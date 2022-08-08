@@ -1,0 +1,15 @@
+.idea/workspace*.xml
+.ipynb_checkpoints/
+.pytest_cache/
+__pycache__/
+*.egg-info/
+temp/*
+build/
+dist/
+.tox/
+*.log
+*.pyc
+*.pyd
+*.exp
+*.lib
+*.so
