@@ -1,7 +1,7 @@
 # Classic Stock Charts in Python
 
 This project aims at creating classic
-technical analysis stock charts in Python.
+technical analysis stock charts in Python with minimum code.
 The library is built around the excellent 
 [matplotlib](https://github.com/matplotlib/matplotlib)
 and depends otherwize only on
@@ -16,17 +16,11 @@ like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
 
 ![Showcase Chart](/output/showcase.svg "Showcase")
 
+
 ## Warning
 
 This project is experimental! For any serious usage you may want to you look into
 [mplfinance](https://pypi.org/project/mplfinance/).
-
-## Requirements
-
-- Python >= 3.8
-- matplotlib
-- pandas
-- yfinance
 
 
 ## Typical Usage
@@ -75,9 +69,6 @@ freq = 'daily'
 prices = get_prices(ticker, freq=freq)
 ```
 
-See example notebook
-[mplchart-helper.ipynb](/examples/mplchart-helper.ipynb)
-
 ## Drawing Primitives
 
 The library contains drawing primitives that can be used as an indicator in the plot api.
@@ -97,9 +88,6 @@ The main primitives are :
 - `Price` for price line plots
 - `Volume` for volume bar plots
 
-See example notebook
-[mplchart-primitives.ipynb](/examples/mplchart-primitives.ipynb)
-
 ## Builtin Indicators
 
 The libary contains some basic technical analysis indicators implemented in pandas.
@@ -110,9 +98,6 @@ before being used in the plot api. Some of the indicators included are:
 - `ROC` Rate of Change
 - `RSI` Relative Strenght Index
 - `MACD` Mooving Average Convergence Divergence
-
-See example notebook
-[mplchart-builtins.ipynb](/examples/mplchart-builtins.ipynb)
 
 ## Ta-lib Functions
 
@@ -133,9 +118,6 @@ indicators = [
 ]
 ```
 
-See example notebook
-[mplchart-abstract.ipynb](/examples/mplchart-abstract.ipynb)
-
 
 ## Example Notebooks
 
@@ -144,20 +126,28 @@ See example notebook
 - [mplchart-abstract.ipynb](/examples/mplchart-abstract.ipynb) Using ta-lib abstract functions as indicators 
 
 
-
 ## Developer Notes
 
-You can install the module with pip
+You can install this package with pip
+
 
 ```console
 pip install git+ssh://git@github.com/furechan/mplchart-proto.git
 ```
 
+## Requirements:
+
+- Python >= 3.8
+- matplotlib
+- pandas
+- yfinance
+
+
 ## Related Projects & Resources
-- [StockCharts.com](https://stockcharts.com/) Better Charting. Smarter Investing.
+- [stockcharts.com](https://stockcharts.com/) Beautifull Stock Charts and Technical Analysis Reference
 - [mplfinance](https://pypi.org/project/mplfinance/) Matplotlib utilities for the visualization,
 and visual analysis, of financial data
-- [matplotlib](https://github.com/matplotlib/matplotlib) matplotlib: plotting with Python
+- [matplotlib](https://github.com/matplotlib/matplotlib) Matplotlib: plotting with Python
 - [pandas](https://github.com/pandas-dev/pandas) Flexible and powerful data analysis / manipulation library
 for Python, providing labeled data structures similar to R data.frame objects,
 statistical functions, and much more
