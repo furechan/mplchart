@@ -1,24 +1,13 @@
 """ basic tecnical analysis indicators """
 
-import pandas as pd
-
 from . import library
+
+from library import get_series
 
 from dataclasses import dataclass
 
 from typing import ClassVar
 
-
-def get_series(prices, item=None):
-    """ extracts series of given name if applicable """
-    if item is not None:
-        return prices[item]
-
-    if isinstance(prices, pd.Series):
-        return prices
-
-    if isinstance(prices, pd.DataFrame):
-        return prices['close']
 
 
 @dataclass

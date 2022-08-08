@@ -4,6 +4,18 @@ import numpy as np
 import pandas as pd
 
 
+def get_series(prices, item=None):
+    """ extracts series of given name if applicable """
+    if item is not None:
+        return prices[item]
+
+    if isinstance(prices, pd.Series):
+        return prices
+
+    if isinstance(prices, pd.DataFrame):
+        return prices['close']
+
+
 def calc_roc(series, period: int = 1):
     """ Rate of Change """
     return series.pct_change(period)

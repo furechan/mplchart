@@ -131,6 +131,36 @@ indicators = [
 See example notebook [mplchart-abstract.ipynb](/examples/mplchart-abstract.ipynb) 
 
 
+## Custom Indicators
+
+It is easy to create custom indicators. An indicator is best implemented as a class whose instance is callable.
+We suggest you use a dataclass and follow the following snippet.
+
+```python
+from dataclasses import dataclass
+
+from mplchart.library import get_series, calc_ema
+
+@dataclass
+class DEMA:
+    """ Double Exponential Moving Average """
+    period: int = 20
+
+    same_scale = True
+    # same_scale is an optional class attribute that indicates
+    # the indicator should be plot on the same axes by default
+
+    def __call__(self, prices):
+        series = get_series(prices)
+        ema1 = calc_ema(series, self.period)
+        ema2 = calc_ema(ema1, self.period)
+        return 2 * ema1 - ema2
+
+```
+
+See example notebook [mplchart-custom.ipynb](/examples/mplchart-custom.ipynb) 
+
+
 ## Example Notebooks
 
 You can find example notebooks in the [examples](/examples/) folder. 
