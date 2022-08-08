@@ -1,5 +1,6 @@
 # Classic Stock Charts in Python
 
+
 This project aims at creating classic
 technical analysis stock charts in Python with minimum code.
 The library is built around the excellent 
@@ -7,8 +8,8 @@ The library is built around the excellent
 The interface is declarative, based on a set of drawing primitives
 like `Candleststicks`, `Volume`, `Peaks`
 and technical indicators
-like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ... If you have
-[ta-lib](https://github.com/mrjbq7/ta-lib)
+like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
+If you have [ta-lib](https://github.com/mrjbq7/ta-lib)
 installed you can also use its abstract functions as indicators but it is not a requirement.
 
 
