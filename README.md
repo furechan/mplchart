@@ -3,15 +3,13 @@
 This project aims at creating classic
 technical analysis stock charts in Python with minimum code.
 The library is built around the excellent 
-[matplotlib](https://github.com/matplotlib/matplotlib)
-and depends otherwize only on
-[pandas](https://github.com/pandas-dev/pandas). If you have
-[ta-lib](https://github.com/mrjbq7/ta-lib)
-installed you can also use its abstract functions as indicators but it is not a requirement. 
+[matplotlib](https://github.com/matplotlib/matplotlib).  
 The interface is declarative, based on a set of drawing primitives
 like `Candleststicks`, `Volume`, `Peaks`
 and technical indicators
-like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
+like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ... If you have
+[ta-lib](https://github.com/mrjbq7/ta-lib)
+installed you can also use its abstract functions as indicators but it is not a requirement.
 
 
 ![Showcase Chart](/output/showcase.svg "Showcase")
@@ -19,8 +17,8 @@ like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
 
 ## Warning
 
-This project is experimental! For any serious usage you may want to you look into
-[mplfinance](https://pypi.org/project/mplfinance/).
+This project is experimental! For any serious usage you may want to you look into projects
+like [mplfinance](https://pypi.org/project/mplfinance/).
 
 
 ## Typical Usage
@@ -82,24 +80,35 @@ indicators = [Candlesticks()]
 chart = Chart(title=title, max_bars=max_bars)
 chart.plot(prices, indicators)
 ```
-The main primitives are :
+The main drawing primitives are :
 - `Candlesticks` for candlesticks plots
-- `OHLC` for Open High Low Close bar plots
+- `OHLC` for open, high, low, close bar plots
 - `Price` for price line plots
 - `Volume` for volume bar plots
+- `Peaks` to plot peaks and valleys
+- `SameAxes` to force plot on the same axes
+- `NewAxes` to force plot on a new axes
+
+See example notebook [mplchart-primitives.ipynb](/examples/mplchart-primitives.ipynb) 
 
 ## Builtin Indicators
 
-The libary contains some basic technical analysis indicators implemented in pandas.
+The libary contains some basic technical analysis indicators implemented in pandas/numpy.
 All indicators are classes that must be instantiated
-before being used in the plot api. Some of the indicators included are:
-- `SMA` imple Moving Average
+before being used in the plot api.
+Some of the indicators included are:
+- `SMA` Simple Moving Average
 - `EMA` Exponential Moving Average
 - `ROC` Rate of Change
-- `RSI` Relative Strenght Index
-- `MACD` Mooving Average Convergence Divergence
+- `RSI` Relative Strength Index
+- `MACD` Moving Average Convergence Divergence
+- `PPO` Price Percentage Oscillator 
+- `SLOPE` Slope (linear regression with time)
+- `BBANDS` Bolling Bands
 
-## Ta-lib Functions
+See example notebook [mplchart-builtins.ipynb](/examples/mplchart-builtins.ipynb) 
+
+## Ta-lib Abstract Functions
 
 If you have 
 [ta-lib](https://github.com/mrjbq7/ta-lib)
@@ -117,9 +126,13 @@ indicators = [
     Function('MACD'),
 ]
 ```
+ 
+See example notebook [mplchart-abstract.ipynb](/examples/mplchart-abstract.ipynb) 
 
 
 ## Example Notebooks
+
+You can find example notebooks in the [examples](/examples/) folder. 
 
 - [mplchart-primitives.ipynb](/examples/mplchart-primitives.ipynb) A quick tour of the drawing primitives 
 - [mplchart-builtins.ipynb](/examples/mplchart-builtins.ipynb) A quick tour of the builtin indicators 
@@ -137,18 +150,21 @@ pip install git+ssh://git@github.com/furechan/mplchart-proto.git
 
 ## Requirements:
 
-- Python >= 3.8
+- python >= 3.8
 - matplotlib
 - pandas
+- numpy
 - yfinance
 
 
 ## Related Projects & Resources
-- [stockcharts.com](https://stockcharts.com/) Beautifull Stock Charts and Technical Analysis Reference
 - [mplfinance](https://pypi.org/project/mplfinance/) Matplotlib utilities for the visualization,
 and visual analysis, of financial data
 - [matplotlib](https://github.com/matplotlib/matplotlib) Matplotlib: plotting with Python
+- [yfinance](https://github.com/ranaroussi/yfinance) Download market data from Yahoo! Finance's API
+- [ta-lib](https://github.com/mrjbq7/ta-lib) Python wrapper for TA-Lib
 - [pandas](https://github.com/pandas-dev/pandas) Flexible and powerful data analysis / manipulation library
 for Python, providing labeled data structures similar to R data.frame objects,
 statistical functions, and much more
-- [yfinance](https://github.com/ranaroussi/yfinance) Download market data from Yahoo! Finance's API
+- [numpy](https://github.com/numpy/numpy) The fundamental package for scientific computing with Python
+- [stockcharts.com](https://stockcharts.com/) Beautiful Stock Charts and Technical Analysis Reference
