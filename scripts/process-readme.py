@@ -1,8 +1,9 @@
-""" script to translate README.md / based urls """
-
+"""
+script to translate README.md local urls
+creates output/README.md for usage with pypi
+"""
 
 import re
-import project
 import argparse
 import posixpath
 
@@ -34,7 +35,7 @@ def main():
     readme = root.joinpath("README.md").resolve(strict=True)
     output = root.joinpath("output").resolve(strict=True)
 
-    config = project.get_config()
+    config = get_config()
     project_url = config.get('metadata', 'url')
 
     branch = "main"

@@ -5,10 +5,9 @@
 - [mplchart-custom.ipynb](mplchart-custom.ipynb) Creating a custom indicator
 - [mplchart-helper.ipynb](mplchart-helper.ipynb) Fetching sample data
 - [mplchart-mintalib.ipynb](mplchart-mintalib.ipynb) Using mintalib indicators (experimental)
+- [mplchart-showcase.ipynb](mplchart-showcase.ipynb) Showcase chart
 
 ## Scripts
 - [mplchart-display.py](mplchart-display.py) Display a chart from a script
 - [mplchart-render.py](mplchart-render.py) Render a chart to SVG
-
-
 
