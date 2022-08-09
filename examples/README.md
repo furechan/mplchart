@@ -1,6 +1,3 @@
-# Examples
-
-
 ## Notebooks
 - [mplchart-primitives.ipynb](mplchart-primitives.ipynb) A quick tour of drawing primitives
 - [mplchart-builtins.ipynb](mplchart-builtins.ipynb) A quick tour of builtin indicators
@@ -8,7 +5,6 @@
 - [mplchart-custom.ipynb](mplchart-custom.ipynb) Creating a custom indicator
 - [mplchart-helper.ipynb](mplchart-helper.ipynb) Fetching sample data
 - [mplchart-mintalib.ipynb](mplchart-mintalib.ipynb) Using mintalib indicators (experimental)
-
 
 ## Scripts
 - [mplchart-display.py](mplchart-display.py) Display a chart from a script
