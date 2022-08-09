@@ -1,4 +1,4 @@
-""" basic tecnical analysis indicators """
+""" technical analysis indicators """
 
 from . import library
 

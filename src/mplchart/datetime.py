@@ -1,4 +1,4 @@
-""" Charting datetime utils """
+""" datetime utils """
 
 import pandas as pd
 

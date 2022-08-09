@@ -1,3 +1,3 @@
-""" Charting package """
+""" charting root package """
 
 

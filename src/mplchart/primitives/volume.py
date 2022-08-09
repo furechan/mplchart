@@ -12,8 +12,10 @@ class Volume(Primitive):
 
     Used to plot the volume
 
-    Args:
-        sma (int) : the period of simple moving average to use. default 20
+    Parameters
+    ----------
+    sma: int, default = 20
+        the period of the simple moving average
     """
 
     def __init__(self, sma=20):

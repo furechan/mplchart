@@ -1,4 +1,4 @@
-""" Charting Layout classes """
+""" layout classes """
 
 from matplotlib.gridspec import GridSpec
 

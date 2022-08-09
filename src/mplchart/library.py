@@ -1,4 +1,4 @@
-""" basic technical analysis library """
+""" technical analysis library """
 
 import numpy as np
 import pandas as pd

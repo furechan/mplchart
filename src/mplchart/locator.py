@@ -1,4 +1,4 @@
-""" Charting locators """
+""" ticker locators """
 
 import math
 import matplotlib.ticker as mticker

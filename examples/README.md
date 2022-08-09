@@ -4,8 +4,9 @@
 - [mplchart-asbtract.ipynb](mplchart-asbtract.ipynb) Using Ta-Lib abstract functions as indicator
 - [mplchart-custom.ipynb](mplchart-custom.ipynb) Creating a custom indicator
 - [mplchart-helper.ipynb](mplchart-helper.ipynb) Fetching sample data
-- [mplchart-mintalib.ipynb](mplchart-mintalib.ipynb) Using mintalib indicators (experimental)
 - [mplchart-showcase.ipynb](mplchart-showcase.ipynb) Showcase chart
+- [mplchart-markers.ipynb](mplchart-markers.ipynb) Trade markers (experimental)
+- [mplchart-mintalib.ipynb](mplchart-mintalib.ipynb) Using mintalib indicators (experimental)
 
 ## Scripts
 - [mplchart-display.py](mplchart-display.py) Display a chart from a script

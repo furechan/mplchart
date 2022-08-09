@@ -66,6 +66,9 @@ freq = 'daily'
 prices = get_prices(ticker, freq=freq)
 ```
 
+See example notebook [mplchart-helper.ipynb](/examples/mplchart-helper.ipynb) 
+
+
 ## Drawing Primitives
 
 The library contains drawing primitives that can be used as an indicator in the plot api.
@@ -164,18 +167,13 @@ See example notebook [mplchart-custom.ipynb](/examples/mplchart-custom.ipynb)
 
 You can find example notebooks in the [examples](/examples/) folder. 
 
-- [mplchart-primitives.ipynb](/examples/mplchart-primitives.ipynb) A quick tour of the drawing primitives 
-- [mplchart-builtins.ipynb](/examples/mplchart-builtins.ipynb) A quick tour of the builtin indicators 
-- [mplchart-abstract.ipynb](/examples/mplchart-abstract.ipynb) Using ta-lib abstract functions as indicators 
-
-
 ## Developer Notes
 
 You can install this package with pip
 
 
 ```console
-pip3 install git+ssh://git@github.com/furechan/mplchart-proto.git
+python3 -mpip install git+ssh://git@github.com/furechan/mplchart-proto.git
 ```
 
 ## Requirements:

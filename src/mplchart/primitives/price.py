@@ -6,24 +6,25 @@ from ..model import Primitive
 from ..utils import series_xy
 
 
-# TODO make Price a fincalc indicator ? (what about Volume, etc ...)
-
-
 class Price(Primitive):
     """
     Price Primitive
 
-    USed to plot price as a line plot
+    Used to plot price as a line plot
 
-    Args:
-        item (str) : name of the column. Default 'close'
+    Paramaters
+    ----------
+    item: str, default = 'close'
+        name of the column to plot
 
-    Returns:
-        return the series named as item
+    Returns
+    -------
+    the series of given name
 
-    Example:
-        Price('close') the close price series
-        Price('open') the open price series
+    Example
+    -------
+    Price('close') the close price series
+    Price('open') the open price series
 
     """
 

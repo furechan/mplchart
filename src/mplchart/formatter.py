@@ -1,4 +1,4 @@
-""" Charting formatters """
+""" ticker formatters """
 
 import matplotlib.ticker as mticker
 

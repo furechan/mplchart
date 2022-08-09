@@ -9,11 +9,13 @@ from ..model import Primitive
 class Peaks(Primitive):
     """
     Peeks Primitive
-
     Used to plot peaks and valey points
 
-    Args:
-        span (int) : refers to minimum number bars required before and after the local peak
+    Parameters
+    ----------
+    span: int
+        minimum number bars required before and after the local peak
+
     """
 
     indicator = None

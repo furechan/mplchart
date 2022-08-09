@@ -1,4 +1,4 @@
-""" plot rendering wrappers """
+""" rendering wrappers """
 
 import numpy as np
 

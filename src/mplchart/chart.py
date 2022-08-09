@@ -1,4 +1,4 @@
-""" Charting Main Module """
+""" charting main module """
 
 import io
 import warnings
@@ -12,14 +12,29 @@ from .wrappers import get_wrapper
 from .utils import series_xy
 
 
-# TODO rename position to avoid confusion with strategy pos ?
-# TODO move get_axes logic out of indicator ?
-# TODO move extract_df logic out of indicator ?
-# TODO add default_pane or same_scale to SMA, EMA, etc ...
-
-
 class Chart:
-    """ Chart Object """
+    """
+    Chart Object
+
+    Parameters
+    ----------
+    title: str, optional
+        the chart title
+    max_bars: int, optional
+        the maximum number of bars to plot
+    start, end: datetime | str, optional
+        the start and end date of the range to plot
+    figsize: tuple(int, int)
+        the size of the figure
+    bgcolor: str, default='w'
+        the backgorund color of the Chart
+
+    Example
+    -------
+    chart = Chart(title=tiltle, ...)
+    chart.plot(prices, indicators)
+
+    """
 
     default_figsize = (12, 9)
     mapper_done = False
@@ -61,6 +76,7 @@ class Chart:
 
     @staticmethod
     def valid_target(target):
+        """ whether the target bname is valid """
         return target in ('samex', 'twinx', 'above', 'below')
 
     def inspect_data(self, data):
@@ -200,7 +216,7 @@ class Chart:
         self.next_target = target
 
     def get_axes(self, target=None, *, height_ratio=None):
-        """ returns or creates axes at given position """
+        """ returns or creates axes at given target """
 
         if self.next_target:
             target = self.next_target
@@ -242,7 +258,7 @@ class Chart:
         return ax
 
     def new_axes(self, target=None, *, height_ratio=None):
-        """ returns or creates axes at given position """
+        """ returns or creates axes at given target """
 
         if target is None:
             target = 'below'
@@ -257,6 +273,7 @@ class Chart:
             print(i, label, xlim, ylim)
 
     def count_axes(self, include_root=False, include_twins=False):
+        """" counts axes that are neither root or twinx """
         count = 0
         for ax in self.figure.axes:
             label = getattr(ax, '_label', None)
@@ -268,7 +285,7 @@ class Chart:
         return count
 
     def get_label(self, indicator):
-        """ returns label for indicator """
+        """ returns label to use for indicator """
 
         if talib_function_check(indicator):
             return talib_function_repr(indicator)
@@ -324,11 +341,20 @@ class Chart:
 
         self.plot(data, indicators=indicators)
 
-    def plot(self, data, indicators):
-        """ plots a list of indicators """
+    def plot(self, prices, indicators):
+        """ plots a list of indicators
+
+        Parameters
+        ----------
+        prices: dataframe
+            the prices data frame
+        indicators: list of indicators
+            list of indciators to plot
+
+        """
 
         for indicator in indicators:
-            self.plot_indicator(data, indicator)
+            self.plot_indicator(prices, indicator)
 
         self.add_legends()
 
@@ -344,6 +370,7 @@ class Chart:
         ax.axvline(xv, linestyle='dashed')
 
     def show(self):
+        """ shows the chart """
         if not self.figure.axes:
             self.new_axes()
 
@@ -351,6 +378,7 @@ class Chart:
         plt.show()
 
     def render(self, format='svg'):
+        """ renders the chart to the specific format """
         if not self.figure.axes:
             self.new_axes()
 

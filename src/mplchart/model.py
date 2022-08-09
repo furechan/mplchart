@@ -1,10 +1,10 @@
-""" Primitive Base class """
+""" primitive base class """
 
 from abc import ABC, abstractmethod
 
 
 class Primitive(ABC):
-    """ base class for Primitives """
+    """ Primitive abstract base class """
 
     @abstractmethod
     def plot_handler(self, data, chart, ax=None):

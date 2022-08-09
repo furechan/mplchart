@@ -1,4 +1,4 @@
-""" Charting date mapper """
+""" date mapper """
 
 import numpy as np
 import pandas as pd

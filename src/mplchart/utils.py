@@ -1,4 +1,4 @@
-""" Charting utils """
+""" charting utils """
 
 
 def series_xy(data, item=None, dropna=False):
