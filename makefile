@@ -2,10 +2,10 @@
 # requires setuptools build twine
 # makefile should be tab indented !
 
-version = 0.0.1
 name = stockchart
 
 dist: FORCE
+	python scripts/process-readme.py
 	python -m build --wheel .
 
 dump: FORCE
@@ -18,7 +18,8 @@ remove: FORCE
 	python setup.py develop -u
 
 upload: FORCE
-	twine upload --repository testpypi dist/*
+#	twine upload --repository testpypi dist/*
+	twine upload dist/*
 
 FORCE:
 

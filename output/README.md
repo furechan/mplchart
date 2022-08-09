@@ -1,32 +1,25 @@
 # Classic Stock Charts in Python
 
+
 This project aims at creating classic
-technical analysis stock charts in Python.
+technical analysis stock charts in Python with minimum code.
 The library is built around the excellent 
-[matplotlib](https://github.com/matplotlib/matplotlib)
-and depends otherwize only on
-[pandas](https://github.com/pandas-dev/pandas). If you have
-[ta-lib](https://github.com/mrjbq7/ta-lib)
-installed you can also use its abstract functions as indicators but it is not a requirement. 
+[matplotlib](https://github.com/matplotlib/matplotlib). 
 The interface is declarative, based on a set of drawing primitives
 like `Candleststicks`, `Volume`, `Peaks`
 and technical indicators
 like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
+If you have [ta-lib](https://github.com/mrjbq7/ta-lib)
+installed you can also use its abstract functions as indicators but it is not a requirement.
 
 
 ![Showcase Chart](https://github.com/furechan/mplchart-proto/raw/main/output/showcase.svg "Showcase")
 
+
 ## Warning
 
-This project is experimental! For any serious usage you may want to you look into
-[mplfinance](https://pypi.org/project/mplfinance/).
-
-## Requirements
-
-- Python >= 3.8
-- matplotlib
-- pandas
-- yfinance
+This is work in progress! For any serious usage you may want to you look into projects
+like [mplfinance](https://pypi.org/project/mplfinance/).
 
 
 ## Typical Usage
@@ -56,15 +49,13 @@ chart.plot(prices, indicators)
 ## Conventions
 
 Prices are expected to be stored as a pandas DataFrame
-with columns
-`open`, `high`, `low`, `close` `volume`
-and a timestamp index 
-named `date`.
+with columns `open`, `high`, `low`, `close` `volume` in **lower case**
+and a timestamp index named `date`.
 
 For testing purposes you can use the `helper` module
 which can fetch sample prices in the proper format via
 [yfinance](https://github.com/ranaroussi/yfinance).
-**This is meant to be used for testing/demo purposes only!**
+This is meant to be used for testing/demo purposes only!
 See yfinance for more information on its usage.
 
 ```python
@@ -74,9 +65,6 @@ ticker = 'AAPL'
 freq = 'daily'
 prices = get_prices(ticker, freq=freq)
 ```
-
-See example notebook
-[mplchart-helper.ipynb](https://github.com/furechan/mplchart-proto/blob/main/examples/mplchart-helper.ipynb)
 
 ## Drawing Primitives
 
@@ -91,30 +79,35 @@ indicators = [Candlesticks()]
 chart = Chart(title=title, max_bars=max_bars)
 chart.plot(prices, indicators)
 ```
-The main primitives are :
+The main drawing primitives are :
 - `Candlesticks` for candlesticks plots
-- `OHLC` for Open High Low Close bar plots
+- `OHLC` for open, high, low, close bar plots
 - `Price` for price line plots
 - `Volume` for volume bar plots
+- `Peaks` to plot peaks and valleys
+- `SameAxes` to force plot on the same axes
+- `NewAxes` to force plot on a new axes
 
-See example notebook
-[mplchart-primitives.ipynb](https://github.com/furechan/mplchart-proto/blob/main/examples/mplchart-primitives.ipynb)
+See example notebook [mplchart-primitives.ipynb](https://github.com/furechan/mplchart-proto/blob/main/examples/mplchart-primitives.ipynb) 
 
 ## Builtin Indicators
 
-The libary contains some basic technical analysis indicators implemented in pandas.
+The libary contains some basic technical analysis indicators implemented in pandas/numpy.
 All indicators are classes that must be instantiated
-before being used in the plot api. Some of the indicators included are:
-- `SMA` imple Moving Average
+before being used in the plot api.
+Some of the indicators included are:
+- `SMA` Simple Moving Average
 - `EMA` Exponential Moving Average
 - `ROC` Rate of Change
-- `RSI` Relative Strenght Index
-- `MACD` Mooving Average Convergence Divergence
+- `RSI` Relative Strength Index
+- `MACD` Moving Average Convergence Divergence
+- `PPO` Price Percentage Oscillator 
+- `SLOPE` Slope (linear regression with time)
+- `BBANDS` Bolling Bands
 
-See example notebook
-[mplchart-builtins.ipynb](https://github.com/furechan/mplchart-proto/blob/main/examples/mplchart-builtins.ipynb)
+See example notebook [mplchart-builtins.ipynb](https://github.com/furechan/mplchart-proto/blob/main/examples/mplchart-builtins.ipynb) 
 
-## Ta-lib Functions
+## Ta-lib Abstract Functions
 
 If you have 
 [ta-lib](https://github.com/mrjbq7/ta-lib)
@@ -132,33 +125,76 @@ indicators = [
     Function('MACD'),
 ]
 ```
+ 
+See example notebook [mplchart-abstract.ipynb](https://github.com/furechan/mplchart-proto/blob/main/examples/mplchart-abstract.ipynb) 
 
-See example notebook
-[mplchart-abstract.ipynb](https://github.com/furechan/mplchart-proto/blob/main/examples/mplchart-abstract.ipynb)
+
+## Custom Indicators
+
+It is easy to create custom indicators.
+An indicator is basically a callable that takes a prices data frame and returns a series as result.
+A function can be used as an indicator but we suggest you implement indicators as a callable dataclass.
+
+```python
+from dataclasses import dataclass
+
+from mplchart.library import get_series, calc_ema
+
+@dataclass
+class DEMA:
+    """ Double Exponential Moving Average """
+    period: int = 20
+
+    same_scale = True
+    # same_scale is an optional class attribute that indicates
+    # the indicator should be plot on the same axes by default
+
+    def __call__(self, prices):
+        series = get_series(prices)
+        ema1 = calc_ema(series, self.period)
+        ema2 = calc_ema(ema1, self.period)
+        return 2 * ema1 - ema2
+
+```
+
+See example notebook [mplchart-custom.ipynb](https://github.com/furechan/mplchart-proto/blob/main/examples/mplchart-custom.ipynb) 
 
 
 ## Example Notebooks
+
+You can find example notebooks in the [examples](https://github.com/furechan/mplchart-proto/blob/main/examples/) folder. 
 
 - [mplchart-primitives.ipynb](https://github.com/furechan/mplchart-proto/blob/main/examples/mplchart-primitives.ipynb) A quick tour of the drawing primitives 
 - [mplchart-builtins.ipynb](https://github.com/furechan/mplchart-proto/blob/main/examples/mplchart-builtins.ipynb) A quick tour of the builtin indicators 
 - [mplchart-abstract.ipynb](https://github.com/furechan/mplchart-proto/blob/main/examples/mplchart-abstract.ipynb) Using ta-lib abstract functions as indicators 
 
 
-
 ## Developer Notes
 
-You can install the module with pip
+You can install this package with pip
+
 
 ```console
-pip install git+ssh://git@github.com/furechan/mplchart-proto.git
+pip3 install git+ssh://git@github.com/furechan/mplchart-proto.git
 ```
 
+## Requirements:
+
+- python >= 3.8
+- matplotlib
+- pandas
+- numpy
+- yfinance
+
+
 ## Related Projects & Resources
-- [StockCharts.com](https://stockcharts.com/) Better Charting. Smarter Investing.
+- [stockcharts.com](https://stockcharts.com/) Beautiful Stock Charts and Technical Analysis Reference
 - [mplfinance](https://pypi.org/project/mplfinance/) Matplotlib utilities for the visualization,
 and visual analysis, of financial data
-- [matplotlib](https://github.com/matplotlib/matplotlib) matplotlib: plotting with Python
+- [matplotlib](https://github.com/matplotlib/matplotlib) Matplotlib: plotting with Python
+- [yfinance](https://github.com/ranaroussi/yfinance) Download market data from Yahoo! Finance's API
+- [ta-lib](https://github.com/mrjbq7/ta-lib) Python wrapper for TA-Lib
 - [pandas](https://github.com/pandas-dev/pandas) Flexible and powerful data analysis / manipulation library
 for Python, providing labeled data structures similar to R data.frame objects,
 statistical functions, and much more
-- [yfinance](https://github.com/ranaroussi/yfinance) Download market data from Yahoo! Finance's API
+- [numpy](https://github.com/numpy/numpy) The fundamental package for scientific computing with Python
