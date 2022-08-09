@@ -4,7 +4,7 @@
 This project aims at creating classic
 technical analysis stock charts in Python with minimum code.
 The library is built around the excellent 
-[matplotlib](https://github.com/matplotlib/matplotlib).  
+[matplotlib](https://github.com/matplotlib/matplotlib). 
 The interface is declarative, based on a set of drawing primitives
 like `Candleststicks`, `Volume`, `Peaks`
 and technical indicators
@@ -175,7 +175,7 @@ You can install this package with pip
 
 
 ```console
-pip install git+ssh://git@github.com/furechan/mplchart-proto.git
+pip3 install git+ssh://git@github.com/furechan/mplchart-proto.git
 ```
 
 ## Requirements:
