@@ -49,8 +49,8 @@ chart.plot(prices, indicators)
 ## Conventions
 
 Prices are expected to be stored as a pandas DataFrame
-with columns `open`, `high`, `low`, `close` `volume` in **lower case**
-and a timestamp index named `date`.
+with columns `open`, `high`, `low`, `close` `volume`
+and a timestamp index named `date`, all in **lower case**!
 
 For testing purposes you can use the `helper` module
 which can fetch sample prices in the proper format via
@@ -188,7 +188,7 @@ pip3 install git+ssh://git@github.com/furechan/mplchart-proto.git
 
 
 ## Related Projects & Resources
-- [stockcharts.com](https://stockcharts.com/) Beautiful Stock Charts and Technical Analysis Reference
+- [stockcharts.com](https://stockcharts.com/) Beautiful stock charts and technical analysis reference
 - [mplfinance](https://pypi.org/project/mplfinance/) Matplotlib utilities for the visualization,
 and visual analysis, of financial data
 - [matplotlib](https://github.com/matplotlib/matplotlib) Matplotlib: plotting with Python
