@@ -18,7 +18,7 @@ installed you can also use its abstract functions as indicators but it is not a 
 
 ## Warning
 
-This project is experimental! For any serious usage you may want to you look into projects
+This is work in progress! For any serious usage you may want to you look into projects
 like [mplfinance](https://pypi.org/project/mplfinance/).
 
 
@@ -49,15 +49,13 @@ chart.plot(prices, indicators)
 ## Conventions
 
 Prices are expected to be stored as a pandas DataFrame
-with columns
-`open`, `high`, `low`, `close` `volume`
-and a timestamp index 
-named `date`.
+with columns `open`, `high`, `low`, `close` `volume` in **lower case**
+and a timestamp index named `date`.
 
 For testing purposes you can use the `helper` module
 which can fetch sample prices in the proper format via
 [yfinance](https://github.com/ranaroussi/yfinance).
-**This is meant to be used for testing/demo purposes only!**
+This is meant to be used for testing/demo purposes only!
 See yfinance for more information on its usage.
 
 ```python
@@ -133,8 +131,9 @@ See example notebook [mplchart-abstract.ipynb](/examples/mplchart-abstract.ipynb
 
 ## Custom Indicators
 
-It is easy to create custom indicators. An indicator is best implemented as a class whose instance is callable.
-We suggest you use a dataclass and follow the following snippet.
+It is easy to create custom indicators.
+An indicator is basically a callable that takes a prices data frame and returns a series as result.
+A function can be used as an indicator but we suggest you implement indicators as a callable dataclass.
 
 ```python
 from dataclasses import dataclass
@@ -189,6 +188,7 @@ pip install git+ssh://git@github.com/furechan/mplchart-proto.git
 
 
 ## Related Projects & Resources
+- [stockcharts.com](https://stockcharts.com/) Beautiful Stock Charts and Technical Analysis Reference
 - [mplfinance](https://pypi.org/project/mplfinance/) Matplotlib utilities for the visualization,
 and visual analysis, of financial data
 - [matplotlib](https://github.com/matplotlib/matplotlib) Matplotlib: plotting with Python
@@ -198,4 +198,3 @@ and visual analysis, of financial data
 for Python, providing labeled data structures similar to R data.frame objects,
 statistical functions, and much more
 - [numpy](https://github.com/numpy/numpy) The fundamental package for scientific computing with Python
-- [stockcharts.com](https://stockcharts.com/) Beautiful Stock Charts and Technical Analysis Reference

@@ -2,7 +2,7 @@
 
 from . import library
 
-from library import get_series
+from .library import get_series
 
 from dataclasses import dataclass
 
