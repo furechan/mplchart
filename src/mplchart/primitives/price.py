@@ -12,19 +12,15 @@ class Price(Primitive):
 
     Used to plot price as a line plot
 
-    Paramaters
-    ----------
-    item: str, default = 'close'
-        name of the column to plot
+    Args:
+        item (str) :  name of the column to plot. default 'close'
 
-    Returns
-    -------
-    the series of given name
+    Returns:
+        the series of given name
 
-    Example
-    -------
-    Price('close') the close price series
-    Price('open') the open price series
+    Example:
+        Price('close') the close price series
+        Price('open') the open price series
 
     """
 

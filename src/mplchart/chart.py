@@ -16,23 +16,16 @@ class Chart:
     """
     Chart Object
 
-    Parameters
-    ----------
-    title: str, optional
-        the chart title
-    max_bars: int, optional
-        the maximum number of bars to plot
-    start, end: datetime | str, optional
-        the start and end date of the range to plot
-    figsize: tuple(int, int)
-        the size of the figure
-    bgcolor: str, default='w'
-        the backgorund color of the Chart
+    Args:
+        title (str) : the chart title
+        max_bars (int) : the maximum number of bars to plot
+        start, end (datetime | str) :  the start and end date of the range to plot
+        figsize (tuple) : the size of the figure
+        bgcolor (str): the backgorund color of the Chart, default='w'
 
-    Example
-    -------
-    chart = Chart(title=tiltle, ...)
-    chart.plot(prices, indicators)
+    Example:
+        chart = Chart(title=tiltle, ...)
+        chart.plot(prices, indicators)
 
     """
 

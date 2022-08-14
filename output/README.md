@@ -13,13 +13,12 @@ If you have [ta-lib](https://github.com/mrjbq7/ta-lib)
 installed you can also use its abstract functions as indicators but it is not a requirement.
 
 
-![Showcase Chart](https://github.com/furechan/mplchart-proto/raw/main/output/showcase.svg "Showcase")
+This is work in progress! For more mature projects you may want to you look into 
+[mplfinance](https://pypi.org/project/mplfinance/).
 
 
-## Warning
+![Showcase Chart](https://github.com/furechan/mplchart/raw/main/output/showcase.svg "Showcase")
 
-This is work in progress! For any serious usage you may want to you look into projects
-like [mplfinance](https://pypi.org/project/mplfinance/).
 
 
 ## Typical Usage
@@ -46,11 +45,14 @@ chart = Chart(title=ticker, max_bars=max_bars)
 chart.plot(prices, indicators)
 ```
 
+See example notebook [mplchart-usage.ipynb](https://github.com/furechan/mplchart/blob/main/examples/mplchart-usage.ipynb) 
+
+
 ## Conventions
 
 Prices are expected to be stored as a pandas DataFrame
-with columns `open`, `high`, `low`, `close` `volume` in **lower case**
-and a timestamp index named `date`.
+with columns `open`, `high`, `low`, `close` `volume`
+and a timestamp index named `date`, all in **lower case**!
 
 For testing purposes you can use the `helper` module
 which can fetch sample prices in the proper format via
@@ -65,6 +67,9 @@ ticker = 'AAPL'
 freq = 'daily'
 prices = get_prices(ticker, freq=freq)
 ```
+
+See example notebook [mplchart-helper.ipynb](https://github.com/furechan/mplchart/blob/main/examples/mplchart-helper.ipynb) 
+
 
 ## Drawing Primitives
 
@@ -88,7 +93,7 @@ The main drawing primitives are :
 - `SameAxes` to force plot on the same axes
 - `NewAxes` to force plot on a new axes
 
-See example notebook [mplchart-primitives.ipynb](https://github.com/furechan/mplchart-proto/blob/main/examples/mplchart-primitives.ipynb) 
+See example notebook [mplchart-primitives.ipynb](https://github.com/furechan/mplchart/blob/main/examples/mplchart-primitives.ipynb) 
 
 ## Builtin Indicators
 
@@ -105,7 +110,7 @@ Some of the indicators included are:
 - `SLOPE` Slope (linear regression with time)
 - `BBANDS` Bolling Bands
 
-See example notebook [mplchart-builtins.ipynb](https://github.com/furechan/mplchart-proto/blob/main/examples/mplchart-builtins.ipynb) 
+See example notebook [mplchart-builtins.ipynb](https://github.com/furechan/mplchart/blob/main/examples/mplchart-builtins.ipynb) 
 
 ## Ta-lib Abstract Functions
 
@@ -126,7 +131,7 @@ indicators = [
 ]
 ```
  
-See example notebook [mplchart-abstract.ipynb](https://github.com/furechan/mplchart-proto/blob/main/examples/mplchart-abstract.ipynb) 
+See example notebook [mplchart-abstract.ipynb](https://github.com/furechan/mplchart/blob/main/examples/mplchart-abstract.ipynb) 
 
 
 ## Custom Indicators
@@ -157,17 +162,12 @@ class DEMA:
 
 ```
 
-See example notebook [mplchart-custom.ipynb](https://github.com/furechan/mplchart-proto/blob/main/examples/mplchart-custom.ipynb) 
+See example notebook [mplchart-custom.ipynb](https://github.com/furechan/mplchart/blob/main/examples/mplchart-custom.ipynb) 
 
 
 ## Example Notebooks
 
-You can find example notebooks in the [examples](https://github.com/furechan/mplchart-proto/blob/main/examples/) folder. 
-
-- [mplchart-primitives.ipynb](https://github.com/furechan/mplchart-proto/blob/main/examples/mplchart-primitives.ipynb) A quick tour of the drawing primitives 
-- [mplchart-builtins.ipynb](https://github.com/furechan/mplchart-proto/blob/main/examples/mplchart-builtins.ipynb) A quick tour of the builtin indicators 
-- [mplchart-abstract.ipynb](https://github.com/furechan/mplchart-proto/blob/main/examples/mplchart-abstract.ipynb) Using ta-lib abstract functions as indicators 
-
+You can find example notebooks in the [examples](https://github.com/furechan/mplchart/blob/main/examples/) folder. 
 
 ## Developer Notes
 
@@ -175,7 +175,7 @@ You can install this package with pip
 
 
 ```console
-pip3 install git+ssh://git@github.com/furechan/mplchart-proto.git
+python3 -mpip install git+ssh://git@github.com/furechan/mplchart-proto.git
 ```
 
 ## Requirements:
@@ -188,7 +188,7 @@ pip3 install git+ssh://git@github.com/furechan/mplchart-proto.git
 
 
 ## Related Projects & Resources
-- [stockcharts.com](https://stockcharts.com/) Beautiful Stock Charts and Technical Analysis Reference
+- [stockcharts.com](https://stockcharts.com/) Beautiful stock charts and technical analysis reference
 - [mplfinance](https://pypi.org/project/mplfinance/) Matplotlib utilities for the visualization,
 and visual analysis, of financial data
 - [matplotlib](https://github.com/matplotlib/matplotlib) Matplotlib: plotting with Python

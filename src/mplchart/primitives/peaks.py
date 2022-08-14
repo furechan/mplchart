@@ -11,10 +11,8 @@ class Peaks(Primitive):
     Peeks Primitive
     Used to plot peaks and valey points
 
-    Parameters
-    ----------
-    span: int
-        minimum number bars required before and after the local peak
+    Args:
+        span (int) :  minimum number bars required before and after the local peak
 
     """
 

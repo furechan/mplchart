@@ -13,13 +13,12 @@ If you have [ta-lib](https://github.com/mrjbq7/ta-lib)
 installed you can also use its abstract functions as indicators but it is not a requirement.
 
 
+This is work in progress! For more mature projects you may want to you look into 
+[mplfinance](https://pypi.org/project/mplfinance/).
+
+
 ![Showcase Chart](/output/showcase.svg "Showcase")
 
-
-## Warning
-
-This is work in progress! For any serious usage you may want to you look into projects
-like [mplfinance](https://pypi.org/project/mplfinance/).
 
 
 ## Typical Usage
@@ -45,6 +44,9 @@ indicators = [
 chart = Chart(title=ticker, max_bars=max_bars)
 chart.plot(prices, indicators)
 ```
+
+See example notebook [mplchart-usage.ipynb](/examples/mplchart-usage.ipynb) 
+
 
 ## Conventions
 
