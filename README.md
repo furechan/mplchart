@@ -168,15 +168,14 @@ See example notebook [mplchart-custom.ipynb](/examples/mplchart-custom.ipynb)
 
 ## Example Notebooks
 
-You can find example notebooks in the [examples](/examples/) folder. 
+You can find more examples in the [examples](/examples/) folder. 
 
 ## Developer Notes
 
-You can install this package with pip
-
+You can install the current version of this package with pip
 
 ```console
-python3 -mpip install git+ssh://git@github.com/furechan/mplchart-proto.git
+python3 -mpip install git+ssh://git@github.com/furechan/mplchart.git
 ```
 
 ## Requirements:
