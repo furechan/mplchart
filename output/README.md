@@ -13,7 +13,7 @@ If you have [ta-lib](https://github.com/mrjbq7/ta-lib)
 installed you can also use its abstract functions as indicators but it is not a requirement.
 
 
-This is work in progress! For more mature projects you may want to you look into 
+This is work in progress! You may also want to look into more mature projects like 
 [mplfinance](https://pypi.org/project/mplfinance/).
 
 

@@ -1,7 +1,8 @@
+""" local folder utility """
+
 from pathlib import Path
 
 root = Path(__file__).parent.parent
-
 
 def save_output(fname, data, *, encoding='utf-8', verbose=True):
     output = root.joinpath("output").resolve(strict=True)
