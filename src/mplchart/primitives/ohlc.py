@@ -16,10 +16,9 @@ class OHLC(Primitive):
     Used to plot prices as OHLC bars
     """
 
-    def __init__(self, width=0.8, colorup='k', colordn='r'):
-        self.width = width
-        self.colorup = colorup
-        self.colordn = colordn
+    WIDTH = 0.8
+    COLORUP = 'black'
+    COLORDN = 'red'
 
     def __str__(self):
         return self.__class__.__name__
@@ -31,8 +30,12 @@ class OHLC(Primitive):
         label = str(self)
         data = chart.extract_df(data)
 
-        return plot_ohlc(data=data, ax=ax, width=self.width,
-                         colorup=self.colorup, colordn=self.colordn,
+        width = chart.get_setting('ohlc.', 'width', self.WIDTH)
+        colorup = chart.get_setting('ohlc.up', 'color', self.COLORUP)
+        colordn = chart.get_setting('ohlc.dn', 'color', self.COLORDN)
+
+        return plot_ohlc(data=data, ax=ax, width=width,
+                         colorup=colorup, colordn=colordn,
                          label=label)
 
 
@@ -65,7 +68,7 @@ def plot_ohlc(data, ax=None, width=0.8, colorup='k', colordn='k', label=None):
 
     verts = np.asarray(verts)
 
-    linewidths = (0.7,)
+    linewidths = (1.0,)
 
     poly = PolyCollection(verts, edgecolors=edgecolor, linewidths=linewidths, label=label)
 

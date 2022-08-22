@@ -9,6 +9,7 @@ from .layout import make_twinx, StandardLayout, FixedLayout
 from .mapper import RawDateMapper, DateIndexMapper
 from .extalib import talib_function_check, talib_function_repr, talib_same_scale
 from .wrappers import get_wrapper
+from .styling import get_stylesheet
 from .utils import series_xy
 
 
@@ -26,38 +27,39 @@ class Chart:
     Example:
         chart = Chart(title=tiltle, ...)
         chart.plot(prices, indicators)
-
     """
 
-    default_figsize = (12, 9)
     mapper_done = False
     next_target = None
     last_indicator = None
-
+    stylesheet = None
     layout = None
     mapper = None
+
+    DEFAULT_FIGSIZE = (12, 9)
 
     def __init__(self, title=None,
                  max_bars=None, start=None, end=None,
                  figure=None, figsize=None, bgcolor='w',
                  use_calendar=False, holidays=None,
-                 fixed_layout=False):
+                 style=None, fixed_layout=False):
+
+        self.start = start
+        self.end = end
+        self.max_bars = max_bars
+        self.holidays = holidays
+        self.use_calendar = use_calendar
+
+        self.layout = FixedLayout if fixed_layout else StandardLayout
+        self.stylesheet = get_stylesheet(style)
 
         if figure is None:
-            figsize = figsize or self.default_figsize
+            figsize = figsize or self.DEFAULT_FIGSIZE
             figure = plt.figure(figsize=figsize, facecolor=bgcolor, edgecolor=bgcolor)
         else:
             figure.clf()
 
         self.figure = figure
-
-        self.start = start
-        self.end = end
-        self.max_bars = max_bars
-        self.use_calendar = use_calendar
-        self.holidays = holidays
-
-        self.layout = FixedLayout if fixed_layout else StandardLayout
 
         self.init_axes()
 
@@ -247,6 +249,7 @@ class Chart:
             ax = self.layout.add_vplot(figure=figure, height_ratio=height_ratio, append=append)
 
         self.config_axes(ax)
+        self.reset_stylesheet()
 
         return ax
 
@@ -276,6 +279,18 @@ class Chart:
                 continue
             count += 1
         return count
+
+    def reset_stylesheet(self):
+        """ resets stylesheet"""
+        return self.stylesheet.reset()
+
+    def get_setting(self, key, section, fallback=None):
+        """ gets setting from stylesheet """
+        return self.stylesheet.get_setting(key, section, fallback=fallback)
+
+    def get_settings(self, key, **kwargs):
+        """ gets settings from stylesheet matching kwargs """
+        return self.stylesheet.get_settings(key, **kwargs)
 
     def get_label(self, indicator):
         """ returns label to use for indicator """
@@ -365,7 +380,7 @@ class Chart:
     def show(self):
         """ shows the chart """
         if not self.figure.axes:
-            self.new_axes()
+            self.get_axes()
 
         # figure.show() seems only to work if figure was not created by pyplot!
         plt.show()
@@ -373,7 +388,7 @@ class Chart:
     def render(self, format='svg'):
         """ renders the chart to the specific format """
         if not self.figure.axes:
-            self.new_axes()
+            self.get_axes()
 
         file = io.StringIO()
         self.figure.savefig(file, format=format)

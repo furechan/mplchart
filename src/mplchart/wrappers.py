@@ -4,13 +4,25 @@ import numpy as np
 
 from .utils import series_xy
 
+from abc import ABC, abstractmethod
+
 from .extalib import talib_function_check, talib_function_name
 
-__all__ = ()
+wrapper_registry = dict()
 
 
-def get_wrapper(indicator):
-    """ gets the rendering wrapper for given indicator """
+def register(name: str):
+    """ register a wrapper class for given indicator names """
+
+    def decorator(func):
+        wrapper_registry[name] = func
+        return func
+
+    return decorator
+
+
+def indicator_name(indicator):
+    """ indicator name (uppercase) """
 
     if talib_function_check(indicator):
         name = talib_function_name(indicator)
@@ -19,25 +31,35 @@ def get_wrapper(indicator):
     else:
         name = indicator.__class__.__name__
 
-    wrapper = globals().get(name.upper())
+    name = name.upper()
 
-    if wrapper is not None:
+    return name
+
+
+def get_wrapper(indicator):
+    """ gets the rendering wrapper for given indicator """
+
+    name = indicator_name(indicator)
+
+    if name in wrapper_registry:
+        wrapper = wrapper_registry.get(name)
         return wrapper(indicator)
 
 
-class Wrapper:
-    """ Indicator Wrapper """
-
-    indicator = None
+class Wrapper(ABC):
+    """ Indicator Wrapper (custom plotting) """
 
     def __init__(self, indicator):
+        name = indicator_name(indicator)
         self.indicator = indicator
+        self.name = name
 
     def check_result(self, data):
         return True
 
+    @abstractmethod
     def plot_result(self, data, chart, ax=None):
-        pass
+        ...
 
 
 class LinePlot(Wrapper):
@@ -45,7 +67,7 @@ class LinePlot(Wrapper):
 
     def plot_result(self, data, chart, ax=None):
         if ax is None:
-            ax = chart.new_axes()
+            ax = chart.get_axes('below')
 
         label = chart.get_label(self.indicator)
         xv, yv = series_xy(data)
@@ -53,8 +75,30 @@ class LinePlot(Wrapper):
         ax.plot(xv, yv, label=label)
 
 
+@register('BOP')
+@register('CMF')
+@register('CCI')
+class AreaPlot(Wrapper):
+    """ AreaPlot Wrapper """
+
+    def plot_result(self, data, chart, ax=None):
+        if ax is None:
+            ax = chart.get_axes('below')
+
+        label = chart.get_label(self.indicator)
+        xv, yv = series_xy(data)
+
+        ax.fill_between(xv, yv, alpha=0.4, label=label)
+
+
+@register('RSI')
 class RSI(Wrapper):
-    """ Relative Strendgth Index Wrapper """
+    """ RSI Wrapper """
+
+    COLOR = "black"
+
+    def check_result(self, data):
+        return data.ndim == 1
 
     def plot_result(self, data, chart, ax=None):
         if ax is None:
@@ -63,7 +107,9 @@ class RSI(Wrapper):
         label = chart.get_label(self.indicator)
         xv, yv = series_xy(data)
 
-        ax.plot(xv, yv, label=label, color='k')
+        color = chart.get_setting('rsi', 'color', self.COLOR)
+
+        ax.plot(xv, yv, label=label, color=color)
 
         with np.errstate(invalid='ignore'):
             ax.fill_between(xv, yv, 70, where=(yv >= 70), interpolate=True, alpha=0.5)
@@ -72,8 +118,13 @@ class RSI(Wrapper):
         ax.set_yticks([30, 50, 70])
 
 
+@register('SAR')
+@register('PSAR')
 class PSAR(Wrapper):
     """ PSAR WRapper """
+
+    def check_result(self, data):
+        return data.ndim == 1
 
     def plot_result(self, data, chart, ax=None):
         if ax is None:
@@ -84,35 +135,33 @@ class PSAR(Wrapper):
         ax.scatter(xv, yv, alpha=0.5, marker=".")
 
 
+@register('VOLUME')
 class VOLUME(Wrapper):
     """ VOLUME Wrapper """
 
-    def plot_result(self, data, chart, ax=None):
+    COLOR = 'grey'
 
+    def check_result(self, data):
+        return data.ndim == 1
+
+    def plot_result(self, data, chart, ax=None):
         if ax is None:
             ax = chart.get_axes('twinx')
 
-        index = data.index
-        volume = data['volume']
+        xv, yv = series_xy(data)
 
-        if 'change' in data:
-            change = data['change']
-            color = np.where(change < 0, 'red', 'grey')
-        else:
-            color = 'grey'
+        color = chart.get_setting('volume', 'color', self.COLOR)
 
         if ax._label == 'twinx':
-            vmax = volume.max()
-            ax.set_ylim(0.0, vmax * 4.0)
+            ymax = np.nanmax(yv)
+            ax.set_ylim(0.0, ymax * 4.0)
             ax.yaxis.set_visible(False)
 
-        ax.bar(index, volume, width=1.0, alpha=0.3, zorder=0, color=color)
-
-        if 'average' in data:
-            average = data['average']
-            ax.plot(index, average, linewidth=0.7, color='grey')
+        ax.bar(xv, yv, width=1.0, alpha=0.3, zorder=0, color=color)
 
 
+@register('MACD')
+@register('PPO')
 class MACD(Wrapper):
     """ MACD Wrapper """
 
@@ -139,11 +188,14 @@ class MACD(Wrapper):
         ax.bar(xv, yv, alpha=0.5, width=0.8)
 
 
+@register('BBANDS')
+@register('KELTNER')
 class BBANDS(Wrapper):
-    """ BBANDS Wrapper"""
+    """ BBANDS Wrapper """
+
+    COLOR = 'orange'
 
     def check_result(self, data):
-        print("check_data", data.ndim, data.shape)
         return data.ndim == 2 and data.shape[1] == 3
 
     def plot_result(self, data, chart, ax=None):
@@ -156,13 +208,15 @@ class BBANDS(Wrapper):
         middle = data.iloc[:, 1]
         lower = data.iloc[:, 2]
 
+        color = chart.get_setting('bbands', 'color', self.COLOR)
+
         xs, ms = series_xy(middle)
-        ax.plot(xs, ms, color='blue', label=label)
+        ax.plot(xs, ms, color=color, linestyle="dashed", label=label)
 
         xs, hs = series_xy(upper)
-        ax.plot(xs, hs, color='orange')
+        ax.plot(xs, hs, color=color, linestyle="dotted")
 
         xs, ls = series_xy(lower)
-        ax.plot(xs, ls, color='orange')
+        ax.plot(xs, ls, color=color, linestyle="dotted")
 
-        ax.fill_between(xs, ls, hs, color='orange', interpolate=True, alpha=0.3)
+        ax.fill_between(xs, ls, hs, color=color, interpolate=True, alpha=0.2)

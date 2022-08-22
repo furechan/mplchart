@@ -18,7 +18,9 @@ class Peaks(Primitive):
 
     indicator = None
 
-    def __init__(self, span=1, *, item=None, color='blue'):
+    COLOR = 'blue'
+
+    def __init__(self, span=1, *, item=None, color=None):
         self.span = span
         self.color = color
         self.item = item
@@ -49,7 +51,7 @@ class Peaks(Primitive):
         xv = data.index
         yv = data
 
-        color = self.color
+        color = self.color or chart.get_setting('peaks', 'color', self.COLOR)
 
         ax.scatter(xv, yv, c=color, s=10 * 10, alpha=0.5, marker=".")
 

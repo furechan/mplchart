@@ -16,6 +16,11 @@ class Volume(Primitive):
         sma (int) : the period of the simple moving average, default = 20
     """
 
+    WIDTH = 0.8
+    COLORUP = 'red'
+    COLORDN = 'grey'
+    MACOLOR = 'grey'
+
     def __init__(self, sma=20):
         self.sma = sma
 
@@ -45,15 +50,21 @@ class Volume(Primitive):
         index = data.index
         volume = data.volume
         change = data.change
-        color = np.where(change < 0, "red", "grey")
+
+        width = chart.get_setting('volume', 'width', self.WIDTH)
+        colorup = chart.get_setting('volume.up', 'color', self.COLORUP)
+        colordn = chart.get_setting('volume.dn', 'color', self.COLORDN)
+        macolor = chart.get_setting('volume.ma', 'color', self.MACOLOR)
+
+        color = np.where(change < 0, colorup, colordn)
 
         if ax._label == 'twinx':
             vmax = data.volume.max()
             ax.set_ylim(0.0, vmax * 4.0)
             ax.yaxis.set_visible(False)
 
-        ax.bar(index, volume, width=1.0, alpha=0.3, zorder=0, color=color)
+        ax.bar(index, volume, width=width, alpha=0.3, zorder=0, color=color)
 
         if self.sma:
             average = data.average
-            ax.plot(index, average, linewidth=0.7, color='grey')
+            ax.plot(index, average, linewidth=0.7, color=macolor)

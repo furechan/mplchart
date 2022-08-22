@@ -1,2 +1,2 @@
-include src/mplchart/data/*
+include src/mplchart/styles/*
 

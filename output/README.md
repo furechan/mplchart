@@ -13,7 +13,8 @@ If you have [ta-lib](https://github.com/mrjbq7/ta-lib)
 installed you can also use its abstract functions as indicators but it is not a requirement.
 
 
-This is work in progress! You may also want to look into more mature projects like 
+> **Warning**
+This is work in progress. For a related project with a mature api you may want to look into
 [mplfinance](https://pypi.org/project/mplfinance/).
 
 
@@ -167,15 +168,14 @@ See example notebook [mplchart-custom.ipynb](https://github.com/furechan/mplchar
 
 ## Example Notebooks
 
-You can find example notebooks in the [examples](https://github.com/furechan/mplchart/blob/main/examples/) folder. 
+You can find more examples in the [examples](https://github.com/furechan/mplchart/blob/main/examples/) folder. 
 
 ## Developer Notes
 
-You can install this package with pip
-
+You can install the current version of this package with pip
 
 ```console
-python3 -mpip install git+ssh://git@github.com/furechan/mplchart-proto.git
+python3 -mpip install git+ssh://git@github.com/furechan/mplchart.git
 ```
 
 ## Requirements:

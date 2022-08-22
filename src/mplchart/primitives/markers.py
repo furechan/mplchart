@@ -45,8 +45,7 @@ class PosMarker(Primitive):
             prices = prices.join(data)
 
         expr = self.expr or self.default_item(prices)
-        pos = prices.eval(expr)
-        pos = np.where(pos > 0.0, 1.0, 0.0)
+        pos = np.where(prices.eval(expr) > 0.0, 1.0, 0.0)
         prices = prices.assign(pos=pos)
 
         return prices
@@ -55,6 +54,9 @@ class PosMarker(Primitive):
 @export
 class TradeMarker(PosMarker):
     """ Trade Marker Primitive """
+
+    COLORENTRY = 'green'
+    COLOREXIT = 'red'
 
     def plot_handler(self, data, chart, ax=None):
         """ main plot handler from raw prices """
@@ -71,7 +73,10 @@ class TradeMarker(PosMarker):
         yv = data.close[mask]
         pos = data.pos[mask]
 
-        cv = np.where(pos > 0, 'g', 'r')
+        colorn = chart.get_setting('marker.entry', 'color', self.COLORENTRY)
+        colorx = chart.get_setting('merker.exit', 'color', self.COLOREXIT)
+
+        cv = np.where(pos > 0, colorn, colorx)
 
         ax.scatter(xv, yv, c=cv, s=12 * 12, alpha=0.6, marker=".")
 
@@ -92,6 +97,9 @@ class TradeMarker(PosMarker):
 class TradeSpan(PosMarker):
     """ Trade Span Primitive """
 
+    COLOR = 'green'
+    ALPHA = 0.1
+
     def plot_handler(self, data, chart, ax=None):
         """ main plot handler from raw prices """
 
@@ -103,8 +111,9 @@ class TradeSpan(PosMarker):
         pos = data.pos
 
         mask = pos.diff().fillna(0).ne(0)
-        color = 'green'
-        alpha = 0.1
+
+        color = chart.get_setting('tradespan', 'color', self.COLOR)
+        alpha = self.ALPHA
 
         xv = data.index[mask]
         sv = data.pos[mask]

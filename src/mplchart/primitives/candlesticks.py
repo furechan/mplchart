@@ -11,8 +11,6 @@ from ..model import Primitive
 
 import warnings
 
-USE_BARS = False
-
 
 class Candlesticks(Primitive):
     """
@@ -21,11 +19,13 @@ class Candlesticks(Primitive):
     Used to plot prices as candlesticks
     """
 
-    def __init__(self, width=0.8, colorup='k', colordn='k', coloroff='w', use_bars=USE_BARS):
-        self.width = width
-        self.colorup = colorup
-        self.colordn = colordn
-        self.coloroff = coloroff
+    WIDTH = 0.8
+    COLORUP = 'black'
+    COLORDN = 'black'
+    COLOROFF = 'white'
+    USE_BARS = False
+
+    def __init__(self, use_bars=USE_BARS):
         self.use_bars = use_bars
 
     def __str__(self):
@@ -38,15 +38,20 @@ class Candlesticks(Primitive):
         label = str(self)
         data = chart.extract_df(data)
 
+        width = chart.get_setting('candles', 'width', self.WIDTH)
+        colorup = chart.get_setting('candles.up', 'color', self.COLORUP)
+        colordn = chart.get_setting('candles.dn', 'color', self.COLORDN)
+        coloroff = chart.get_setting('candles.off', 'color', self.COLOROFF)
+
         if self.use_bars:
             return plot_csbars(
-                data=data, ax=ax, width=self.width,
-                colorup=self.colorup, colordn=self.colordn, coloroff=self.coloroff,
+                data=data, ax=ax, width=width,
+                colorup=colorup, colordn=colordn, coloroff=coloroff,
                 label=label)
         else:
             return plot_cspoly(
-                data=data, ax=ax, width=self.width,
-                colorup=self.colorup, colordn=self.colordn, coloroff=self.coloroff,
+                data=data, ax=ax, width=width,
+                colorup=colorup, colordn=colordn, coloroff=coloroff,
                 label=label)
 
 
