@@ -166,9 +166,9 @@ class DEMA:
 See example notebook [mplchart-custom.ipynb](/examples/mplchart-custom.ipynb) 
 
 
-## Example Notebooks
+## Examples
 
-You can find more examples in the [examples](/examples/) folder. 
+You can find example notebooks and scripts in the [examples](/examples/) folder. 
 
 ## Developer Notes
 
