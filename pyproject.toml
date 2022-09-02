@@ -1,0 +1,5 @@
+[build-system]
+# PEP 508 specifications.
+# requires = ["setuptools>=42", "wheel"]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"

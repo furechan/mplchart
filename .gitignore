@@ -7,6 +7,7 @@ temp/*
 build/
 dist/
 .tox/
+*.bak
 *.log
 *.pyc
 *.pyd

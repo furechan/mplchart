@@ -17,6 +17,9 @@ install: FORCE
 remove: FORCE
 	python setup.py develop -u
 
+tox: FORCE
+	tox --workdir %USERPROFILE%\Parking\mplchart.tox
+
 upload: FORCE
 #	twine upload --repository testpypi dist/*
 	twine upload dist/*
