@@ -1,5 +1,39 @@
 [build-system]
-# PEP 508 specifications.
-# requires = ["setuptools>=42", "wheel"]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = [ "pdm-backend" ]
+build-backend = "pdm.backend"
+
+[project]
+name = "mplchart"
+dynamic = [ "version" ]
+requires-python = ">=3.9"
+description = "Classic Stock Charts in Python"
+urls = { homepage = "https://github.com/furechan/mplchart" }
+authors = [ { name = "Furechan", email = "furechan@xsmail.com"} ]
+readme = "output/README.md"
+license = { file = "LICENSE.txt" }
+classifiers = [
+    "Topic :: Office/Business :: Financial",
+    "Development Status :: 2 - Pre-Alpha",
+    "Programming Language :: Python :: 3"
+]
+keywords = [
+    "finance",
+    "charting",
+    "matplotlib",
+    "candlesticks"
+]
+dependencies = [
+    "matplotlib",
+    "yfinance",
+    "numpy",
+    "pandas"
+]
+
+[tool.pdm.version]
+source = "file"
+path = "src/mplchart/__init__.py"
+
+[tool.pytest.ini_options]
+addopts = [ "-p no:cacheprovider" ]
+testpaths = [ "tests" ]
+

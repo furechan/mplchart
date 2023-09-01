@@ -115,6 +115,6 @@ def get_prices(ticker: str, freq='daily', *,
     if caching and cache_file:
         if verbose:
             print(f"Saving {ticker} data to {cache_file} ...")
-        prices.to_csv(cache_file, line_terminator="\n")
+        prices.to_csv(cache_file, lineterminator="\n")
 
     return prices
