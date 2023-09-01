@@ -1,7 +1,6 @@
 """
-script to translate README.md local urls
-creates output/README.md for usage with pypi
-Developer use only!
+Script to translate README.md local urls
+Creates output/README.md for usage with pypi
 """
 
 import re
