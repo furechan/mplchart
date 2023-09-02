@@ -1,16 +1,13 @@
 # Classic Stock Charts in Python
 
 
-This project aims at creating classic
-technical analysis stock charts in Python with minimum code.
-The library is built around the excellent 
-[matplotlib](https://github.com/matplotlib/matplotlib). 
-The interface is declarative, based on a set of drawing primitives
-like `Candleststicks`, `Volume`, `Peaks`
-and technical indicators
-like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
-If you have [ta-lib](https://github.com/mrjbq7/ta-lib)
-installed you can also use its abstract functions as indicators but it is not a requirement.
+Create classic technical analysis stock charts in Python with minimum code.
+The library is mainly built around [matplotlib](https://github.com/matplotlib/matplotlib). 
+Charts can be defined using a declarative interface,
+based on a set of drawing primitives like `Candleststicks`, `Volume`, `Peaks`
+and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
+If you have [ta-lib](https://github.com/mrjbq7/ta-lib) installed you can also
+use any of its abstract functions as indicators.
 
 
 > **Warning**
@@ -19,7 +16,6 @@ This is work in progress. For a related project with a mature api you may want t
 
 
 ![Showcase Chart](/output/showcase.svg "Showcase")
-
 
 
 ## Typical Usage
@@ -51,15 +47,13 @@ See example notebook [mplchart-usage.ipynb](/examples/mplchart-usage.ipynb)
 
 ## Conventions
 
-Prices are expected to be stored as a pandas DataFrame
+Price data is expected to be predented as a pandas DataFrame
 with columns `open`, `high`, `low`, `close` `volume`
 and a timestamp index named `date`, all in **lower case**!
 
 For testing purposes you can use the `helper` module
 which can fetch sample prices in the proper format via
 [yfinance](https://github.com/ranaroussi/yfinance).
-This is meant to be used for testing/demo purposes only!
-See yfinance for more information on its usage.
 
 ```python
 from mplchart.helper import get_prices
@@ -76,7 +70,6 @@ See example notebook [mplchart-helper.ipynb](/examples/mplchart-helper.ipynb)
 
 The library contains drawing primitives that can be used as an indicator in the plot api.
 All primitives are classes that must be instantiated as objects before being used in the plot api.
-Here is a snippet for the `Candlesticks` primitive.
 
 ```python
 from mplchart.primitives import Candlesticks
@@ -85,6 +78,7 @@ indicators = [Candlesticks()]
 chart = Chart(title=title, max_bars=max_bars)
 chart.plot(prices, indicators)
 ```
+
 The main drawing primitives are :
 - `Candlesticks` for candlesticks plots
 - `OHLC` for open, high, low, close bar plots
@@ -99,9 +93,10 @@ See example notebook [mplchart-primitives.ipynb](/examples/mplchart-primitives.i
 ## Builtin Indicators
 
 The libary contains some basic technical analysis indicators implemented in pandas/numpy.
-All indicators are classes that must be instantiated
-before being used in the plot api.
+Indicators are classes that must be instantiated before being used in the plot api.
+
 Some of the indicators included are:
+
 - `SMA` Simple Moving Average
 - `EMA` Exponential Moving Average
 - `ROC` Rate of Change
@@ -115,10 +110,8 @@ See example notebook [mplchart-builtins.ipynb](/examples/mplchart-builtins.ipynb
 
 ## Ta-lib Abstract Functions
 
-If you have 
-[ta-lib](https://github.com/mrjbq7/ta-lib)
-installed you can use its abstract functions as indicators.
-The functions are created by calling `abstract.Function` with the name of the indicator and its parameters.
+If you have [ta-lib](https://github.com/mrjbq7/ta-lib) installed you can use its abstract functions as indicators.
+The indicators are created by calling `abstract.Function` with the name of the indicator and its parameters.
 
 ```python
 from talib.abstract import Function
@@ -137,9 +130,8 @@ See example notebook [mplchart-abstract.ipynb](/examples/mplchart-abstract.ipynb
 
 ## Custom Indicators
 
-It is easy to create custom indicators.
-An indicator is basically a callable that takes a prices data frame and returns a series as result.
-A function can be used as an indicator but we suggest you implement indicators as a callable dataclass.
+Any callable that takes a prices data frame and returns a series as result can be used as indicator.
+A function can be used as an indicator but you can also implement an indicator as a callable dataclass.
 
 ```python
 from dataclasses import dataclass
@@ -170,7 +162,7 @@ See example notebook [mplchart-custom.ipynb](/examples/mplchart-custom.ipynb)
 
 You can find example notebooks and scripts in the [examples](/examples/) folder. 
 
-## Developer Notes
+## Installation
 
 You can install the current version of this package with pip
 
@@ -188,7 +180,7 @@ python3 -mpip install git+ssh://git@github.com/furechan/mplchart.git
 
 
 ## Related Projects & Resources
-- [stockcharts.com](https://stockcharts.com/) Beautiful stock charts and technical analysis reference
+- [stockcharts.com](https://stockcharts.com/) Classic stock charts and technical analysis reference
 - [mplfinance](https://pypi.org/project/mplfinance/) Matplotlib utilities for the visualization,
 and visual analysis, of financial data
 - [matplotlib](https://github.com/matplotlib/matplotlib) Matplotlib: plotting with Python

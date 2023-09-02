@@ -3,8 +3,11 @@ Script to translate README.md local urls
 Creates output/README.md for usage with pypi
 """
 
+
 import re
+import toml
 import argparse
+import jmespath
 import posixpath
 
 import configparser
@@ -15,24 +18,29 @@ root = Path(__file__).parent.parent
 
 
 def get_project_url():
+    """ extract project url from project configuration """
+
+    pyproject = root.joinpath("pyproject.toml")
     setupcfg = root.joinpath("setup.cfg")
+    setup = root.joinpath("setup.py")
+
+    if pyproject.exists():
+        config = toml.load(pyproject)
+        return jmespath.search("project.urls.homepage", config)
 
     if setupcfg.exists():
         config = configparser.ConfigParser()
         config.read(setupcfg)
         return config.get('metadata', 'url')
 
-    setup = root.joinpath("setup.py")
-    contents = setup.read_text()
+    if setup.exists():
+        contents = setup.read_text()
+        match = re.search(r"(?xm) ^ \s* url \s* = \s* ([\"']) ([^\"']+) \1 \s* $", contents)
+        if match:
+            url = match.group(2)
+            return url
 
-    match = re.search(r"(?xm) ^ \s* url \s* = \s* ([\"']) ([^\"']+) \1 \s* $", contents)
-
-    if not match:
-        raise ValueError("Cound not extract url!")
-
-    url = match.group(2)
-
-    return url
+    raise ValueError("Cound not extract url!")
 
 
 def process_readme(file, project_url, branch="main", verbose=False):

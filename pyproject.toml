@@ -5,7 +5,7 @@ build-backend = "pdm.backend"
 [project]
 name = "mplchart"
 dynamic = [ "version" ]
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 description = "Classic Stock Charts in Python"
 urls = { homepage = "https://github.com/furechan/mplchart" }
 authors = [ { name = "Furechan", email = "furechan@xsmail.com"} ]
@@ -34,6 +34,7 @@ source = "file"
 path = "src/mplchart/__init__.py"
 
 [tool.pytest.ini_options]
+filterwarnings = [ "ignore", "default:::mplchart" ]
 addopts = [ "-p no:cacheprovider" ]
 testpaths = [ "tests" ]
 
