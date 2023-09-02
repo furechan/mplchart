@@ -1,11 +1,10 @@
-# for use in windows only ...
 # requires setuptools build twine
 # makefile should be tab indented !
 
-name = stockchart
+name = mplchart
 
-dist: FORCE
-	python scripts/process-readme.py
+build: FORCE
+	python extras/process-readme.py
 	python -m build --wheel .
 
 dump: FORCE
@@ -16,9 +15,6 @@ install: FORCE
 
 remove: FORCE
 	python setup.py develop -u
-
-tox: FORCE
-	tox --workdir %USERPROFILE%\Parking\mplchart.tox
 
 upload: FORCE
 #	twine upload --repository testpypi dist/*
