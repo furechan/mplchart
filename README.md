@@ -63,7 +63,7 @@ freq = 'daily'
 prices = get_prices(ticker, freq=freq)
 ```
 
-See example notebook [mplchart-helper.ipynb](/examples/mplchart-helper.ipynb) 
+See example notebook [mplchart-prices.ipynb](/examples/mplchart-prices.ipynb) 
 
 
 ## Drawing Primitives
@@ -125,7 +125,7 @@ indicators = [
 ]
 ```
  
-See example notebook [mplchart-abstract.ipynb](/examples/mplchart-abstract.ipynb) 
+See example notebook [mplchart-abstract.ipynb](/examples/mplchart-talib.ipynb) 
 
 
 ## Custom Indicators

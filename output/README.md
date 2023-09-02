@@ -125,7 +125,7 @@ indicators = [
 ]
 ```
  
-See example notebook [mplchart-abstract.ipynb](https://github.com/furechan/mplchart/blob/main/examples/mplchart-abstract.ipynb) 
+See example notebook [mplchart-talib.ipynb](https://github.com/furechan/mplchart/blob/main/examples/mplchart-talib.ipynb) 
 
 
 ## Custom Indicators

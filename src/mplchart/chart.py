@@ -67,7 +67,7 @@ class Chart:
             self.set_title(title)
 
         if self.layout.use_tight_layout:
-            self.figure.set_tight_layout(True)
+            self.figure.set_layout_engine('tight')
 
     @staticmethod
     def valid_target(target):
