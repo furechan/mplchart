@@ -4,7 +4,6 @@
 - [mplchart-builtins.ipynb](mplchart-builtins.ipynb) A quick tour of builtin indicators
 - [mplchart-talib.ipynb](mplchart-talib.ipynb) Using ta-Lib abstract functions as indicators
 - [mplchart-custom.ipynb](mplchart-custom.ipynb) Creating a custom indicator
-- [mplchart-prices.ipynb](mplchart-prices.ipynb) Fetching sample data
 - [mplchart-markers.ipynb](mplchart-markers.ipynb) Trade markers (experimental)
 - [mplchart-mintalib.ipynb](mplchart-mintalib.ipynb) Using mintalib indicators (experimental)
 - [mplchart-render.ipynb](mplchart-render.ipynb) Render a chart to SVG

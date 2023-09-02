@@ -38,6 +38,11 @@ class Chart:
 
     DEFAULT_FIGSIZE = (12, 9)
 
+    @staticmethod
+    def normalize(prices):
+        prices = prices.rename(columns=str.lower).rename_axis(index=str.lower)
+        return prices
+
     def __init__(self, title=None,
                  max_bars=None, start=None, end=None,
                  figure=None, figsize=None, bgcolor='w',
@@ -342,13 +347,6 @@ class Chart:
             if handles:
                 ax.legend(loc="upper left")
 
-    def plot_indicators(self, indicators, data):
-        """ plots a list of  indicators (legqacy) """
-
-        warnings.warn("`plot_indicators` is legacy. use `plot` instead!")
-
-        self.plot(data, indicators=indicators)
-
     def plot(self, prices, indicators):
         """ plots a list of indicators
 
@@ -360,6 +358,8 @@ class Chart:
             list of indciators to plot
 
         """
+
+        prices = self.normalize(prices)
 
         for indicator in indicators:
             self.plot_indicator(prices, indicator)

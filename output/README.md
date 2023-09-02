@@ -21,14 +21,14 @@ This is work in progress. For a related project with a mature api you may want t
 ## Typical Usage
 
 ```python
+import yfinance as yf
+
 from mplchart.chart import Chart
-from mplchart.helper import get_prices
 from mplchart.primitives import Candlesticks, Volume
 from mplchart.indicators import ROC, SMA, EMA, RSI, MACD
 
 ticker = 'AAPL'
-freq = 'daily'
-prices = get_prices(ticker, freq=freq)
+prices = yf.Ticker(ticker).history('5y')
 
 max_bars = 250
 
@@ -50,20 +50,8 @@ See example notebook [mplchart-usage.ipynb](https://github.com/furechan/mplchart
 Price data is expected to be predented as a pandas DataFrame
 with columns `open`, `high`, `low`, `close` `volume`
 and a timestamp index named `date`, all in **lower case**!
-
-For testing purposes you can use the `helper` module
-which can fetch sample prices in the proper format via
-[yfinance](https://github.com/ranaroussi/yfinance).
-
-```python
-from mplchart.helper import get_prices
-
-ticker = 'AAPL'
-freq = 'daily'
-prices = get_prices(ticker, freq=freq)
-```
-
-See example notebook [mplchart-helper.ipynb](https://github.com/furechan/mplchart/blob/main/examples/mplchart-helper.ipynb) 
+Please note, The library will automatically convert column
+and index names to lower case for internal use.
 
 
 ## Drawing Primitives
@@ -125,7 +113,7 @@ indicators = [
 ]
 ```
  
-See example notebook [mplchart-talib.ipynb](https://github.com/furechan/mplchart/blob/main/examples/mplchart-talib.ipynb) 
+See example notebook [mplchart-abstract.ipynb](https://github.com/furechan/mplchart/blob/main/examples/mplchart-talib.ipynb) 
 
 
 ## Custom Indicators
