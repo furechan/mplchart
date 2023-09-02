@@ -1,19 +1,15 @@
 from mplchart.chart import Chart
-from mplchart.helper import get_prices
 
 from mplchart.primitives import Candlesticks, Volume
 from mplchart.indicators import SMA, RSI, MACD
 
 
-def test_builtins():
-    ticker = 'AAPL'
-    prices = get_prices(ticker)
-
+def test_chart(sample_prices):
     max_bars = 250
     indicators = [Candlesticks(), SMA(50), SMA(200), Volume(), RSI(), MACD()]
 
-    chart = Chart(title=ticker, max_bars=max_bars)
-    chart.plot(prices, indicators)
+    chart = Chart(title="Test", max_bars=max_bars)
+    chart.plot(sample_prices, indicators)
 
     assert chart.count_axes() > 1
 
