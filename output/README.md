@@ -48,17 +48,17 @@ See example notebook [mplchart-usage.ipynb](https://github.com/furechan/mplchart
 
 ## Conventions
 
-Price data is expected to be predented as a pandas DataFrame
+Price data is expected to be presented as a pandas DataFrame
 with columns `open`, `high`, `low`, `close` `volume`
 and a timestamp index named `date`.
-Please note, The library will automatically convert column
+Please note, the library will automatically convert column
 and index names to lower case for its internal use.
 
 
 ## Drawing Primitives
 
 The library contains drawing primitives that can be used as an indicator in the plot api.
-All primitives are classes that must be instantiated as objects before being used in the plot api.
+All primitives are classes that must be instantiated before being used in the plot api.
 
 ```python
 from mplchart.primitives import Candlesticks
