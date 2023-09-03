@@ -390,7 +390,7 @@ class Chart:
         if not self.figure.axes:
             self.get_axes()
 
-        file = io.StringIO()
+        file = io.BytesIO()
         self.figure.savefig(file, format=format)
         result = file.getvalue()
 

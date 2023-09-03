@@ -11,7 +11,7 @@ use any of its abstract functions as indicators.
 
 
 > **Note**
-This is work in progress. For a related project with a mature api you may want to look into
+This project is work in progress. For a related project with a mature api you may want to look into
 [mplfinance](https://pypi.org/project/mplfinance/).
 
 
@@ -113,7 +113,7 @@ indicators = [
 ]
 ```
  
-See example notebook [mplchart-abstract.ipynb](https://github.com/furechan/mplchart/blob/main/examples/mplchart-talib.ipynb) 
+See example notebook [mplchart-talib.ipynb](https://github.com/furechan/mplchart/blob/main/examples/mplchart-talib.ipynb) 
 
 
 ## Custom Indicators
