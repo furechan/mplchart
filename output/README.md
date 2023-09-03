@@ -50,7 +50,7 @@ See example notebook [mplchart-usage.ipynb](https://github.com/furechan/mplchart
 
 Price data is expected to be predented as a pandas DataFrame
 with columns `open`, `high`, `low`, `close` `volume`
-and a timestamp index named `date`, all in **lower case**!
+and a timestamp index named `date`.
 Please note, The library will automatically convert column
 and index names to lower case for its internal use.
 
