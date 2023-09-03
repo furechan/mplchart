@@ -1,8 +1,9 @@
 # Classic Stock Charts in Python
 
 
-Create classic technical analysis stock charts in Python with minimum code.
-The library is mainly built around [matplotlib](https://github.com/matplotlib/matplotlib). 
+Create classic technical analysis stock charts in Python with minimal code.
+The library is built around [matplotlib](https://github.com/matplotlib/matplotlib)
+and [pandas](https://github.com/pandas-dev/pandas). 
 Charts can be defined using a declarative interface,
 based on a set of drawing primitives like `Candleststicks`, `Volume`, `Peaks`
 and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
@@ -11,7 +12,7 @@ use any of its abstract functions as indicators.
 
 
 > **Note**
-This project is work in progress. For a related project with a mature api you may want to look into
+This project is work in progress. For a library with a mature api you may want to look into
 [mplfinance](https://pypi.org/project/mplfinance/).
 
 
@@ -51,7 +52,7 @@ Price data is expected to be predented as a pandas DataFrame
 with columns `open`, `high`, `low`, `close` `volume`
 and a timestamp index named `date`, all in **lower case**!
 Please note, The library will automatically convert column
-and index names to lower case for internal use.
+and index names to lower case for its internal use.
 
 
 ## Drawing Primitives

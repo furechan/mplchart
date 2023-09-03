@@ -7,5 +7,5 @@
 - [mplchart-markers.ipynb](mplchart-markers.ipynb) Trade markers (experimental)
 - [mplchart-mintalib.ipynb](mplchart-mintalib.ipynb) Using mintalib indicators (experimental)
 - [mplchart-render.ipynb](mplchart-render.ipynb) Render a chart to SVG
-- [mplchart-display.py](mplchart-script.py) Display a chart from a script
+- [mplchart-script.py](mplchart-script.py) Display a chart from a script
 

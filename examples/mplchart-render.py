@@ -18,7 +18,7 @@ def main():
     chart.plot(prices, indicators)
 
     data = chart.render('svg')
-    print(data)
+    print(data[:256], "...")
 
 
 if __name__ == "__main__":

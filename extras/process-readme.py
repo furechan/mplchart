@@ -1,6 +1,7 @@
 """
-Script to translate README.md local urls
+Script to translate README.md relative urls
 Creates output/README.md for usage with pypi
+Requires toml, jmespath !
 """
 
 
@@ -44,6 +45,7 @@ def get_project_url():
 
 
 def process_readme(file, project_url, branch="main", verbose=False):
+    """ translate relative urls to full urls """
 
     def replace(m):
         exclam, alt, url = m.groups()
@@ -67,21 +69,20 @@ def process_readme(file, project_url, branch="main", verbose=False):
 
 def main():
     parser = argparse.ArgumentParser()
+
     parser.add_argument("-v", "--verbose", action="store_true", help="verbose mode")
-    parser.set_defaults(verbose=True)
+    parser.set_defaults(verbose=False)
 
     options = parser.parse_args()
-    verbose = options.verbose
 
     readme = root.joinpath("README.md").resolve(strict=True)
-    output = root.joinpath("output").resolve(strict=True)
+    outfile = root.joinpath("output/README.md").resolve()
 
     project_url = get_project_url()
 
     print("project_url", project_url)
 
-    textout = process_readme(readme, project_url, verbose=verbose)
-    outfile = output.joinpath("README.md")
+    textout = process_readme(readme, project_url, verbose=options.verbose)
 
     print(f"Updating {outfile} ...")
     outfile.write_text(textout)
