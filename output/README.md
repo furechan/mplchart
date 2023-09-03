@@ -10,7 +10,8 @@ If you have [ta-lib](https://github.com/mrjbq7/ta-lib) installed you can also
 use any of its abstract functions as indicators.
 
 
-> **Note** This is work in progress. For a related project with a mature api you may want to look into
+> **Note**
+This is work in progress. For a related project with a mature api you may want to look into
 [mplfinance](https://pypi.org/project/mplfinance/).
 
 
