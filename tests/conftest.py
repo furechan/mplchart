@@ -3,7 +3,6 @@ import pandas as pd
 
 from pathlib import Path
 
-print(f"loading {__file__} ...")
 
 # Arrange
 @pytest.fixture

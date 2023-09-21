@@ -11,22 +11,12 @@ urls = { homepage = "https://github.com/furechan/mplchart" }
 authors = [ { name = "Furechan", email = "furechan@xsmail.com"} ]
 readme = "output/README.md"
 license = { file = "LICENSE.txt" }
+keywords = [ "finance", "charting", "matplotlib", "candlesticks" ]
+dependencies = [ "matplotlib", "yfinance", "numpy", "pandas" ]
 classifiers = [
     "Topic :: Office/Business :: Financial",
     "Development Status :: 2 - Pre-Alpha",
     "Programming Language :: Python :: 3"
-]
-keywords = [
-    "finance",
-    "charting",
-    "matplotlib",
-    "candlesticks"
-]
-dependencies = [
-    "matplotlib",
-    "yfinance",
-    "numpy",
-    "pandas"
 ]
 
 [tool.pdm.version]
