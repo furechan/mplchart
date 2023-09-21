@@ -19,7 +19,7 @@ CACHE_FILE_NAME = "mplchart.helper.{params}.csv"
 tempdir = pathlib.Path(tempfile.gettempdir())
 
 warnings.warn(
-    "The helper module is deprecated",
+    "The helper module is deprecated. Use your own data source.",
     DeprecationWarning,
     stacklevel=2
 )
