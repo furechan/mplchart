@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 
-def get_series(prices, item=None):
+def get_series(prices, item: str = None):
     """ extracts series of given name if applicable """
     if item is not None:
         return prices[item]
