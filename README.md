@@ -12,8 +12,9 @@ use any of its abstract functions as indicators.
 
 
 > **Warning**
-This project is work in progress. For a library with a mature api you may want to look into
-[mplfinance](https://pypi.org/project/mplfinance/).
+> This project is work in progress.
+> For a library with a mature api you may want to look into
+> [mplfinance](https://pypi.org/project/mplfinance/).
 
 
 ![Showcase Chart](/output/showcase.svg "Showcase")
@@ -43,8 +44,6 @@ chart = Chart(title=ticker, max_bars=max_bars)
 chart.plot(prices, indicators)
 ```
 
-See example notebook [mplchart-usage.ipynb](/examples/mplchart-usage.ipynb) 
-
 
 ## Conventions
 
@@ -61,6 +60,7 @@ The library contains drawing primitives that can be used as an indicator in the 
 All primitives are classes that must be instantiated before being used in the plot api.
 
 ```python
+from mplchart.chart import Chart
 from mplchart.primitives import Candlesticks
 
 indicators = [Candlesticks()]
@@ -77,7 +77,6 @@ The main drawing primitives are :
 - `SameAxes` to force plot on the same axes
 - `NewAxes` to force plot on a new axes
 
-See example notebook [mplchart-primitives.ipynb](/examples/mplchart-primitives.ipynb) 
 
 ## Builtin Indicators
 
@@ -95,7 +94,6 @@ Some of the indicators included are:
 - `SLOPE` Slope (linear regression with time)
 - `BBANDS` Bolling Bands
 
-See example notebook [mplchart-builtins.ipynb](/examples/mplchart-builtins.ipynb) 
 
 ## Ta-lib Abstract Functions
 
@@ -103,6 +101,7 @@ If you have [ta-lib](https://github.com/mrjbq7/ta-lib) installed you can use its
 The indicators are created by calling `abstract.Function` with the name of the indicator and its parameters.
 
 ```python
+from mplchart.primitives import Candlesticks
 from talib.abstract import Function
 
 indicators = [
@@ -113,8 +112,6 @@ indicators = [
     Function('MACD'),
 ]
 ```
- 
-See example notebook [mplchart-talib.ipynb](/examples/mplchart-talib.ipynb) 
 
 
 ## Custom Indicators
@@ -144,20 +141,18 @@ class DEMA:
 
 ```
 
-See example notebook [mplchart-custom.ipynb](/examples/mplchart-custom.ipynb) 
-
-
 ## Examples
 
-You can find example notebooks and scripts in the [examples](/examples/) folder. 
+You can find example notebooks and scripts in the examples folder. 
 
 ## Installation
 
 You can install the current version of this package with pip
 
 ```console
-python3 -mpip install git+ssh://git@github.com/furechan/mplchart.git
+python -mpip install git+ssh://git@github.com/furechan/mplchart.git
 ```
+
 
 ## Requirements:
 

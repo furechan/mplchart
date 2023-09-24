@@ -4,7 +4,6 @@ Creates output/README.md for usage with pypi
 Requires toml, jmespath !
 """
 
-
 import re
 import toml
 import argparse
@@ -15,15 +14,15 @@ import configparser
 
 from pathlib import Path
 
-root = Path(__file__).parent.parent
+ROOTDIR = Path(__file__).parent.parent
 
 
 def get_project_url():
     """ extract project url from project configuration """
 
-    pyproject = root.joinpath("pyproject.toml")
-    setupcfg = root.joinpath("setup.cfg")
-    setup = root.joinpath("setup.py")
+    pyproject = ROOTDIR.joinpath("pyproject.toml")
+    setupcfg = ROOTDIR.joinpath("setup.cfg")
+    setup = ROOTDIR.joinpath("setup.py")
 
     if pyproject.exists():
         config = toml.load(pyproject)
@@ -66,7 +65,6 @@ def process_readme(file, project_url, branch="main", verbose=False):
     return result
 
 
-
 def main():
     parser = argparse.ArgumentParser()
 
@@ -75,8 +73,8 @@ def main():
 
     options = parser.parse_args()
 
-    readme = root.joinpath("README.md").resolve(strict=True)
-    outfile = root.joinpath("output/README.md").resolve()
+    readme = ROOTDIR.joinpath("README.md").resolve(strict=True)
+    outfile = ROOTDIR.joinpath("output/README.md").resolve()
 
     project_url = get_project_url()
 

@@ -20,7 +20,8 @@ tempdir = pathlib.Path(tempfile.gettempdir())
 
 warnings.warn(
     "The helper module is deprecated. Use your own data source.",
-    DeprecationWarning
+    DeprecationWarning,
+    stacklevel=2
 )
 
 
