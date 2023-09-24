@@ -7,6 +7,7 @@ __pycache__/
 build/
 dist/
 .tox/
+.coverage
 *.bak
 *.log
 *.pyc
