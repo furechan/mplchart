@@ -46,6 +46,3 @@ class SameAxes(ForceAxes):
 
     def __init__(self, target='samex'):
         super().__init__(target)
-
-
-__all__ = [k for k, v in globals().items() if getattr(v, '__module__', None) == __name__]

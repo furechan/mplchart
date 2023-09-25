@@ -7,11 +7,6 @@ from ..model import Primitive
 from matplotlib.collections import LineCollection
 
 
-def export(func):
-    globals().setdefault('__all__', []).append(func.__name__)
-    return func
-
-
 class PosMarker(Primitive):
     """ Base class for position based markers """
 
@@ -51,7 +46,6 @@ class PosMarker(Primitive):
         return prices
 
 
-@export
 class TradeMarker(PosMarker):
     """ Trade Marker Primitive """
 
@@ -93,7 +87,6 @@ class TradeMarker(PosMarker):
         ax.add_collection(lc)
 
 
-@export
 class TradeSpan(PosMarker):
     """ Trade Span Primitive """
 

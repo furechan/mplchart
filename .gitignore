@@ -1,13 +1,15 @@
 .DS_Store
+.coverage
 .ipynb_checkpoints/
 .pytest_cache/
 __pycache__/
 *.egg-info/
 .idea/
+archive/
+backup/
 build/
 dist/
 .tox/
-.coverage
 *.bak
 *.log
 *.pyc
