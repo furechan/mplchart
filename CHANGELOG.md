@@ -5,16 +5,16 @@
 - Created `samples` sub-package with sample price data
 - Removed data files from tests folder
 - Removed relative links from readme (except showcase.svg)
+- Parametrized tests with unittest
 
 ## 0.0.3
-- Minor update (alpha)
 - Setup uses `pyproject.toml` and `pdm-backend`
 - Column names are converted to lower case automatically
 - Helper module is deprecated. Use other data sources like `yfinance` ...
 - Added `tox` config with sdist packaging
 
 ## 0.0.2
-- Minor update (alpha)
+- Minor update
 
 ## 0.0.1
-- Initial release (alpha)
+- Initial release
