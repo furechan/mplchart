@@ -56,7 +56,7 @@ class Volume(Primitive):
         colordn = chart.get_setting('volume.dn', 'color', self.COLORDN)
         macolor = chart.get_setting('volume.ma', 'color', self.MACOLOR)
 
-        color = np.where(change < 0, colorup, colordn)
+        color = np.where(change > 0, colorup, colordn)
 
         if ax._label == 'twinx':
             vmax = data.volume.max()
