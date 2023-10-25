@@ -6,8 +6,12 @@ import pandas as pd
 
 def get_series(prices, item: str = None):
     """ extracts series of given name if applicable """
+
+    # rename columns to make search case insensitive
+    prices = prices.rename(columns=str.lower)
+
     if item is not None:
-        return prices[item]
+        return prices[item.lower()]
 
     if isinstance(prices, pd.Series):
         return prices

@@ -17,8 +17,8 @@ class Volume(Primitive):
     """
 
     WIDTH = 0.8
-    COLORUP = 'red'
-    COLORDN = 'grey'
+    COLORUP = 'green'
+    COLORDN = 'red'
     MACOLOR = 'grey'
 
     def __init__(self, sma=20):
