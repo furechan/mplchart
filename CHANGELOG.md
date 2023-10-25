@@ -6,6 +6,7 @@
 - Removed data files from tests folder
 - Removed relative links from readme (except showcase.svg)
 - Parametrized tests with unittest
+- Fixed Volume Colors
 
 ## 0.0.3
 - Setup uses `pyproject.toml` and `pdm-backend`
