@@ -5,7 +5,7 @@
 - Created `samples` sub-package with sample price data
 - Removed data files from tests folder
 - Removed relative links from readme (except showcase.svg)
-- Parametrized tests with unittest
+- Parametrized tests with pytest
 - Fixed Volume Colors
 
 ## 0.0.3
