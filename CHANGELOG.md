@@ -1,7 +1,6 @@
 # Change Log
 
 ## 0.0.4
-- Work in progress ...
 - Created `samples` sub-package with sample price data
 - Removed data files from tests folder
 - Removed relative links from readme (except showcase.svg)
