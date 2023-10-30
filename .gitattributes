@@ -1,2 +1,0 @@
-# Ignore jupyter notebooks files in github stats
-*.ipynb linguist-vendored=true
