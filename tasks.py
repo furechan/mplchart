@@ -1,4 +1,4 @@
-""" Ibvoke.py tasks file """
+""" Invoke.py tasks file """
 
 import shutil
 
