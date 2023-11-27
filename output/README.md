@@ -150,9 +150,8 @@ You can find example notebooks and scripts in the examples folder.
 You can install the current version of this package with pip
 
 ```console
-python -mpip install git+ssh://git@github.com/furechan/mplchart.git
+python -mpip install git+https://github.com/furechan/mplchart.git
 ```
-
 
 ## Requirements:
 

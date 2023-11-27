@@ -27,7 +27,7 @@ include = ["src/*"]
 
 
 [tool.custom]
-install = "git+https://github.com/furechan/mplchart.git"
+install_url = "git+https://github.com/furechan/mplchart.git"
 
 
 [tool.pytest.ini_options]

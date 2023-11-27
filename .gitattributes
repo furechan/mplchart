@@ -1,2 +1,2 @@
-# Ignore jupyter notebooks files in github stats
-*.ipynb linguist-vendored=true
+# Exclude some files from github stats
+*.ipynb linguist-documentation
