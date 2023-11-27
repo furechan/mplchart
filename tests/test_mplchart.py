@@ -12,6 +12,9 @@ INDICATORS = [Volume(), SMA(50), EMA(50), RSI(), MACD(), PPO(), BBANDS()]
 def prices():
     return samples.sample_prices()
 
+def test_prices(prices):
+    assert len(prices) > 0
+
 
 @pytest.mark.parametrize("indicator", INDICATORS, ids=str)
 def test_chart(prices, indicator, max_bars=250):

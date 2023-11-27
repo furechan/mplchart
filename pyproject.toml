@@ -1,15 +1,17 @@
+
 [build-system]
-requires = [ "pdm-backend" ]
-build-backend = "pdm.backend"
+requires = [ "hatchling" ]
+build-backend = "hatchling.build"
+
 
 [project]
 name = "mplchart"
-dynamic = [ "version" ]
+version = "0.0.4"
 requires-python = ">=3.8"
+readme = "output/README.md"
 description = "Classic Stock Charts in Python"
 urls = { homepage = "https://github.com/furechan/mplchart" }
-authors = [ { name = "Furechan", email = "furechan@xsmail.com"} ]
-readme = "output/README.md"
+authors = [ { name = "Furechan", email = "furechan@xsmail.com" } ]
 license = { file = "LICENSE.txt" }
 keywords = [ "finance", "charting", "matplotlib", "candlesticks" ]
 dependencies = [ "matplotlib", "yfinance", "numpy", "pandas" ]
@@ -19,9 +21,14 @@ classifiers = [
     "Programming Language :: Python :: 3"
 ]
 
-[tool.pdm.version]
-source = "file"
-path = "src/mplchart/__init__.py"
+[tool.hatch.build]
+sources = ["src"]
+include = ["src/*"]
+
+
+[tool.custom]
+install = "git+https://github.com/furechan/mplchart.git"
+
 
 [tool.pytest.ini_options]
 filterwarnings = [ "ignore", "default:::mplchart" ]
