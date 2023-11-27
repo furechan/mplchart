@@ -1,6 +1,7 @@
 # Change Log
 
 ## 0.0.4
+- Added github workflow
 - Setup uses `pyproject.toml` with `hatchling` backend
 - Added tests and linting with `noxfile.py`
 - Created `samples` sub-package with sample price data
