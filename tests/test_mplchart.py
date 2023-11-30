@@ -15,7 +15,6 @@ def prices():
 def test_prices(prices):
     assert len(prices) > 0
 
-
 @pytest.mark.parametrize("indicator", INDICATORS, ids=str)
 def test_chart(prices, indicator, max_bars=250):
     if indicator is None:

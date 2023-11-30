@@ -8,8 +8,8 @@ from matplotlib.gridspec import GridSpec
 
 def make_twinx(ax, label='twinx'):
     """
-    Creates a twin x axes and configuresd y axes to the left
-    This is contrast to what Axes.tinwx does byd default
+    Creates a twin x axes and configures y axes to the left
+    This is contrast to what Axes.tinwx does by default
     """
 
     ax2 = ax._make_twin_axes(sharex=ax)
