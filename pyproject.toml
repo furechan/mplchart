@@ -23,8 +23,6 @@ classifiers = [
 
 [tool.hatch.build]
 sources = ["src"]
-include = ["src/*"]
-
 
 [tool.custom]
 install_url = "git+https://github.com/furechan/mplchart.git"
