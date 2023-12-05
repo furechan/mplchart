@@ -1,6 +1,7 @@
 # Change Log
 
 ## 0.0.4
+- Added tasks.py
 - Added github workflow
 - Setup uses `pyproject.toml` with `hatchling` backend
 - Added tests and linting with `noxfile.py`
