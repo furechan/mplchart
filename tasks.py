@@ -37,7 +37,7 @@ def clean(ctx):
         ctx.run("rm -rf {}".format(pattern))
 
 
-@task
+@task(clean)
 def build(ctx):
     """ Build wheel with python -mbuild """
     ctx.run("python -mbuild --wheel")
