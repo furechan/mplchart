@@ -5,14 +5,12 @@ Create classic technical analysis stock charts in Python with minimal code.
 The library is built around [matplotlib](https://github.com/matplotlib/matplotlib)
 and [pandas](https://github.com/pandas-dev/pandas). 
 Charts can be defined using a declarative interface,
-based on a set of drawing primitives like `Candleststicks`, `Volume`, `Peaks`
+based on a set of drawing primitives like `Candleststicks`, `Volume`
 and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
-If you have [ta-lib](https://github.com/mrjbq7/ta-lib) installed you can also
-use any of its abstract functions as indicators.
 
 
 > **Warning**
-> This project is work in progress.
+> This project is work in progress and the api is bound to change.
 > For a library with a mature api you may want to look into
 > [mplfinance](https://pypi.org/project/mplfinance/).
 

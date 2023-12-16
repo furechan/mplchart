@@ -30,6 +30,7 @@ class Chart:
     """
 
     mapper_done = False
+    source_data = None
     next_target = None
     last_indicator = None
     stylesheet = None
@@ -55,7 +56,12 @@ class Chart:
         self.holidays = holidays
         self.use_calendar = use_calendar
 
-        self.layout = FixedLayout if fixed_layout else StandardLayout
+        if fixed_layout:
+            warnings.warn("Fixed layout is deprecated!")
+            self.layout = FixedLayout
+        else:
+            self.layout = StandardLayout
+
         self.stylesheet = get_stylesheet(style)
 
         if figure is None:
@@ -77,13 +83,34 @@ class Chart:
     @staticmethod
     def valid_target(target):
         """ whether the target bname is valid """
-        return target in ('samex', 'twinx', 'above', 'below')
+        return target in ('main', 'samex', 'twinx', 'above', 'below')
 
     def inspect_data(self, data):
-        """ initalizes mapper from data """
+        """ initalizes chart from data """
+
+        if self.source_data is None:
+            self.source_data = data
 
         if not self.mapper_done:
             self.config_mapper(data=data)
+
+    def rebase_data(self, data):
+        if self.source_data is None:
+            warnings.warn("No source data to rebase to!")
+            return data
+
+        source_data = self.mapper.slice(self.source_data)
+        index = data.index.intersection(source_data.index)
+
+        if not len(index):
+            warnings.warn("No intersection of data!")
+            return data
+
+        dp = data.loc[index[0]]
+        sp = source_data.loc[index[0]]
+        factor = sp / dp
+
+        return data.filter(['open', 'high', 'low', 'close']) * factor
 
     def extract_df(self, data):
         """ extract dataframe view """
@@ -164,15 +191,15 @@ class Chart:
     def init_axes(self):
         """ create root axes """
 
-        # create a root axes with label 'root'
-        # must be called after the layout is set !
-        # the root axes is needed before set_title, config_mapping
+        # Create a root axes with label 'root'
+        # Must be called after the layout is set !
+        # The root axes is needed before set_title, config_mapping
 
         ax = self.layout.init_vplot(self.figure)
         self.config_axes(ax, root=True)
 
     def root_axes(self):
-        """ returns root axes usualy axes[0] """
+        """ returns root axes, usualy axes[0] """
 
         if not self.figure.axes:
             warnings.warn("root_axes called before init_axes!")
@@ -181,7 +208,7 @@ class Chart:
         return self.figure.axes[0]
 
     def main_axes(self):
-        """ returns main axes usualy axes[1] """
+        """ returns main axes, usualy axes[1] """
 
         if not self.figure.axes:
             warnings.warn("main_axes called before init_axes!")
@@ -207,10 +234,10 @@ class Chart:
 
         return 'below'
 
-    def force_axes(self, target):
-        """ forces target for next get_axes """
+    def force_target(self, target):
+        """ force target for next get_axes """
 
-        if target not in ('samex', 'twinx', 'above', 'below'):
+        if not self.valid_target(target):
             raise ValueError("Invalid target %r" % target)
 
         self.next_target = target
@@ -225,7 +252,7 @@ class Chart:
         if target is None:
             target = 'samex'
 
-        if target not in ('samex', 'twinx', 'above', 'below'):
+        if not self.valid_target(target):
             raise ValueError("Invalid target %r" % target)
 
         figure = self.figure
@@ -233,18 +260,21 @@ class Chart:
         if not figure.axes:
             self.init_axes()
 
+        # ignore root and volume axes
         axes = [ax for ax in self.figure.axes if ax._label not in ('root', 'twinx')]
 
-        last_ax = axes[-1] if axes else None
-
-        if last_ax is None:
+        if not axes:
             ax = self.layout.add_vplot(figure=figure)
         else:
+
+            if target == 'main':
+                return axes[0]
+
             if target == 'samex':
-                return last_ax
+                return axes[-1]
 
             if target == 'twinx':
-                return make_twinx(last_ax)
+                return make_twinx(axes[-1])
 
             append = (target == 'below')
 
@@ -257,14 +287,6 @@ class Chart:
         self.reset_stylesheet()
 
         return ax
-
-    def new_axes(self, target=None, *, height_ratio=None):
-        """ returns or creates axes at given target """
-
-        if target is None:
-            target = 'below'
-
-        return self.get_axes(target, height_ratio=height_ratio)
 
     def dump_axes(self):
         for i, ax in enumerate(self.figure.axes):
@@ -305,15 +327,16 @@ class Chart:
 
         return getattr(indicator, '__name__', str(indicator))
 
-    def plot_indicator(self, data, indicator, ax=None):
+    def plot_indicator(self, data, indicator):
         """ calculates and plots an indicator """
 
-        # call primitive plot_handler if defined
+        # Call the indicator's plot_handler if defined (before any calc)
+        # Note this is the only location where plot_handler is called
         if hasattr(indicator, 'plot_handler'):
-            indicator.plot_handler(data, chart=self, ax=ax)
+            indicator.plot_handler(data, chart=self)
             return
 
-        # process data if indicator is callable
+        # Invoke indicator and compute result if indicator is callable
         if callable(indicator):
             self.last_indicator = indicator
             result = indicator(data)
@@ -321,18 +344,23 @@ class Chart:
         else:
             raise ValueError(f"Indicator {indicator!r} not callable")
 
-        # call wrapper plor_result if applicable
+        # Calling wrapper plot_result if applicable
+        # Note target axes has not been selected yet
+        # The wrapper will do the axes selection calling get_axes
         wrapper = get_wrapper(indicator)
         if wrapper is not None and wrapper.check_result(result):
-            wrapper.plot_result(result, chart=self, ax=ax)
+            wrapper.plot_result(result, chart=self)
             return
 
-        # plot results as line plots ( default plot)
-        if ax is None:
-            target = self.default_pane(indicator)
-            ax = self.get_axes(target)
+        # Select axes according to indicator properties (see same_scale)
+        target = self.default_pane(indicator)
+        ax = self.get_axes(target)
 
+        # Calling indicator plot_result if present
+        # Note here we are calling plot_result with an axes
+        # This does not seem to be happening ever !
         if hasattr(indicator, 'plot_result'):
+            warnings.warn("Calling plot_result on {indicator!r} with ax={ax!r}")
             indicator.plot_result(result, self, ax=ax)
             return
 
@@ -347,7 +375,7 @@ class Chart:
             if handles:
                 ax.legend(loc="upper left")
 
-    def plot(self, prices, indicators):
+    def plot(self, prices, indicators, *, target=None, rebase=False):
         """ plots a list of indicators
 
         Parameters
@@ -359,7 +387,13 @@ class Chart:
 
         """
 
+        if target is not None:
+            self.force_target(target)
+
         prices = self.normalize(prices)
+
+        if rebase:
+            prices = self.rebase_data(prices)
 
         for indicator in indicators:
             self.plot_indicator(prices, indicator)

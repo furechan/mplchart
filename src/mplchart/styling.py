@@ -8,9 +8,8 @@ import matplotlib.colors as mcolors
 
 from pathlib import Path
 
-from abc import ABC, abstractmethod
-
-styles_folder = Path(__file__).joinpath("../styles")
+DEFAULT_STYLE = 'defaults'
+STYLES_FOLDER = Path(__file__).joinpath("../styles")
 
 
 def get_stylesheet(name):
@@ -37,29 +36,12 @@ class Cycler:
         return self.items[pos]
 
 
-class StyleSheetBase(ABC):
-    """ StyleSheet Abstract Base Class """
-
-    @abstractmethod
-    def get_setting(self, key: str, section: str, fallback=None):
-        ...
-
-    def get_settings(self, key: str, **kwargs):
-        result = dict()
-        for section, fallback in kwargs.items():
-            value = self.get_setting(key, section, fallback=fallback)
-            result[section] = value
-        return result
-
-
-class StyleSheet(StyleSheetBase):
+class StyleSheet:
     """ Stylesheet """
-
-    DEFAULT_STYLE = 'defaults'
 
     @staticmethod
     def get_inifile(name, strict=True):
-        file = styles_folder.joinpath(f"mplchart-{name}.ini").resolve(strict=strict)
+        file = STYLES_FOLDER.joinpath(f"mplchart-{name}.ini").resolve(strict=strict)
         if file.exists:
             return file
 
@@ -69,7 +51,7 @@ class StyleSheet(StyleSheetBase):
 
         files = list()
 
-        inifile = cls.get_inifile(cls.DEFAULT_STYLE)
+        inifile = cls.get_inifile(DEFAULT_STYLE)
         files.append(inifile)
 
         if style is not None:
@@ -90,6 +72,13 @@ class StyleSheet(StyleSheetBase):
 
     def reset(self):
         self.cached.clear()
+
+    def get_settings(self, key: str, **kwargs):
+        result = dict()
+        for section, fallback in kwargs.items():
+            value = self.get_setting(key, section, fallback=fallback)
+            result[section] = value
+        return result
 
     def get_setting(self, key: str, section: str, fallback=None):
         key = key.lower()
@@ -130,4 +119,3 @@ class StyleSheet(StyleSheetBase):
                 result = float(result)
 
         return result
-

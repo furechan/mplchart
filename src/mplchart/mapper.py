@@ -10,7 +10,7 @@ import warnings
 
 
 class RawDateMapper:
-    """ RawDate mapper convert between date and number using matplotlib.dates """
+    """ RawDate mapper between date and number using matplotlib.dates """
 
     def __init__(self, max_bars=None, start=None, end=None):
 
@@ -38,6 +38,17 @@ class RawDateMapper:
         warnings.warn("RsawDataManager.get_date is legacy!")
         return value
 
+    def slice(self, data):
+        """ slice data on dates  """
+
+        if self.start or self.end:
+            data = data.loc[self.start:self.end]
+
+        if self.max_bars and len(data) > self.max_bars:
+            data = data.iloc[-self.max_bars:]
+
+        return data
+
     def extract_df(self, data):
         """ extracts dataframe by mapping date to number/coordinate  """
 
@@ -63,7 +74,7 @@ class RawDateMapper:
 
 
 class DateIndexMapper:
-    """ DateIndex two way mapper between date and position/coordinate """
+    """ DateIndex mapper between date and position/coordinate """
 
     index = None
 
@@ -85,6 +96,17 @@ class DateIndexMapper:
         result = self.index.get_indexer([date], method='bfill')
 
         return result[0]
+
+    def slice(self, data):
+        """ slice data on dates  """
+
+        if self.start or self.end:
+            data = data.loc[self.start:self.end]
+
+        if self.max_bars and len(data) > self.max_bars:
+            data = data.iloc[-self.max_bars:]
+
+        return data
 
     def extract_df(self, data):
         """ extracts dataframe by mapping date to position/coordinate  """
@@ -121,4 +143,3 @@ class DateIndexMapper:
 
         if formatter:
             ax.xaxis.set_major_formatter(formatter)
-

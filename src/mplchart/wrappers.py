@@ -135,31 +135,6 @@ class PSAR(Wrapper):
         ax.scatter(xv, yv, alpha=0.5, marker=".")
 
 
-@register('VOLUME')
-class VOLUME(Wrapper):
-    """ VOLUME Wrapper """
-
-    COLOR = 'grey'
-
-    def check_result(self, data):
-        return data.ndim == 1
-
-    def plot_result(self, data, chart, ax=None):
-        if ax is None:
-            ax = chart.get_axes('twinx')
-
-        xv, yv = series_xy(data)
-
-        color = chart.get_setting('volume', 'color', self.COLOR)
-
-        if ax._label == 'twinx':
-            ymax = np.nanmax(yv)
-            ax.set_ylim(0.0, ymax * 4.0)
-            ax.yaxis.set_visible(False)
-
-        ax.bar(xv, yv, width=1.0, alpha=0.3, zorder=0, color=color)
-
-
 @register('MACD')
 @register('PPO')
 class MACD(Wrapper):

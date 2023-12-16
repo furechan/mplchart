@@ -1,7 +1,8 @@
 # Change Log
 
-## In progress
-
+## 0.0.5
+- Multiple asset plots (tentative)
+- Fixed Layout is deprecated. Will be removed in the future
 
 ## 0.0.4
 - Added tasks.py

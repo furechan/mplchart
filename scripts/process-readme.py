@@ -1,46 +1,40 @@
 """
 Script to translate README.md relative urls
 Creates output/README.md for usage with pypi
-Requires toml, jmespath !
+Requires tomli !
 """
 
 import re
-import toml
+import tomli
 import argparse
-import jmespath
 import posixpath
-
-import configparser
 
 from pathlib import Path
 
 ROOTDIR = Path(__file__).parent.parent
 
 
+def jquery(data: dict, item: str, default=None):
+    result = data
+
+    for i in item.split("."):
+        result = result.get(i, None)
+        if result is None:
+            return default
+
+    return result
+
+
 def get_project_url():
     """ extract project url from project configuration """
 
     pyproject = ROOTDIR.joinpath("pyproject.toml")
-    setupcfg = ROOTDIR.joinpath("setup.cfg")
-    setup = ROOTDIR.joinpath("setup.py")
 
-    if pyproject.exists():
-        config = toml.load(pyproject)
-        return jmespath.search("project.urls.homepage", config)
+    if not pyproject.exists():
+        raise FileNotFoundError("pyproject.toml")
 
-    if setupcfg.exists():
-        config = configparser.ConfigParser()
-        config.read(setupcfg)
-        return config.get('metadata', 'url')
-
-    if setup.exists():
-        contents = setup.read_text()
-        match = re.search(r"(?xm) ^ \s* url \s* = \s* ([\"']) ([^\"']+) \1 \s* $", contents)
-        if match:
-            url = match.group(2)
-            return url
-
-    raise ValueError("Cound not extract url!")
+    config = tomli.loads(pyproject.read_text())
+    return jquery(config, "project.urls.homepage")
 
 
 def process_readme(file, project_url, branch="main", verbose=False):

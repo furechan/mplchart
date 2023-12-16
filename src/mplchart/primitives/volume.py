@@ -58,6 +58,7 @@ class Volume(Primitive):
 
         color = np.where(change > 0, colorup, colordn)
 
+        # This should always be the case !?
         if ax._label == 'twinx':
             vmax = data.volume.max()
             ax.set_ylim(0.0, vmax * 4.0)

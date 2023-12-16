@@ -6,32 +6,14 @@ from ..model import Primitive
 class ForceAxes(Primitive):
     """ Primitive to force axis for next indicator """
 
-    indicator = None
-
     def __init__(self, target='below'):
         if target not in ('samex', 'twinx', 'above', 'below'):
             raise ValueError(f"Invalid target {target!r}")
 
         self.target = target
 
-    def __ror__(self, indicator):
-        if self.indicator is not None:
-            raise ValueError("Indicator already defined!")
-
-        return self.clone(indicator=indicator)
-
-    def __rmatmul__(self, indicator):
-        if self.indicator is not None:
-            raise ValueError("Indicator already defined!")
-
-        return self.clone(indicator=indicator)
-
     def plot_handler(self, data, chart, ax=None):
-        if self.indicator is not None:
-            ax = chart.get_axes(self.target)
-            chart.plot_indicator(data, self.indicator, ax=ax)
-        else:
-            chart.force_axes(self.target)
+        chart.force_target(self.target)
 
 
 class NewAxes(ForceAxes):
