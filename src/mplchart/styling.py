@@ -11,6 +11,8 @@ from pathlib import Path
 DEFAULT_STYLE = 'defaults'
 STYLES_FOLDER = Path(__file__).joinpath("../styles")
 
+# TODO move get_initile to styles
+# TODO add axes argument to get_setting
 
 def get_stylesheet(name):
     return StyleSheet(name)
