@@ -1,6 +1,5 @@
-# type: ignore
 # pylint: disable=import-error
-# pyright: reportMissingModuleSource=false
+# pyright: reportMissingImports=false
 
 import os
 import nox
