@@ -44,12 +44,20 @@ class Chart:
         prices = prices.rename(columns=str.lower).rename_axis(index=str.lower)
         return prices
 
-    def __init__(self, title=None,
-                 max_bars=None, start=None, end=None,
-                 figure=None, figsize=None, bgcolor='w',
-                 use_calendar=False, holidays=None,
-                 style=None, fixed_layout=False):
-
+    def __init__(
+        self,
+        title=None,
+        max_bars=None,
+        start=None,
+        end=None,
+        figure=None,
+        figsize=None,
+        bgcolor="w",
+        use_calendar=False,
+        holidays=None,
+        style=None,
+        fixed_layout=False,
+    ):
         self.start = start
         self.end = end
         self.max_bars = max_bars
@@ -78,15 +86,15 @@ class Chart:
             self.set_title(title)
 
         if self.layout.use_tight_layout:
-            self.figure.set_layout_engine('tight')
+            self.figure.set_layout_engine("tight")
 
     @staticmethod
     def valid_target(target):
-        """ whether the target bname is valid """
-        return target in ('main', 'samex', 'twinx', 'above', 'below')
+        """whether the target bname is valid"""
+        return target in ("main", "samex", "twinx", "above", "below")
 
     def inspect_data(self, data):
-        """ initalizes chart from data """
+        """initalizes chart from data"""
 
         if self.source_data is None:
             self.source_data = data
@@ -110,10 +118,10 @@ class Chart:
         sp = source_data.loc[index[0]]
         factor = sp / dp
 
-        return data.filter(['open', 'high', 'low', 'close']) * factor
+        return data.filter(["open", "high", "low", "close"]) * factor
 
     def extract_df(self, data):
-        """ extract dataframe view """
+        """extract dataframe view"""
 
         self.inspect_data(data)
 
@@ -123,7 +131,7 @@ class Chart:
         return data
 
     def map_date(self, date):
-        """ map date to value """
+        """map date to value"""
 
         if not self.mapper_done:
             raise ValueError("mapper was not configure yet!")
@@ -134,7 +142,7 @@ class Chart:
         return date
 
     def set_title(self, title):
-        """ Sets chart title on root axes. Must be called after init_axes! """
+        """Sets chart title on root axes. Must be called after init_axes!"""
 
         if title is None:
             return
@@ -145,14 +153,18 @@ class Chart:
         ax.set_title(title)
 
     def config_mapper(self, *, data=None):
-        """ Configures the date mapper from the original data """
+        """Configures the date mapper from the original data"""
 
         self.mapper_done = True
 
         if self.use_calendar:
-            self.mapper = RawDateMapper(start=self.start, end=self.end, max_bars=self.max_bars)
+            self.mapper = RawDateMapper(
+                start=self.start, end=self.end, max_bars=self.max_bars
+            )
         elif data is not None:
-            self.mapper = DateIndexMapper(index=data.index, start=self.start, end=self.end, max_bars=self.max_bars)
+            self.mapper = DateIndexMapper(
+                index=data.index, start=self.start, end=self.end, max_bars=self.max_bars
+            )
         else:
             raise ValueError("Cannot create mapper. data is None!")
 
@@ -161,11 +173,13 @@ class Chart:
             self.mapper.config_axes(ax)
 
     def config_axes(self, ax, root=False):
-        """ configures axes """
+        """configures axes"""
 
         ax.set_xmargin(0.0)
         ax.set_axisbelow(True)
-        ax.patch.set_visible(False)  # make patch trasnparent to see through root axes drawings
+        ax.patch.set_visible(
+            False
+        )  # make patch trasnparent to see through root axes drawings
 
         # x grid is displayed by the root axes
         # y grid is displayed by the sub axes
@@ -182,14 +196,15 @@ class Chart:
 
         # remove ticks on non-root axes
         ax.tick_params(
-            axis='x',  # changes apply to the x-axis
-            which='both',  # both major and minor ticks are affected
+            axis="x",  # changes apply to the x-axis
+            which="both",  # both major and minor ticks are affected
             bottom=False,  # ticks along the bottom edge are off
             top=False,  # ticks along the top edge are off
-            labelbottom=False)  # labels along the bottom edge are off
+            labelbottom=False,
+        )  # labels along the bottom edge are off
 
     def init_axes(self):
-        """ create root axes """
+        """create root axes"""
 
         # Create a root axes with label 'root'
         # Must be called after the layout is set !
@@ -199,7 +214,7 @@ class Chart:
         self.config_axes(ax, root=True)
 
     def root_axes(self):
-        """ returns root axes, usualy axes[0] """
+        """returns root axes, usualy axes[0]"""
 
         if not self.figure.axes:
             warnings.warn("root_axes called before init_axes!")
@@ -208,7 +223,7 @@ class Chart:
         return self.figure.axes[0]
 
     def main_axes(self):
-        """ returns main axes, usualy axes[1] """
+        """returns main axes, usualy axes[1]"""
 
         if not self.figure.axes:
             warnings.warn("main_axes called before init_axes!")
@@ -222,20 +237,20 @@ class Chart:
         return ax
 
     def default_pane(self, indicator):
-        """ return the default pane to use for indicator """
+        """return the default pane to use for indicator"""
 
         if talib_function_check(indicator):
             same_scale = talib_same_scale(indicator)
         else:
-            same_scale = getattr(indicator, 'same_scale', False)
+            same_scale = getattr(indicator, "same_scale", False)
 
         if same_scale and self.count_axes() <= 1:
-            return 'samex'
+            return "samex"
 
-        return 'below'
+        return "below"
 
     def force_target(self, target):
-        """ force target for next get_axes """
+        """force target for next get_axes"""
 
         if not self.valid_target(target):
             raise ValueError("Invalid target %r" % target)
@@ -243,14 +258,14 @@ class Chart:
         self.next_target = target
 
     def get_axes(self, target=None, *, height_ratio=None):
-        """ returns or creates axes at given target """
+        """returns or creates axes at given target"""
 
         if self.next_target:
             target = self.next_target
             del self.next_target
 
         if target is None:
-            target = 'samex'
+            target = "samex"
 
         if not self.valid_target(target):
             raise ValueError("Invalid target %r" % target)
@@ -261,27 +276,28 @@ class Chart:
             self.init_axes()
 
         # ignore root and volume axes
-        axes = [ax for ax in self.figure.axes if ax._label not in ('root', 'twinx')]
+        axes = [ax for ax in self.figure.axes if ax._label not in ("root", "twinx")]
 
         if not axes:
             ax = self.layout.add_vplot(figure=figure)
         else:
-
-            if target == 'main':
+            if target == "main":
                 return axes[0]
 
-            if target == 'samex':
+            if target == "samex":
                 return axes[-1]
 
-            if target == 'twinx':
+            if target == "twinx":
                 return make_twinx(axes[-1])
 
-            append = (target == 'below')
+            append = target == "below"
 
             if not height_ratio:
                 height_ratio = 0.2
 
-            ax = self.layout.add_vplot(figure=figure, height_ratio=height_ratio, append=append)
+            ax = self.layout.add_vplot(
+                figure=figure, height_ratio=height_ratio, append=append
+            )
 
         self.config_axes(ax)
         self.reset_stylesheet()
@@ -290,49 +306,49 @@ class Chart:
 
     def dump_axes(self):
         for i, ax in enumerate(self.figure.axes):
-            label = getattr(ax, '_label') or "none"
+            label = getattr(ax, "_label") or "none"
             xlim = ax.get_xlim()
             ylim = ax.get_ylim()
             print(i, label, xlim, ylim)
 
     def count_axes(self, include_root=False, include_twins=False):
-        """" counts axes that are neither root or twinx """
+        """ " counts axes that are neither root or twinx"""
         count = 0
         for ax in self.figure.axes:
-            label = getattr(ax, '_label', None)
-            if label == 'root' and not include_root:
+            label = getattr(ax, "_label", None)
+            if label == "root" and not include_root:
                 continue
-            if label == 'twinx' and not include_twins:
+            if label == "twinx" and not include_twins:
                 continue
             count += 1
         return count
 
     def reset_stylesheet(self):
-        """ resets stylesheet"""
+        """resets stylesheet"""
         return self.stylesheet.reset()
 
     def get_setting(self, key, section, fallback=None):
-        """ gets setting from stylesheet """
+        """gets setting from stylesheet"""
         return self.stylesheet.get_setting(key, section, fallback=fallback)
 
     def get_settings(self, key, **kwargs):
-        """ gets settings from stylesheet matching kwargs """
+        """gets settings from stylesheet matching kwargs"""
         return self.stylesheet.get_settings(key, **kwargs)
 
     def get_label(self, indicator):
-        """ returns label to use for indicator """
+        """returns label to use for indicator"""
 
         if talib_function_check(indicator):
             return talib_function_repr(indicator)
 
-        return getattr(indicator, '__name__', str(indicator))
+        return getattr(indicator, "__name__", str(indicator))
 
     def plot_indicator(self, data, indicator):
-        """ calculates and plots an indicator """
+        """calculates and plots an indicator"""
 
         # Call the indicator's plot_handler if defined (before any calc)
         # Note this is the only location where plot_handler is called
-        if hasattr(indicator, 'plot_handler'):
+        if hasattr(indicator, "plot_handler"):
             indicator.plot_handler(data, chart=self)
             return
 
@@ -359,7 +375,7 @@ class Chart:
         # Calling indicator plot_result if present
         # Note here we are calling plot_result with an axes
         # This does not seem to be happening ever !
-        if hasattr(indicator, 'plot_result'):
+        if hasattr(indicator, "plot_result"):
             warnings.warn("Calling plot_result on {indicator!r} with ax={ax!r}")
             indicator.plot_result(result, self, ax=ax)
             return
@@ -369,14 +385,14 @@ class Chart:
         ax.plot(xv, yv, label=label)
 
     def add_legends(self):
-        """ adds legends to all axes """
+        """adds legends to all axes"""
         for ax in self.figure.axes:
             handles, labels = ax.get_legend_handles_labels()
             if handles:
                 ax.legend(loc="upper left")
 
     def plot(self, prices, indicators, *, target=None, rebase=False):
-        """ plots a list of indicators
+        """plots a list of indicators
 
         Parameters
         ----------
@@ -401,7 +417,7 @@ class Chart:
         self.add_legends()
 
     def plot_vline(self, date):
-        """ plots a vertical line across all axes """
+        """plots a vertical line across all axes"""
 
         if not self.figure.axes:
             raise RuntimeError("axes not initialized!")
@@ -409,18 +425,18 @@ class Chart:
         ax = self.root_axes()
         xv = self.map_date(date)
 
-        ax.axvline(xv, linestyle='dashed')
+        ax.axvline(xv, linestyle="dashed")
 
     def show(self):
-        """ shows the chart """
+        """shows the chart"""
         if not self.figure.axes:
             self.get_axes()
 
         # figure.show() seems only to work if figure was not created by pyplot!
         plt.show()
 
-    def render(self, format='svg'):
-        """ renders the chart to the specific format """
+    def render(self, format="svg"):
+        """renders the chart to the specific format"""
         if not self.figure.axes:
             self.get_axes()
 

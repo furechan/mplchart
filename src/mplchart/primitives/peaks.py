@@ -11,7 +11,8 @@ def extract_peaks(prices, span=1):
     extracts local peaks.
 
     Args:
-        span (int) : refers to minimum number bars required before and after the local peak
+        span (int) : refers to minimum number bars required before
+        and after the local peak
 
     Return:
         A series of prices defined only at local peaks and equal to nan otherwize
@@ -19,7 +20,7 @@ def extract_peaks(prices, span=1):
 
     window = 2 * span + 1
 
-    if hasattr(prices, 'columns'):
+    if hasattr(prices, "columns"):
         high, low = prices.high, prices.low
     else:
         high, low = prices, prices
@@ -47,7 +48,7 @@ class Peaks(Primitive):
 
     indicator = None
 
-    COLOR = 'blue'
+    COLOR = "blue"
 
     def __init__(self, span=1, *, item=None, color=None):
         self.span = span
@@ -80,7 +81,6 @@ class Peaks(Primitive):
         xv = data.index
         yv = data
 
-        color = self.color or chart.get_setting('peaks', 'color', self.COLOR)
+        color = self.color or chart.get_setting("peaks", "color", self.COLOR)
 
         ax.scatter(xv, yv, c=color, s=10 * 10, alpha=0.5, marker=".")
-

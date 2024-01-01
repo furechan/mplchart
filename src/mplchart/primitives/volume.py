@@ -17,9 +17,9 @@ class Volume(Primitive):
     """
 
     WIDTH = 0.8
-    COLORUP = 'green'
-    COLORDN = 'red'
-    MACOLOR = 'grey'
+    COLORUP = "green"
+    COLORDN = "red"
+    MACOLOR = "grey"
 
     def __init__(self, sma=20):
         self.sma = sma
@@ -34,7 +34,7 @@ class Volume(Primitive):
         result = dict(volume=volume, change=change)
 
         if self.sma:
-            result['average'] = volume.rolling(self.sma).mean()
+            result["average"] = volume.rolling(self.sma).mean()
 
         result = pd.DataFrame(result)
 
@@ -42,7 +42,7 @@ class Volume(Primitive):
 
     def plot_handler(self, data, chart, ax=None):
         if ax is None:
-            ax = chart.get_axes('twinx')
+            ax = chart.get_axes("twinx")
 
         data = self.calc(data)
         data = chart.extract_df(data)
@@ -51,15 +51,15 @@ class Volume(Primitive):
         volume = data.volume
         change = data.change
 
-        width = chart.get_setting('volume', 'width', self.WIDTH)
-        colorup = chart.get_setting('volume.up', 'color', self.COLORUP)
-        colordn = chart.get_setting('volume.dn', 'color', self.COLORDN)
-        macolor = chart.get_setting('volume.ma', 'color', self.MACOLOR)
+        width = chart.get_setting("volume", "width", self.WIDTH)
+        colorup = chart.get_setting("volume.up", "color", self.COLORUP)
+        colordn = chart.get_setting("volume.dn", "color", self.COLORDN)
+        macolor = chart.get_setting("volume.ma", "color", self.MACOLOR)
 
         color = np.where(change > 0, colorup, colordn)
 
         # This should always be the case !?
-        if ax._label == 'twinx':
+        if ax._label == "twinx":
             vmax = data.volume.max()
             ax.set_ylim(0.0, vmax * 4.0)
             ax.yaxis.set_visible(False)

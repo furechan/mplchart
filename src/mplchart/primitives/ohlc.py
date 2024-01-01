@@ -17,8 +17,8 @@ class OHLC(Primitive):
     """
 
     WIDTH = 0.8
-    COLORUP = 'black'
-    COLORDN = 'red'
+    COLORUP = "black"
+    COLORDN = "red"
 
     def __str__(self):
         return self.__class__.__name__
@@ -30,17 +30,17 @@ class OHLC(Primitive):
         label = str(self)
         data = chart.extract_df(data)
 
-        width = chart.get_setting('ohlc.', 'width', self.WIDTH)
-        colorup = chart.get_setting('ohlc.up', 'color', self.COLORUP)
-        colordn = chart.get_setting('ohlc.dn', 'color', self.COLORDN)
+        width = chart.get_setting("ohlc.", "width", self.WIDTH)
+        colorup = chart.get_setting("ohlc.up", "color", self.COLORUP)
+        colordn = chart.get_setting("ohlc.dn", "color", self.COLORDN)
 
-        return plot_ohlc(data=data, ax=ax, width=width,
-                         colorup=colorup, colordn=colordn,
-                         label=label)
+        return plot_ohlc(
+            data=data, ax=ax, width=width, colorup=colorup, colordn=colordn, label=label
+        )
 
 
-def plot_ohlc(data, ax=None, width=0.8, colorup='k', colordn='k', label=None):
-    """ plots open-high-low-close charts as polygons """
+def plot_ohlc(data, ax=None, width=0.8, colorup="k", colordn="k", label=None):
+    """plots open-high-low-close charts as polygons"""
 
     ax = ax or plt.gca()
 
@@ -56,22 +56,30 @@ def plot_ohlc(data, ax=None, width=0.8, colorup='k', colordn='k', label=None):
 
     half_bar = avg_spacing * width / 2.0
 
-    with np.errstate(invalid='ignore'):
+    with np.errstate(invalid="ignore"):
         edgecolor = np.where(change < 0.0, colordn, colorup)
 
-    verts = [((x, l),
-              (x, o), (x - half_bar, o), (x, o),
-              (x, c), (x + half_bar, c), (x, c),
-              (x, h)
-              )
-             for x, o, h, l, c in zip(xvalues, data.open, data.high, data.low, data.close)]
+    verts = [
+        (
+            (x, l),
+            (x, o),
+            (x - half_bar, o),
+            (x, o),
+            (x, c),
+            (x + half_bar, c),
+            (x, c),
+            (x, h),
+        )
+        for x, o, h, l, c in zip(xvalues, data.open, data.high, data.low, data.close)
+    ]
 
     verts = np.asarray(verts)
 
     linewidths = (1.0,)
 
-    poly = PolyCollection(verts, edgecolors=edgecolor, linewidths=linewidths, label=label)
+    poly = PolyCollection(
+        verts, edgecolors=edgecolor, linewidths=linewidths, label=label
+    )
 
     ax.add_collection(poly)
     ax.autoscale_view()
-

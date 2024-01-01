@@ -6,7 +6,7 @@ from matplotlib.gridspec import GridSpec
 # see dynamic-subplot.ipynb
 
 
-def make_twinx(ax, label='twinx'):
+def make_twinx(ax, label="twinx"):
     """
     Creates a twin x axes and configures y axes to the left
     This is contrast to what Axes.tinwx does by default
@@ -26,13 +26,13 @@ def make_twinx(ax, label='twinx'):
 
 
 class StandardLayout:
-    """ Grispec Baeed Layout """
+    """Grispec Baeed Layout"""
 
     use_tight_layout = True
 
     @classmethod
-    def init_vplot(cls, figure, *, label='root'):
-        """ Returns or creates the root axes """
+    def init_vplot(cls, figure, *, label="root"):
+        """Returns or creates the root axes"""
 
         if figure.axes:
             return figure.axes[0]
@@ -44,9 +44,9 @@ class StandardLayout:
     @classmethod
     def add_vplot(cls, figure, *, label=None, height_ratio=1.0, append=True):
         """
-            Returns or create new plots vertically respecting height rations
-            This version uses add_subplot api
-            Requires tight_layout=True!
+        Returns or create new plots vertically respecting height rations
+        This version uses add_subplot api
+        Requires tight_layout=True!
         """
 
         main_ax = 1
@@ -76,7 +76,9 @@ class StandardLayout:
             new_pos, pos_inc = 0, 1
             nrows += 1
 
-        gridspec = GridSpec(nrows, ncols, height_ratios=height_ratios, hspace=0.0, figure=figure)
+        gridspec = GridSpec(
+            nrows, ncols, height_ratios=height_ratios, hspace=0.0, figure=figure
+        )
 
         for i, ax in enumerate(figure.axes):
             if i >= main_ax:
@@ -93,13 +95,13 @@ class StandardLayout:
 
 
 class FixedLayout:
-    """ Fixed Layout """
+    """Fixed Layout"""
 
     use_tight_layout = False
 
     @classmethod
-    def init_vplot(cls, figure, *, label='root'):
-        """ Returns or creates root axes """
+    def init_vplot(cls, figure, *, label="root"):
+        """Returns or creates root axes"""
 
         if figure.axes:
             return figure.axes[0]
@@ -111,9 +113,9 @@ class FixedLayout:
     @classmethod
     def add_vplot(cls, figure, *, label=None, height_ratio=1.0, append=True):
         """
-            Returns or create new plots vertically respecting height rations
-            This version uses add_axes and generates a warning when tight_layout = True!
-            Does not allocate space for the Title area!
+        Returns or create new plots vertically respecting height rations
+        This version uses add_axes and generates a warning when tight_layout = True!
+        Does not allocate space for the Title area!
         """
 
         main_ax = 1
@@ -134,9 +136,21 @@ class FixedLayout:
         hf = 1.0 - height
 
         if append:
-            y0, dy, = 0.0, height
+            (
+                y0,
+                dy,
+            ) = (
+                0.0,
+                height,
+            )
         else:
-            y0, dy, = 1.0 - height, 0.0
+            (
+                y0,
+                dy,
+            ) = (
+                1.0 - height,
+                0.0,
+            )
 
         grid = []
 
@@ -155,4 +169,3 @@ class FixedLayout:
         ax = figure.add_axes(rect, sharex=sharex, label=label, in_layout=True)
 
         return ax
-

@@ -8,18 +8,19 @@ import matplotlib.colors as mcolors
 
 from pathlib import Path
 
-DEFAULT_STYLE = 'defaults'
+DEFAULT_STYLE = "defaults"
 STYLES_FOLDER = Path(__file__).joinpath("../styles")
 
 # TODO move get_initile to styles
 # TODO add axes argument to get_setting
+
 
 def get_stylesheet(name):
     return StyleSheet(name)
 
 
 class Cycler:
-    """ Trivial Property Cycler """
+    """Trivial Property Cycler"""
 
     def __init__(self, items):
         if isinstance(items, str):
@@ -39,7 +40,7 @@ class Cycler:
 
 
 class StyleSheet:
-    """ Stylesheet """
+    """Stylesheet"""
 
     @staticmethod
     def get_inifile(name, strict=True):
@@ -90,7 +91,7 @@ class StyleSheet:
         else:
             return fallback
 
-        cycle_values = (section in ['color'])
+        cycle_values = section in ["color"]
         result = fallback
         found = set()
 
@@ -114,10 +115,10 @@ class StyleSheet:
             key = result
 
         if found:
-            if section == 'color' and not mcolors.is_color_like(result):
+            if section == "color" and not mcolors.is_color_like(result):
                 return fallback
 
-            if section in ['width', 'linewidth', 'alpha']:
+            if section in ["width", "linewidth", "alpha"]:
                 result = float(result)
 
         return result

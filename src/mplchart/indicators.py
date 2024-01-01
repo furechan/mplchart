@@ -9,10 +9,10 @@ from dataclasses import dataclass
 from typing import ClassVar
 
 
-
 @dataclass
 class SMA:
-    """ Simple Moving Average """
+    """Simple Moving Average"""
+
     period: int = 20
 
     same_scale: ClassVar[bool] = True
@@ -24,7 +24,8 @@ class SMA:
 
 @dataclass
 class EMA:
-    """ Exponential Moving Average """
+    """Exponential Moving Average"""
+
     period: int = 20
 
     same_scale: ClassVar[bool] = True
@@ -36,7 +37,8 @@ class EMA:
 
 @dataclass
 class ROC:
-    """ Rate of Change """
+    """Rate of Change"""
+
     period: int = 20
 
     def __call__(self, prices):
@@ -46,7 +48,8 @@ class ROC:
 
 @dataclass
 class RSI:
-    """ Relative Strengh Index """
+    """Relative Strengh Index"""
+
     period: int = 20
 
     def __call__(self, prices):
@@ -56,7 +59,8 @@ class RSI:
 
 @dataclass
 class MACD:
-    """ Moving Average Convergence Divergence """
+    """Moving Average Convergence Divergence"""
+
     n1: int = 12
     n2: int = 26
     n3: int = 9
@@ -68,7 +72,8 @@ class MACD:
 
 @dataclass
 class PPO:
-    """ Price Percentage Oscillator """
+    """Price Percentage Oscillator"""
+
     n1: int = 12
     n2: int = 26
     n3: int = 9
@@ -78,10 +83,10 @@ class PPO:
         return library.calc_ppo(series, self.n1, self.n2, self.n3)
 
 
-
 @dataclass
 class SLOPE:
-    """ Slope (Linear regression with time) """
+    """Slope (Linear regression with time)"""
+
     period: int = 20
 
     def __call__(self, prices):
@@ -91,7 +96,8 @@ class SLOPE:
 
 @dataclass
 class BBANDS:
-    """ Bollinger Bands """
+    """Bollinger Bands"""
+
     period: int = 20
     nbdev: float = 2.0
 

@@ -8,9 +8,9 @@ from matplotlib.collections import LineCollection
 
 
 class PosMarker(Primitive):
-    """ Base class for position based markers """
+    """Base class for position based markers"""
 
-    candidate_items = ('pos', 'macdhist', 'ppohist')
+    candidate_items = ("pos", "macdhist", "ppohist")
     indicator = None
     expr = None
 
@@ -31,7 +31,7 @@ class PosMarker(Primitive):
             raise ValueError("No valid position column!")
 
     def process(self, prices, chart):
-        """ adds indicator result and position to prices """
+        """adds indicator result and position to prices"""
 
         indicator = self.indicator or chart.last_indicator
 
@@ -47,13 +47,13 @@ class PosMarker(Primitive):
 
 
 class TradeMarker(PosMarker):
-    """ Trade Marker Primitive """
+    """Trade Marker Primitive"""
 
-    COLORENTRY = 'green'
-    COLOREXIT = 'red'
+    COLORENTRY = "green"
+    COLOREXIT = "red"
 
     def plot_handler(self, data, chart, ax=None):
-        """ main plot handler from raw prices """
+        """main plot handler from raw prices"""
 
         if ax is None:
             ax = chart.main_axes()
@@ -67,8 +67,8 @@ class TradeMarker(PosMarker):
         yv = data.close[mask]
         pos = data.pos[mask]
 
-        colorn = chart.get_setting('marker.entry', 'color', self.COLORENTRY)
-        colorx = chart.get_setting('merker.exit', 'color', self.COLOREXIT)
+        colorn = chart.get_setting("marker.entry", "color", self.COLORENTRY)
+        colorx = chart.get_setting("merker.exit", "color", self.COLOREXIT)
 
         cv = np.where(pos > 0, colorn, colorx)
 
@@ -82,19 +82,19 @@ class TradeMarker(PosMarker):
 
         colors = [pos_color if pos.iloc[i] else neg_color for i in range(len(segments))]
 
-        lc = LineCollection(segments, colors=colors, linestyles='solid', linewidths=1.0)
+        lc = LineCollection(segments, colors=colors, linestyles="solid", linewidths=1.0)
 
         ax.add_collection(lc)
 
 
 class TradeSpan(PosMarker):
-    """ Trade Span Primitive """
+    """Trade Span Primitive"""
 
-    COLOR = 'green'
+    COLOR = "green"
     ALPHA = 0.1
 
     def plot_handler(self, data, chart, ax=None):
-        """ main plot handler from raw prices """
+        """main plot handler from raw prices"""
 
         if ax is None:
             ax = chart.root_axes()
@@ -105,7 +105,7 @@ class TradeSpan(PosMarker):
 
         mask = pos.diff().fillna(0).ne(0)
 
-        color = chart.get_setting('tradespan', 'color', self.COLOR)
+        color = chart.get_setting("tradespan", "color", self.COLOR)
         alpha = self.ALPHA
 
         xv = data.index[mask]

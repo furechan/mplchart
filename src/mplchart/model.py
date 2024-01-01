@@ -4,11 +4,11 @@ from abc import ABC, abstractmethod
 
 
 class Primitive(ABC):
-    """ Primitive abstract base class """
+    """Primitive abstract base class"""
 
     @abstractmethod
     def plot_handler(self, data, chart, ax=None):
-        """ Plot handler is called before any callculation """
+        """Plot handler is called before any callculation"""
         ...
 
     def clone(self, **kwargs):
@@ -16,4 +16,3 @@ class Primitive(ABC):
         result = cls.__new__(cls)
         result.__dict__.update(self.__dict__, **kwargs)
         return result
-

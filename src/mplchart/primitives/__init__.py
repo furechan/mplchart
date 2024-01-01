@@ -7,4 +7,3 @@ from .ohlc import OHLC
 from .candlesticks import Candlesticks
 from .peaks import Peaks
 from .markers import TradeMarker, TradeSpan
-

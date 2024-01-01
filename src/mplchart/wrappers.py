@@ -12,7 +12,7 @@ wrapper_registry = dict()
 
 
 def register(name: str):
-    """ register a wrapper class for given indicator names """
+    """register a wrapper class for given indicator names"""
 
     def decorator(func):
         wrapper_registry[name] = func
@@ -22,11 +22,11 @@ def register(name: str):
 
 
 def indicator_name(indicator):
-    """ indicator name (uppercase) """
+    """indicator name (uppercase)"""
 
     if talib_function_check(indicator):
         name = talib_function_name(indicator)
-    elif hasattr(indicator, '__name__'):
+    elif hasattr(indicator, "__name__"):
         name = indicator.__name__
     else:
         name = indicator.__class__.__name__
@@ -37,7 +37,7 @@ def indicator_name(indicator):
 
 
 def get_wrapper(indicator):
-    """ gets the rendering wrapper for given indicator """
+    """gets the rendering wrapper for given indicator"""
 
     name = indicator_name(indicator)
 
@@ -47,7 +47,7 @@ def get_wrapper(indicator):
 
 
 class Wrapper(ABC):
-    """ Indicator Wrapper (custom plotting) """
+    """Indicator Wrapper (custom plotting)"""
 
     def __init__(self, indicator):
         name = indicator_name(indicator)
@@ -63,11 +63,11 @@ class Wrapper(ABC):
 
 
 class LinePlot(Wrapper):
-    """ LinePlot Wrapper """
+    """LinePlot Wrapper"""
 
     def plot_result(self, data, chart, ax=None):
         if ax is None:
-            ax = chart.get_axes('below')
+            ax = chart.get_axes("below")
 
         label = chart.get_label(self.indicator)
         xv, yv = series_xy(data)
@@ -75,15 +75,15 @@ class LinePlot(Wrapper):
         ax.plot(xv, yv, label=label)
 
 
-@register('BOP')
-@register('CMF')
-@register('CCI')
+@register("BOP")
+@register("CMF")
+@register("CCI")
 class AreaPlot(Wrapper):
-    """ AreaPlot Wrapper """
+    """AreaPlot Wrapper"""
 
     def plot_result(self, data, chart, ax=None):
         if ax is None:
-            ax = chart.get_axes('below')
+            ax = chart.get_axes("below")
 
         label = chart.get_label(self.indicator)
         xv, yv = series_xy(data)
@@ -91,9 +91,9 @@ class AreaPlot(Wrapper):
         ax.fill_between(xv, yv, alpha=0.4, label=label)
 
 
-@register('RSI')
+@register("RSI")
 class RSI(Wrapper):
-    """ RSI Wrapper """
+    """RSI Wrapper"""
 
     COLOR = "black"
 
@@ -102,50 +102,50 @@ class RSI(Wrapper):
 
     def plot_result(self, data, chart, ax=None):
         if ax is None:
-            ax = chart.get_axes('above')
+            ax = chart.get_axes("above")
 
         label = chart.get_label(self.indicator)
         xv, yv = series_xy(data)
 
-        color = chart.get_setting('rsi', 'color', self.COLOR)
+        color = chart.get_setting("rsi", "color", self.COLOR)
 
         ax.plot(xv, yv, label=label, color=color)
 
-        with np.errstate(invalid='ignore'):
+        with np.errstate(invalid="ignore"):
             ax.fill_between(xv, yv, 70, where=(yv >= 70), interpolate=True, alpha=0.5)
             ax.fill_between(xv, yv, 30, where=(yv <= 30), interpolate=True, alpha=0.5)
 
         ax.set_yticks([30, 50, 70])
 
 
-@register('SAR')
-@register('PSAR')
+@register("SAR")
+@register("PSAR")
 class PSAR(Wrapper):
-    """ PSAR WRapper """
+    """PSAR WRapper"""
 
     def check_result(self, data):
         return data.ndim == 1
 
     def plot_result(self, data, chart, ax=None):
         if ax is None:
-            ax = chart.get_axes('samex')
+            ax = chart.get_axes("samex")
 
         xv, yv = series_xy(data)
 
         ax.scatter(xv, yv, alpha=0.5, marker=".")
 
 
-@register('MACD')
-@register('PPO')
+@register("MACD")
+@register("PPO")
 class MACD(Wrapper):
-    """ MACD Wrapper """
+    """MACD Wrapper"""
 
     def check_result(self, data):
         return data.ndim == 2 and data.shape[1] == 3
 
     def plot_result(self, data, chart, ax=None):
         if ax is None:
-            ax = chart.get_axes('below')
+            ax = chart.get_axes("below")
 
         label = chart.get_label(self.indicator)
 
@@ -154,7 +154,7 @@ class MACD(Wrapper):
         dist = data.iloc[:, 2] * 2.5
 
         xv, yv = series_xy(macd)
-        ax.plot(xv, yv, color='k', label=label)
+        ax.plot(xv, yv, color="k", label=label)
 
         xv, yv = series_xy(signal)
         ax.plot(xv, yv)
@@ -163,19 +163,19 @@ class MACD(Wrapper):
         ax.bar(xv, yv, alpha=0.5, width=0.8)
 
 
-@register('BBANDS')
-@register('KELTNER')
+@register("BBANDS")
+@register("KELTNER")
 class BBANDS(Wrapper):
-    """ BBANDS Wrapper """
+    """BBANDS Wrapper"""
 
-    COLOR = 'orange'
+    COLOR = "orange"
 
     def check_result(self, data):
         return data.ndim == 2 and data.shape[1] == 3
 
     def plot_result(self, data, chart, ax=None):
         if ax is None:
-            ax = chart.get_axes('samex')
+            ax = chart.get_axes("samex")
 
         label = chart.get_label(self.indicator)
 
@@ -183,7 +183,7 @@ class BBANDS(Wrapper):
         middle = data.iloc[:, 1]
         lower = data.iloc[:, 2]
 
-        color = chart.get_setting('bbands', 'color', self.COLOR)
+        color = chart.get_setting("bbands", "color", self.COLOR)
 
         xs, ms = series_xy(middle)
         ax.plot(xs, ms, color=color, linestyle="dashed", label=label)

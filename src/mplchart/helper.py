@@ -21,19 +21,19 @@ tempdir = pathlib.Path(tempfile.gettempdir())
 warnings.warn(
     "The helper module is deprecated. Use your own data source.",
     DeprecationWarning,
-    stacklevel=2
+    stacklevel=2,
 )
 
 
 def list_cache():
-    """ lists files in temporary cache """
+    """lists files in temporary cache"""
 
     pattern = CACHE_FILE_NAME.format(params="*")
     return list(tempdir.glob(pattern))
 
 
 def clear_cache(verbose=False):
-    """ deletes all files in temporary cache """
+    """deletes all files in temporary cache"""
 
     pattern = CACHE_FILE_NAME.format(params="*")
     for file in tempdir.glob(pattern):
@@ -43,7 +43,7 @@ def clear_cache(verbose=False):
 
 
 def map_frequency(freq):
-    """ maps loosely defined frequency string to an interval """
+    """maps loosely defined frequency string to an interval"""
 
     match = re.fullmatch(r"(\d+)(\w+)", freq)
 
@@ -53,16 +53,16 @@ def map_frequency(freq):
     else:
         count = 1
 
-    if freq in ('m', 'min', 'minute'):
-        freq = 'm'
-    elif freq in ('h', 'hour', 'hourly'):
-        freq = 'h'
-    elif freq in ('d', 'day', 'daily'):
-        freq = 'd'
-    elif freq in ('wk', 'week', 'weekly'):
-        freq = 'wk'
-    elif freq in ('mo', 'month', 'monthly'):
-        freq = 'mo'
+    if freq in ("m", "min", "minute"):
+        freq = "m"
+    elif freq in ("h", "hour", "hourly"):
+        freq = "h"
+    elif freq in ("d", "day", "daily"):
+        freq = "d"
+    elif freq in ("wk", "week", "weekly"):
+        freq = "wk"
+    elif freq in ("mo", "month", "monthly"):
+        freq = "mo"
     else:
         raise ValueError(f"Invalid frequency {freq}!")
 
@@ -70,7 +70,7 @@ def map_frequency(freq):
 
 
 def maximum_period(freq):
-    """ maps loosely defined frequency string to a maximum period """
+    """maps loosely defined frequency string to a maximum period"""
 
     match = re.fullmatch(r"(\d+)(\w+)", freq)
 
@@ -80,18 +80,23 @@ def maximum_period(freq):
     else:
         count = 1
 
-    if freq in ('m', 'min', 'minute'):
+    if freq in ("m", "min", "minute"):
         return "60d" if count > 1 else "7d"
 
-    if freq in ('h', 'hour', 'hourly'):
+    if freq in ("h", "hour", "hourly"):
         return "60d"
 
-    return 'max'
+    return "max"
 
 
-def get_prices(ticker: str, freq='daily', *,
-               caching: bool = True, verbose: bool = False,
-               max_age: float = DEFAULT_MAX_AGE):
+def get_prices(
+    ticker: str,
+    freq="daily",
+    *,
+    caching: bool = True,
+    verbose: bool = False,
+    max_age: float = DEFAULT_MAX_AGE,
+):
     """
     function to retrieve sample prices in OHLCV format
     data is fetched via yfinance with some optional caching logic added
@@ -116,8 +121,8 @@ def get_prices(ticker: str, freq='daily', *,
             return pd.read_csv(cache_file, index_col=0, parse_dates=True)
 
     prices = yf.Ticker(ticker).history(interval=interval, period=period)
-    prices = prices.rename(columns=str.lower).rename_axis(index='date')
-    prices = prices.filter(['open', 'high', 'low', 'close', 'volume'])
+    prices = prices.rename(columns=str.lower).rename_axis(index="date")
+    prices = prices.filter(["open", "high", "low", "close", "volume"])
 
     if caching and cache_file:
         if verbose:

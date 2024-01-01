@@ -5,7 +5,7 @@ import pandas as pd
 
 
 def get_series(prices, item: str = None):
-    """ extracts series of given name if applicable """
+    """extracts series of given name if applicable"""
 
     # rename columns to make search case insensitive
     prices = prices.rename(columns=str.lower)
@@ -17,26 +17,28 @@ def get_series(prices, item: str = None):
         return prices
 
     if isinstance(prices, pd.DataFrame):
-        return prices['close']
+        return prices["close"]
 
 
 def calc_roc(series, period: int = 1):
-    """ Rate of Change """
+    """Rate of Change"""
     return series.pct_change(period)
 
 
 def calc_sma(series, period: int = 20):
-    """ Simple Moving Average """
+    """Simple Moving Average"""
     return series.rolling(window=period).mean()
 
 
 def calc_ema(series, period: int = 20):
-    """ Exponential Moving Average """
-    return series.ewm(span=period, adjust=True, ignore_na=True, min_periods=period).mean()
+    """Exponential Moving Average"""
+    return series.ewm(
+        span=period, adjust=True, ignore_na=True, min_periods=period
+    ).mean()
 
 
 def calc_rsi(series, period: int = 14):
-    """ Relative Strength Index """
+    """Relative Strength Index"""
     kw = dict(alpha=1.0 / period, min_periods=period, adjust=True, ignore_na=True)
 
     diff = series.diff()
@@ -48,7 +50,7 @@ def calc_rsi(series, period: int = 14):
 
 
 def calc_macd(series, n1: int = 20, n2: int = 26, n3: int = 9):
-    """ Moving Average Convergence Divergence """
+    """Moving Average Convergence Divergence"""
     ema1 = calc_ema(series, n1)
     ema2 = calc_ema(series, n2)
 
@@ -57,13 +59,12 @@ def calc_macd(series, n1: int = 20, n2: int = 26, n3: int = 9):
     hist = macd - signal
 
     result = dict(macd=macd, macdsignal=signal, macdhist=hist)
-    result = pd.DataFrame(result
-                          )
+    result = pd.DataFrame(result)
     return result
 
 
 def calc_ppo(series, n1: int = 20, n2: int = 26, n3: int = 9):
-    """ Price Percentage Oscillator """
+    """Price Percentage Oscillator"""
     ema1 = calc_ema(series, n1)
     ema2 = calc_ema(series, n2)
 
@@ -77,7 +78,7 @@ def calc_ppo(series, n1: int = 20, n2: int = 26, n3: int = 9):
 
 
 def calc_slope(series, period: int = 20):
-    """ calculates the slope (lnear regression) over a rolling window """
+    """calculates the slope (lnear regression) over a rolling window"""
 
     xx = np.arange(period) - (period - 1) / 2.0
 
@@ -91,8 +92,8 @@ def calc_slope(series, period: int = 20):
 
 
 def calc_bbands(prices, period: int = 20, nbdev: float = 2.0):
-    """ Bollinger Bands """
-    midprc = (prices['high'] + prices['low'] + prices['close']) / 3.0
+    """Bollinger Bands"""
+    midprc = (prices["high"] + prices["low"] + prices["close"]) / 3.0
     std = midprc.rolling(period).std(ddof=0)
     middle = midprc.rolling(period).mean()
     upper = middle + nbdev * std

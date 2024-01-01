@@ -9,9 +9,9 @@ def date_ticks(start, end, max_ticks=14):
 
     step = (end - start) / max_ticks / pd.Timedelta(days=1)
 
-    freq_list = ((1, 'D'), (7, 'W'), (14, '2W'), (30, 'MS'), (90, 'QS'), (360, 'Y'))
+    freq_list = ((1, "D"), (7, "W"), (14, "2W"), (30, "MS"), (90, "QS"), (360, "Y"))
 
-    freq = next((f for s, f in freq_list if step <= s), '5Y')
+    freq = next((f for s, f in freq_list if step <= s), "5Y")
 
     dates = pd.date_range(start=start, end=end, freq=freq)
 
@@ -24,20 +24,20 @@ def date_labels(dates):
 
     for date in dates:
         if date is None:
-            labels.append('')
+            labels.append("")
             continue
         prevy, prevm = year, month
         year, month = date.year, date.month
         fmt = []
 
         if prevy and year != prevy:
-            fmt.append('%Y')
+            fmt.append("%Y")
 
         elif prevm and month != prevm:
-            fmt.append('%b')
+            fmt.append("%b")
 
         if not fmt or date.day >= 7:
-            fmt.append('%d')
+            fmt.append("%d")
 
         fmt = "-".join(fmt)
         label = date.strftime(fmt)

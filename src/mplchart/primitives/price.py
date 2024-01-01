@@ -24,7 +24,7 @@ class Price(Primitive):
 
     """
 
-    def __init__(self, *, item='close'):
+    def __init__(self, *, item="close"):
         self.item = item
 
     def __str__(self):

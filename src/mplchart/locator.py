@@ -11,7 +11,7 @@ VERBOSE = False
 
 
 class DateIndexLocator(mticker.Locator):
-    """ Locator based on a pandas DateTimeIndex """
+    """Locator based on a pandas DateTimeIndex"""
 
     def __init__(self, index, *, verbose=VERBOSE):
         if index is None:
@@ -28,7 +28,7 @@ class DateIndexLocator(mticker.Locator):
         return self.tick_values(vmin, vmax, max_ticks=max_ticks)
 
     def get_date(self, value, clip=False):
-        """ returns date from position (used in tick_values) """
+        """returns date from position (used in tick_values)"""
 
         idx = int(round(value))
 
@@ -49,9 +49,9 @@ class DateIndexLocator(mticker.Locator):
         return self.index[idx]
 
     def map_dates(self, dates):
-        """ returns location of date in index (used in tick_values) """
+        """returns location of date in index (used in tick_values)"""
 
-        return self.index.get_indexer(dates, method='bfill')
+        return self.index.get_indexer(dates, method="bfill")
 
     def tick_values(self, vmin, vmax, max_ticks=10):
         if self.verbose:

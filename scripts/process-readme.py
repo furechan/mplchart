@@ -26,7 +26,7 @@ def jquery(data: dict, item: str, default=None):
 
 
 def get_project_url():
-    """ extract project url from project configuration """
+    """extract project url from project configuration"""
 
     pyproject = ROOTDIR.joinpath("pyproject.toml")
 
@@ -38,7 +38,7 @@ def get_project_url():
 
 
 def process_readme(file, project_url, branch="main", verbose=False):
-    """ translate relative urls to full urls """
+    """translate relative urls to full urls"""
 
     def replace(m):
         exclam, alt, url = m.groups()
