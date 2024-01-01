@@ -1,13 +1,15 @@
+# type: ignore
+# pylint: disable=import-error
+# pyright: reportMissingModuleSource=false
+
 import os
 import nox
 import tempfile
 
+
 ENVDIR = os.path.join(tempfile.gettempdir(), "envs")
 
 nox.options.envdir = ENVDIR
-
-if os.getenv("CONDA_DEFAULT_ENV"):
-    nox.options.default_venv_backend = "conda"
 
 
 @nox.session

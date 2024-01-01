@@ -14,7 +14,7 @@ urls = { homepage = "https://github.com/furechan/mplchart" }
 authors = [{ name = "Furechan", email = "furechan@xsmail.com" }]
 keywords = ["finance", "charting", "matplotlib", "candlesticks"]
 dependencies = ["matplotlib", "yfinance", "numpy", "pandas"]
-optional-dependencies.dev = ["pytest", "tomli", "jmespath"]
+optional-dependencies.dev = ["pytest", "ipykernel"]
 classifiers = [
     "Topic :: Office/Business :: Financial",
     "Development Status :: 2 - Pre-Alpha",

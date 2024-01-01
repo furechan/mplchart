@@ -120,7 +120,10 @@ def get_prices(
                 print(f"Loading {ticker} data from {cache_file} ...")
             return pd.read_csv(cache_file, index_col=0, parse_dates=True)
 
-    prices = yf.Ticker(ticker).history(interval=interval, period=period)
+    # prices = yf.Ticker(ticker).history(interval=interval, period=period)
+    prices = yf.download(
+        ticker, interval=interval, period=period, progress=False, auto_adjust=True
+    )
     prices = prices.rename(columns=str.lower).rename_axis(index="date")
     prices = prices.filter(["open", "high", "low", "close", "volume"])
 
