@@ -16,8 +16,6 @@ keywords = ["finance", "charting", "matplotlib", "candlesticks"]
 dependencies = ["matplotlib", "yfinance", "numpy", "pandas"]
 optional-dependencies.dev = ["pytest", "ipykernel"]
 classifiers = [
-    "Topic :: Office/Business :: Financial",
-    "Development Status :: 2 - Pre-Alpha",
     "Programming Language :: Python :: 3",
 ]
 
@@ -28,7 +26,6 @@ only-include = ["src"]
 exclude = [".*"]
 
 [tool.pydev]
-install-url = "git+https://github.com/furechan/mplchart.git"
 allow-publish = true
 
 [tool.pytest.ini_options]
