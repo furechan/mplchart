@@ -1,18 +1,15 @@
-""" mplchart stylesheets (experimental) """
+""" mplchart styling (experimental) """
 
 import re
-import warnings
 import configparser
 
 import matplotlib.colors as mcolors
 
-from pathlib import Path
+from .stylesheets import get_inifile
 
 DEFAULT_STYLE = "defaults"
-STYLES_FOLDER = Path(__file__).joinpath("../styles")
 
-# TODO move get_initile to styles
-# TODO add axes argument to get_setting
+# MAYBE add axes argument to get_setting ?
 
 
 def get_stylesheet(name):
@@ -42,28 +39,23 @@ class Cycler:
 class StyleSheet:
     """Stylesheet"""
 
-    @staticmethod
-    def get_inifile(name, strict=True):
-        file = STYLES_FOLDER.joinpath(f"mplchart-{name}.ini").resolve(strict=strict)
-        if file.exists:
-            return file
-
     @classmethod
     def load_config(cls, style=None):
         config = configparser.ConfigParser()
 
-        files = list()
+        paths = list()
 
-        inifile = cls.get_inifile(DEFAULT_STYLE)
-        files.append(inifile)
+        inifile = get_inifile(DEFAULT_STYLE)
+        paths.append(inifile)
 
         if style is not None:
-            inifile = cls.get_inifile(style)
-            files.append(inifile)
+            inifile = get_inifile(style)
+            paths.append(inifile)
 
-        res = config.read(files)
-        if len(res) < len(files):
-            warnings.warn("Error loading configuration files ...")
+        for path in paths:
+            if path.exists():
+                data = path.read_text()
+                config.read_string(data, source=path.name)
 
         return config
 
