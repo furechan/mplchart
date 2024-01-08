@@ -6,10 +6,10 @@ build-backend = "hatchling.build"
 [project]
 name = "mplchart"
 version = "0.0.6"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 readme = "output/README.md"
 description = "Classic Stock Charts in Python"
-license = { file = "LICENSE.txt" }
+license = { text = "MIT" }
 urls = { homepage = "https://github.com/furechan/mplchart" }
 authors = [{ name = "Furechan", email = "furechan@xsmail.com" }]
 keywords = ["finance", "charting", "matplotlib", "candlesticks"]
@@ -17,6 +17,8 @@ dependencies = ["matplotlib", "yfinance", "numpy", "pandas"]
 optional-dependencies.dev = ["pytest", "ipykernel"]
 classifiers = [
     "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
 ]
 
 [tool.hatch.build]
