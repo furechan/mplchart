@@ -7,8 +7,8 @@ name = "mplchart"
 version = "0.0.6"
 requires-python = ">=3.9"
 readme = "output/README.md"
+license = { text = "MIT License" }
 description = "Classic Stock Charts in Python"
-license = { text = "MIT" }
 urls = { homepage = "https://github.com/furechan/mplchart" }
 authors = [{ name = "Furechan", email = "furechan@xsmail.com" }]
 keywords = ["finance", "charting", "matplotlib", "candlesticks"]
