@@ -115,7 +115,10 @@ class RSI(Wrapper):
             ax.fill_between(xv, yv, 70, where=(yv >= 70), interpolate=True, alpha=0.5)
             ax.fill_between(xv, yv, 30, where=(yv <= 30), interpolate=True, alpha=0.5)
 
-        ax.set_yticks([30, 50, 70])
+        ax.set_yticks([30, 70])
+        ax.set_yticks([10, 30, 50, 70, 90], minor=True)
+        ax.grid(axis="y", which="major", linestyle="-", linewidth=2)
+        ax.grid(axis="y", which="minor", linestyle=":", linewidth=2)
 
 
 @register("SAR")
@@ -133,6 +136,38 @@ class PSAR(Wrapper):
         xv, yv = series_xy(data)
 
         ax.scatter(xv, yv, alpha=0.5, marker=".")
+
+
+@register("ADX")
+class ADX(Wrapper):
+    """ADX Wrapper"""
+
+    def check_result(self, data):
+        return data.ndim == 2 and data.shape[1] == 3
+
+    def plot_result(self, data, chart, ax=None):
+        if ax is None:
+            ax = chart.get_axes("below")
+
+        label = chart.get_label(self.indicator)
+
+        adx = data.iloc[:, 0]
+        pdi = data.iloc[:, 1]
+        mdi = data.iloc[:, 2]
+
+        xv, yv = series_xy(adx)
+        ax.plot(xv, yv, color="k", label=label)
+
+        xv, yv = series_xy(pdi)
+        ax.plot(xv, yv, color="g")
+
+        xv, yv = series_xy(mdi)
+        ax.plot(xv, yv, color="r")
+
+        ax.set_yticks([20])
+        ax.set_yticks([20, 40], minor=True)
+        ax.grid(axis="y", which="major", linestyle="-", linewidth=2)
+        ax.grid(axis="y", which="minor", linestyle=":", linewidth=2)
 
 
 @register("MACD")

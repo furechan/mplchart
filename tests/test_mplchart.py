@@ -3,9 +3,20 @@ import pytest
 from mplchart import samples
 from mplchart.chart import Chart
 from mplchart.primitives import Candlesticks, Volume
-from mplchart.indicators import SMA, EMA, RSI, MACD, PPO, BBANDS
+from mplchart.indicators import SMA, EMA, RSI, ATR, ADX, MACD, PPO, SLOPE, BBANDS
 
-INDICATORS = [Volume(), SMA(50), EMA(50), RSI(), MACD(), PPO(), BBANDS()]
+INDICATORS = [
+    Volume(),
+    SMA(50),
+    EMA(50),
+    RSI(),
+    ATR(),
+    ADX(),
+    MACD(),
+    PPO(),
+    SLOPE(),
+    BBANDS(),
+]
 
 
 @pytest.fixture

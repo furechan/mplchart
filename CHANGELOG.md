@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.6
+- Added ATR and ADX indicators
+
 ## 0.0.5
 - Multiple asset plots (tentative)
 - Fixed Layout is deprecated. Will be removed in the future

@@ -10,7 +10,7 @@ from mplchart.indicators import SMA, RSI, MACD
 
 def main():
     ticker = "AAPL"
-    prices = yf.download(ticker, period="5y", auto_adjust=True)
+    prices = yf.Ticker(ticker).history(period="5y")
 
     max_bars = 250
     indicators = [Candlesticks(), SMA(50), SMA(200), Volume(), RSI(), MACD()]

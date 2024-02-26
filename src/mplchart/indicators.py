@@ -50,11 +50,31 @@ class ROC:
 class RSI:
     """Relative Strengh Index"""
 
-    period: int = 20
+    period: int = 14
 
     def __call__(self, prices):
         series = get_series(prices)
         return library.calc_rsi(series, self.period)
+
+
+@dataclass
+class ATR:
+    """Average True Range"""
+
+    period: int = 14
+
+    def __call__(self, prices):
+        return library.calc_atr(prices, self.period)
+
+
+@dataclass
+class ADX:
+    """Average Directional Index"""
+
+    period: int = 14
+
+    def __call__(self, prices):
+        return library.calc_adx(prices, self.period)
 
 
 @dataclass

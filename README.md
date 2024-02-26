@@ -87,6 +87,8 @@ Some of the indicators included are:
 - `EMA` Exponential Moving Average
 - `ROC` Rate of Change
 - `RSI` Relative Strength Index
+- `ATR` Average True Range
+- `ADX` Average Directional Index
 - `MACD` Moving Average Convergence Divergence
 - `PPO` Price Percentage Oscillator 
 - `SLOPE` Slope (linear regression with time)
