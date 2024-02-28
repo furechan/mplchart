@@ -120,6 +120,11 @@ class RSI(Wrapper):
         ax.grid(axis="y", which="major", linestyle="-", linewidth=2)
         ax.grid(axis="y", which="minor", linestyle=":", linewidth=2)
 
+        yformatter = ax.yaxis.get_major_formatter()
+        ax.yaxis.set_minor_formatter(yformatter)
+
+
+
 
 @register("SAR")
 @register("PSAR")
@@ -168,6 +173,9 @@ class ADX(Wrapper):
         ax.set_yticks([20, 40], minor=True)
         ax.grid(axis="y", which="major", linestyle="-", linewidth=2)
         ax.grid(axis="y", which="minor", linestyle=":", linewidth=2)
+
+        yformatter = ax.yaxis.get_major_formatter()
+        ax.yaxis.set_minor_formatter(yformatter)
 
 
 @register("MACD")
