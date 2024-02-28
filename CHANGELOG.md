@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.7
+- Added labels for minor ticks in RSI and ADX
+
 ## 0.0.6
 - Added ATR and ADX indicators
 
