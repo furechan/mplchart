@@ -13,6 +13,17 @@ from .styling import get_stylesheet
 from .utils import series_xy
 
 
+"""
+How primitives/indicators are plotted
+1) try plot_handler. No processing or no extract_df yet
+2) call indicator / process data
+3) call extract_df / map dataframe
+3) try wrapper plot_results is applicable
+4) select axes
+5) try indicator plot_results if applicable
+6) plot series as a line 
+"""
+
 class Chart:
     """
     Chart Object
@@ -121,7 +132,7 @@ class Chart:
         return data.filter(["open", "high", "low", "close"]) * factor
 
     def extract_df(self, data):
-        """extract dataframe view"""
+        """extract dataframe subset"""
 
         self.inspect_data(data)
 
@@ -347,12 +358,15 @@ class Chart:
         """calculates and plots an indicator"""
 
         # Call the indicator's plot_handler if defined (before any calc)
-        # Note this is the only location where plot_handler is called
+        # this is the only location where plot_handler is called
+        # plot_handler is currently defined only for Primitives
+        # Note that dates have not been mapped yet (see extract_df)
         if hasattr(indicator, "plot_handler"):
             indicator.plot_handler(data, chart=self)
             return
 
         # Invoke indicator and compute result if indicator is callable
+        # Result data is mapped to the charting view (see extract_df)
         if callable(indicator):
             self.last_indicator = indicator
             result = indicator(data)
@@ -362,7 +376,7 @@ class Chart:
 
         # Calling wrapper plot_result if applicable
         # Note target axes has not been selected yet
-        # The wrapper will do the axes selection calling get_axes
+        # The wrapper will do the axes selection calling chart.get_axes
         wrapper = get_wrapper(indicator)
         if wrapper is not None and wrapper.check_result(result):
             wrapper.plot_result(result, chart=self)
@@ -374,7 +388,9 @@ class Chart:
 
         # Calling indicator plot_result if present
         # Note here we are calling plot_result with an axes
-        # This does not seem to be happening ever !
+        # Hum? This does not seem to be happening ever!
+        # plot_results is defined for wrappers only at this time !?
+        # TODO move this above get_axes to align logic with wrappers
         if hasattr(indicator, "plot_result"):
             warnings.warn("Calling plot_result on {indicator!r} with ax={ax!r}")
             indicator.plot_result(result, self, ax=ax)

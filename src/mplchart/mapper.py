@@ -102,10 +102,10 @@ class DateIndexMapper:
         """slice data on dates"""
 
         if self.start or self.end:
-            data = data.loc[self.start : self.end]
+            data = data.loc[self.start: self.end]
 
         if self.max_bars and len(data) > self.max_bars:
-            data = data.iloc[-self.max_bars :]
+            data = data.iloc[-self.max_bars:]
 
         return data
 
@@ -115,7 +115,7 @@ class DateIndexMapper:
         xloc = pd.Series(np.arange(len(self.index)), index=self.index)
 
         if self.start or self.end:
-            xloc = xloc[self.start : self.end]
+            xloc = xloc[self.start: self.end]
 
         if self.max_bars:
             xloc = xloc.tail(self.max_bars)

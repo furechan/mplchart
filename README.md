@@ -40,6 +40,7 @@ indicators = [
 
 chart = Chart(title=ticker, max_bars=max_bars)
 chart.plot(prices, indicators)
+chart.show()
 ```
 
 
@@ -155,7 +156,7 @@ python -mpip install git+https://github.com/furechan/mplchart.git
 
 ## Requirements:
 
-- python >= 3.8
+- python >= 3.9
 - matplotlib
 - pandas
 - numpy
