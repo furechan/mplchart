@@ -34,4 +34,4 @@ def dump(c):
 @task
 def publish(c):
     """ Publish to PyPI with twine """
-    c.run("twine dist/*.whl")
+    c.run("twine upload dist/*.whl")
