@@ -1,116 +1,64 @@
 """ mplchart styling (experimental) """
 
-import re
+import io
+import warnings
 import configparser
 
 import matplotlib.colors as mcolors
 
 from .stylesheets import get_inifile
 
-DEFAULT_STYLE = "defaults"
 
-# MAYBE add axes argument to get_setting ?
+def get_stylesheet(name=None):
+    """ Stylesheet factory method """
 
+    stylesheet = Stylesheet()
 
-def get_stylesheet(name):
-    return StyleSheet(name)
+    if name is not None:
+        inifile = get_inifile(name)
+        if inifile.exists():
+            stylesheet.load(inifile)
+        else:
+            warnings.warn(f"File {inifile.name} not found!")
 
-
-class Cycler:
-    """Trivial Property Cycler"""
-
-    def __init__(self, items):
-        if isinstance(items, str):
-            items = re.split(r",\s+", items)
-
-        if not len(items):
-            raise ValueError("Not a valid list")
-
-        self.items = items
-        self.size = len(items)
-        self.count = 0
-
-    def __next__(self):
-        pos = self.count % self.size
-        self.count += 1
-        return self.items[pos]
+    return stylesheet
 
 
-class StyleSheet:
-    """Stylesheet"""
+class Stylesheet:
+    """ Stylesheet """
 
-    @classmethod
-    def load_config(cls, style=None):
-        config = configparser.ConfigParser()
+    def __init__(self):
+        self.config = configparser.ConfigParser()
 
-        paths = list()
+    def load(self, path):
+        """ read from pathlike """
+        if path.exists():
+            data = path.read_text()
+            self.config.read_string(data, source=path.name)
 
-        inifile = get_inifile(DEFAULT_STYLE)
-        paths.append(inifile)
+    def dumps(self):
+        buffer = io.StringIO()
+        self.config.write(buffer, space_around_delimiters=True)
+        return buffer.getvalue()
 
-        if style is not None:
-            inifile = get_inifile(style)
-            paths.append(inifile)
+    def get_setting(self, key: str, section: str, fallback=None):
+        result = self.config.get(section, key.lower(), fallback=fallback)
 
-        for path in paths:
-            if path.exists():
-                data = path.read_text()
-                config.read_string(data, source=path.name)
+        if section == "color" and not mcolors.is_color_like(result):
+            return fallback
 
-        return config
+        if section in ["width", "linewidth", "alpha"]:
+            result = float(result)
 
-    def __init__(self, style=None):
-        config = self.load_config(style)
-
-        self.config = config
-        self.cached = dict()
-
-    def reset(self):
-        self.cached.clear()
+        return result
 
     def get_settings(self, key: str, **kwargs):
         result = dict()
+
         for section, fallback in kwargs.items():
             value = self.get_setting(key, section, fallback=fallback)
-            result[section] = value
-        return result
-
-    def get_setting(self, key: str, section: str, fallback=None):
-        key = key.lower()
-
-        if self.config.has_section(section):
-            data = self.config[section]
-        else:
-            return fallback
-
-        cycle_values = section in ["color"]
-        result = fallback
-        found = set()
-
-        while key in data:
-            # check for recursion
-            if key in found:
-                return fallback
-            else:
-                found.add(key)
-
-            result = data.get(key)
-
-            if cycle_values and "," in result:
-                ckey = section + ":" + key
-                if ckey in self.cached:
-                    cycler = self.cached.get(ckey)
-                else:
-                    cycler = self.cached[ckey] = Cycler(result)
-                result = next(cycler)
-
-            key = result
-
-        if found:
-            if section == "color" and not mcolors.is_color_like(result):
-                return fallback
-
-            if section in ["width", "linewidth", "alpha"]:
-                result = float(result)
+            if value is not None:
+                result[section] = value
 
         return result
+

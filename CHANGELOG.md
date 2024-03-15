@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.0.8
+- Added tasks.py
+- New talib wrapper uses talib metadata
+- Stylesheets are inactive unless specified
+
 ## 0.0.7
 - Added labels for minor ticks in RSI and ADX
 

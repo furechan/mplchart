@@ -38,7 +38,7 @@ class Candlesticks(Primitive):
         label = str(self)
         data = chart.extract_df(data)
 
-        width = chart.get_setting("candles", "width", self.WIDTH)
+        width = self.WIDTH
         colorup = chart.get_setting("candles.up", "color", self.COLORUP)
         colordn = chart.get_setting("candles.dn", "color", self.COLORDN)
         coloroff = chart.get_setting("candles.off", "color", self.COLOROFF)

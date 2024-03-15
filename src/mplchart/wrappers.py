@@ -4,9 +4,9 @@ import numpy as np
 
 from .utils import series_xy
 
-from abc import ABC, abstractmethod
+from .model import Wrapper
 
-from .extalib import talib_function_check, talib_function_name
+from .extalib import talib_function_check, TalibWrapper
 
 wrapper_registry = dict()
 
@@ -24,42 +24,28 @@ def register(name: str):
 def indicator_name(indicator):
     """indicator name (uppercase)"""
 
-    if talib_function_check(indicator):
-        name = talib_function_name(indicator)
-    elif hasattr(indicator, "__name__"):
+    if hasattr(indicator, "__name__"):
         name = indicator.__name__
     else:
         name = indicator.__class__.__name__
 
-    name = name.upper()
-
-    return name
+    return name.upper()
 
 
 def get_wrapper(indicator):
-    """gets the rendering wrapper for given indicator"""
+    """create rendering wrapper for naive indicator"""
+
+    if hasattr(indicator, "plot_result"):
+        return None
+
+    if talib_function_check(indicator):
+        return TalibWrapper(indicator)
 
     name = indicator_name(indicator)
 
     if name in wrapper_registry:
         wrapper = wrapper_registry.get(name)
         return wrapper(indicator)
-
-
-class Wrapper(ABC):
-    """Indicator Wrapper (custom plotting)"""
-
-    def __init__(self, indicator):
-        name = indicator_name(indicator)
-        self.indicator = indicator
-        self.name = name
-
-    def check_result(self, data):
-        return True
-
-    @abstractmethod
-    def plot_result(self, data, chart, ax=None):
-        ...
 
 
 class LinePlot(Wrapper):
@@ -69,7 +55,7 @@ class LinePlot(Wrapper):
         if ax is None:
             ax = chart.get_axes("below")
 
-        label = chart.get_label(self.indicator)
+        label = repr(self)
         xv, yv = series_xy(data)
 
         ax.plot(xv, yv, label=label)
@@ -85,7 +71,8 @@ class AreaPlot(Wrapper):
         if ax is None:
             ax = chart.get_axes("below")
 
-        label = chart.get_label(self.indicator)
+        label = repr(self)
+
         xv, yv = series_xy(data)
 
         ax.fill_between(xv, yv, alpha=0.4, label=label)
@@ -95,6 +82,7 @@ class AreaPlot(Wrapper):
 class RSI(Wrapper):
     """RSI Wrapper"""
 
+    default_pane = "above"
     COLOR = "black"
 
     def check_result(self, data):
@@ -104,7 +92,7 @@ class RSI(Wrapper):
         if ax is None:
             ax = chart.get_axes("above")
 
-        label = chart.get_label(self.indicator)
+        label = repr(self)
         xv, yv = series_xy(data)
 
         color = chart.get_setting("rsi", "color", self.COLOR)
@@ -122,8 +110,6 @@ class RSI(Wrapper):
 
         yformatter = ax.yaxis.get_major_formatter()
         ax.yaxis.set_minor_formatter(yformatter)
-
-
 
 
 @register("SAR")
@@ -154,7 +140,7 @@ class ADX(Wrapper):
         if ax is None:
             ax = chart.get_axes("below")
 
-        label = chart.get_label(self.indicator)
+        label = repr(self)
 
         adx = data.iloc[:, 0]
         pdi = data.iloc[:, 1]
@@ -190,11 +176,11 @@ class MACD(Wrapper):
         if ax is None:
             ax = chart.get_axes("below")
 
-        label = chart.get_label(self.indicator)
+        label = repr(self)
 
         macd = data.iloc[:, 0]
         signal = data.iloc[:, 1]
-        dist = data.iloc[:, 2] * 2.5
+        dist = data.iloc[:, 2] * 2.0
 
         xv, yv = series_xy(macd)
         ax.plot(xv, yv, color="k", label=label)
@@ -211,6 +197,7 @@ class MACD(Wrapper):
 class BBANDS(Wrapper):
     """BBANDS Wrapper"""
 
+    same_scale = True
     COLOR = "orange"
 
     def check_result(self, data):
@@ -220,13 +207,13 @@ class BBANDS(Wrapper):
         if ax is None:
             ax = chart.get_axes("samex")
 
-        label = chart.get_label(self.indicator)
+        label = repr(self)
 
         upper = data.iloc[:, 0]
         middle = data.iloc[:, 1]
         lower = data.iloc[:, 2]
 
-        color = chart.get_setting("bbands", "color", self.COLOR)
+        color = self.COLOR
 
         xs, ms = series_xy(middle)
         ax.plot(xs, ms, color=color, linestyle="dashed", label=label)

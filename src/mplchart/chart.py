@@ -5,24 +5,23 @@ import warnings
 
 import matplotlib.pyplot as plt
 
-from .layout import make_twinx, StandardLayout, FixedLayout
-from .mapper import RawDateMapper, DateIndexMapper
-from .extalib import talib_function_check, talib_function_repr, talib_same_scale
+from .utils import series_xy
 from .wrappers import get_wrapper
 from .styling import get_stylesheet
-from .utils import series_xy
-
+from .layout import make_twinx, StandardLayout, FixedLayout
+from .mapper import RawDateMapper, DateIndexMapper
 
 """
 How primitives/indicators are plotted
 1) try plot_handler. No processing or no extract_df yet
 2) call indicator / process data
 3) call extract_df / map dataframe
-3) try wrapper plot_results is applicable
+3) try wrapper plot_result if applicable
 4) select axes
-5) try indicator plot_results if applicable
+5) try indicator plot_result if applicable
 6) plot series as a line 
 """
+
 
 class Chart:
     """
@@ -56,18 +55,18 @@ class Chart:
         return prices
 
     def __init__(
-        self,
-        title=None,
-        max_bars=None,
-        start=None,
-        end=None,
-        figure=None,
-        figsize=None,
-        bgcolor="w",
-        use_calendar=False,
-        holidays=None,
-        style=None,
-        fixed_layout=False,
+            self,
+            title=None,
+            max_bars=None,
+            start=None,
+            end=None,
+            figure=None,
+            figsize=None,
+            bgcolor="w",
+            use_calendar=False,
+            holidays=None,
+            style=None,
+            fixed_layout=False,
     ):
         self.start = start
         self.end = end
@@ -170,7 +169,7 @@ class Chart:
 
         if self.use_calendar:
             self.mapper = RawDateMapper(
-                start=self.start, end=self.end, max_bars=self.max_bars
+                index=data.index, start=self.start, end=self.end, max_bars=self.max_bars
             )
         elif data is not None:
             self.mapper = DateIndexMapper(
@@ -250,10 +249,12 @@ class Chart:
     def default_pane(self, indicator):
         """return the default pane to use for indicator"""
 
-        if talib_function_check(indicator):
-            same_scale = talib_same_scale(indicator)
-        else:
-            same_scale = getattr(indicator, "same_scale", False)
+        default_pane = getattr(indicator, "default_pane", None)
+
+        if default_pane:
+            return default_pane
+
+        same_scale = getattr(indicator, "same_scale", None)
 
         if same_scale and self.count_axes() <= 1:
             return "samex"
@@ -269,7 +270,12 @@ class Chart:
         self.next_target = target
 
     def get_axes(self, target=None, *, height_ratio=None):
-        """returns or creates axes at given target"""
+        """
+        selects existing axes or creates new axes depending on target
+
+        Args:
+            target: one of "main", "samex", twinx", "above", "below"
+        """
 
         if self.next_target:
             target = self.next_target
@@ -311,7 +317,6 @@ class Chart:
             )
 
         self.config_axes(ax)
-        self.reset_stylesheet()
 
         return ax
 
@@ -334,23 +339,15 @@ class Chart:
             count += 1
         return count
 
-    def reset_stylesheet(self):
-        """resets stylesheet"""
-        return self.stylesheet.reset()
-
     def get_setting(self, key, section, fallback=None):
-        """gets setting from stylesheet"""
-        return self.stylesheet.get_setting(key, section, fallback=fallback)
+        """setting from stylesheet"""
+        if self.stylesheet:
+            return self.stylesheet.get_setting(key, section, fallback=fallback)
 
-    def get_settings(self, key, **kwargs):
-        """gets settings from stylesheet matching kwargs"""
-        return self.stylesheet.get_settings(key, **kwargs)
+        return fallback
 
     def get_label(self, indicator):
         """returns label to use for indicator"""
-
-        if talib_function_check(indicator):
-            return talib_function_repr(indicator)
 
         return getattr(indicator, "__name__", str(indicator))
 
@@ -374,31 +371,32 @@ class Chart:
         else:
             raise ValueError(f"Indicator {indicator!r} not callable")
 
-        # Calling wrapper plot_result if applicable
-        # Note target axes has not been selected yet
-        # The wrapper will do the axes selection calling chart.get_axes
+        # Use wrapper in place of indicator if applicable
         wrapper = get_wrapper(indicator)
         if wrapper is not None and wrapper.check_result(result):
-            wrapper.plot_result(result, chart=self)
-            return
+            indicator, wrapper = wrapper, None
 
-        # Select axes according to indicator properties (see same_scale)
+        # Select axes according to indicator properties (default_pane, same_scale)
         target = self.default_pane(indicator)
         ax = self.get_axes(target)
 
         # Calling indicator plot_result if present
         # Note here we are calling plot_result with an axes
-        # Hum? This does not seem to be happening ever!
-        # plot_results is defined for wrappers only at this time !?
-        # TODO move this above get_axes to align logic with wrappers
         if hasattr(indicator, "plot_result"):
-            warnings.warn("Calling plot_result on {indicator!r} with ax={ax!r}")
-            indicator.plot_result(result, self, ax=ax)
+            indicator.plot_result(result, chart=self, ax=ax)
             return
 
         label = self.get_label(indicator)
         xv, yv = series_xy(result)
         ax.plot(xv, yv, label=label)
+
+    def plot_result(self, data, indicator, ax=None):
+        name = getattr(indicator, "__name__", str(indicator))
+        if data.__class__.__name__ == "Series":
+            data = {name: data}
+        for name, series in data.items():
+            xv, yv = series_xy(series)
+            ax.plot(xv, yv, label=name)
 
     def add_legends(self):
         """adds legends to all axes"""

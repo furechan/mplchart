@@ -30,7 +30,7 @@ class OHLC(Primitive):
         label = str(self)
         data = chart.extract_df(data)
 
-        width = chart.get_setting("ohlc.", "width", self.WIDTH)
+        width = self.WIDTH
         colorup = chart.get_setting("ohlc.up", "color", self.COLORUP)
         colordn = chart.get_setting("ohlc.dn", "color", self.COLORDN)
 

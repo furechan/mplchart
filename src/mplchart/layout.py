@@ -13,6 +13,7 @@ def make_twinx(ax, label="twinx"):
     """
 
     ax2 = ax._make_twin_axes(sharex=ax)
+    ax.set_zorder(ax2.get_zorder() + 1)
 
     if label is not None:
         ax2._label = label

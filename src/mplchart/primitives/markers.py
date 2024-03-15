@@ -68,7 +68,7 @@ class TradeMarker(PosMarker):
         pos = data.pos[mask]
 
         colorn = chart.get_setting("marker.entry", "color", self.COLORENTRY)
-        colorx = chart.get_setting("merker.exit", "color", self.COLOREXIT)
+        colorx = chart.get_setting("marker.exit", "color", self.COLOREXIT)
 
         cv = np.where(pos > 0, colorn, colorx)
 

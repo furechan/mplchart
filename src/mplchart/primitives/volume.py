@@ -21,7 +21,7 @@ class Volume(Primitive):
     COLORDN = "red"
     MACOLOR = "grey"
 
-    def __init__(self, sma=20):
+    def __init__(self, sma=50):
         self.sma = sma
 
     def __str__(self):
@@ -51,12 +51,14 @@ class Volume(Primitive):
         volume = data.volume
         change = data.change
 
-        width = chart.get_setting("volume", "width", self.WIDTH)
+        width = self.WIDTH
         colorup = chart.get_setting("volume.up", "color", self.COLORUP)
         colordn = chart.get_setting("volume.dn", "color", self.COLORDN)
         macolor = chart.get_setting("volume.ma", "color", self.MACOLOR)
 
         color = np.where(change > 0, colorup, colordn)
+
+        # ax.set_zorder(0)
 
         # This should always be the case !?
         if ax._label == "twinx":
@@ -64,7 +66,7 @@ class Volume(Primitive):
             ax.set_ylim(0.0, vmax * 4.0)
             ax.yaxis.set_visible(False)
 
-        ax.bar(index, volume, width=width, alpha=0.3, zorder=0, color=color)
+        ax.bar(index, volume, width=width, alpha=0.3, color=color)
 
         if self.sma:
             average = data.average
