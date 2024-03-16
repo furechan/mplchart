@@ -10,7 +10,7 @@ and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
 
 
 > **Warning**
-> This project is work in progress and the api is bound to change.
+> This project is experimental and the interface can change.
 > For a library with a mature api you may want to look into
 > [mplfinance](https://pypi.org/project/mplfinance/).
 
@@ -40,6 +40,7 @@ indicators = [
 
 chart = Chart(title=ticker, max_bars=max_bars)
 chart.plot(prices, indicators)
+chart.show()
 ```
 
 
@@ -87,6 +88,8 @@ Some of the indicators included are:
 - `EMA` Exponential Moving Average
 - `ROC` Rate of Change
 - `RSI` Relative Strength Index
+- `ATR` Average True Range
+- `ADX` Average Directional Index
 - `MACD` Moving Average Convergence Divergence
 - `PPO` Price Percentage Oscillator 
 - `SLOPE` Slope (linear regression with time)
@@ -153,7 +156,7 @@ python -mpip install git+https://github.com/furechan/mplchart.git
 
 ## Requirements:
 
-- python >= 3.8
+- python >= 3.9
 - matplotlib
 - pandas
 - numpy
