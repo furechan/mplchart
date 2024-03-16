@@ -10,7 +10,7 @@ and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
 
 
 > **Warning**
-> This project is work in progress and the api is bound to change.
+> This project is experimental and the interface can change.
 > For a library with a mature api you may want to look into
 > [mplfinance](https://pypi.org/project/mplfinance/).
 
