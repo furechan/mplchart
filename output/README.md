@@ -93,7 +93,7 @@ Some of the indicators included are:
 - `MACD` Moving Average Convergence Divergence
 - `PPO` Price Percentage Oscillator 
 - `SLOPE` Slope (linear regression with time)
-- `BBANDS` Bolling Bands
+- `BBANDS` Bollinger Bands
 
 
 ## Ta-lib Abstract Functions
