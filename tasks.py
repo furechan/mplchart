@@ -1,3 +1,4 @@
+# noinspection PyUnresolvedReferences
 from invoke import task
 from pathlib import Path
 
@@ -7,7 +8,7 @@ ROOT = Path(__file__).parent
 
 @task
 def info(c):
-    """ Publish to PyPI with twine """
+    """ Check package versions """
     c.run(f"pip index versions {PACKAGE}")
 
 
@@ -15,6 +16,13 @@ def info(c):
 def clean(c):
     """ Clean project dist """
     c.run("rm -rf dist")
+
+
+@task
+def check(c):
+    """ Check package """
+    c.run("nbcheck examples misc")
+    c.run("flake8")
 
 
 @task(clean)

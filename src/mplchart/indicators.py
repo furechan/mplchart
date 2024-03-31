@@ -1,12 +1,15 @@
 """ technical analysis indicators """
 
-from . import library
-
-from .library import get_series
+import numpy as np
 
 from dataclasses import dataclass
 
 from typing import ClassVar
+
+from . import library
+
+from .library import get_series
+from .utils import series_xy
 
 
 @dataclass
@@ -52,9 +55,35 @@ class RSI:
 
     period: int = 14
 
+    default_pane: ClassVar[str] = "above"
+    COLOR: ClassVar[str] = "black"
+
     def __call__(self, prices):
         series = get_series(prices)
         return library.calc_rsi(series, self.period)
+
+    def plot_result(self, data, chart, ax=None):
+        if ax is None:
+            ax = chart.get_axes("above")
+
+        label = repr(self)
+        xv, yv = series_xy(data)
+
+        color = chart.get_setting("rsi", "color", self.COLOR)
+
+        ax.plot(xv, yv, label=label, color=color)
+
+        with np.errstate(invalid="ignore"):
+            ax.fill_between(xv, yv, 70, where=(yv >= 70), interpolate=True, alpha=0.5)
+            ax.fill_between(xv, yv, 30, where=(yv <= 30), interpolate=True, alpha=0.5)
+
+        ax.set_yticks([30, 70])
+        ax.set_yticks([10, 30, 50, 70, 90], minor=True)
+        ax.grid(axis="y", which="major", linestyle="-", linewidth=2)
+        ax.grid(axis="y", which="minor", linestyle=":", linewidth=2)
+
+        yformatter = ax.yaxis.get_major_formatter()
+        ax.yaxis.set_minor_formatter(yformatter)
 
 
 @dataclass
@@ -76,6 +105,33 @@ class ADX:
     def __call__(self, prices):
         return library.calc_adx(prices, self.period)
 
+    def plot_result(self, data, chart, ax=None):
+        if ax is None:
+            ax = chart.get_axes("below")
+
+        label = repr(self)
+
+        adx = data.iloc[:, 0]
+        pdi = data.iloc[:, 1]
+        mdi = data.iloc[:, 2]
+
+        xv, yv = series_xy(adx)
+        ax.plot(xv, yv, color="k", label=label)
+
+        xv, yv = series_xy(pdi)
+        ax.plot(xv, yv, color="g")
+
+        xv, yv = series_xy(mdi)
+        ax.plot(xv, yv, color="r")
+
+        ax.set_yticks([20])
+        ax.set_yticks([20, 40], minor=True)
+        ax.grid(axis="y", which="major", linestyle="-", linewidth=2)
+        ax.grid(axis="y", which="minor", linestyle=":", linewidth=2)
+
+        yformatter = ax.yaxis.get_major_formatter()
+        ax.yaxis.set_minor_formatter(yformatter)
+
 
 @dataclass
 class MACD:
@@ -89,6 +145,25 @@ class MACD:
         series = get_series(prices)
         return library.calc_macd(series, self.n1, self.n2, self.n3)
 
+    def plot_result(self, data, chart, ax=None):
+        if ax is None:
+            ax = chart.get_axes("below")
+
+        label = repr(self)
+
+        macd = data.iloc[:, 0]
+        signal = data.iloc[:, 1]
+        hist = data.iloc[:, 2] * 2.0
+
+        xv, yv = series_xy(macd)
+        ax.plot(xv, yv, color="k", label=label)
+
+        xv, yv = series_xy(signal)
+        ax.plot(xv, yv)
+
+        xv, yv = series_xy(hist)
+        ax.bar(xv, yv, alpha=0.5, width=0.8)
+
 
 @dataclass
 class PPO:
@@ -101,6 +176,25 @@ class PPO:
     def __call__(self, prices):
         series = get_series(prices)
         return library.calc_ppo(series, self.n1, self.n2, self.n3)
+
+    def plot_result(self, data, chart, ax=None):
+        if ax is None:
+            ax = chart.get_axes("below")
+
+        label = repr(self)
+
+        ppo = data.iloc[:, 0]
+        signal = data.iloc[:, 1]
+        hist = data.iloc[:, 2] * 2.0
+
+        xv, yv = series_xy(ppo)
+        ax.plot(xv, yv, color="k", label=label)
+
+        xv, yv = series_xy(signal)
+        ax.plot(xv, yv)
+
+        xv, yv = series_xy(hist)
+        ax.bar(xv, yv, alpha=0.5, width=0.8)
 
 
 @dataclass
@@ -122,9 +216,33 @@ class BBANDS:
     nbdev: float = 2.0
 
     same_scale: ClassVar[bool] = True
+    COLOR: ClassVar[str] = "orange"
 
     def __call__(self, prices):
         return library.calc_bbands(prices, self.period, self.nbdev)
+
+    def plot_result(self, data, chart, ax=None):
+        if ax is None:
+            ax = chart.get_axes("samex")
+
+        label = repr(self)
+
+        upper = data.iloc[:, 0]
+        middle = data.iloc[:, 1]
+        lower = data.iloc[:, 2]
+
+        color = self.COLOR
+
+        xs, ms = series_xy(middle)
+        ax.plot(xs, ms, color=color, linestyle="dashed", label=label)
+
+        xs, hs = series_xy(upper)
+        ax.plot(xs, hs, color=color, linestyle="dotted")
+
+        xs, ls = series_xy(lower)
+        ax.plot(xs, ls, color=color, linestyle="dotted")
+
+        ax.fill_between(xs, ls, hs, color=color, interpolate=True, alpha=0.2)
 
 
 __all__ = [k for k in dir() if k.isupper()]

@@ -19,7 +19,7 @@ How primitives/indicators are plotted
 3) try wrapper plot_result if applicable
 4) select axes
 5) try indicator plot_result if applicable
-6) plot series as a line 
+6) plot series as a line
 """
 
 
@@ -346,11 +346,6 @@ class Chart:
 
         return fallback
 
-    def get_label(self, indicator):
-        """returns label to use for indicator"""
-
-        return getattr(indicator, "__name__", str(indicator))
-
     def plot_indicator(self, data, indicator):
         """calculates and plots an indicator"""
 
@@ -374,29 +369,32 @@ class Chart:
         # Use wrapper in place of indicator if applicable
         wrapper = get_wrapper(indicator)
         if wrapper is not None and wrapper.check_result(result):
-            indicator, wrapper = wrapper, None
+            indicator = wrapper
 
         # Select axes according to indicator properties (default_pane, same_scale)
         target = self.default_pane(indicator)
         ax = self.get_axes(target)
 
         # Calling indicator plot_result if present
-        # Note here we are calling plot_result with an axes
+        # Note here we are calling plot_result with a defined axes
         if hasattr(indicator, "plot_result"):
             indicator.plot_result(result, chart=self, ax=ax)
             return
 
-        label = self.get_label(indicator)
-        xv, yv = series_xy(result)
-        ax.plot(xv, yv, label=label)
+        self.plot_result(result, indicator, ax=ax)
 
-    def plot_result(self, data, indicator, ax=None):
+    def plot_result(self, result, indicator, ax=None):
+        """ last resort plot_result handler """
         name = getattr(indicator, "__name__", str(indicator))
-        if data.__class__.__name__ == "Series":
-            data = {name: data}
-        for name, series in data.items():
+
+        if result.__class__.__name__ == "Series":
+            result = result.to_frame()
+
+        for colnum, colname in enumerate(result):
+            label = name if colnum == 0 else colname
+            series = result[colname]
             xv, yv = series_xy(series)
-            ax.plot(xv, yv, label=name)
+            ax.plot(xv, yv, label=label)
 
     def add_legends(self):
         """adds legends to all axes"""

@@ -61,4 +61,3 @@ class Stylesheet:
                 result[section] = value
 
         return result
-
