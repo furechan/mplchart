@@ -49,11 +49,6 @@ class Chart:
 
     DEFAULT_FIGSIZE = (12, 9)
 
-    @staticmethod
-    def normalize(prices):
-        prices = prices.rename(columns=str.lower).rename_axis(index=str.lower)
-        return prices
-
     def __init__(
             self,
             title=None,
@@ -97,6 +92,11 @@ class Chart:
 
         if self.layout.use_tight_layout:
             self.figure.set_layout_engine("tight")
+
+    @staticmethod
+    def normalize(prices):
+        prices = prices.rename(columns=str.lower).rename_axis(index=str.lower)
+        return prices
 
     @staticmethod
     def valid_target(target):

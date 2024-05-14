@@ -3,6 +3,7 @@
 ## 0.0.9
 - Moved indicator ploting logic to `indicators` module
 - Removed deprecated `helper` module
+- Added `nicegui` exmaple
 
 ## 0.0.8
 - Added tasks.py for project management
