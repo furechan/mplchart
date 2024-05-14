@@ -14,12 +14,11 @@ symbol = "AAPL"
 period = "25Y"
 max_bars = 250
 
-
 with ui.row():
     ticker = ui.input('Ticker', value=symbol)
     button = ui.button('Update Chart')
 
-with ui.pyplot(figsize=(9, 6)) as plot:
+with ui.pyplot(figsize=(9, 6), close=True) as plot:
     plt.plot()
 
 
