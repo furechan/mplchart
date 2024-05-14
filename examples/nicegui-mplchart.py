@@ -18,7 +18,7 @@ with ui.row():
     ticker = ui.input('Ticker', value=symbol)
     button = ui.button('Update Chart')
 
-with ui.pyplot(figsize=(9, 6), close=True) as plot:
+with ui.pyplot(figsize=(9, 6), close=False) as plot:
     plt.plot()
 
 
