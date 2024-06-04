@@ -5,13 +5,17 @@ import pandas as pd
 from importlib import resources
 
 
-def sample_prices(max_bars=0):
+def sample_prices(freq: str = "daily", *, max_bars: int = 0):
     """Sample prices"""
 
-    # NOTE that path here is a traversable not a Path object
-    path = resources.files(__name__).joinpath("sample-prices.csv")
+    fname = f"{freq}-prices.csv"
+    path = resources.files(__name__).joinpath(fname)
+    # Note that path here is a traversable not a Path object
+
     with path.open("r") as file:
         prices = pd.read_csv(file, index_col=0, parse_dates=True)
+
     if max_bars > 0:
         prices = prices.tail(max_bars)
+
     return prices
