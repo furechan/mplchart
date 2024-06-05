@@ -5,7 +5,6 @@ import pandas as pd
 
 import matplotlib.ticker as mticker
 
-
 """
 strftime formats specifiers
 %Y  Year with century
@@ -16,17 +15,17 @@ strftime formats specifiers
 %S  Second zero-padded
 """
 
-def date_labels(dates):
 
+def date_labels(dates):
     start, end, count = dates[0], dates[-1], len(dates)
     years = end.year - start.year
     months = years * 12 + end.month - start.month
 
     delta = (end - start) / pd.Timedelta(days=1)
-    interval = delta / (count -1) if count > 1 else 0
+    interval = delta / (count - 1) if count > 1 else 0
 
     if interval > 300:
-        formats = ("%Y", )
+        formats = ("%Y",)
     elif interval > 30:
         formats = ("%Y", "%b")
     elif interval > 0.5:
@@ -34,7 +33,7 @@ def date_labels(dates):
     elif interval > 0:
         formats = ("%b-%d", "%H:%M")
     else:
-        formats = ("%Y-%b-%d", )
+        formats = ("%Y-%b-%d",)
 
     pdate = None
     labels = []
@@ -73,7 +72,7 @@ class DateIndexFormatter(mticker.Formatter):
     def format_data(self, value):
         """date label"""
         size = len(self.index)
-        idx = np.floor(value).astype(int).clip(0, size-1)
+        idx = np.floor(value).astype(int).clip(0, size - 1)
         date = self.index[idx]
         result = date.strftime(self.fmt)
         return result
@@ -81,6 +80,6 @@ class DateIndexFormatter(mticker.Formatter):
     def format_ticks(self, values):
         """date labels"""
         size = len(self.index)
-        idx = np.floor(values).astype(int).clip(0, size-1)
+        idx = np.floor(values).astype(int).clip(0, size - 1)
         dates = self.index[idx]
         return date_labels(dates)

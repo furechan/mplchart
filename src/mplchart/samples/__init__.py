@@ -4,8 +4,7 @@ import pandas as pd
 
 from importlib import resources
 
-
-SAMPLES_TIMEZONE = "America/New_York"
+TIMEZONE = "America/New_York"
 
 
 def sample_prices(freq: str = "daily", *, max_bars: int = 0):
@@ -19,7 +18,7 @@ def sample_prices(freq: str = "daily", *, max_bars: int = 0):
         prices = pd.read_csv(file, index_col=0, parse_dates=True)
 
     if freq != "daily":
-        prices.index = pd.to_datetime(prices.index, utc=True).tz_convert(SAMPLES_TIMEZONE)
+        prices.index = pd.to_datetime(prices.index, utc=True).tz_convert(TIMEZONE)
 
     if max_bars > 0:
         prices = prices.tail(max_bars)
