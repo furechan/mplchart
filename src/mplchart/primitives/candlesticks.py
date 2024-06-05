@@ -124,8 +124,8 @@ def plot_cspoly(
     high, low = data.high, data.low
     change = data.close.pct_change()
     filled = data.close <= data.open
-    upper = np.maximum(data.open, data.close)
-    lower = np.minimum(data.open, data.close)
+    bottom = np.minimum(data.open, data.close)
+    top = np.maximum(data.open, data.close)
 
     if count > 0:
         # spacing = (xvalues[-1] - xvalues[0]) / (count - 1)
@@ -141,18 +141,18 @@ def plot_cspoly(
 
     verts = [
         (
-            (x - half_bar, b),
-            (x - half_bar, t),
-            (x, t),
-            (x, h),
-            (x, t),
-            (x + half_bar, t),
-            (x + half_bar, b),
-            (x, b),
-            (x, l),
-            (x, b),
+            (xv - half_bar, bt),
+            (xv - half_bar, tp),
+            (xv, tp),
+            (xv, hi),
+            (xv, tp),
+            (xv + half_bar, tp),
+            (xv + half_bar, bt),
+            (xv, bt),
+            (xv, lo),
+            (xv, bt),
         )
-        for x, b, t, l, h in zip(xvalues, lower, upper, low, high)
+        for xv, bt, tp, lo, hi in zip(xvalues, bottom, top, low, high)
     ]
 
     verts = np.asarray(verts)

@@ -61,16 +61,16 @@ def plot_ohlc(data, ax=None, width=0.8, colorup="k", colordn="k", label=None):
 
     verts = [
         (
-            (x, l),
-            (x, o),
-            (x - half_bar, o),
-            (x, o),
-            (x, c),
-            (x + half_bar, c),
-            (x, c),
-            (x, h),
+            (xv, lo),
+            (xv, op),
+            (xv - half_bar, op),
+            (xv, op),
+            (xv, cl),
+            (xv + half_bar, cl),
+            (xv, cl),
+            (xv, hi),
         )
-        for x, o, h, l, c in zip(xvalues, data.open, data.high, data.low, data.close)
+        for xv, op, hi, lo, cl in zip(xvalues, data.open, data.high, data.low, data.close)
     ]
 
     verts = np.asarray(verts)

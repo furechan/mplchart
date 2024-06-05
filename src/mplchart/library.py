@@ -1,6 +1,5 @@
 """ technical analysis library """
 
-
 import numpy as np
 import pandas as pd
 
@@ -19,7 +18,6 @@ def get_series(prices, item: str = None):
 
     if isinstance(prices, pd.DataFrame):
         return prices["close"]
-
 
 
 def calc_roc(series, period: int = 1):
