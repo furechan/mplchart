@@ -4,6 +4,7 @@
 - Moved indicator ploting logic to `indicators` module
 - Removed deprecated `helper` module
 - Added support for minute data labels
+- Removed deprecated stylesheet logic
 
 ## 0.0.8
 - Added tasks.py for project management
