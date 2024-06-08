@@ -5,7 +5,7 @@
 - Removed deprecated `helper` module
 - Added support for minute data labels
 - Removed deprecated stylesheet logic
-- Added oolor options to most primitives
+- Added color options to most primitives
 
 ## 0.0.8
 - Added tasks.py for project management
