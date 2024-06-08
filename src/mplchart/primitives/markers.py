@@ -1,4 +1,4 @@
-""" Markers """
+""" Marker primitives """
 
 import numpy as np
 

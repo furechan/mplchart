@@ -385,6 +385,7 @@ class Chart:
 
     def plot_result(self, result, indicator, ax=None):
         """ last resort plot_result handler """
+
         name = getattr(indicator, "__name__", str(indicator))
 
         if result.__class__.__name__ == "Series":

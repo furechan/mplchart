@@ -19,13 +19,10 @@ class Candlesticks(Primitive):
     Used to plot prices as candlesticks
     """
 
-    WIDTH = 0.8
-    COLORUP = "black"
-    COLORDN = "black"
-    COLOROFF = "white"
-    USE_BARS = False
-
-    def __init__(self, use_bars=USE_BARS):
+    def __init__(self, *, width: float = 0.8, colorup: str = None, colordn: str = None, use_bars: bool = False):
+        self.width = width
+        self.colorup = colorup
+        self.colordn = colordn
         self.use_bars = use_bars
 
     def __str__(self):
@@ -38,10 +35,11 @@ class Candlesticks(Primitive):
         label = str(self)
         data = chart.extract_df(data)
 
-        width = self.WIDTH
-        colorup = chart.get_setting("candles.up", "color", self.COLORUP)
-        colordn = chart.get_setting("candles.dn", "color", self.COLORDN)
-        coloroff = chart.get_setting("candles.off", "color", self.COLOROFF)
+        width = self.width
+
+        colorup = self.colorup or "k"
+        colordn = self.colordn or "k"
+        coloroff = self.colorup or "w"
 
         if self.use_bars:
             return plot_csbars(
@@ -65,49 +63,8 @@ class Candlesticks(Primitive):
             )
 
 
-def plot_csbars(
-    data, ax=None, width=0.6, colorup="k", colordn="k", coloroff="w", label=None
-):
-    """plots candlesticks as bars"""
-
-    ax = ax or plt.gca()
-
-    xvalues = data.index.values
-
-    high, low = data.high, data.low
-    change = data.close.pct_change()
-    filled = data.close <= data.open
-    upper = np.maximum(data.open, data.close)
-    lower = np.minimum(data.open, data.close)
-
-    with np.errstate(invalid="ignore"):
-        color = np.where(change < 0.0, colordn, colorup)
-        edgecolor = np.where(change < 0.0, colordn, colorup)
-        fillcolor = np.where(filled, color, coloroff)
-
-    ax.bar(
-        xvalues,
-        height=high - low,
-        bottom=low,
-        edgecolor=edgecolor,
-        width=0.0,
-        linewidth=0.7,
-        label=label,
-    )
-    ax.bar(
-        xvalues,
-        height=upper - lower,
-        bottom=lower,
-        color=fillcolor,
-        edgecolor=edgecolor,
-        width=width,
-        fill=True,
-        linewidth=0.7,
-    )
-
-
 def plot_cspoly(
-    data, ax=None, width=0.6, colorup="k", colordn="k", coloroff="w", label=None
+        data, ax=None, width=0.6, colorup="k", colordn="k", coloroff="w", label=None
 ):
     """plots candlesticks as polygons"""
 
@@ -123,12 +80,10 @@ def plot_cspoly(
 
     high, low = data.high, data.low
     change = data.close.pct_change()
-    filled = data.close <= data.open
     bottom = np.minimum(data.open, data.close)
     top = np.maximum(data.open, data.close)
 
     if count > 0:
-        # spacing = (xvalues[-1] - xvalues[0]) / (count - 1)
         spacing = np.nanmin(np.diff(xvalues))
     else:
         spacing = 1.0
@@ -136,8 +91,10 @@ def plot_cspoly(
     half_bar = spacing * width / 2.0
 
     with np.errstate(invalid="ignore"):
-        edgecolor = np.where(change < 0.0, colordn, colorup)
-        facecolor = np.where(filled, edgecolor, coloroff)
+        # edgecolor = np.where(change < 0.0, colordn, colorup)
+        # facecolor = np.where(filled, edgecolor, coloroff)
+        edgecolor = np.where(change >= 0.0, colorup, colordn)
+        facecolor = np.where(change >= 0.0, coloroff, colordn)
 
     verts = [
         (
@@ -169,3 +126,42 @@ def plot_cspoly(
 
     ax.add_collection(poly)
     ax.autoscale_view()
+
+
+def plot_csbars(
+        data, ax=None, width=0.6, colorup="k", colordn="k", coloroff="w", label=None
+):
+    """plots candlesticks as bars"""
+
+    ax = ax or plt.gca()
+
+    xvalues = data.index.values
+
+    high, low = data.high, data.low
+    change = data.close.pct_change()
+    upper = np.maximum(data.open, data.close)
+    lower = np.minimum(data.open, data.close)
+
+    with np.errstate(invalid="ignore"):
+        edgecolor = np.where(change >= 0.0, colorup, colordn)
+        facecolor = np.where(change >= 0.0, coloroff, colordn)
+
+    ax.bar(
+        xvalues,
+        height=high - low,
+        bottom=low,
+        edgecolor=edgecolor,
+        width=0.0,
+        linewidth=0.7,
+        label=label,
+    )
+    ax.bar(
+        xvalues,
+        height=upper - lower,
+        bottom=lower,
+        color=facecolor,
+        edgecolor=edgecolor,
+        width=width,
+        fill=True,
+        linewidth=0.7,
+    )

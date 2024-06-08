@@ -33,3 +33,4 @@ class Wrapper(ABC):
     @abstractmethod
     def plot_result(self, data, chart, ax=None):
         ...
+
