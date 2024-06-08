@@ -120,7 +120,7 @@ class RSI(Indicator):
             ax.fill_between(xv, yv, 30, where=(yv <= 30), interpolate=True, alpha=0.5)
 
         ax.set_yticks([30, 70])
-        ax.set_yticks([10, 30, 50, 70, 90], minor=True)
+        ax.set_yticks([30, 50, 70], minor=True)
         ax.grid(axis="y", which="major", linestyle="-", linewidth=2)
         ax.grid(axis="y", which="minor", linestyle=":", linewidth=2)
 
