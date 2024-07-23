@@ -397,6 +397,7 @@ class Chart:
             xv, yv = series_xy(series)
             ax.plot(xv, yv, label=label)
 
+
     def add_legends(self):
         """adds legends to all axes"""
         for ax in self.figure.axes:
@@ -426,6 +427,42 @@ class Chart:
 
         for indicator in indicators:
             self.plot_indicator(prices, indicator)
+
+        self.add_legends()
+
+    def plot_points(self, points):
+        """Plots individual points on the chart with optional labels and arrows.
+        
+        Args:
+            points (list[ChartPoint]): a list of ChartPoint objects
+        """
+        if not self.figure.axes:
+            raise RuntimeError("axes not initialized!")
+
+        ax = self.main_axes()
+
+        for point in points:
+            date = point.datetime
+            price = point.price
+            arrow = point.arrow
+            color = point.get('color', 'green')  # Default to blue if no color specified
+            label = point.get('label', '')
+            label_offset = point.get('label_offset', 1)
+            arrowprops = point.get('arrowprops', dict(facecolor=color, arrowstyle='->'))
+
+            xv = self.map_date(date)
+            ax.scatter(xv, price, color=color, label=f'{label or "Point"} at {price}')
+            
+            if label:
+                ax.annotate(
+                    label,
+                    xy=(xv, price),
+                    xytext=(xv, price + label_offset),  # Adjust the text position
+                    textcoords='data',
+                    arrowprops=arrowprops if arrow else None,
+                    fontsize=15,
+                    color=color
+                )
 
         self.add_legends()
 
