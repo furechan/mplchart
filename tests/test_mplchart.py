@@ -6,6 +6,7 @@ from mplchart.chart import Chart
 from mplchart.samples import sample_prices
 from mplchart.primitives import Candlesticks, Volume
 from mplchart.indicators import SMA, EMA, RSI, ATR, ADX, MACD, PPO, SLOPE, BBANDS
+from mplchart.datamodels import ChartPoint
 
 FREQS = ["daily", "hourly", "minute"]
 
@@ -39,8 +40,20 @@ def test_chart(indicator, freq, max_bars=250):
 
     indicators = [Candlesticks(), indicator]
 
+    halfway = len(prices) // 2
+
+    chart_point = [
+        ChartPoint(
+            datetime=str(prices.index[halfway]),
+            price=prices.iloc[halfway]['close'],
+            label="Test Point",
+            arrow=True
+        )
+    ]
     chart = Chart(title="Test", max_bars=max_bars)
     chart.plot(prices, indicators)
+
+    chart.plot_points(chart_point)
 
     assert chart.count_axes() > 0
 

@@ -8,7 +8,7 @@ class Primitive(ABC):
 
     @abstractmethod
     def plot_handler(self, data, chart, ax=None):
-        """Plot handler is called before any callculation"""
+        """Plot handler is called before any calculation"""
         ...
 
     def clone(self, **kwargs):
