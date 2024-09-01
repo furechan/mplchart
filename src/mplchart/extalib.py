@@ -52,7 +52,7 @@ class TalibWrapper(Wrapper):
             target = "samex" if self.same_scale else "below"
             ax = chart.get_axes(target)
 
-        def get_series(name):
+        def _series_data(name):
             if data.__class__.__name__ == "Series":
                 series = data
             else:
@@ -65,7 +65,7 @@ class TalibWrapper(Wrapper):
             label = repr(self) if name in ("real", "interer") else name
             for flag in flags:
                 if flag == HISTOGRAM:
-                    xv, yv = get_series(name)
+                    xv, yv = _series_data(name)
                     ax.bar(xv, yv, alpha=0.5, width=0.8, label=label)
                     continue
 
@@ -84,12 +84,12 @@ class TalibWrapper(Wrapper):
                 else:
                     warnings.warn(f"Unknown flag {flag!r}")
 
-                xv, yv = get_series(name)
+                xv, yv = _series_data(name)
                 ax.plot(xv, yv, linestyle=linestyle, label=label)
 
         if upper_limit and lower_limit:
-            xs, us = get_series(upper_limit)
-            xs, ls = get_series(lower_limit)
+            xs, us = _series_data(upper_limit)
+            xs, ls = _series_data(lower_limit)
             ax.fill_between(xs, ls, us,
                             interpolate=True,
                             alpha=0.2)

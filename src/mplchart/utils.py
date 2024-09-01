@@ -1,4 +1,4 @@
-""" charting utils """
+""" mplchart utils """
 
 
 def series_xy(data, item=None, dropna=False):
@@ -14,3 +14,4 @@ def series_xy(data, item=None, dropna=False):
     y = data.values
 
     return x, y
+

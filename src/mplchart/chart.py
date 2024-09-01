@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 
 from .utils import series_xy
 from .wrappers import get_wrapper
-from .styling import get_stylesheet
 from .layout import make_twinx, StandardLayout, FixedLayout
 from .mapper import RawDateMapper, DateIndexMapper
 
@@ -22,6 +21,9 @@ How primitives/indicators are plotted
 6) plot series as a line
 """
 
+
+# TODO remove Chart style argument
+# TODO remove Chart get_setting method
 
 class Chart:
     """
@@ -43,7 +45,6 @@ class Chart:
     source_data = None
     next_target = None
     last_indicator = None
-    stylesheet = None
     layout = None
     mapper = None
 
@@ -75,7 +76,8 @@ class Chart:
         else:
             self.layout = StandardLayout
 
-        self.stylesheet = get_stylesheet(style)
+        if style is not None:
+            warnings.warn("style argument is deprecated!")
 
         if figure is None:
             figsize = figsize or self.DEFAULT_FIGSIZE
@@ -340,9 +342,7 @@ class Chart:
         return count
 
     def get_setting(self, key, section, fallback=None):
-        """setting from stylesheet"""
-        if self.stylesheet:
-            return self.stylesheet.get_setting(key, section, fallback=fallback)
+        """chart level setting """
 
         return fallback
 
@@ -385,6 +385,7 @@ class Chart:
 
     def plot_result(self, result, indicator, ax=None):
         """ last resort plot_result handler """
+
         name = getattr(indicator, "__name__", str(indicator))
 
         if result.__class__.__name__ == "Series":

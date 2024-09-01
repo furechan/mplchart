@@ -16,13 +16,16 @@ class Volume(Primitive):
         sma (int) : the period of the simple moving average, default = 20
     """
 
-    WIDTH = 0.8
-    COLORUP = "green"
-    COLORDN = "red"
-    MACOLOR = "grey"
-
-    def __init__(self, sma=50):
+    def __init__(self, sma=50, *,
+                 width: float = 0.8,
+                 colorup: str = "green",
+                 colordn: str = "red",
+                 colorma: str = "grey"):
         self.sma = sma
+        self.width = width
+        self.colorup = colorup
+        self.colordn = colordn
+        self.colorma = colorma
 
     def __str__(self):
         return self.__class__.__name__
@@ -51,10 +54,10 @@ class Volume(Primitive):
         volume = data.volume
         change = data.change
 
-        width = self.WIDTH
-        colorup = chart.get_setting("volume.up", "color", self.COLORUP)
-        colordn = chart.get_setting("volume.dn", "color", self.COLORDN)
-        macolor = chart.get_setting("volume.ma", "color", self.MACOLOR)
+        width = self.width
+        colorup = self.colorup
+        colordn = self.colordn
+        colorma = self.colorma
 
         color = np.where(change > 0, colorup, colordn)
 
@@ -70,4 +73,4 @@ class Volume(Primitive):
 
         if self.sma:
             average = data.average
-            ax.plot(index, average, linewidth=0.7, color=macolor)
+            ax.plot(index, average, linewidth=0.7, color=colorma)

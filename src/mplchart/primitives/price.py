@@ -24,8 +24,9 @@ class Price(Primitive):
 
     """
 
-    def __init__(self, *, item="close"):
+    def __init__(self, item: str = "close", *, color: str = None):
         self.item = item
+        self.color = color
 
     def __str__(self):
         return self.item
@@ -40,9 +41,10 @@ class Price(Primitive):
             ax = chart.get_axes()
 
         label = str(self)
+        color = self.color
 
         data = self.calc(data)
         data = chart.extract_df(data)
 
         xv, yv = series_xy(data)
-        ax.plot(xv, yv, label=label, color=None)
+        ax.plot(xv, yv, label=label, color=color)

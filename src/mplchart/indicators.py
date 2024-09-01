@@ -6,14 +6,56 @@ from dataclasses import dataclass
 
 from typing import ClassVar
 
+from inspect import Signature, Parameter
+
 from . import library
 
 from .library import get_series
 from .utils import series_xy
 
 
+def auto_label(self):
+    cname = self.__class__.__qualname__
+    signature = Signature.from_callable(self.__init__)
+    args, keyword_only = [], False
+
+    for p in signature.parameters.values():
+        v = getattr(self, p.name, p.default)
+
+        if p.kind in (Parameter.VAR_POSITIONAL, Parameter.VAR_KEYWORD):
+            raise ValueError(f"Unsupported parameter type {p.kind}")
+
+        if p.kind == Parameter.KEYWORD_ONLY:
+            keyword_only = True
+        elif isinstance(p.default, (type(None), str, bool)):
+            keyword_only = True
+
+        if v == p.default:
+            # skip argument if not equal to default
+            if keyword_only or not isinstance(v, (int, float)):
+                keyword_only = True
+                continue
+
+        if keyword_only:
+            args.append(f"{p.name}={v!r}")
+        else:
+            args.append(f"{v!r}")
+
+    args = ", ".join(args)
+
+    return f"{cname}({args})"
+
+
+class Indicator:
+    """Injects a basic __repr__ based on __init__ signature"""
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls.__str__ = auto_label
+
+
 @dataclass
-class SMA:
+class SMA(Indicator):
     """Simple Moving Average"""
 
     period: int = 20
@@ -26,7 +68,7 @@ class SMA:
 
 
 @dataclass
-class EMA:
+class EMA(Indicator):
     """Exponential Moving Average"""
 
     period: int = 20
@@ -39,7 +81,7 @@ class EMA:
 
 
 @dataclass
-class ROC:
+class ROC(Indicator):
     """Rate of Change"""
 
     period: int = 20
@@ -50,7 +92,7 @@ class ROC:
 
 
 @dataclass
-class RSI:
+class RSI(Indicator):
     """Relative Strengh Index"""
 
     period: int = 14
@@ -66,7 +108,7 @@ class RSI:
         if ax is None:
             ax = chart.get_axes("above")
 
-        label = repr(self)
+        label = str(self)
         xv, yv = series_xy(data)
 
         color = chart.get_setting("rsi", "color", self.COLOR)
@@ -78,7 +120,7 @@ class RSI:
             ax.fill_between(xv, yv, 30, where=(yv <= 30), interpolate=True, alpha=0.5)
 
         ax.set_yticks([30, 70])
-        ax.set_yticks([10, 30, 50, 70, 90], minor=True)
+        ax.set_yticks([30, 50, 70], minor=True)
         ax.grid(axis="y", which="major", linestyle="-", linewidth=2)
         ax.grid(axis="y", which="minor", linestyle=":", linewidth=2)
 
@@ -87,7 +129,7 @@ class RSI:
 
 
 @dataclass
-class ATR:
+class ATR(Indicator):
     """Average True Range"""
 
     period: int = 14
@@ -97,7 +139,7 @@ class ATR:
 
 
 @dataclass
-class ADX:
+class ADX(Indicator):
     """Average Directional Index"""
 
     period: int = 14
@@ -109,7 +151,7 @@ class ADX:
         if ax is None:
             ax = chart.get_axes("below")
 
-        label = repr(self)
+        label = str(self)
 
         adx = data.iloc[:, 0]
         pdi = data.iloc[:, 1]
@@ -134,7 +176,7 @@ class ADX:
 
 
 @dataclass
-class MACD:
+class MACD(Indicator):
     """Moving Average Convergence Divergence"""
 
     n1: int = 12
@@ -149,7 +191,7 @@ class MACD:
         if ax is None:
             ax = chart.get_axes("below")
 
-        label = repr(self)
+        label = str(self)
 
         macd = data.iloc[:, 0]
         signal = data.iloc[:, 1]
@@ -166,7 +208,7 @@ class MACD:
 
 
 @dataclass
-class PPO:
+class PPO(Indicator):
     """Price Percentage Oscillator"""
 
     n1: int = 12
@@ -181,7 +223,7 @@ class PPO:
         if ax is None:
             ax = chart.get_axes("below")
 
-        label = repr(self)
+        label = str(self)
 
         ppo = data.iloc[:, 0]
         signal = data.iloc[:, 1]
@@ -198,7 +240,7 @@ class PPO:
 
 
 @dataclass
-class SLOPE:
+class SLOPE(Indicator):
     """Slope (Linear regression with time)"""
 
     period: int = 20
@@ -209,7 +251,7 @@ class SLOPE:
 
 
 @dataclass
-class BBANDS:
+class BBANDS(Indicator):
     """Bollinger Bands"""
 
     period: int = 20
@@ -225,7 +267,7 @@ class BBANDS:
         if ax is None:
             ax = chart.get_axes("samex")
 
-        label = repr(self)
+        label = str(self)
 
         upper = data.iloc[:, 0]
         middle = data.iloc[:, 1]

@@ -16,9 +16,10 @@ class OHLC(Primitive):
     Used to plot prices as OHLC bars
     """
 
-    WIDTH = 0.8
-    COLORUP = "black"
-    COLORDN = "red"
+    def __init__(self, *, width: float = 0.8, colorup: str = None, colordn: str = None):
+        self.width = width
+        self.colorup = colorup
+        self.colordn = colordn
 
     def __str__(self):
         return self.__class__.__name__
@@ -30,16 +31,16 @@ class OHLC(Primitive):
         label = str(self)
         data = chart.extract_df(data)
 
-        width = self.WIDTH
-        colorup = chart.get_setting("ohlc.up", "color", self.COLORUP)
-        colordn = chart.get_setting("ohlc.dn", "color", self.COLORDN)
+        width = self.width
+        colorup = self.colorup or "k"
+        colordn = self.colordn or "r"
 
         return plot_ohlc(
             data=data, ax=ax, width=width, colorup=colorup, colordn=colordn, label=label
         )
 
 
-def plot_ohlc(data, ax=None, width=0.8, colorup="k", colordn="k", label=None):
+def plot_ohlc(data, ax=None, width=0.8, colorup="k", colordn="r", label=None):
     """plots open-high-low-close charts as polygons"""
 
     ax = ax or plt.gca()
@@ -61,16 +62,16 @@ def plot_ohlc(data, ax=None, width=0.8, colorup="k", colordn="k", label=None):
 
     verts = [
         (
-            (x, l),
-            (x, o),
-            (x - half_bar, o),
-            (x, o),
-            (x, c),
-            (x + half_bar, c),
-            (x, c),
-            (x, h),
+            (xv, lo),
+            (xv, op),
+            (xv - half_bar, op),
+            (xv, op),
+            (xv, cl),
+            (xv + half_bar, cl),
+            (xv, cl),
+            (xv, hi),
         )
-        for x, o, h, l, c in zip(xvalues, data.open, data.high, data.low, data.close)
+        for xv, op, hi, lo, cl in zip(xvalues, data.open, data.high, data.low, data.close)
     ]
 
     verts = np.asarray(verts)
