@@ -1,5 +1,7 @@
 """ Candlesticks primitive """
 
+import warnings
+
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -9,7 +11,6 @@ from matplotlib.collections import PolyCollection
 
 from ..model import Primitive
 
-import warnings
 
 
 class Candlesticks(Primitive):
