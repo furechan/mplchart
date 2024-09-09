@@ -119,7 +119,7 @@ indicators = [
 
 ## Custom Indicators
 
-Any callable that takes a prices data frame and returns a series can be used as indicator.
+Any callable that takes a prices dataframe and returns a series or dataframe can be used as indicator.
 You can also implement a custom indicator as a subclass of `Indicator`.
 
 ```python
