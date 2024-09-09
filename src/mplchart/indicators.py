@@ -79,6 +79,19 @@ class EMA(Indicator):
         series = get_series(prices)
         return library.calc_ema(series, self.period)
 
+@dataclass
+class WMA(Indicator):
+    """Weighted Moving Average"""
+
+    period: int = 20
+
+    same_scale: ClassVar[bool] = True
+
+    def __call__(self, prices):
+        series = get_series(prices)
+        return library.calc_wma(series, self.period)
+
+
 
 @dataclass
 class ROC(Indicator):

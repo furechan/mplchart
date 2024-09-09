@@ -37,6 +37,17 @@ def calc_ema(series, period: int = 20):
     ).mean()
 
 
+def calc_wma(series, period: int = 20):
+    """Weighted Moving Average"""
+    weights = np.arange(1, period + 1, dtype=float)
+    weights /= np.sum(weights)
+
+    def average(data):
+        return np.sum(data.values * weights)
+
+    return series.rolling(period).apply(average)
+
+
 def calc_rsi(series, period: int = 14):
     """Relative Strength Index"""
     ewm = dict(alpha=1.0 / period, min_periods=period, adjust=True, ignore_na=True)
