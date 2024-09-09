@@ -119,29 +119,29 @@ indicators = [
 
 ## Custom Indicators
 
-Any callable that takes a prices data frame and returns a series as result can be used as indicator.
-A function can be used as an indicator but you can also implement an indicator as a callable dataclass.
+Any callable that takes a prices data frame and returns a series can be used as indicator.
+You can also implement a custom indicator as a subclass of `Indicator`.
 
 ```python
-from dataclasses import dataclass
-
+from mplchart.model import Indicator
 from mplchart.library import get_series, calc_ema
 
-@dataclass
-class DEMA:
-    """ Double Exponential Moving Average """
-    period: int = 20
+class DEMA(Indicator):
+    """Double Exponential Moving Average"""
 
     same_scale = True
-    # same_scale is an optional class attribute that indicates
-    # the indicator should be plot on the same axes by default
+    # same_scale is an optional class attribute
+    # to specify that the indicator can be drawn
+    # on the same axes as the previous indicator
+
+    def __init__(self, period: int = 20):
+        self.period = period
 
     def __call__(self, prices):
         series = get_series(prices)
         ema1 = calc_ema(series, self.period)
         ema2 = calc_ema(ema1, self.period)
         return 2 * ema1 - ema2
-
 ```
 
 ## Examples

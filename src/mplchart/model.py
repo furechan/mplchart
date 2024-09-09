@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 
-from .utils import auto_label
+from .utils import short_repr
 
 
 class Primitive(ABC):
@@ -40,7 +40,7 @@ class Wrapper(ABC):
 class Indicator(ABC):
     """Indicator Base Class"""
 
-    __str__ = auto_label
+    __repr__ = short_repr
 
     @abstractmethod
     def __call__(self, data):
@@ -61,8 +61,8 @@ class ComposedIndicator(Indicator):
             raise TypeError("Arguments must be callable")
         self.args = args
 
-    def __str__(self):
-        return " @ ".join(str(fn) for fn in self.args)
+    def __repr__(self):
+        return " @ ".join(repr(fn) for fn in self.args)
 
     def __call__(self, data):
         result = data

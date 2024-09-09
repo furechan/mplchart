@@ -39,7 +39,9 @@ def get_series(prices, item: str = None):
         return prices["close"]
 
 
-def auto_label(self):
+def short_repr(self):
+    """ short repr based on __init__ signature """
+
     cname = self.__class__.__qualname__
     signature = Signature.from_callable(self.__init__)
     args, keyword_only = [], False

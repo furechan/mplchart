@@ -2,87 +2,83 @@
 
 import numpy as np
 
-from dataclasses import dataclass
-
-from typing import ClassVar
-
 from . import library
 
-from .utils import get_series, series_xy
 from .model import Indicator
+from .utils import get_series, series_xy
 
 
-@dataclass
 class SMA(Indicator):
     """Simple Moving Average"""
 
-    period: int = 20
+    same_scale: bool = True
 
-    same_scale: ClassVar[bool] = True
+    def __init__(self, period: int = 20):
+        self.period = period
 
     def __call__(self, prices):
         series = get_series(prices)
         return library.calc_sma(series, self.period)
 
 
-@dataclass
 class EMA(Indicator):
     """Exponential Moving Average"""
 
-    period: int = 20
+    same_scale: bool = True
 
-    same_scale: ClassVar[bool] = True
+    def __init__(self, period: int = 20):
+        self.period = period
 
     def __call__(self, prices):
         series = get_series(prices)
         return library.calc_ema(series, self.period)
 
-@dataclass
+
 class WMA(Indicator):
     """Weighted Moving Average"""
 
-    period: int = 20
+    same_scale: bool = True
 
-    same_scale: ClassVar[bool] = True
+    def __init__(self, period: int = 20):
+        self.period = period
 
     def __call__(self, prices):
         series = get_series(prices)
         return library.calc_wma(series, self.period)
 
 
-@dataclass
 class HMA(Indicator):
     """Hull Moving Average"""
 
-    period: int = 20
+    same_scale: bool = True
 
-    same_scale: ClassVar[bool] = True
+    def __init__(self, period: int = 20):
+        self.period = period
 
     def __call__(self, prices):
         series = get_series(prices)
         return library.calc_hma(series, self.period)
 
 
-
-@dataclass
 class ROC(Indicator):
     """Rate of Change"""
 
-    period: int = 20
+    def __init__(self, period: int = 20):
+        self.period = period
 
     def __call__(self, prices):
         series = get_series(prices)
         return library.calc_roc(series, self.period)
 
 
-@dataclass
 class RSI(Indicator):
     """Relative Strengh Index"""
 
-    period: int = 14
+    default_pane: str = "above"
+    color: str = "black"
 
-    default_pane: ClassVar[str] = "above"
-    COLOR: ClassVar[str] = "black"
+    def __init__(self, period: int = 14):
+        self.period = period
 
     def __call__(self, prices):
         series = get_series(prices)
@@ -95,7 +91,7 @@ class RSI(Indicator):
         label = str(self)
         xv, yv = series_xy(data)
 
-        color = chart.get_setting("rsi", "color", self.COLOR)
+        color = self.color
 
         ax.plot(xv, yv, label=label, color=color)
 
@@ -112,21 +108,21 @@ class RSI(Indicator):
         ax.yaxis.set_minor_formatter(yformatter)
 
 
-@dataclass
 class ATR(Indicator):
     """Average True Range"""
 
-    period: int = 14
+    def __init__(self, period: int = 14):
+        self.period = period
 
     def __call__(self, prices):
         return library.calc_atr(prices, self.period)
 
 
-@dataclass
 class ADX(Indicator):
     """Average Directional Index"""
 
-    period: int = 14
+    def __init__(self, period: int = 14):
+        self.period = period
 
     def __call__(self, prices):
         return library.calc_adx(prices, self.period)
@@ -159,13 +155,13 @@ class ADX(Indicator):
         ax.yaxis.set_minor_formatter(yformatter)
 
 
-@dataclass
 class MACD(Indicator):
     """Moving Average Convergence Divergence"""
 
-    n1: int = 12
-    n2: int = 26
-    n3: int = 9
+    def __init__(self, n1: int = 12, n2: int = 26, n3: int = 9):
+        self.n1 = n1
+        self.n2 = n2
+        self.n3 = n3
 
     def __call__(self, prices):
         series = get_series(prices)
@@ -191,13 +187,13 @@ class MACD(Indicator):
         ax.bar(xv, yv, alpha=0.5, width=0.8)
 
 
-@dataclass
 class PPO(Indicator):
     """Price Percentage Oscillator"""
 
-    n1: int = 12
-    n2: int = 26
-    n3: int = 9
+    def __init__(self, n1: int = 12, n2: int = 26, n3: int = 9):
+        self.n1 = n1
+        self.n2 = n2
+        self.n3 = n3
 
     def __call__(self, prices):
         series = get_series(prices)
@@ -223,26 +219,26 @@ class PPO(Indicator):
         ax.bar(xv, yv, alpha=0.5, width=0.8)
 
 
-@dataclass
 class SLOPE(Indicator):
     """Slope (Linear regression with time)"""
 
-    period: int = 20
+    def __init__(self, period: int = 20):
+        self.period = period
 
     def __call__(self, prices):
         series = get_series(prices)
         return library.calc_slope(series, self.period)
 
 
-@dataclass
 class BBANDS(Indicator):
     """Bollinger Bands"""
 
-    period: int = 20
-    nbdev: float = 2.0
+    same_scale: bool = True
+    color: str = "orange"
 
-    same_scale: ClassVar[bool] = True
-    COLOR: ClassVar[str] = "orange"
+    def __init__(self, period: int = 20, nbdev: float = 2.0):
+        self.period = period
+        self.nbdev = nbdev
 
     def __call__(self, prices):
         return library.calc_bbands(prices, self.period, self.nbdev)
@@ -257,7 +253,7 @@ class BBANDS(Indicator):
         middle = data.iloc[:, 1]
         lower = data.iloc[:, 2]
 
-        color = self.COLOR
+        color = self.color
 
         xs, ms = series_xy(middle)
         ax.plot(xs, ms, color=color, linestyle="dashed", label=label)
