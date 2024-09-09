@@ -29,7 +29,7 @@ def get_series(prices, item: str = None):
         else:
             return prices
 
-    # rename columns to make columne name case insensitive
+    # rename columns to make lookup case insensitive
     prices = prices.rename(columns=str.lower)
 
     if item is not None:
