@@ -1,23 +1,10 @@
 """ technical analysis library """
 
+import math
 import numpy as np
 import pandas as pd
 
-
-def get_series(prices, item: str = None):
-    """extracts series of given name if applicable"""
-
-    # rename columns to make search case insensitive
-    prices = prices.rename(columns=str.lower)
-
-    if item is not None:
-        return prices[item.lower()]
-
-    if isinstance(prices, pd.Series):
-        return prices
-
-    if isinstance(prices, pd.DataFrame):
-        return prices["close"]
+from .utils import get_series
 
 
 def calc_roc(series, period: int = 1):
@@ -46,6 +33,21 @@ def calc_wma(series, period: int = 20):
         return np.sum(data.values * weights)
 
     return series.rolling(period).apply(average)
+
+
+def calc_hma(series, period: int = 20):
+    """Hull Moving Average"""
+
+    if period <= 0:
+        raise ValueError("period must be greater than zero")
+
+    m1 = calc_wma(series, round(period/2))
+    m2 = calc_wma(series, period)
+    m3 = (2 *  m1) - m2
+
+    result = calc_wma(m3, round(math.sqrt(period)))
+
+    return result
 
 
 def calc_rsi(series, period: int = 14):

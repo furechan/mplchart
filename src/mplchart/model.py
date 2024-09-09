@@ -2,6 +2,8 @@
 
 from abc import ABC, abstractmethod
 
+from .utils import auto_label
+
 
 class Primitive(ABC):
     """Primitive abstract base class"""
@@ -33,4 +35,47 @@ class Wrapper(ABC):
     @abstractmethod
     def plot_result(self, data, chart, ax=None):
         ...
+
+
+class Indicator(ABC):
+    """Indicator Base Class"""
+
+    __str__ = auto_label
+
+    @abstractmethod
+    def __call__(self, data):
+        ...
+
+    def __matmul__(self, other):
+        if callable(other):
+            return ComposedIndicator(self, other)
+        return self(other)
+
+
+
+class ComposedIndicator(Indicator):
+    """Composed Indicator"""
+
+    def __init__(self, *args):
+        if not all(callable(arg) for arg in args):
+            raise TypeError("Arguments must be callable")
+        self.args = args
+
+    def __str__(self):
+        return " @ ".join(str(fn) for fn in self.args)
+
+    def __call__(self, data):
+        result = data
+        for fn in reversed(self.args):
+            result = fn(result)
+        return result
+
+    def __matmul__(self, other):
+        if callable(other):
+            return self.__class__(*self.args, other)
+        return self(other)
+
+    @property
+    def same_scale(self):
+        return all(getattr(i, "same_scale", False) for i in self.args)
 

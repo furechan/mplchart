@@ -87,6 +87,7 @@ Some of the indicators included are:
 - `SMA` Simple Moving Average
 - `EMA` Exponential Moving Average
 - `WMA` Weighted Moving Average
+- `HMA` Hull Moving Average
 - `ROC` Rate of Change
 - `RSI` Relative Strength Index
 - `ATR` Average True Range

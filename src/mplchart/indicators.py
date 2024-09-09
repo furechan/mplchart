@@ -6,52 +6,10 @@ from dataclasses import dataclass
 
 from typing import ClassVar
 
-from inspect import Signature, Parameter
-
 from . import library
 
-from .library import get_series
-from .utils import series_xy
-
-
-def auto_label(self):
-    cname = self.__class__.__qualname__
-    signature = Signature.from_callable(self.__init__)
-    args, keyword_only = [], False
-
-    for p in signature.parameters.values():
-        v = getattr(self, p.name, p.default)
-
-        if p.kind in (Parameter.VAR_POSITIONAL, Parameter.VAR_KEYWORD):
-            raise ValueError(f"Unsupported parameter type {p.kind}")
-
-        if p.kind == Parameter.KEYWORD_ONLY:
-            keyword_only = True
-        elif isinstance(p.default, (type(None), str, bool)):
-            keyword_only = True
-
-        if v == p.default:
-            # skip argument if not equal to default
-            if keyword_only or not isinstance(v, (int, float)):
-                keyword_only = True
-                continue
-
-        if keyword_only:
-            args.append(f"{p.name}={v!r}")
-        else:
-            args.append(f"{v!r}")
-
-    args = ", ".join(args)
-
-    return f"{cname}({args})"
-
-
-class Indicator:
-    """Injects a basic __repr__ based on __init__ signature"""
-
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        cls.__str__ = auto_label
+from .utils import get_series, series_xy
+from .model import Indicator
 
 
 @dataclass
@@ -90,6 +48,19 @@ class WMA(Indicator):
     def __call__(self, prices):
         series = get_series(prices)
         return library.calc_wma(series, self.period)
+
+
+@dataclass
+class HMA(Indicator):
+    """Hull Moving Average"""
+
+    period: int = 20
+
+    same_scale: ClassVar[bool] = True
+
+    def __call__(self, prices):
+        series = get_series(prices)
+        return library.calc_hma(series, self.period)
 
 
 
