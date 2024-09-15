@@ -15,7 +15,7 @@ How primitives/indicators are plotted
 1) try plot_handler. No processing or no extract_df yet
 2) call indicator / process data
 3) call extract_df / map dataframe
-3) try wrapper plot_result if applicable
+3) replace indicator with wrapper if applicable
 4) select axes
 5) try indicator plot_result if applicable
 6) plot series as a line

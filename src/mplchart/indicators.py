@@ -118,6 +118,16 @@ class ATR(Indicator):
         return library.calc_atr(prices, self.period)
 
 
+class ATRP(Indicator):
+    """Average True Range (Percent)"""
+
+    def __init__(self, period: int = 14):
+        self.period = period
+
+    def __call__(self, prices):
+        return library.calc_atr(prices, self.period, percent=True)
+
+
 class ADX(Indicator):
     """Average Directional Index"""
 

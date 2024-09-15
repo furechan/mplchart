@@ -63,10 +63,10 @@ def calc_rsi(series, period: int = 14):
     return result
 
 
-def calc_atr(prices, period: int = 14):
+def calc_atr(prices, period: int = 14, *, percent: bool = False):
     """Average True Range"""
 
-    hlc = prices.filter(["high", "low"]).join(prices["close"].shift(1))
+    hlc = prices.filter(['high', 'low']).join(prices['close'].shift(1))
     trange = hlc.max(axis=1) - hlc.min(axis=1)
 
     if period > 0:
@@ -74,6 +74,9 @@ def calc_atr(prices, period: int = 14):
         result = trange.ewm(**ewm).mean()
     else:
         result = trange
+    
+    if percent:
+        result = 100 * result / prices['close']
 
     return result
 
