@@ -8,38 +8,38 @@ ROOT = Path(__file__).parent
 
 @task
 def info(c):
-    """ Check package versions """
+    """Check package versions"""
     c.run(f"pip index versions {PACKAGE}")
 
 
 @task
 def clean(c):
-    """ Clean project dist """
+    """Clean project dist"""
     c.run("rm -rf dist")
 
 
 @task
 def check(c):
-    """ Check package """
+    """Check package"""
     c.run("nbcheck examples misc")
-    c.run("flake8")
+    c.run("ruff check")
 
 
 @task(clean)
 def build(c):
-    """ Build project wheel """
+    """Build project wheel"""
     c.run("nbfixme examples misc")
     c.run("python -mbuild --wheel")
 
 
 @task
 def dump(c):
-    """ Dump wheel contents """
+    """Dump wheel contents"""
     for file in ROOT.glob("dist/*.whl"):
         c.run(f"unzip -l {file}")
 
 
 @task
 def publish(c):
-    """ Publish to PyPI with twine """
+    """Publish to PyPI with twine"""
     c.run("twine upload dist/*.whl")

@@ -26,6 +26,9 @@ dev-mode-dirs = ["src"]
 only-include = ["src"]
 exclude = [".*"]
 
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
 [tool.pydev]
 allow-publish = true
 
