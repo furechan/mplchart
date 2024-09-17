@@ -1,4 +1,4 @@
-""" primitive base class """
+"""primitive base class"""
 
 from abc import ABC, abstractmethod
 
@@ -23,18 +23,11 @@ class Primitive(ABC):
 class Wrapper(ABC):
     """Indicator plotting wrapper"""
 
-    def __init__(self, indicator):
-        self.indicator = indicator
-
-    def __repr__(self, *args, **kwargs):
-        return getattr(self.indicator, "__name__", repr(self.indicator))
-
     def check_result(self, data):
         return True
 
     @abstractmethod
-    def plot_result(self, data, chart, ax=None):
-        ...
+    def plot_result(self, data, chart, ax=None): ...
 
 
 class Indicator(ABC):
@@ -43,14 +36,12 @@ class Indicator(ABC):
     __repr__ = short_repr
 
     @abstractmethod
-    def __call__(self, data):
-        ...
+    def __call__(self, data): ...
 
     def __matmul__(self, other):
         if callable(other):
             return ComposedIndicator(self, other)
         return self(other)
-
 
 
 class ComposedIndicator(Indicator):
@@ -78,4 +69,3 @@ class ComposedIndicator(Indicator):
     @property
     def same_scale(self):
         return all(getattr(i, "same_scale", False) for i in self.args)
-

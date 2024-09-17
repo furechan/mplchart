@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from mplchart.chart import Chart
 from mplchart.samples import sample_prices
 from mplchart.primitives import Candlesticks, Volume
-from mplchart.indicators import SMA, EMA, WMA, HMA, RSI, ATR, ADX, MACD, PPO, SLOPE, BBANDS
+from mplchart.indicators import SMA, EMA, WMA, HMA, RSI, ATR, ATRP, ADX, MACD, PPO, SLOPE, BBANDS
 
 FREQS = ["daily", "hourly", "minute"]
 
@@ -17,6 +17,7 @@ INDICATORS = [
     HMA(20),
     RSI(),
     ATR(),
+    ATRP(),
     ADX(),
     MACD(),
     PPO(),

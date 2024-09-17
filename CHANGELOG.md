@@ -1,5 +1,14 @@
 # Change Log
 
+## 0.0.12
+- Added ATRP indicator
+
+## 0.0.11
+- Refactorings
+
+## 0.0.10
+- Refactorings
+
 ## 0.0.9
 - Moved indicator ploting logic to `indicators` module
 - Removed deprecated `helper` module
