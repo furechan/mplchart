@@ -4,21 +4,24 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mplchart"
-version = "0.0.12"
 requires-python = ">=3.9"
 readme = "output/README.md"
+dynamic = ["version"]
 license = { text = "MIT License" }
 description = "Classic Stock Charts in Python"
 urls = { homepage = "https://github.com/furechan/mplchart" }
 authors = [{ name = "Furechan", email = "furechan@xsmail.com" }]
 keywords = ["finance", "charting", "matplotlib", "candlesticks"]
-dependencies = ["matplotlib", "yfinance", "numpy", "pandas"]
-optional-dependencies.dev = ["pytest", "pytest-sugar", "ipykernel"]
+dependencies = ["matplotlib", "numpy", "pandas"]
+optional-dependencies.dev = ["yfinance", "pytest", "ipykernel", "ta-lib", "ruff"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+
+[tool.hatch.version]
+path = "src/mplchart/__init__.py"
 
 [tool.hatch.build]
 targets.wheel.sources = ["src"]

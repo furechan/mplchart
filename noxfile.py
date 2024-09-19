@@ -1,6 +1,6 @@
 import os
-import nox
 import tempfile
+import nox  # type: ignore
 
 VERSIONS = ["3.9", "3.10", "3.11", "3.12"]
 
@@ -18,5 +18,6 @@ def tests(session: nox.Session):
 
 @nox.session()
 def lint(session: nox.Session):
-    session.install("ruff")
+    session.install("ruff", "nbcheck")
     session.run("ruff", "check")
+    session.run("nbcheck", "examples", "misc")
