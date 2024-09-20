@@ -2,7 +2,6 @@
 
 ## 0.0.12
 - Added ATRP indicator
-- Added noxfile.py
 - Version is dynamic
 
 ## 0.0.11
