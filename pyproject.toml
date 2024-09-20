@@ -13,12 +13,14 @@ urls = { homepage = "https://github.com/furechan/mplchart" }
 authors = [{ name = "Furechan", email = "furechan@xsmail.com" }]
 keywords = ["finance", "charting", "matplotlib", "candlesticks"]
 dependencies = ["matplotlib", "numpy", "pandas"]
-optional-dependencies.dev = ["yfinance", "pytest", "ipykernel", "ta-lib", "ruff"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+
+[project.optional-dependencies]
+dev = ["yfinance", "pytest", "ipykernel", "ta-lib", "ruff"]
 
 [tool.hatch.version]
 path = "src/mplchart/__init__.py"
@@ -32,9 +34,6 @@ exclude = [".*"]
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 "*.ipynb" = ["F401", "F811"]
-
-[tool.pydev]
-allow-publish = true
 
 [tool.pytest.ini_options]
 addopts = ["-p no:cacheprovider"]

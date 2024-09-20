@@ -7,7 +7,6 @@ PACKAGE = "mplchart"
 ROOT = Path(__file__).parent
 
 
-
 @task
 def info(c):
     """Check package versions"""
