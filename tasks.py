@@ -8,6 +8,12 @@ FOLDER = Path(__file__).parent
 
 
 @task
+def install(c):
+    """Check package versions"""
+    c.run("pip install -e \".[extras]\"")
+
+
+@task
 def info(c):
     """Check package versions"""
     c.run(f"pip index versions {PACKAGE}")

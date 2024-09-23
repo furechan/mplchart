@@ -105,7 +105,7 @@ class Chart:
         """whether the target bname is valid"""
         return target in ("main", "samex", "twinx", "above", "below")
 
-    def inspect_data(self, data):
+    def init_mapper(self, data):
         """initalizes chart from data"""
 
         if self.source_data is None:
@@ -114,28 +114,48 @@ class Chart:
         if not self.mapper_done:
             self.config_mapper(data=data)
 
+    def config_mapper(self, *, data=None):
+        """Configures the date mapper from the original data"""
+
+        self.mapper_done = True
+
+        if self.use_calendar:
+            self.mapper = RawDateMapper(
+                index=data.index, start=self.start, end=self.end, max_bars=self.max_bars
+            )
+        elif data is not None:
+            self.mapper = DateIndexMapper(
+                index=data.index, start=self.start, end=self.end, max_bars=self.max_bars
+            )
+        else:
+            raise ValueError("Cannot create mapper. data is None!")
+
+        if self.mapper:
+            ax = self.root_axes()
+            self.mapper.config_axes(ax)
+
     def rebase_data(self, data):
         if self.source_data is None:
             warnings.warn("No source data to rebase to!")
             return data
 
-        source_data = self.mapper.slice(self.source_data)
-        index = data.index.intersection(source_data.index)
+        source_data = self.mapper.extract_df(self.source_data)
+        mapped_data = self.mapper.extract_df(data)
 
-        if not len(index):
+        if not len(data) or not len(source_data):
             warnings.warn("No intersection of data!")
             return data
 
-        dp = data.loc[index[0]]
-        sp = source_data.loc[index[0]]
-        factor = sp / dp
+        sp = source_data.loc[0].close
+        mp = mapped_data.loc[0].close
+        factor = sp / mp
 
         return data.filter(["open", "high", "low", "close"]) * factor
 
     def extract_df(self, data):
         """extract dataframe subset"""
 
-        self.inspect_data(data)
+        self.init_mapper(data)
 
         if self.mapper:
             return self.mapper.extract_df(data)
@@ -163,26 +183,6 @@ class Chart:
 
         ax = self.root_axes()
         ax.set_title(title)
-
-    def config_mapper(self, *, data=None):
-        """Configures the date mapper from the original data"""
-
-        self.mapper_done = True
-
-        if self.use_calendar:
-            self.mapper = RawDateMapper(
-                index=data.index, start=self.start, end=self.end, max_bars=self.max_bars
-            )
-        elif data is not None:
-            self.mapper = DateIndexMapper(
-                index=data.index, start=self.start, end=self.end, max_bars=self.max_bars
-            )
-        else:
-            raise ValueError("Cannot create mapper. data is None!")
-
-        if self.mapper:
-            ax = self.root_axes()
-            self.mapper.config_axes(ax)
 
     def config_axes(self, ax, root=False):
         """configures axes"""
