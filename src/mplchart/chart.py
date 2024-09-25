@@ -4,11 +4,15 @@ import io
 import warnings
 
 import matplotlib.pyplot as plt
+from collections import defaultdict
+from functools import cached_property
 
 from .utils import series_xy
 from .wrappers import get_wrapper
-from .layout import make_twinx, StandardLayout, FixedLayout
+from .layout import make_twinx, StandardLayout
 from .mapper import RawDateMapper, DateIndexMapper
+from .stylemap import StyleMap
+from .stylesheet import STYLESHEET
 
 """
 How primitives/indicators are plotted
@@ -16,14 +20,11 @@ How primitives/indicators are plotted
 2) call indicator / process data
 3) call extract_df / map dataframe
 3) replace indicator with wrapper if applicable
-4) select axes
+4) select/create axes
 5) try indicator plot_result if applicable
-6) plot series as a line
+6) otherwise plot series as lines
 """
 
-
-# TODO remove Chart style argument
-# TODO remove Chart get_setting method
 
 class Chart:
     """
@@ -41,12 +42,13 @@ class Chart:
         chart.plot(prices, indicators)
     """
 
+    mapper = None
     mapper_done = False
     source_data = None
     next_target = None
     last_indicator = None
-    layout = None
-    mapper = None
+    layout = StandardLayout
+
 
     DEFAULT_FIGSIZE = (12, 9)
 
@@ -58,34 +60,34 @@ class Chart:
             end=None,
             figure=None,
             figsize=None,
-            bgcolor="w",
-            use_calendar=False,
+            bgcolor=None,
             holidays=None,
-            style=None,
-            fixed_layout=False,
+            stylesheet=None,
+            use_calendar=False,
     ):
+
         self.start = start
         self.end = end
+        self.figsize = figsize
+        self.bgcolor = bgcolor
         self.max_bars = max_bars
         self.holidays = holidays
         self.use_calendar = use_calendar
 
-        if fixed_layout:
-            warnings.warn("Fixed layout is deprecated!")
-            self.layout = FixedLayout
-        else:
-            self.layout = StandardLayout
+        if stylesheet is None:
+            stylesheet = STYLESHEET
+        stylesheet = dict(stylesheet)
+        self.stylesheet = stylesheet
+        self.stylemaps = defaultdict(lambda: StyleMap(stylesheet))
 
-        if style is not None:
-            warnings.warn("style argument is deprecated!")
-
-        if figure is None:
-            figsize = figsize or self.DEFAULT_FIGSIZE
-            figure = plt.figure(figsize=figsize, facecolor=bgcolor, edgecolor=bgcolor)
-        else:
+        if figure is not None:
             figure.clf()
+            self.figure = figure
 
-        self.figure = figure
+        # if figure is None:
+            # figsize = figsize or self.DEFAULT_FIGSIZE
+            # bgcolor = self.get_setting("chart", "bgcolor", bgcolor)
+            # figure = plt.figure(figsize=figsize, facecolor=bgcolor, edgecolor=bgcolor)
 
         self.init_axes()
 
@@ -94,6 +96,14 @@ class Chart:
 
         if self.layout.use_tight_layout:
             self.figure.set_layout_engine("tight")
+
+
+    @cached_property
+    def figure(self):
+        figsize = self.figsize or self.DEFAULT_FIGSIZE
+        bgcolor = self.get_setting("chart", "bgcolor", self.bgcolor)
+        return plt.figure(figsize=figsize, facecolor=bgcolor, edgecolor=bgcolor)
+
 
     @staticmethod
     def normalize(prices):
@@ -104,6 +114,13 @@ class Chart:
     def valid_target(target):
         """whether the target bname is valid"""
         return target in ("main", "samex", "twinx", "above", "below")
+
+    def get_stylemap(self, ax=None):
+        return self.stylemaps[ax]
+
+    def get_setting(self, prefix, name, default=None, *, ax=None):
+        stylemap = self.get_stylemap(ax)
+        return stylemap.get_setting(prefix, name, default=default)
 
     def init_mapper(self, data):
         """initalizes chart from data"""
@@ -341,11 +358,6 @@ class Chart:
             count += 1
         return count
 
-    def get_setting(self, key, section, fallback=None):
-        """chart level setting """
-
-        return fallback
-
     def plot_indicator(self, data, indicator):
         """calculates and plots an indicator"""
 
@@ -368,7 +380,7 @@ class Chart:
 
         # Use wrapper in place of indicator if applicable
         wrapper = get_wrapper(indicator)
-        if wrapper is not None and wrapper.check_result(result):
+        if wrapper is not None:
             indicator = wrapper
 
         # Select axes according to indicator properties (default_pane, same_scale)

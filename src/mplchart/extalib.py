@@ -27,6 +27,9 @@ class TalibWrapper(Wrapper):
     def __init__(self, indicator):
         self.indicator = indicator
 
+    def __call__(self, data):
+        return self.indicator(data)
+
     @classmethod
     def check_indicator(cls, indicator):
         return hasattr(indicator, "func_object")

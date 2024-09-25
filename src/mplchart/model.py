@@ -23,9 +23,6 @@ class Primitive(ABC):
 class Wrapper(ABC):
     """Indicator plotting wrapper"""
 
-    def check_result(self, data):
-        return True
-
     @abstractmethod
     def plot_result(self, data, chart, ax=None): ...
 

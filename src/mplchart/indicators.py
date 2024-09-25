@@ -99,13 +99,13 @@ class RSI(Indicator):
             ax.fill_between(xv, yv, 70, where=(yv >= 70), interpolate=True, alpha=0.5)
             ax.fill_between(xv, yv, 30, where=(yv <= 30), interpolate=True, alpha=0.5)
 
-        ax.set_yticks([30, 70])
-        ax.set_yticks([30, 50, 70], minor=True)
+        ax.set_yticks([30, 50, 70])
         ax.grid(axis="y", which="major", linestyle="-", linewidth=2)
-        ax.grid(axis="y", which="minor", linestyle=":", linewidth=2)
 
-        yformatter = ax.yaxis.get_major_formatter()
-        ax.yaxis.set_minor_formatter(yformatter)
+        # ax.set_yticks([30, 50, 70], minor=True)
+        # ax.grid(axis="y", which="minor", linestyle=":", linewidth=2)
+        # yformatter = ax.yaxis.get_major_formatter()
+        # ax.yaxis.set_minor_formatter(yformatter)
 
 
 class ATR(Indicator):
@@ -156,13 +156,13 @@ class ADX(Indicator):
         xv, yv = series_xy(mdi)
         ax.plot(xv, yv, color="r")
 
-        ax.set_yticks([20])
-        ax.set_yticks([20, 40], minor=True)
+        ax.set_yticks([20, 40])
         ax.grid(axis="y", which="major", linestyle="-", linewidth=2)
-        ax.grid(axis="y", which="minor", linestyle=":", linewidth=2)
 
-        yformatter = ax.yaxis.get_major_formatter()
-        ax.yaxis.set_minor_formatter(yformatter)
+        # ax.set_yticks([20, 40], minor=True)
+        # ax.grid(axis="y", which="minor", linestyle=":", linewidth=2)
+        # yformatter = ax.yaxis.get_major_formatter()
+        # ax.yaxis.set_minor_formatter(yformatter)
 
 
 class MACD(Indicator):
