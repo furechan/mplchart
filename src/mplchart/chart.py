@@ -1,11 +1,14 @@
-""" charting main module """
+"""charting main module"""
 
 import io
 import warnings
 
 import matplotlib.pyplot as plt
+
+
 from collections import defaultdict
 from functools import cached_property
+
 
 from .utils import series_xy
 from .wrappers import get_wrapper
@@ -35,7 +38,6 @@ class Chart:
         max_bars (int) : the maximum number of bars to plot
         start, end (datetime | str) :  the start and end date of the range to plot
         figsize (tuple) : the size of the figure
-        bgcolor (str): the backgorund color of the Chart, default='w'
 
     Example:
         chart = Chart(title=tiltle, ...)
@@ -49,30 +51,34 @@ class Chart:
     last_indicator = None
     layout = StandardLayout
 
-
     DEFAULT_FIGSIZE = (12, 9)
 
     def __init__(
-            self,
-            title=None,
-            max_bars=None,
-            start=None,
-            end=None,
-            figure=None,
-            figsize=None,
-            bgcolor=None,
-            holidays=None,
-            stylesheet=None,
-            use_calendar=False,
+        self,
+        title=None,
+        max_bars=None,
+        start=None,
+        end=None,
+        figure=None,
+        figsize=None,
+        bgcolor=None,
+        holidays=None,
+        stylesheet=None,
+        use_calendar=False,
     ):
-
         self.start = start
         self.end = end
         self.figsize = figsize
-        self.bgcolor = bgcolor
         self.max_bars = max_bars
         self.holidays = holidays
         self.use_calendar = use_calendar
+
+        if bgcolor is not None:
+            warnings.warn(
+                "bgcolor is obsolete. Use styles instead!",
+                DeprecationWarning,
+                stacklevel=2,
+            )
 
         if stylesheet is None:
             stylesheet = STYLESHEET
@@ -84,11 +90,6 @@ class Chart:
             figure.clf()
             self.figure = figure
 
-        # if figure is None:
-            # figsize = figsize or self.DEFAULT_FIGSIZE
-            # bgcolor = self.get_setting("chart", "bgcolor", bgcolor)
-            # figure = plt.figure(figsize=figsize, facecolor=bgcolor, edgecolor=bgcolor)
-
         self.init_axes()
 
         if title:
@@ -97,13 +98,12 @@ class Chart:
         if self.layout.use_tight_layout:
             self.figure.set_layout_engine("tight")
 
-
     @cached_property
     def figure(self):
         figsize = self.figsize or self.DEFAULT_FIGSIZE
-        bgcolor = self.get_setting("chart", "bgcolor", self.bgcolor)
-        return plt.figure(figsize=figsize, facecolor=bgcolor, edgecolor=bgcolor)
-
+        # bgcolor = self.get_setting("chart", "bgcolor", self.bgcolor)
+        # return plt.figure(figsize=figsize, facecolor=bgcolor, edgecolor=bgcolor)
+        return plt.figure(figsize=figsize)
 
     @staticmethod
     def normalize(prices):
@@ -396,7 +396,7 @@ class Chart:
         self.plot_result(result, indicator, ax=ax)
 
     def plot_result(self, result, indicator, ax=None):
-        """ last resort plot_result handler """
+        """last resort plot_result handler"""
 
         name = getattr(indicator, "__name__", str(indicator))
 

@@ -6,6 +6,8 @@ from . import library
 
 from .model import Indicator
 from .utils import get_series, series_xy
+from .colors import default_edgecolor, closest_color
+
 
 
 class SMA(Indicator):
@@ -75,7 +77,7 @@ class RSI(Indicator):
     """Relative Strengh Index"""
 
     default_pane: str = "above"
-    color: str = "black"
+    color: str = None
 
     def __init__(self, period: int = 14):
         self.period = period
@@ -91,7 +93,7 @@ class RSI(Indicator):
         label = str(self)
         xv, yv = series_xy(data)
 
-        color = self.color
+        color = self.color or default_edgecolor()
 
         ax.plot(xv, yv, label=label, color=color)
 
@@ -147,14 +149,19 @@ class ADX(Indicator):
         pdi = data.iloc[:, 1]
         mdi = data.iloc[:, 2]
 
+
+        adxcolor = default_edgecolor()
+        pdicolor = closest_color("green")
+        mdicolor = closest_color("red")
+
         xv, yv = series_xy(adx)
-        ax.plot(xv, yv, color="k", label=label)
+        ax.plot(xv, yv, color=adxcolor, label=label)
 
         xv, yv = series_xy(pdi)
-        ax.plot(xv, yv, color="g")
+        ax.plot(xv, yv, color=pdicolor)
 
         xv, yv = series_xy(mdi)
-        ax.plot(xv, yv, color="r")
+        ax.plot(xv, yv, color=mdicolor)
 
         ax.set_yticks([20, 40])
         ax.grid(axis="y", which="major", linestyle="-", linewidth=2)
@@ -187,8 +194,10 @@ class MACD(Indicator):
         signal = data.iloc[:, 1]
         hist = data.iloc[:, 2] * 2.0
 
+        edgecolor = default_edgecolor()
+
         xv, yv = series_xy(macd)
-        ax.plot(xv, yv, color="k", label=label)
+        ax.plot(xv, yv, color=edgecolor, label=label)
 
         xv, yv = series_xy(signal)
         ax.plot(xv, yv)
@@ -219,8 +228,10 @@ class PPO(Indicator):
         signal = data.iloc[:, 1]
         hist = data.iloc[:, 2] * 2.0
 
+        edgecolor = default_edgecolor()
+
         xv, yv = series_xy(ppo)
-        ax.plot(xv, yv, color="k", label=label)
+        ax.plot(xv, yv, color=edgecolor, label=label)
 
         xv, yv = series_xy(signal)
         ax.plot(xv, yv)
@@ -244,7 +255,7 @@ class BBANDS(Indicator):
     """Bollinger Bands"""
 
     same_scale: bool = True
-    color: str = "orange"
+    color: str = None
 
     def __init__(self, period: int = 20, nbdev: float = 2.0):
         self.period = period
@@ -266,7 +277,9 @@ class BBANDS(Indicator):
         color = self.color
 
         xs, ms = series_xy(middle)
-        ax.plot(xs, ms, color=color, linestyle="dashed", label=label)
+        res = ax.plot(xs, ms, color=color, linestyle="dashed", label=label)
+
+        color = res[-1].get_color()  # uodate color from last plot
 
         xs, hs = series_xy(upper)
         ax.plot(xs, hs, color=color, linestyle="dotted")

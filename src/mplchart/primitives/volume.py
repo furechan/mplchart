@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from ..model import Primitive
-
+from ..colors import closest_color
 
 class Volume(Primitive):
     """
@@ -18,9 +18,9 @@ class Volume(Primitive):
 
     def __init__(self, sma=50, *,
                  width: float = 0.8,
-                 colorup: str = "green",
-                 colordn: str = "red",
-                 colorma: str = "grey"):
+                 colorup: str = None,
+                 colordn: str = None,
+                 colorma: str = None):
         self.sma = sma
         self.width = width
         self.colorup = colorup
@@ -55,9 +55,9 @@ class Volume(Primitive):
         change = data.change
 
         width = self.width
-        colorup = self.colorup
-        colordn = self.colordn
-        colorma = self.colorma
+        colorup = closest_color("green")
+        colordn = closest_color("red")
+        colorma = closest_color("gray")
 
         color = np.where(change > 0, colorup, colordn)
 

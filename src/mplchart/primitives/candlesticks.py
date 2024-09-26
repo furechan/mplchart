@@ -1,4 +1,4 @@
-""" Candlesticks primitive """
+"""Candlesticks primitive"""
 
 import warnings
 
@@ -10,6 +10,7 @@ import matplotlib.dates as mdates
 from matplotlib.collections import PolyCollection
 
 from ..model import Primitive
+from ..colors import default_edgecolor
 
 
 
@@ -20,7 +21,14 @@ class Candlesticks(Primitive):
     Used to plot prices as candlesticks
     """
 
-    def __init__(self, *, width: float = 0.8, colorup: str = None, colordn: str = None, use_bars: bool = False):
+    def __init__(
+        self,
+        *,
+        width: float = 0.8,
+        colorup: str = None,
+        colordn: str = None,
+        use_bars: bool = False,
+    ):
         self.width = width
         self.colorup = colorup
         self.colordn = colordn
@@ -38,9 +46,12 @@ class Candlesticks(Primitive):
 
         width = self.width
 
-        colorup = self.colorup or "k"
-        colordn = self.colordn or "k"
-        coloroff = self.colorup or "w"
+        edgecolor = default_edgecolor()
+        facecolor = plt.rcParams["axes.facecolor"]
+
+        colorup = self.colorup or edgecolor
+        colordn = self.colordn or edgecolor
+        coloroff = self.colorup or facecolor
 
         if self.use_bars:
             return plot_csbars(
@@ -65,7 +76,7 @@ class Candlesticks(Primitive):
 
 
 def plot_cspoly(
-        data, ax=None, width=0.6, colorup="k", colordn="k", coloroff="w", label=None
+    data, ax=None, width=0.6, colorup=None, colordn=None, coloroff=None, label=None
 ):
     """plots candlesticks as polygons"""
 
@@ -130,7 +141,7 @@ def plot_cspoly(
 
 
 def plot_csbars(
-        data, ax=None, width=0.6, colorup="k", colordn="k", coloroff="w", label=None
+    data, ax=None, width=0.6, colorup=None, colordn=None, coloroff=None, label=None
 ):
     """plots candlesticks as bars"""
 

@@ -2,7 +2,7 @@
 
 ## 0.0.12
 - Added ATRP indicator
-- Version is dynamic
+- Experimental Stylesheet
 
 ## 0.0.11
 - Refactorings
