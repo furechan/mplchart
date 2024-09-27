@@ -73,6 +73,39 @@ class ROC(Indicator):
         return library.calc_roc(series, self.period)
 
 
+class ATR(Indicator):
+    """Average True Range"""
+
+    def __init__(self, period: int = 14):
+        self.period = period
+
+    def __call__(self, prices):
+        return library.calc_atr(prices, self.period)
+
+
+class ATRP(Indicator):
+    """Average True Range (Percent)"""
+
+    def __init__(self, period: int = 14):
+        self.period = period
+
+    def __call__(self, prices):
+        return library.calc_atr(prices, self.period, percent=True)
+
+
+class SLOPE(Indicator):
+    """Slope (Linear regression with time)"""
+
+    def __init__(self, period: int = 20):
+        self.period = period
+
+    def __call__(self, prices):
+        series = get_series(prices)
+        return library.calc_slope(series, self.period)
+
+
+
+
 class RSI(Indicator):
     """Relative Strengh Index"""
 
@@ -110,28 +143,8 @@ class RSI(Indicator):
         # ax.yaxis.set_minor_formatter(yformatter)
 
 
-class ATR(Indicator):
-    """Average True Range"""
-
-    def __init__(self, period: int = 14):
-        self.period = period
-
-    def __call__(self, prices):
-        return library.calc_atr(prices, self.period)
-
-
-class ATRP(Indicator):
-    """Average True Range (Percent)"""
-
-    def __init__(self, period: int = 14):
-        self.period = period
-
-    def __call__(self, prices):
-        return library.calc_atr(prices, self.period, percent=True)
-
-
 class ADX(Indicator):
-    """Average Directional Index"""
+    """Average Directinal Index"""
 
     def __init__(self, period: int = 14):
         self.period = period
@@ -144,15 +157,40 @@ class ADX(Indicator):
             ax = chart.get_axes("below")
 
         label = str(self)
+        xv, yv = series_xy(data)
+
+        adxcolor = default_edgecolor()
+
+        ax.plot(xv, yv, color=adxcolor, label=label)
+
+        ax.set_yticks([20, 40])
+        ax.grid(axis="y", which="major", linestyle="-", linewidth=2)
+
+
+
+class DMI(Indicator):
+    """Directional Movement Index"""
+
+    def __init__(self, period: int = 14):
+        self.period = period
+
+    def __call__(self, prices):
+        return library.calc_dmi(prices, self.period)
+
+    def plot_result(self, data, chart, ax=None):
+        if ax is None:
+            ax = chart.get_axes("below")
+
+        label = str(self)
 
         adx = data.iloc[:, 0]
         pdi = data.iloc[:, 1]
-        mdi = data.iloc[:, 2]
+        ndi = data.iloc[:, 2]
 
 
         adxcolor = default_edgecolor()
         pdicolor = closest_color("green")
-        mdicolor = closest_color("red")
+        ndicolor = closest_color("red")
 
         xv, yv = series_xy(adx)
         ax.plot(xv, yv, color=adxcolor, label=label)
@@ -160,8 +198,8 @@ class ADX(Indicator):
         xv, yv = series_xy(pdi)
         ax.plot(xv, yv, color=pdicolor)
 
-        xv, yv = series_xy(mdi)
-        ax.plot(xv, yv, color=mdicolor)
+        xv, yv = series_xy(ndi)
+        ax.plot(xv, yv, color=ndicolor)
 
         ax.set_yticks([20, 40])
         ax.grid(axis="y", which="major", linestyle="-", linewidth=2)
@@ -238,17 +276,6 @@ class PPO(Indicator):
 
         xv, yv = series_xy(hist)
         ax.bar(xv, yv, alpha=0.5, width=0.8)
-
-
-class SLOPE(Indicator):
-    """Slope (Linear regression with time)"""
-
-    def __init__(self, period: int = 20):
-        self.period = period
-
-    def __call__(self, prices):
-        series = get_series(prices)
-        return library.calc_slope(series, self.period)
 
 
 class BBANDS(Indicator):

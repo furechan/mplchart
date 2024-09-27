@@ -109,8 +109,8 @@ def calc_ppo(series, n1: int = 20, n2: int = 26, n3: int = 9):
     return result
 
 
-def calc_adx(prices, period: int = 14):
-    """Average Directional Index"""
+def calc_dmi(prices, period: int = 14):
+    """Directional Movement Index"""
 
     ewm = dict(alpha=1 / period, min_periods=period, adjust=True, ignore_na=True)
 
@@ -120,18 +120,37 @@ def calc_adx(prices, period: int = 14):
     lm = -prices.low.diff(1)
 
     pdm = hm.where((hm > lm) & (hm > 0), 0)
-    mdm = lm.where((lm > hm) & (lm > 0), 0)
+    ndm = lm.where((lm > hm) & (lm > 0), 0)
 
     pdi = 100 * pdm.ewm(**ewm).mean() / atr
-    mdi = 100 * mdm.ewm(**ewm).mean() / atr
+    ndi = 100 * ndm.ewm(**ewm).mean() / atr
 
-    dx = 100 * np.abs(pdi - mdi) / (pdi + mdi)
+    dx = 100 * np.abs(pdi - ndi) / (pdi + ndi)
     adx = dx.ewm(**ewm).mean()
 
-    result = dict(adx=adx, pdi=pdi, mdi=mdi)
+    result = dict(adx=adx, pdi=pdi, ndi=ndi)
     result = pd.DataFrame(result)
 
     return result
+
+
+def calc_adx(prices, period: int = 14):
+    """Average Directional Index"""
+
+    return calc_dmi(prices, period).adx
+
+
+def calc_pdi(prices, period: int = 14):
+    """Positive Directional Indicator"""
+
+    return calc_dmi(prices, period).pdi
+
+
+def calc_ndi(prices, period: int = 14):
+    """Negative Directional Indicator"""
+
+    return calc_dmi(prices, period).ndi
+
 
 
 def calc_slope(series, period: int = 20):

@@ -1,6 +1,7 @@
 # Change Log
 
 ## 0.0.12
+- Added DMI indicator
 - Added ATRP indicator
 - Experimental Stylesheet
 
