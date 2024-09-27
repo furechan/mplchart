@@ -1,10 +1,10 @@
-""" technical analysis library """
+"""technical analysis library"""
 
 import math
 import numpy as np
 import pandas as pd
 
-from .utils import get_series # noqa F401
+from .utils import get_series  # noqa F401
 
 # TODO remove get_series import
 
@@ -43,9 +43,9 @@ def calc_hma(series, period: int = 20):
     if period <= 0:
         raise ValueError("period must be greater than zero")
 
-    m1 = calc_wma(series, round(period/2))
+    m1 = calc_wma(series, round(period / 2))
     m2 = calc_wma(series, period)
-    m3 = (2 *  m1) - m2
+    m3 = (2 * m1) - m2
 
     result = calc_wma(m3, round(math.sqrt(period)))
 
@@ -68,7 +68,7 @@ def calc_rsi(series, period: int = 14):
 def calc_atr(prices, period: int = 14, *, percent: bool = False):
     """Average True Range"""
 
-    hlc = prices.filter(['high', 'low']).join(prices['close'].shift(1))
+    hlc = prices.filter(["high", "low"]).join(prices["close"].shift(1))
     trange = hlc.max(axis=1) - hlc.min(axis=1)
 
     if period > 0:
@@ -76,9 +76,9 @@ def calc_atr(prices, period: int = 14, *, percent: bool = False):
         result = trange.ewm(**ewm).mean()
     else:
         result = trange
-    
+
     if percent:
-        result = 100 * result / prices['close']
+        result = 100 * result / prices["close"]
 
     return result
 
@@ -150,7 +150,6 @@ def calc_ndi(prices, period: int = 14):
     """Negative Directional Indicator"""
 
     return calc_dmi(prices, period).ndi
-
 
 
 def calc_slope(series, period: int = 20):

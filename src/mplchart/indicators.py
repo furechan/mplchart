@@ -1,4 +1,4 @@
-""" technical analysis indicators """
+"""technical analysis indicators"""
 
 import numpy as np
 
@@ -7,7 +7,6 @@ from . import library
 from .model import Indicator
 from .utils import get_series, series_xy
 from .colors import default_edgecolor, closest_color
-
 
 
 class SMA(Indicator):
@@ -104,8 +103,6 @@ class SLOPE(Indicator):
         return library.calc_slope(series, self.period)
 
 
-
-
 class RSI(Indicator):
     """Relative Strengh Index"""
 
@@ -167,7 +164,6 @@ class ADX(Indicator):
         ax.grid(axis="y", which="major", linestyle="-", linewidth=2)
 
 
-
 class DMI(Indicator):
     """Directional Movement Index"""
 
@@ -186,7 +182,6 @@ class DMI(Indicator):
         adx = data.iloc[:, 0]
         pdi = data.iloc[:, 1]
         ndi = data.iloc[:, 2]
-
 
         adxcolor = default_edgecolor()
         pdicolor = closest_color("green")
