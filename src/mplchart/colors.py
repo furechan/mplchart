@@ -3,13 +3,14 @@ from matplotlib import pyplot as plt
 from matplotlib import colors as mcolors
 
 
-def default_edgecolor():
+def default_pencolor():
     """default edgecolor to use instead of black"""
     facecolor = plt.rcParams["axes.facecolor"]
 
-    edgecolor = plt.rcParams["patch.edgecolor"]
-    if edgecolor != facecolor:
-        return edgecolor
+    # color = plt.rcParams["patch.edgecolor"]
+    color = plt.rcParams["text.color"]
+    if color != facecolor:
+        return color
 
     return "black"
 

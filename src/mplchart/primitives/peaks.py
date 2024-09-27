@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from ..model import Primitive
-
+from ..colors import default_pencolor
 
 class Peaks(Primitive):
     """
@@ -18,7 +18,7 @@ class Peaks(Primitive):
 
     indicator = None
 
-    def __init__(self, span=1, *, item: str = None, color: str = "black"):
+    def __init__(self, span=1, *, item: str = None, color: str = None):
         self.span = span
         self.color = color
         self.item = item
@@ -49,7 +49,7 @@ class Peaks(Primitive):
         xv = data.index
         yv = data
 
-        color = self.color
+        color = self.color or default_pencolor()
 
         ax.scatter(xv, yv, c=color, s=10 * 10, alpha=0.5, marker=".")
 

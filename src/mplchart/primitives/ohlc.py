@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection
 
 from ..model import Primitive
-from ..colors import default_edgecolor
+from ..colors import default_pencolor
 
 
 class OHLC(Primitive):
@@ -32,7 +32,7 @@ class OHLC(Primitive):
         label = str(self)
         data = chart.extract_df(data)
 
-        edgecolor = default_edgecolor()
+        edgecolor = default_pencolor()
 
         width = self.width
         colorup = self.colorup or edgecolor
@@ -46,7 +46,7 @@ class OHLC(Primitive):
 def plot_ohlc(data, ax=None, width=0.8, colorup=None, colordn=None, label=None):
     """plots open-high-low-close charts as polygons"""
 
-    edgecolor = default_edgecolor()
+    edgecolor = default_pencolor()
 
     colorup = colorup or edgecolor
     colordn = colordn or edgecolor

@@ -6,7 +6,7 @@ from . import library
 
 from .model import Indicator
 from .utils import get_series, series_xy
-from .colors import default_edgecolor, closest_color
+from .colors import default_pencolor, closest_color
 
 
 class SMA(Indicator):
@@ -123,7 +123,7 @@ class RSI(Indicator):
         label = str(self)
         xv, yv = series_xy(data)
 
-        color = self.color or default_edgecolor()
+        color = self.color or default_pencolor()
 
         ax.plot(xv, yv, label=label, color=color)
 
@@ -156,7 +156,7 @@ class ADX(Indicator):
         label = str(self)
         xv, yv = series_xy(data)
 
-        adxcolor = default_edgecolor()
+        adxcolor = default_pencolor()
 
         ax.plot(xv, yv, color=adxcolor, label=label)
 
@@ -183,7 +183,7 @@ class DMI(Indicator):
         pdi = data.iloc[:, 1]
         ndi = data.iloc[:, 2]
 
-        adxcolor = default_edgecolor()
+        adxcolor = default_pencolor()
         pdicolor = closest_color("green")
         ndicolor = closest_color("red")
 
@@ -227,7 +227,7 @@ class MACD(Indicator):
         signal = data.iloc[:, 1]
         hist = data.iloc[:, 2] * 2.0
 
-        edgecolor = default_edgecolor()
+        edgecolor = default_pencolor()
 
         xv, yv = series_xy(macd)
         ax.plot(xv, yv, color=edgecolor, label=label)
@@ -261,7 +261,7 @@ class PPO(Indicator):
         signal = data.iloc[:, 1]
         hist = data.iloc[:, 2] * 2.0
 
-        edgecolor = default_edgecolor()
+        edgecolor = default_pencolor()
 
         xv, yv = series_xy(ppo)
         ax.plot(xv, yv, color=edgecolor, label=label)

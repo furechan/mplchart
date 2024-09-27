@@ -10,7 +10,7 @@ import matplotlib.dates as mdates
 from matplotlib.collections import PolyCollection
 
 from ..model import Primitive
-from ..colors import default_edgecolor
+from ..colors import default_pencolor
 
 
 
@@ -46,7 +46,7 @@ class Candlesticks(Primitive):
 
         width = self.width
 
-        edgecolor = default_edgecolor()
+        edgecolor = default_pencolor()
         facecolor = plt.rcParams["axes.facecolor"]
 
         colorup = self.colorup or edgecolor
