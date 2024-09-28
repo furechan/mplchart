@@ -67,8 +67,8 @@ class TradeMarker(PosMarker):
         yv = data.close[mask]
         pos = data.pos[mask]
 
-        colorn = chart.get_setting("marker.entry", "color", self.COLORENTRY)
-        colorx = chart.get_setting("marker.exit", "color", self.COLOREXIT)
+        colorn = self.COLORENTRY
+        colorx = self.COLOREXIT
 
         cv = np.where(pos > 0, colorn, colorx)
 
@@ -105,7 +105,7 @@ class TradeSpan(PosMarker):
 
         mask = pos.diff().fillna(0).ne(0)
 
-        color = chart.get_setting("tradespan", "color", self.COLOR)
+        color = self.COLOR
         alpha = self.ALPHA
 
         xv = data.index[mask]

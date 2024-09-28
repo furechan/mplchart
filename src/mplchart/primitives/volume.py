@@ -1,10 +1,11 @@
-""" Volume primitive """
+"""Volume primitive"""
 
 import numpy as np
 import pandas as pd
 
 from ..model import Primitive
 from ..colors import closest_color
+
 
 class Volume(Primitive):
     """
@@ -13,14 +14,18 @@ class Volume(Primitive):
     Used to plot the volume
 
     Args:
-        sma (int) : the period of the simple moving average, default = 20
+        sma (int) : the period of the simple moving average, optional
     """
 
-    def __init__(self, sma=50, *,
-                 width: float = 0.8,
-                 colorup: str = None,
-                 colordn: str = None,
-                 colorma: str = None):
+    def __init__(
+        self,
+        sma: int = None,
+        *,
+        width: float = 0.8,
+        colorup: str = None,
+        colordn: str = None,
+        colorma: str = None,
+    ):
         self.sma = sma
         self.width = width
         self.colorup = colorup

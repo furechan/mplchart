@@ -5,8 +5,6 @@ import warnings
 
 import matplotlib.pyplot as plt
 
-
-from collections import defaultdict
 from functools import cached_property
 
 
@@ -14,8 +12,6 @@ from .utils import series_xy
 from .wrappers import get_wrapper
 from .layout import make_twinx, StandardLayout
 from .mapper import RawDateMapper, DateIndexMapper
-from .stylemap import StyleMap
-from .stylesheet import STYLESHEET
 
 """
 How primitives/indicators are plotted
@@ -63,7 +59,6 @@ class Chart:
         figsize=None,
         bgcolor=None,
         holidays=None,
-        stylesheet=None,
         use_calendar=False,
     ):
         self.start = start
@@ -79,12 +74,6 @@ class Chart:
                 DeprecationWarning,
                 stacklevel=2,
             )
-
-        if stylesheet is None:
-            stylesheet = STYLESHEET
-        stylesheet = dict(stylesheet)
-        self.stylesheet = stylesheet
-        self.stylemaps = defaultdict(lambda: StyleMap(stylesheet))
 
         if figure is not None:
             figure.clf()
@@ -114,13 +103,6 @@ class Chart:
     def valid_target(target):
         """whether the target bname is valid"""
         return target in ("main", "samex", "twinx", "above", "below")
-
-    def get_stylemap(self, ax=None):
-        return self.stylemaps[ax]
-
-    def get_setting(self, prefix, name, default=None, *, ax=None):
-        stylemap = self.get_stylemap(ax)
-        return stylemap.get_setting(prefix, name, default=default)
 
     def init_mapper(self, data):
         """initalizes chart from data"""

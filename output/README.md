@@ -48,15 +48,15 @@ chart.show()
 
 Price data is expected to be presented as a pandas DataFrame
 with columns `open`, `high`, `low`, `close` `volume`
-and a timestamp index named `date`.
+and a timestamp index named `date` or `datetime`.
 Please note, the library will automatically convert column
 and index names to lower case for its internal use.
 
 
 ## Drawing Primitives
 
-The library contains drawing primitives that can be used as an indicator in the plot api.
-All primitives are classes that must be instantiated before being used in the plot api.
+The library contains drawing primitives that can be used like an indicator in the plot api.
+Primitives are classes and must be instantiated before being used as parameters to the plot api.
 
 ```python
 from mplchart.chart import Chart
@@ -80,19 +80,23 @@ The main drawing primitives are :
 ## Builtin Indicators
 
 The libary contains some basic technical analysis indicators implemented in pandas/numpy.
-Indicators are classes that must be instantiated before being used in the plot api.
+Indicators are classes and must be instantiated before being used as parameters to the plot api.
 
 Some of the indicators included are:
 
 - `SMA` Simple Moving Average
 - `EMA` Exponential Moving Average
+- `WMA` Weighted Moving Average
+- `HMA` Hull Moving Average
 - `ROC` Rate of Change
 - `RSI` Relative Strength Index
 - `ATR` Average True Range
+- `ATRP` Average True Range (Percent)
 - `ADX` Average Directional Index
+- `DMI` Directional Movement Index
 - `MACD` Moving Average Convergence Divergence
 - `PPO` Price Percentage Oscillator 
-- `SLOPE` Slope (linear regression with time)
+- `SLOPE` Slope (time linear regression)
 - `BBANDS` Bollinger Bands
 
 
@@ -117,29 +121,29 @@ indicators = [
 
 ## Custom Indicators
 
-Any callable that takes a prices data frame and returns a series as result can be used as indicator.
-A function can be used as an indicator but you can also implement an indicator as a callable dataclass.
+Any callable that takes a prices dataframe and returns a series or dataframe can be used as indicator.
+You can also implement a custom indicator as a subclass of `Indicator`.
 
 ```python
-from dataclasses import dataclass
-
+from mplchart.model import Indicator
 from mplchart.library import get_series, calc_ema
 
-@dataclass
-class DEMA:
-    """ Double Exponential Moving Average """
-    period: int = 20
+class DEMA(Indicator):
+    """Double Exponential Moving Average"""
 
     same_scale = True
-    # same_scale is an optional class attribute that indicates
-    # the indicator should be plot on the same axes by default
+    # same_scale is an optional class attribute
+    # to specify that the indicator can be drawn
+    # on the same axes as the previous indicator
+
+    def __init__(self, period: int = 20):
+        self.period = period
 
     def __call__(self, prices):
         series = get_series(prices)
         ema1 = calc_ema(series, self.period)
         ema2 = calc_ema(ema1, self.period)
         return 2 * ema1 - ema2
-
 ```
 
 ## Examples
