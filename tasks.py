@@ -9,8 +9,9 @@ FOLDER = Path(__file__).parent
 
 
 @task
-def install(c):
+def setup(c):
     """Check package versions"""
+    c.run("pip install \"numpy<2.0.0\"")
     c.run("pip install -e \".[extras]\"")
 
 

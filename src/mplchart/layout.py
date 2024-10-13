@@ -3,9 +3,6 @@
 from matplotlib.gridspec import GridSpec
 
 
-# see dynamic-subplot.ipynb
-
-
 def make_twinx(ax, label="twinx"):
     """
     Creates a twin x axes and configures y axes to the left

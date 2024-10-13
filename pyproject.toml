@@ -20,7 +20,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-extras = ["yfinance", "pytest", "ipykernel", "ta-lib", "ruff"]
+extras = ["yfinance", "pytest", "ipykernel", "ta-lib", "ruff", "jinja2"]
 
 [tool.hatch.version]
 path = "src/mplchart/__init__.py"

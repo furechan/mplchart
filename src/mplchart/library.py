@@ -4,6 +4,7 @@ import math
 import numpy as np
 import pandas as pd
 
+
 from .utils import get_series  # noqa F401
 
 # TODO remove get_series import

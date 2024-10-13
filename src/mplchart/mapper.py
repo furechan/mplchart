@@ -8,64 +8,52 @@ from .formatter import DateIndexFormatter
 
 
 class RawDateMapper:
-    """RawDate mapper between date and number using matplotlib.dates"""
+    """Raw Date Mapper (no mapping, just slices dates)"""
 
     def __init__(self, index, max_bars=None, start=None, end=None):
         if start or end:
-            locs = index.slice_indexer(start=start, end=end)
+            locs = index.tz_localize(None).slice_indexer(start=start, end=end)
             index = index[locs]
 
-        if max_bars > 0:
+        if max_bars and max_bars > 0:
             index = index[-max_bars:]
 
         self.start = index[0]
         self.end = index[-1]
 
-    def map_date(self, date):  # needed for plot_vline
-        """returns date as number/coordinate"""
-        return date
-
     def extract_df(self, data):
-        """extracts dataframe by mapping date to number/coordinate"""
+        """slice data"""
 
         if self.start or self.end:
-            data = data.loc[self.start:self.end]
+            data = data.loc[self.start : self.end]
 
         return data
 
+    def map_date(self, date):  # needed for plot_vline
+        return date
+
     def get_locator(self):
-        """no locator needed"""
         return None
 
     def get_formatter(self):
-        """no formatter needed"""
         return None
 
     def config_axes(self, ax):
-        """no config needed"""
         pass
 
 
-
 class DateIndexMapper:
-    """DateIndex mapper between date and position/coordinate"""
+    """Date Index Mapper maps dates to integers"""
 
     def __init__(self, index, *, max_bars=None, start=None, end=None):
         if start or end:
-            locs = index.slice_indexer(start=start, end=end)
+            locs = index.tz_localize(None).slice_indexer(start=start, end=end)
             index = index[locs]
 
-        if max_bars > 0:
+        if max_bars and max_bars > 0:
             index = index[-max_bars:]
 
         self.index = index
-
-    def map_date(self, date):  # nedded for plot_vline
-        """location of date in index"""
-
-        result = self.index.get_indexer([date], method="bfill")
-
-        return result[0]
 
     def extract_df(self, data):
         """extracts dataframe by mapping date to position/coordinate"""
@@ -74,7 +62,16 @@ class DateIndexMapper:
 
         xloc, data = xloc.align(data, join="inner")
 
-        return data.set_axis(xloc)
+        data = data.set_axis(xloc)
+
+        return data
+
+    def map_date(self, date):  # nedded for plot_vline
+        """location of date in index"""
+
+        result = self.index.get_indexer([date], method="bfill")
+
+        return result[0]
 
     def get_locator(self):
         """locator for this mapper"""

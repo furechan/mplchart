@@ -1,18 +1,7 @@
+"""Mplchart color utils"""
 
-from matplotlib import pyplot as plt
-from matplotlib import colors as mcolors
-
-
-def default_pencolor():
-    """default edgecolor to use instead of black"""
-    facecolor = plt.rcParams["axes.facecolor"]
-
-    # color = plt.rcParams["patch.edgecolor"]
-    color = plt.rcParams["text.color"]
-    if color != facecolor:
-        return color
-
-    return "black"
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 
 
 def closest_color(color, color_cycle=None):
@@ -20,7 +9,7 @@ def closest_color(color, color_cycle=None):
     if color_cycle is None:
         prop_cycle = plt.rcParams["axes.prop_cycle"]
         color_cycle = prop_cycle.by_key()["color"]
-        
+
     def distance(c1, c2):
         v1 = mcolors.to_rgb(c1)
         v2 = mcolors.to_rgb(c2)

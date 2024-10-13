@@ -6,12 +6,15 @@ import warnings
 import matplotlib.pyplot as plt
 
 from functools import cached_property
+from collections import Counter
 
 
-from .utils import series_xy
 from .wrappers import get_wrapper
+from .colors import closest_color
+from .utils import series_xy, same_scale
 from .layout import make_twinx, StandardLayout
 from .mapper import RawDateMapper, DateIndexMapper
+
 
 """
 How primitives/indicators are plotted
@@ -41,7 +44,6 @@ class Chart:
     """
 
     mapper = None
-    mapper_done = False
     source_data = None
     next_target = None
     last_indicator = None
@@ -59,6 +61,7 @@ class Chart:
         figsize=None,
         bgcolor=None,
         holidays=None,
+        color_scheme=(),
         use_calendar=False,
     ):
         self.start = start
@@ -67,10 +70,11 @@ class Chart:
         self.max_bars = max_bars
         self.holidays = holidays
         self.use_calendar = use_calendar
+        self.color_scheme = dict(color_scheme)
 
         if bgcolor is not None:
             warnings.warn(
-                "bgcolor is obsolete. Use styles instead!",
+                "bgcolor parameter is obsolete. Use matplotlib styles instead!",
                 DeprecationWarning,
                 stacklevel=2,
             )
@@ -88,9 +92,13 @@ class Chart:
             self.figure.set_layout_engine("tight")
 
     @cached_property
+    def counter(self):
+        return Counter()
+
+    @cached_property
     def figure(self):
         figsize = self.figsize or self.DEFAULT_FIGSIZE
-        # bgcolor = self.get_setting("chart", "bgcolor", self.bgcolor)
+        # bgcolor = self.get_color("bgcolor")
         # return plt.figure(figsize=figsize, facecolor=bgcolor, edgecolor=bgcolor)
         return plt.figure(figsize=figsize)
 
@@ -99,24 +107,15 @@ class Chart:
         prices = prices.rename(columns=str.lower).rename_axis(index=str.lower)
         return prices
 
-    @staticmethod
-    def valid_target(target):
-        """whether the target bname is valid"""
-        return target in ("main", "samex", "twinx", "above", "below")
-
     def init_mapper(self, data):
-        """initalizes chart from data"""
+        """initalizes chart and mapper with price data"""
+
+        if self.mapper is not None:
+            warnings.warn("init_mapper was already called!", stacklevel=2)
+            return
 
         if self.source_data is None:
             self.source_data = data
-
-        if not self.mapper_done:
-            self.config_mapper(data=data)
-
-    def config_mapper(self, *, data=None):
-        """Configures the date mapper from the original data"""
-
-        self.mapper_done = True
 
         if self.use_calendar:
             self.mapper = RawDateMapper(
@@ -151,26 +150,63 @@ class Chart:
 
         return data.filter(["open", "high", "low", "close"]) * factor
 
+    def next_line_color(self, ax):
+        """Next line color either text.color or cycled color"""
+        handles, _ = ax.get_legend_handles_labels()
+        if len(handles):
+            return ax._get_lines.get_next_color()
+        else:
+            return plt.rcParams["text.color"]
+
+    def next_fill_color(self, ax):
+        """Next cycled color for fill"""
+        return ax._get_patches_for_fill.get_next_color()
+
+    def get_color(self, name, ax=None, indicator=None, *, fallback=None):
+        """Lookup color through indicator and color_scheme"""
+
+        color = fallback
+
+        colors = self.color_scheme
+        if colors and name in colors:
+            color = colors[name] or color
+
+        if hasattr(indicator, "colors"):
+            colors = indicator.colors
+            if colors and name in colors:
+                color = colors[name] or color
+
+        if isinstance(color, list):
+            ckey = ax, name
+            count = self.counter[ckey]
+            self.counter[ckey] += 1
+            color = color[count % len(color)] if color else None
+
+        if color and color.startswith("~"):
+            color = closest_color(color.removeprefix("~"))
+
+        if color == "line":
+            color = self.next_line_color(ax)
+        elif color == "fill":
+            color = self.next_fill_color(ax)
+
+        return color
+
     def extract_df(self, data):
         """extract dataframe subset"""
 
-        self.init_mapper(data)
+        if self.mapper is None:
+            self.init_mapper(data)
 
-        if self.mapper:
-            return self.mapper.extract_df(data)
-
-        return data
+        return self.mapper.extract_df(data)
 
     def map_date(self, date):
         """map date to value"""
 
-        if not self.mapper_done:
+        if self.mapper is None:
             raise ValueError("mapper was not configure yet!")
 
-        if self.mapper:
-            return self.mapper.map_date(date)
-
-        return date
+        return self.mapper.map_date(date)
 
     def set_title(self, title):
         """Sets chart title on root axes. Must be called after init_axes!"""
@@ -247,23 +283,31 @@ class Chart:
 
         return ax
 
-    def default_pane(self, indicator):
-        """return the default pane to use for indicator"""
+    def get_target(self, indicator):
+        """target axes for indicator"""
 
         default_pane = getattr(indicator, "default_pane", None)
-
-        if default_pane:
+        if default_pane is not None:
             return default_pane
 
-        same_scale = getattr(indicator, "same_scale", None)
-
-        if same_scale and self.count_axes() <= 1:
-            return "samex"
+        if same_scale(indicator) and self.count_axes() <= 1:
+            return "same"
 
         return "below"
 
+    @staticmethod
+    def valid_target(target):
+        """whether the target bname is valid"""
+        return target in ("main", "same", "samex", "twinx", "above", "below")
+
     def force_target(self, target):
         """force target for next get_axes"""
+
+        warnings.warn(
+            "Chart.force_target is legacy! Use axes modifier to select axes.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
 
         if not self.valid_target(target):
             raise ValueError("Invalid target %r" % target)
@@ -275,7 +319,7 @@ class Chart:
         selects existing axes or creates new axes depending on target
 
         Args:
-            target: one of "main", "samex", twinx", "above", "below"
+            target: one of "main", "same", twinx", "above", "below"
         """
 
         if self.next_target:
@@ -283,7 +327,7 @@ class Chart:
             del self.next_target
 
         if target is None:
-            target = "samex"
+            target = "same"
 
         if not self.valid_target(target):
             raise ValueError("Invalid target %r" % target)
@@ -302,7 +346,7 @@ class Chart:
             if target == "main":
                 return axes[0]
 
-            if target == "samex":
+            if target in ("same", "samex"):
                 return axes[-1]
 
             if target == "twinx":
@@ -340,6 +384,12 @@ class Chart:
             count += 1
         return count
 
+    def calc_result(self, prices, indicator):
+        self.last_indicator = indicator
+        result = indicator(prices)
+        result = self.extract_df(result)
+        return result
+
     def plot_indicator(self, data, indicator):
         """calculates and plots an indicator"""
 
@@ -354,9 +404,7 @@ class Chart:
         # Invoke indicator and compute result if indicator is callable
         # Result data is mapped to the charting view (see extract_df)
         if callable(indicator):
-            self.last_indicator = indicator
-            result = indicator(data)
-            result = self.extract_df(result)
+            result = self.calc_result(data, indicator)
         else:
             raise ValueError(f"Indicator {indicator!r} not callable")
 
@@ -366,8 +414,9 @@ class Chart:
             indicator = wrapper
 
         # Select axes according to indicator properties (default_pane, same_scale)
-        target = self.default_pane(indicator)
-        ax = self.get_axes(target)
+        # target = self.default_pane(indicator)
+        # ax = self.get_axes(target)
+        ax = None
 
         # Calling indicator plot_result if present
         # Note here we are calling plot_result with a defined axes
@@ -379,6 +428,8 @@ class Chart:
 
     def plot_result(self, result, indicator, ax=None):
         """last resort plot_result handler"""
+
+        raise RuntimeError("Last resort handler is legacy!")
 
         name = getattr(indicator, "__name__", str(indicator))
 

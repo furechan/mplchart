@@ -1,10 +1,12 @@
-""" Peaks primitive """
+"""Peaks primitive"""
 
 import numpy as np
 import pandas as pd
 
+import matplotlib.pyplot as plt
+
 from ..model import Primitive
-from ..colors import default_pencolor
+
 
 class Peaks(Primitive):
     """
@@ -46,10 +48,8 @@ class Peaks(Primitive):
         data = self.calc(data)
         data = chart.extract_df(data)
 
-        xv = data.index
-        yv = data
-
-        color = self.color or default_pencolor()
+        xv, yv = data.index, data
+        color = self.color or plt.rcParams["text.color"]
 
         ax.scatter(xv, yv, c=color, s=10 * 10, alpha=0.5, marker=".")
 
@@ -69,7 +69,7 @@ def extract_peaks(prices, span=1):
     window = 2 * span + 1
 
     if hasattr(prices, "columns"):
-        high, low = prices.high, prices.low
+        high, low = prices["high"], prices["low"]
     else:
         high, low = prices, prices
 

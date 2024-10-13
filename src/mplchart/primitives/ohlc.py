@@ -1,4 +1,4 @@
-""" OHLC primitive """
+"""OHLC primitive"""
 
 import numpy as np
 
@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection
 
 from ..model import Primitive
-from ..colors import default_pencolor
 
 
 class OHLC(Primitive):
@@ -32,7 +31,7 @@ class OHLC(Primitive):
         label = str(self)
         data = chart.extract_df(data)
 
-        edgecolor = default_pencolor()
+        edgecolor = plt.rcParams["text.color"]
 
         width = self.width
         colorup = self.colorup or edgecolor
@@ -46,11 +45,10 @@ class OHLC(Primitive):
 def plot_ohlc(data, ax=None, width=0.8, colorup=None, colordn=None, label=None):
     """plots open-high-low-close charts as polygons"""
 
-    edgecolor = default_pencolor()
+    edgecolor = plt.rcParams["text.color"]
 
     colorup = colorup or edgecolor
     colordn = colordn or edgecolor
-
 
     ax = ax or plt.gca()
 
@@ -80,7 +78,9 @@ def plot_ohlc(data, ax=None, width=0.8, colorup=None, colordn=None, label=None):
             (xv, cl),
             (xv, hi),
         )
-        for xv, op, hi, lo, cl in zip(xvalues, data.open, data.high, data.low, data.close)
+        for xv, op, hi, lo, cl in zip(
+            xvalues, data.open, data.high, data.low, data.close
+        )
     ]
 
     verts = np.asarray(verts)

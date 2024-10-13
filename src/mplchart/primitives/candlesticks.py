@@ -10,8 +10,6 @@ import matplotlib.dates as mdates
 from matplotlib.collections import PolyCollection
 
 from ..model import Primitive
-from ..colors import default_pencolor
-
 
 
 class Candlesticks(Primitive):
@@ -46,7 +44,7 @@ class Candlesticks(Primitive):
 
         width = self.width
 
-        edgecolor = default_pencolor()
+        edgecolor = plt.rcParams["text.color"]
         facecolor = plt.rcParams["axes.facecolor"]
 
         colorup = self.colorup or edgecolor
@@ -103,8 +101,6 @@ def plot_cspoly(
     half_bar = spacing * width / 2.0
 
     with np.errstate(invalid="ignore"):
-        # edgecolor = np.where(change < 0.0, colordn, colorup)
-        # facecolor = np.where(filled, edgecolor, coloroff)
         edgecolor = np.where(change >= 0.0, colorup, colordn)
         facecolor = np.where(change >= 0.0, coloroff, colordn)
 

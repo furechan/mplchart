@@ -33,7 +33,10 @@ prices = yf.Ticker(ticker).history('5y')
 max_bars = 250
 
 indicators = [
-    Candlesticks(), SMA(50), SMA(200), Volume(),
+    Candlesticks(),
+    Volume(),
+    SMA(50),
+    SMA(200),
     RSI(),
     MACD(),
 ]
@@ -68,13 +71,11 @@ chart.plot(prices, indicators)
 ```
 
 The main drawing primitives are :
-- `Candlesticks` for candlesticks plots
+- `Candlesticks` for candlestick plots
 - `OHLC` for open, high, low, close bar plots
 - `Price` for price line plots
 - `Volume` for volume bar plots
-- `Peaks` to plot peaks and valleys
-- `SameAxes` to force plot on the same axes
-- `NewAxes` to force plot on a new axes
+- `Peaks` to mark peaks and valleys
 
 
 ## Builtin Indicators
@@ -100,10 +101,11 @@ Some of the indicators included are:
 - `BBANDS` Bollinger Bands
 
 
-## Ta-lib Abstract Functions
 
-If you have [ta-lib](https://github.com/mrjbq7/ta-lib) installed you can use its abstract functions as indicators.
-The indicators are created by calling `abstract.Function` with the name of the indicator and its parameters.
+## Talib Abstract Functions
+
+If you have [ta-lib](https://github.com/mrjbq7/ta-lib) installed you can use the library abstract functions as indicators.
+The indicators are created by calling `Function` with the name of the indicator and its parameters.
 
 ```python
 from mplchart.primitives import Candlesticks
@@ -119,9 +121,24 @@ indicators = [
 ```
 
 
+## Select target axes with `NewAxes` and `SameAxes` modifiers
+
+Indicators usually plot in a new axes below, except for a few indicators that plot by default in the main axes. You can change the target axes to use for any indicator by using an axes modifier. A modifier is applied to an indicator with the `|` operator as in the example below.
+
+```python
+from mplchart.modifiers import NewAxes, SameAxes
+
+indicators = [
+    Candlesticks(),
+    ROC(20) | NewAxes(),
+    ROC(50) | SameAxes(),
+]
+```
+
+
 ## Custom Indicators
 
-Any callable that takes a prices dataframe and returns a series or dataframe can be used as indicator.
+Any callable that accepts a prices dataframe and returns a series or dataframe can be used as an indicator.
 You can also implement a custom indicator as a subclass of `Indicator`.
 
 ```python
@@ -146,6 +163,8 @@ class DEMA(Indicator):
         return 2 * ema1 - ema2
 ```
 
+
+
 ## Examples
 
 You can find example notebooks and scripts in the examples folder. 
@@ -158,23 +177,18 @@ You can install the current version of this package with pip
 python -mpip install git+https://github.com/furechan/mplchart.git
 ```
 
-## Requirements:
+## Dependencies
 
 - python >= 3.9
 - matplotlib
 - pandas
 - numpy
-- yfinance
 
 
 ## Related Projects & Resources
 - [stockcharts.com](https://stockcharts.com/) Classic stock charts and technical analysis reference
-- [mplfinance](https://pypi.org/project/mplfinance/) Matplotlib utilities for the visualization,
-and visual analysis, of financial data
+- [mplfinance](https://pypi.org/project/mplfinance/) Matplotlib utilities for the visualization, and visual analysis, of financial data
 - [matplotlib](https://github.com/matplotlib/matplotlib) Matplotlib: plotting with Python
+- [pandas](https://github.com/pandas-dev/pandas) Flexible and powerful data analysis / manipulation library for Python, providing labeled data structures similar to R data.frame objects, statistical functions, and much more
 - [yfinance](https://github.com/ranaroussi/yfinance) Download market data from Yahoo! Finance's API
 - [ta-lib](https://github.com/mrjbq7/ta-lib) Python wrapper for TA-Lib
-- [pandas](https://github.com/pandas-dev/pandas) Flexible and powerful data analysis / manipulation library
-for Python, providing labeled data structures similar to R data.frame objects,
-statistical functions, and much more
-- [numpy](https://github.com/numpy/numpy) The fundamental package for scientific computing with Python

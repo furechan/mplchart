@@ -1,8 +1,43 @@
-""" mplchart utils """
+"""mplchart utils"""
 
 import pandas as pd
 
 from inspect import Signature, Parameter
+
+TALIB_SAME_SCALE = "Output scale same as input"
+
+
+def same_scale(indicator):
+    """Whether indicator uses the same scale as inputs"""
+
+    if hasattr(indicator, "function_flags"):  # talib
+        flags = indicator.function_flags or ()
+        return TALIB_SAME_SCALE in flags
+
+    return getattr(indicator, "same_scale", False)
+
+
+def get_name(indicator):
+    """indicator name"""
+
+    if hasattr(indicator, "func_object"):  # talib
+        return indicator.info.get("name")
+
+    if hasattr(indicator, "__name__"):  # function
+        return indicator.name.removeprefix("calc_")
+
+    return indicator.__class__.__name__
+
+
+def get_label(indicator):
+    """indicator label"""
+
+    if hasattr(indicator, "func_object"):  # talib
+        name = indicator.info.get("name")
+        params = [repr(v) for v in indicator.parameters.values()]
+        return name + "(" + ", ".join(params) + ")"
+
+    return str(indicator)
 
 
 def series_xy(data, item=None, dropna=False):
@@ -40,7 +75,7 @@ def get_series(prices, item: str = None):
 
 
 def short_repr(self):
-    """ short repr based on __init__ signature """
+    """short repr based on __init__ signature"""
 
     cname = self.__class__.__qualname__
     signature = Signature.from_callable(self.__init__)

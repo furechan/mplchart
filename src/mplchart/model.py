@@ -63,6 +63,3 @@ class ComposedIndicator(Indicator):
             return self.__class__(*self.args, other)
         return self(other)
 
-    @property
-    def same_scale(self):
-        return all(getattr(i, "same_scale", False) for i in self.args)

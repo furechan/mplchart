@@ -1,4 +1,4 @@
-""" Marker primitives """
+"""Marker primitives (experimental)"""
 
 import numpy as np
 
@@ -7,10 +7,9 @@ from ..model import Primitive
 from matplotlib.collections import LineCollection
 
 
-class PosMarker(Primitive):
-    """Base class for position based markers"""
+class Marker(Primitive):
+    """Base class for flag based markers"""
 
-    candidate_items = ("pos", "macdhist", "ppohist")
     indicator = None
     expr = None
 
@@ -23,15 +22,8 @@ class PosMarker(Primitive):
 
         return self.clone(indicator=indicator)
 
-    def default_item(self, prices):
-        items = [c for c in prices.columns if c in self.candidate_items]
-        if items:
-            return items[0]
-        else:
-            raise ValueError("No valid position column!")
-
     def process(self, prices, chart):
-        """adds indicator result and position to prices"""
+        """adds indicator result and flag to prices"""
 
         indicator = self.indicator or chart.last_indicator
 
@@ -39,38 +31,35 @@ class PosMarker(Primitive):
             data = indicator(prices)
             prices = prices.join(data)
 
-        expr = self.expr or self.default_item(prices)
-        pos = np.where(prices.eval(expr) > 0.0, 1.0, 0.0)
-        prices = prices.assign(pos=pos)
+        flag = np.where(prices.eval(self.expr) > 0.0, 1.0, 0.0)
+        prices = prices.assign(flag=flag)
 
         return prices
 
 
-class TradeMarker(PosMarker):
-    """Trade Marker Primitive"""
+class CrossMarker(Marker):
+    """Cross Marker Primitive"""
 
     COLORENTRY = "green"
     COLOREXIT = "red"
 
     def plot_handler(self, data, chart, ax=None):
-        """main plot handler from raw prices"""
-
         if ax is None:
             ax = chart.main_axes()
 
         data = self.process(data, chart)
         data = chart.extract_df(data)
 
-        mask = data.pos.diff().fillna(0).ne(0)
+        mask = data.flag.diff().fillna(0).ne(0)
 
         xv = data.index[mask]
         yv = data.close[mask]
-        pos = data.pos[mask]
+        flag = data.flag[mask]
 
         colorn = self.COLORENTRY
         colorx = self.COLOREXIT
 
-        cv = np.where(pos > 0, colorn, colorx)
+        cv = np.where(flag > 0, colorn, colorx)
 
         ax.scatter(xv, yv, c=cv, s=12 * 12, alpha=0.6, marker=".")
 
@@ -80,36 +69,36 @@ class TradeMarker(PosMarker):
         pos_color = (0.0, 0.0, 0.0, 1.0)
         neg_color = (0.0, 0.0, 0.0, 0.0)
 
-        colors = [pos_color if pos.iloc[i] else neg_color for i in range(len(segments))]
+        colors = [
+            pos_color if flag.iloc[i] else neg_color for i in range(len(segments))
+        ]
 
         lc = LineCollection(segments, colors=colors, linestyles="solid", linewidths=1.0)
 
         ax.add_collection(lc)
 
 
-class TradeSpan(PosMarker):
-    """Trade Span Primitive"""
+class Stripes(Marker):
+    """Stripes Primitive"""
 
     COLOR = "green"
     ALPHA = 0.1
 
     def plot_handler(self, data, chart, ax=None):
-        """main plot handler from raw prices"""
-
         if ax is None:
             ax = chart.root_axes()
 
         data = self.process(data, chart)
         data = chart.extract_df(data)
-        pos = data.pos
+        flag = data.flag
 
-        mask = pos.diff().fillna(0).ne(0)
+        mask = flag.diff().fillna(0).ne(0)
 
         color = self.COLOR
         alpha = self.ALPHA
 
         xv = data.index[mask]
-        sv = data.pos[mask]
+        sv = data.flag[mask]
         x = s = px = None
 
         for x, s in zip(xv, sv):
