@@ -1,9 +1,10 @@
 # Change Log
 
 ## 0.0.12
-- Added DMI indicator
-- Added ATRP indicator
-- Experimental Stylesheet
+- Added `DMI` indicator (`ADX` is now a single series indicator)
+- Added `ATRP` indicator (Average True Range Percentage)
+- Plotting Logic moved out of indicators
+- Experimental `color_scheme` and `Color` modifier
 
 ## 0.0.11
 - Refactorings
