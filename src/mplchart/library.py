@@ -153,6 +153,19 @@ def calc_ndi(prices, period: int = 14):
     return calc_dmi(prices, period).ndi
 
 
+def calc_bbands(prices, period: int = 20, nbdev: float = 2.0):
+    """Bollinger Bands"""
+    midprc = (prices["high"] + prices["low"] + prices["close"]) / 3.0
+    std = midprc.rolling(period).std(ddof=0)
+    middle = midprc.rolling(period).mean()
+    upper = middle + nbdev * std
+    lower = middle - nbdev * std
+
+    result = dict(upperband=upper, middleband=middle, lowerband=lower)
+    result = pd.DataFrame(result)
+    return result
+
+
 def calc_slope(series, period: int = 20):
     """calculates the slope (lnear regression) over a rolling window"""
 
@@ -167,14 +180,18 @@ def calc_slope(series, period: int = 20):
     return series.rolling(window=period).apply(func, raw=True)
 
 
-def calc_bbands(prices, period: int = 20, nbdev: float = 2.0):
-    """Bollinger Bands"""
-    midprc = (prices["high"] + prices["low"] + prices["close"]) / 3.0
-    std = midprc.rolling(period).std(ddof=0)
-    middle = midprc.rolling(period).mean()
-    upper = middle + nbdev * std
-    lower = middle - nbdev * std
+def calc_stoch(prices, period: int = 14, fastn: int = 3, slown: int = 3):
+    """Stochastik Oscillator"""
 
-    result = dict(upperband=upper, middleband=middle, lowerband=lower)
-    result = pd.DataFrame(result)
-    return result
+    high = prices["high"].rolling(period).max()
+    low = prices["low"].rolling(period).min()
+    close = prices["close"]
+    
+    fastk = (close - low) / (high - low) * 100
+    slowk = calc_sma(fastk, fastn)
+    slowd = calc_sma(slowk, slown)
+
+    slowk = fastk.rolling(window=fastn).mean()
+    slowd = slowk.rolling(window=slown).mean()
+
+    return pd.DataFrame(dict(slowk=slowk, slowd=slowd))

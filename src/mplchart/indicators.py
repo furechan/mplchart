@@ -179,4 +179,17 @@ class BBANDS(Indicator):
         return library.calc_bbands(prices, self.period, self.nbdev)
 
 
+class STOCH(Indicator):
+    """Stochastik Oscillator"""
+
+    def __init__(self, period: int = 14, fastn: int = 3, slown: int = 3):
+        self.period = period
+        self.fastn = fastn
+        self.slown = slown
+
+    def __call__(self, prices):
+        return library.calc_stoch(prices, self.period)
+
+
+
 __all__ = [k for k in dir() if k.isupper()]

@@ -92,12 +92,13 @@ Some of the indicators included are:
 - `ROC` Rate of Change
 - `RSI` Relative Strength Index
 - `ATR` Average True Range
-- `ATRP` Average True Range (Percent)
+- `ATRP` Average True Range Percent
 - `ADX` Average Directional Index
 - `DMI` Directional Movement Index
 - `MACD` Moving Average Convergence Divergence
 - `PPO` Price Percentage Oscillator 
 - `SLOPE` Slope (time linear regression)
+- `STOCH` Stochastic Oscillator
 - `BBANDS` Bollinger Bands
 
 

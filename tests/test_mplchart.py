@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 from mplchart.chart import Chart
 from mplchart.samples import sample_prices
 from mplchart.primitives import Candlesticks, Volume
-from mplchart.indicators import SMA, EMA, WMA, HMA, RSI, ATR, ATRP, ADX, MACD, PPO, SLOPE, BBANDS
+from mplchart.indicators import SMA, EMA, WMA, HMA, RSI, ATR, ATRP, ADX, MACD, PPO
+from mplchart.indicators import SLOPE, BBANDS, STOCH
 
 try:
     from talib import abstract
@@ -29,6 +30,7 @@ INDICATORS = [
     PPO(),
     SLOPE(),
     BBANDS(),
+    STOCH()
 ]
 
 

@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.14
+- Added STOCH Indicator (Stochastic Oscillator)
+
 ## 0.0.13
 - Updated Pypi README
 
