@@ -68,5 +68,5 @@ def bump(c):
     version = version[:-1] + (version[-1]+1, )
     version = ".".join(str(v) for v in version)
     print(f"Updating version to {version} ...")
-    buffer = print(re.sub(pattern, f"version = \"{version}\"\n", buffer, flags=re.VERBOSE | re.MULTILINE))
-    pyproject.write_text(buffer)
+    output = re.sub(pattern, f"version = \"{version}\"\n", buffer, flags=re.VERBOSE | re.MULTILINE)
+    pyproject.write_text(output)

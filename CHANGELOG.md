@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.13
+- Updated Pypi README
+
 ## 0.0.12
 - Added `DMI` indicator (`ADX` is now a single series indicator)
 - Added `ATRP` indicator (Average True Range Percentage)
