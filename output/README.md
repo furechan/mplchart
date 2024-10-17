@@ -21,6 +21,8 @@ and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
 ## Typical Usage
 
 ```python
+# Candlesticks chart with SMA, RSI and MACD indicators
+
 import yfinance as yf
 
 from mplchart.chart import Chart
@@ -62,6 +64,8 @@ The library contains drawing primitives that can be used like an indicator in th
 Primitives are classes and must be instantiated as objects before being used with the plot api.
 
 ```python
+# Candlesticks chart 
+
 from mplchart.chart import Chart
 from mplchart.primitives import Candlesticks
 
@@ -116,6 +120,8 @@ If you have [ta-lib](https://github.com/mrjbq7/ta-lib) installed you can use the
 The indicators are created by calling `Function` with the name of the indicator and its parameters.
 
 ```python
+# Candlesticks chart with talib indicators
+
 from mplchart.primitives import Candlesticks
 from talib.abstract import Function
 
@@ -135,6 +141,8 @@ Most indicators are drawn as line plots with default colors and settings. You ca
 
 
 ```python
+# Customizing indicator style with LinePlot
+
 from mplchart.indicators import SMA, EMA, ROC
 from mplchart.primitives import Candlesticks, LinePlot
 
@@ -150,12 +158,14 @@ indicators = [
 Indicators usually plot in a new axes below, except for a few indicators that plot by default in the main axes. You can change the target axes for any indicator by piping it into an axes primitive as in the example below.
 
 ```python
+# Plotting two indicators on the same axes with SameAxes
+
 from mplchart.indicators import SMA, EMA, ROC
-from mplchart.primitives import Candlesticks, NewAxes, SameAxes
+from mplchart.primitives import Candlesticks, SameAxes
 
 indicators = [
     Candlesticks(),
-    ROC(20) | NewAxes(),
+    ROC(20),
     ROC(50) | SameAxes(),
 ]
 ```
@@ -167,6 +177,8 @@ Any callable that accepts a prices dataframe and returns a series or dataframe c
 You can also implement a custom indicator as a subclass of `Indicator`.
 
 ```python
+# Custom Indicator Example
+
 from mplchart.model import Indicator
 from mplchart.library import get_series, calc_ema
 
