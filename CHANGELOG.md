@@ -1,7 +1,9 @@
 # Change Log
 
 ## 0.0.14
-- Added STOCH Indicator (Stochastic Oscillator)
+- Added `STOCH` Indicator (Stochastic Oscillator)
+- Added `LinePlot`, `AreaPlot` and `BarPlot` primitives
+
 
 ## 0.0.13
 - Updated Pypi README

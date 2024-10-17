@@ -49,7 +49,8 @@ class AutoWrapper(Wrapper):
 
         return list(data.columns)
 
-    def series_data(self, data, item=None):
+    def series_xy(self, data, item=None):   # ignore item for series !!!
+        """split data into x, y arrays"""
         if data.__class__.__name__ == "Series":
             series = data
         elif item is not None:
@@ -76,13 +77,13 @@ class AutoWrapper(Wrapper):
 
             if item.endswith("hist"):
                 color = chart.get_color(item, ax, self.indicator, fallback="fill")
-                xv, yv = self.series_data(data, item)
+                xv, yv = self.series_xy(data, item)
                 ax.bar(xv, yv, color=color, alpha=0.5, width=0.8, label=label)
                 counter += 1
                 continue
 
             color = chart.get_color(item, ax, self.indicator, fallback="line")
-            xv, yv = self.series_data(data, item)
+            xv, yv = self.series_xy(data, item)
             ax.plot(xv, yv, label=label, color=color)
             counter += 1
 
@@ -94,9 +95,9 @@ class AutoWrapper(Wrapper):
             name = get_name(self.indicator).lower()
             color = chart.get_color(name, ax, self.indicator, fallback="line")
 
-            xv, mv = self.series_data(data, middleband)
-            xv, lv = self.series_data(data, lowerband)
-            xv, uv = self.series_data(data, upperband)
+            xv, mv = self.series_xy(data, middleband)
+            xv, lv = self.series_xy(data, lowerband)
+            xv, uv = self.series_xy(data, upperband)
 
             ax.plot(xv, mv, color=color, linestyle="dashed")
             ax.plot(xv, lv, color=color, linestyle="dotted")
@@ -115,7 +116,7 @@ class AutoWrapper(Wrapper):
         if oversold is not None:
             color = chart.get_color("oversold", ax, self.indicator, fallback="fill")
             with np.errstate(invalid="ignore"):
-                xv, yv = self.series_data(data)
+                xv, yv = self.series_xy(data)
                 ax.fill_between(
                     xv,
                     yv,
@@ -129,7 +130,7 @@ class AutoWrapper(Wrapper):
         if overbought is not None:
             color = chart.get_color("overbought", ax, self.indicator, fallback="fill")
             with np.errstate(invalid="ignore"):
-                xv, yv = self.series_data(data)
+                xv, yv = self.series_xy(data)
                 ax.fill_between(
                     xv,
                     yv,

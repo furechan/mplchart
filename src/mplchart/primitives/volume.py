@@ -11,7 +11,7 @@ class Volume(Primitive):
     """
     Volume Primitive
 
-    Used to plot the volume
+    Plot volume with optional moving average
 
     Args:
         sma (int) : the period of the simple moving average, optional
@@ -35,9 +35,9 @@ class Volume(Primitive):
     def __str__(self):
         return self.__class__.__name__
 
-    def calc(self, data):
-        volume = data.volume
-        change = data.close.pct_change()
+    def process(self, prices):
+        volume = prices.volume
+        change = prices.close.pct_change()
 
         result = dict(volume=volume, change=change)
 
@@ -48,11 +48,11 @@ class Volume(Primitive):
 
         return result
 
-    def plot_handler(self, data, chart, ax=None):
+    def plot_handler(self, prices, chart, ax=None):
         if ax is None:
             ax = chart.get_axes("twinx")
 
-        data = self.calc(data)
+        data = self.process(prices)
         data = chart.extract_df(data)
 
         index = data.index

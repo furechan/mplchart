@@ -35,13 +35,13 @@ class Candlesticks(Primitive):
     def __str__(self):
         return self.__class__.__name__
 
-    def plot_handler(self, data, chart, ax=None):
+    def plot_handler(self, prices, chart, ax=None):
         if ax is None:
             ax = chart.get_axes()
 
-        label = str(self)
-        data = chart.extract_df(data)
+        data = chart.extract_df(prices)
 
+        label = str(self)
         width = self.width
 
         edgecolor = plt.rcParams["text.color"]

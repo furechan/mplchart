@@ -22,14 +22,11 @@ class Marker(Primitive):
 
         return self.clone(indicator=indicator)
 
-    def process(self, prices, chart):
+    def process(self, prices):
         """adds indicator result and flag to prices"""
 
-        indicator = self.indicator or chart.last_indicator
-
-        if indicator:
-            data = indicator(prices)
-            prices = prices.join(data)
+        data = self.calc_result(prices, self.indicator)
+        prices = prices.join(data)
 
         flag = np.where(prices.eval(self.expr) > 0.0, 1.0, 0.0)
         prices = prices.assign(flag=flag)
@@ -43,11 +40,11 @@ class CrossMarker(Marker):
     COLORENTRY = "green"
     COLOREXIT = "red"
 
-    def plot_handler(self, data, chart, ax=None):
+    def plot_handler(self, prices, chart, ax=None):
         if ax is None:
             ax = chart.main_axes()
 
-        data = self.process(data, chart)
+        data = self.process(prices)
         data = chart.extract_df(data)
 
         mask = data.flag.diff().fillna(0).ne(0)
@@ -84,11 +81,11 @@ class Stripes(Marker):
     COLOR = "green"
     ALPHA = 0.1
 
-    def plot_handler(self, data, chart, ax=None):
+    def plot_handler(self, prices, chart, ax=None):
         if ax is None:
             ax = chart.root_axes()
 
-        data = self.process(data, chart)
+        data = self.process(prices)
         data = chart.extract_df(data)
         flag = data.flag
 

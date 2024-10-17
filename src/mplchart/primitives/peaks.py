@@ -31,7 +31,7 @@ class Peaks(Primitive):
 
         self.clone(indicator=indicator)
 
-    def calc(self, data):
+    def process(self, data):
         if self.item:
             data = getattr(data, self.item)
         return extract_peaks(data, span=self.span)
@@ -40,12 +40,8 @@ class Peaks(Primitive):
         if ax is None:
             ax = chart.get_axes()
 
-        indicator = self.indicator or chart.last_indicator
-
-        if indicator:
-            data = indicator(data)
-
-        data = self.calc(data)
+        data = chart.calc_result(data, self.indicator)
+        data = self.process(data)
         data = chart.extract_df(data)
 
         xv, yv = data.index, data

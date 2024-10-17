@@ -46,7 +46,7 @@ class Chart:
     mapper = None
     source_data = None
     next_target = None
-    last_indicator = None
+    last_result = None
     layout = StandardLayout
 
     DEFAULT_FIGSIZE = (12, 9)
@@ -61,20 +61,28 @@ class Chart:
         figsize=None,
         bgcolor=None,
         holidays=None,
+        raw_dates=False,
         color_scheme=(),
-        use_calendar=False,
     ):
         self.start = start
         self.end = end
         self.figsize = figsize
         self.max_bars = max_bars
         self.holidays = holidays
-        self.use_calendar = use_calendar
+        self.raw_dates = raw_dates
         self.color_scheme = dict(color_scheme)
+
+        if raw_dates:
+            warnings.warn(
+                "raw_dates parameter is deprecated.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+
 
         if bgcolor is not None:
             warnings.warn(
-                "bgcolor parameter is obsolete. Use matplotlib styles instead!",
+                "bgcolor parameter is deprecated. Use matplotlib styles instead!",
                 DeprecationWarning,
                 stacklevel=2,
             )
@@ -117,7 +125,7 @@ class Chart:
         if self.source_data is None:
             self.source_data = data
 
-        if self.use_calendar:
+        if self.raw_dates:
             self.mapper = RawDateMapper(
                 index=data.index, start=self.start, end=self.end, max_bars=self.max_bars
             )
@@ -286,6 +294,9 @@ class Chart:
     def get_target(self, indicator):
         """target axes for indicator"""
 
+        if indicator is None:
+            return "same"
+
         default_pane = getattr(indicator, "default_pane", None)
         if default_pane is not None:
             return default_pane
@@ -385,9 +396,16 @@ class Chart:
         return count
 
     def calc_result(self, prices, indicator):
-        self.last_indicator = indicator
-        result = indicator(prices)
-        result = self.extract_df(result)
+        """ calculates indicator result saving last result"""
+
+        if indicator is not None:
+            result = indicator(prices)
+            self.last_result = result
+        elif self.last_result is not None:
+            result = self.last_result
+        else:
+            result = prices
+            
         return result
 
     def plot_indicator(self, data, indicator):
@@ -405,6 +423,7 @@ class Chart:
         # Result data is mapped to the charting view (see extract_df)
         if callable(indicator):
             result = self.calc_result(data, indicator)
+            result = self.extract_df(result)
         else:
             raise ValueError(f"Indicator {indicator!r} not callable")
 
@@ -460,6 +479,8 @@ class Chart:
             list of indciators to plot
 
         """
+
+        self.last_result = None
 
         if target is not None:
             self.force_target(target)

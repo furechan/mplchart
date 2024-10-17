@@ -115,6 +115,21 @@ MACD() | Styles(macd=..., macdsignal)
 
 ADX() | Replace(yticks=(20, 40))                     # indicator.info
 
+# Specific Plot Primitives
+
+SMA(50) | LinePlot(color="...")
+SMA(50) | AreaPlot(color="...")
+SMA(50) | BarPlot(color="...")
+SMA(50) | ScatterPlot(color="...")
+
+# Generic Plot Primitive
+
+SMA(50) | Plot("line", color="...")
+SMA(50) | Plot("area", AreaPlot(color="...")
+SMA(50) | Plot("scatter", color="...")
+SMA(50) | Plot("bars", color="...")
+
+
 
 # Style dataclass ???
 

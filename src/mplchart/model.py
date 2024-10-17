@@ -1,6 +1,9 @@
 """primitive base class"""
 
+import copy
+
 from abc import ABC, abstractmethod
+
 
 from .utils import short_repr
 
@@ -13,9 +16,14 @@ class Primitive(ABC):
         """Plot handler is called before any callculation"""
         ...
 
-    def clone(self, **kwargs):
+    def clone_legacy(self, **kwargs):
         cls = self.__class__
         result = cls.__new__(cls)
+        result.__dict__.update(self.__dict__, **kwargs)
+        return result
+
+    def clone(self, **kwargs):
+        result = copy.copy(self)
         result.__dict__.update(self.__dict__, **kwargs)
         return result
 

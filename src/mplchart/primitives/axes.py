@@ -1,38 +1,54 @@
 """Axes primitives"""
 
+import copy
 import warnings
 
 from ..model import Primitive
 
 
-class SameAxes(Primitive):
-    """Primitive to force same axis for next indicator"""
-
-    def __init__(self):
-        warnings.warn(
-            "SameAxes primitive is deprecated. Use Position modifier instead!",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
-    def plot_handler(self, data, chart, ax=None):
-        chart.force_target("same")
-
-
 class NewAxes(Primitive):
-    """Primitive to force axis for next indicator"""
+    """New Axes Primitive
+
+    Apply to an indicator with the `|` operator.
+
+    Args:
+        target (str) : target axes like 'same', 'above', 'below'
+
+    Example:
+        SMA(20) | NewAxes()
+    """
 
     def __init__(self, target="below"):
-        warnings.warn(
-            "NewAxes primitive is deprecated. Use Position modifier instead!",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
-        if target not in ("twinx", "above", "below"):
+        if target not in ("same", "twinx", "above", "below"):
             raise ValueError(f"Invalid target {target!r}")
 
         self.target = target
 
-    def plot_handler(self, data, chart, ax=None):
+    def __ror__(self, indicator):
+        if not callable(indicator):
+            return NotImplemented
+
+        result = copy.copy(indicator)
+        result.default_pane = self.target
+        return result
+
+    def plot_handler(self, prices, chart, ax=None):
+        warnings.warn(
+            "Use without indicator is deprecated. Use with `|` operator!",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         chart.force_target(self.target)
+
+
+class SameAxes(NewAxes):
+    """Use Same Axes
+
+    Apply to an indicator with the `|` operator.
+
+    Example:
+        ROC(20) | SameAxes()
+    """
+
+    def __init__(self):
+        super().__init__("same")

@@ -25,7 +25,7 @@ import yfinance as yf
 
 from mplchart.chart import Chart
 from mplchart.primitives import Candlesticks, Volume
-from mplchart.indicators import ROC, SMA, EMA, RSI, MACD
+from mplchart.indicators import SMA, EMA, ROC, RSI, MACD
 
 ticker = 'AAPL'
 prices = yf.Ticker(ticker).history('5y')
@@ -51,7 +51,7 @@ chart.show()
 
 Price data is expected to be presented as a pandas DataFrame
 with columns `open`, `high`, `low`, `close` `volume`
-and a timestamp index named `date` or `datetime`.
+and a datetime index named `date` or `datetime`.
 Please note, the library will automatically convert column
 and index names to lower case for its internal use.
 
@@ -59,7 +59,7 @@ and index names to lower case for its internal use.
 ## Drawing Primitives
 
 The library contains drawing primitives that can be used like an indicator in the plot api.
-Primitives are classes and must be instantiated before being used as parameters to the plot api.
+Primitives are classes and must be instantiated as objects before being used with the plot api.
 
 ```python
 from mplchart.chart import Chart
@@ -76,12 +76,19 @@ The main drawing primitives are :
 - `Price` for price line plots
 - `Volume` for volume bar plots
 - `Peaks` to mark peaks and valleys
+- `SameAxes` to use same axes as last plot
+- `NewAxes` to use new axes above or below
+- `LinePlot` draw an indicator as line plot
+- `AreaPlot` draw an indicator as area plot
+- `BarPlot` draw an indicator as bar plot
+
+
 
 
 ## Builtin Indicators
 
-The libary contains some basic technical analysis indicators implemented in pandas/numpy.
-Indicators are classes and must be instantiated before being used as parameters to the plot api.
+The libary includes some standard technical analysis indicators implemented in pandas/numpy.
+Indicators are classes and must be instantiated as objects before being used with the plot api.
 
 Some of the indicators included are:
 
@@ -103,7 +110,7 @@ Some of the indicators included are:
 
 
 
-## Talib Abstract Functions
+## Talib Functions
 
 If you have [ta-lib](https://github.com/mrjbq7/ta-lib) installed you can use the library abstract functions as indicators.
 The indicators are created by calling `Function` with the name of the indicator and its parameters.
@@ -122,12 +129,29 @@ indicators = [
 ```
 
 
-## Select target axes with `NewAxes` and `SameAxes` modifiers
+## Override indicator rendering with the plotting primitives
 
-Indicators usually plot in a new axes below, except for a few indicators that plot by default in the main axes. You can change the target axes to use for any indicator by using an axes modifier. A modifier is applied to an indicator with the `|` operator as in the example below.
+Most indicators are drawn as line plots with default colors and settings. You can override the rendering of an indicator by piping it with the `|` operator into a primitive like `LinePlot`, `AreaPlot` or `BarPlot` as in the example below. If the indicator returns a dataframe instead of a series you need to specify an `item` (column name) in the primitive.
+
 
 ```python
-from mplchart.modifiers import NewAxes, SameAxes
+from mplchart.indicators import SMA, EMA, ROC
+from mplchart.primitives import Candlesticks, LinePlot
+
+indicators = [
+    Candlesticks(),
+    SMA(20) | LinePlot(style="dashed", color="red", alpha=0.5, width=3)
+]
+```
+
+
+## Override target axes with `NewAxes` and `SameAxes` primitives
+
+Indicators usually plot in a new axes below, except for a few indicators that plot by default in the main axes. You can change the target axes for any indicator by piping it into an axes primitive as in the example below.
+
+```python
+from mplchart.indicators import SMA, EMA, ROC
+from mplchart.primitives import Candlesticks, NewAxes, SameAxes
 
 indicators = [
     Candlesticks(),
@@ -168,7 +192,7 @@ class DEMA(Indicator):
 
 ## Examples
 
-You can find example notebooks and scripts in the examples folder. 
+You can find example notebooks and scripts in the `examples` folder. 
 
 ## Installation
 

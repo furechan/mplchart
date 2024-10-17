@@ -1,6 +1,7 @@
-"""Indicator Modifiers"""
+"""Indicator Modifiers (experimental)"""
 
 import copy
+import warnings
 
 from collections.abc import Mapping
 
@@ -20,6 +21,14 @@ class NewAxes:
     """
 
     def __init__(self, target="below"):
+        cname = self.__class__.__name__
+        warnings.warn(
+            f"{cname} modifier is deprecated. Use primitive instead!",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
+
         if target not in ("same", "twinx", "above", "below"):
             raise ValueError(f"Invalid target {target!r}")
         self.target = target

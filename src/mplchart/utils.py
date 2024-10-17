@@ -40,8 +40,8 @@ def get_label(indicator):
     return str(indicator)
 
 
-def series_xy(data, item=None, dropna=False):
-    """split series into x, y arrays"""
+def series_xy(data, item=None, *, dropna=False):
+    """split data into x, y arrays"""
 
     if item is not None:
         data = data[item]
@@ -53,6 +53,25 @@ def series_xy(data, item=None, dropna=False):
     y = data.values
 
     return x, y
+
+
+def series_data(data, item: str = None, *, default_item: str = None, strict: bool = False):
+    if isinstance(data, pd.DataFrame):
+        if item is not None:
+            return data[item]
+        elif default_item is not None:
+            return data[default_item]
+        else:
+            raise ValueError("Item is required for a DataFrame")
+
+    if isinstance(data, pd.Series):
+        if item is None or not strict:
+            return data
+        else:
+            raise ValueError("Item must be None for a Series")
+
+    raise TypeError(f"Invalid series type {type(data).__name__} !")
+
 
 
 def get_series(prices, item: str = None):
