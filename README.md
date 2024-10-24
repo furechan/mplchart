@@ -158,7 +158,7 @@ indicators = [
 Indicators usually plot in a new axes below, except for a few indicators that plot by default in the main axes. You can change the target axes for any indicator by piping it into an axes primitive as in the example below.
 
 ```python
-# Plotting two indicators on the same axes with SameAxes
+# Plotting two indicators on the same axes with SameAxes primitive
 
 from mplchart.indicators import SMA, EMA, ROC
 from mplchart.primitives import Candlesticks, SameAxes

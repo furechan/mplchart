@@ -1,6 +1,7 @@
 # noinspection PyUnresolvedReferences
 
 import re
+
 from pathlib import Path
 from invoke import task  # type: ignore
 
@@ -9,54 +10,55 @@ FOLDER = Path(__file__).parent
 
 
 @task
-def setup(c):
-    """Check package versions"""
-    c.run("pip install \"numpy<2.0.0\"")
-    c.run("pip install -e \".[extras]\"")
+def setup(ctx):
+    """Install package with extras"""
+    ctx.run('pip install "numpy<2.0.0"')
+    ctx.run('pip install -e ".[dev]"')
 
 
 @task
-def info(c):
+def info(ctx):
     """Check package versions"""
-    c.run(f"pip index versions {PACKAGE}")
+    ctx.run(f"pip index versions {PACKAGE}")
 
 
 @task
-def clean(c):
+def clean(ctx):
     """Clean project dist"""
-    c.run("rm -rf dist")
+    ctx.run("rm -rf dist")
 
 
 @task
-def check(c):
+def check(ctx):
     """Check package"""
-    c.run("pip install -q ruff nbcheck")
-    c.run("nbcheck examples misc")
-    c.run("ruff check")
+    ctx.run("pip install -q ruff nbcheck")
+    ctx.run("nbcheck examples misc")
+    ctx.run("ruff check")
 
 
 @task(clean)
-def build(c):
+def build(ctx):
     """Build project wheel"""
-    c.run("pip install -q build")
-    c.run("python -mbuild --wheel")
+    ctx.run("pip install -q build")
+    ctx.run("python -mbuild --wheel")
 
 
 @task
-def dump(c):
+def dump(ctx):
     """Dump wheel contents"""
     for file in FOLDER.glob("dist/*.whl"):
-        c.run(f"unzip -l {file}")
+        ctx.run(f"unzip -l {file}")
 
 
 @task
-def publish(c):
+def publish(ctx):
     """Publish to PyPI with twine"""
-    c.run("pip install -q twine")
-    c.run("twine upload dist/*.whl")
+    ctx.run("pip install -q twine")
+    ctx.run("twine upload dist/*.whl")
+
 
 @task
-def bump(c):
+def bump(ctx):
     """Bump patch version in pyproject"""
     pyproject = Path(__file__).joinpath("../pyproject.toml").resolve(strict=True)
     buffer = pyproject.read_text()
@@ -65,8 +67,10 @@ def bump(c):
     if not match:
         raise ValueError("Could not find version setting")
     version = tuple(int(i) for i in match.group(1).split("."))
-    version = version[:-1] + (version[-1]+1, )
+    version = version[:-1] + (version[-1] + 1,)
     version = ".".join(str(v) for v in version)
     print(f"Updating version to {version} ...")
-    output = re.sub(pattern, f"version = \"{version}\"\n", buffer, flags=re.VERBOSE | re.MULTILINE)
+    output = re.sub(
+        pattern, f'version = "{version}"\n', buffer, flags=re.VERBOSE | re.MULTILINE
+    )
     pyproject.write_text(output)

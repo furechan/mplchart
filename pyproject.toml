@@ -20,10 +20,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-extras = ["yfinance", "pytest", "nbmake", "ipykernel", "ta-lib", "ruff", "jinja2"]
-
-[tool.hatch.version]
-path = "src/mplchart/__init__.py"
+dev = ["yfinance", "pytest", "nbmake", "ipykernel", "ta-lib", "ruff", "jinja2"]
 
 [tool.hatch.build]
 targets.wheel.sources = ["src"]
@@ -38,3 +35,7 @@ exclude = [".*"]
 [tool.pytest.ini_options]
 addopts = ["-p no:cacheprovider"]
 testpaths = ["tests"]
+
+[tool.hatch.envs.default]
+type = "virtual"
+path = ".venv"
