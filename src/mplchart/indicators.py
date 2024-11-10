@@ -106,7 +106,7 @@ class RSI(Indicator):
     oversold: float = 30
     overbought: float = 70
     yticks: tuple = 30, 50, 70
-    default_pane: str = "above"
+    # default_pane: str = "above"
 
     def __init__(self, period: int = 14):
         self.period = period

@@ -9,5 +9,5 @@ from .peaks import Peaks
 from .lineplot import LinePlot
 from .areaplot import AreaPlot
 from .barplot import BarPlot
-
+from .chart_patterns import ChartPattern, ScanProperties
 
