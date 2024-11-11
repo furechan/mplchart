@@ -40,45 +40,29 @@ class Zigzag:
         dir = np.sign(pivot.direction)
     
         if len(self.zigzag_pivots) >= 1:
+            value = pivot.point.norm_price
             last_pivot = self.zigzag_pivots[0]
-            last_value = last_pivot.point.price
-             
+            last_value = last_pivot.point.norm_price
+            last_index = last_pivot.point.index
+
              # Check direction mismatch
             if np.sign(last_pivot.direction) == np.sign(dir):
                 raise ValueError('Direction mismatch')
                  
+            # Calculate slope between last and current pivot
+            pivot.ratio = round(
+                (value - last_value) / (pivot.point.index - last_index), 
+                3
+            )
+    
             if len(self.zigzag_pivots) >= 2:
                 llast_pivot = self.zigzag_pivots[1]
-                value = pivot.point.price
-                llast_value = llast_pivot.point.price
+                llast_value = llast_pivot.point.norm_price
                  
                 # Determine if trend is strong (2) or weak (1)
                 new_dir = dir * 2 if dir * value > dir * llast_value else dir
                 pivot.direction = int(new_dir)
                 
-                # Calculate price ratio
-                pivot.ratio = round(
-                    abs(last_value - value) / abs(llast_value - last_value), 
-                    3
-                )
-                
-                # Calculate bar ratio
-                pivot.bar_ratio = round(
-                    abs(last_pivot.point.index - pivot.point.index) / 
-                    abs(llast_pivot.point.index - last_pivot.point.index),
-                    3
-                )
-                
-                if len(self.zigzag_pivots) >= 3:
-                    lllast_pivot = self.zigzag_pivots[2]
-                    lllast_value = lllast_pivot.point.price
-                    
-                    # Calculate size ratio
-                    pivot.size_ratio = round(
-                        abs(last_value - value) / abs(lllast_value - llast_value),
-                        3
-                    )
-    
         # Insert at beginning and maintain max size
         self.zigzag_pivots.insert(0, pivot)
         if len(self.zigzag_pivots) > self.pivot_limit:
@@ -87,9 +71,19 @@ class Zigzag:
         return self
     
     def window_peaks(self, df: pd.DataFrame, before: int, after: int) -> pd.Series:
-        """Faster version using numpy's stride tricks"""
-        values_high = df["high"].values
-        values_low = df["low"].values
+        """
+        Faster version using numpy's stride tricks
+ 
+        Args:
+            df: DataFrame with 'high' and 'low' columns
+            before: Number of bars before the current bar
+            after: Number of bars after the current bar
+ 
+        Returns:
+            pd.Series: Series of highs and lows
+        """
+        values_high = df["norm_high"].values
+        values_low = df["norm_low"].values
         result_high = np.zeros(len(values_high))
         result_low = np.zeros(len(values_low))
         
@@ -115,20 +109,27 @@ class Zigzag:
         Returns:
             self: Returns zigzag object for method chaining
         """
+        # rescale the dataframe using the max and low prices in the range
+        max_price = df['high'].max()
+        min_price = df['low'].min() * 0.9
+        df['norm_high'] = (df['high'] - min_price) / (max_price - min_price)
+        df['norm_low'] = (df['low'] - min_price) / (max_price - min_price)
+        df['norm_open'] = (df['open'] - min_price) / (max_price - min_price)
+        df['norm_close'] = (df['close'] - min_price) / (max_price - min_price)
+ 
         self.zigzag_pivots = []
         self.flags = ZigzagFlags()
         
         highs, lows = self.window_peaks(df, self.backcandels, self.forwardcandels)
 
-        # Calculate pivot highs using rolling window
-        pivot_highs = df['high'].where((df['high'] == highs))
+        # Calculate pivot highs
+        pivot_highs = df['norm_high'].where((df['norm_high'] == highs))
     
-        # Calculate pivot lows using rolling window
-        pivot_lows = df['low'].where((df['low'] == lows))
-        
+        # Calculate pivot lows
+        pivot_lows = df['norm_low'].where((df['norm_low'] == lows))
+
         # Process pivot points into zigzag
         last_pivot_price = None
-        last_pivot_index = None
         last_pivot_direction = 0
         
         for i in range(len(df)):
@@ -142,22 +143,27 @@ class Zigzag:
                         high_change = abs(pivot_highs.iloc[i] - last_pivot_price)
                         low_change = abs(pivot_lows.iloc[i] - last_pivot_price)
                         if high_change > low_change:
-                            current_price = pivot_highs.iloc[i]
+                            current_norm_price = pivot_highs.iloc[i]
+                            current_price = df.iloc[i]['high']
                             # 1 for bullish, -1 for bearish
                             current_direction = 1
                         else:
-                            current_price = pivot_lows.iloc[i]
+                            current_norm_price = pivot_lows.iloc[i]
+                            current_price = df.iloc[i]['low']
                             current_direction = -1
                     else:
                         # First pivot - take the high
-                        current_price = pivot_highs.iloc[i]
+                        current_norm_price = pivot_highs.iloc[i]
+                        current_price = df.iloc[i]['high']
                         current_direction = 1
                 
                 elif not pd.isna(pivot_highs.iloc[i]):
-                    current_price = pivot_highs.iloc[i]
+                    current_norm_price = pivot_highs.iloc[i]
+                    current_price = df.iloc[i]['high']
                     current_direction = 1
                 else:
-                    current_price = pivot_lows.iloc[i]
+                    current_norm_price = pivot_lows.iloc[i]
+                    current_price = df.iloc[i]['low']
                     current_direction = -1
                 
                 # Create and add pivot if valid
@@ -165,6 +171,7 @@ class Zigzag:
                     new_pivot = Pivot(
                         point=Point(
                             price=current_price,
+                            norm_price=current_norm_price,
                             index=current_index,
                             time=current_time
                         ),
@@ -173,22 +180,21 @@ class Zigzag:
                     
                     try:
                         self.add_new_pivot(new_pivot)
-                        last_pivot_price = current_price
-                        last_pivot_index = current_index
+                        last_pivot_price = current_norm_price
                         last_pivot_direction = current_direction
                     except ValueError:
                         # Handle case where pivot couldn't be added
                         continue
                 
                 # Update last pivot if same direction but more extreme
-                elif ((current_direction == 1 and current_price > last_pivot_price) or
-                    (current_direction == -1 and current_price < last_pivot_price)):
+                elif ((current_direction == 1 and current_norm_price > last_pivot_price) or
+                    (current_direction == -1 and current_norm_price < last_pivot_price)):
                     # Update the last pivot
+                    self.zigzag_pivots[0].point.norm_price = current_norm_price
                     self.zigzag_pivots[0].point.price = current_price
                     self.zigzag_pivots[0].point.index = current_index
                     self.zigzag_pivots[0].point.time = current_time
-                    last_pivot_price = current_price
-                    last_pivot_index = current_index
+                    last_pivot_price = current_norm_price
         
         return self
 

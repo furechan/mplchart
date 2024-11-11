@@ -29,14 +29,14 @@ class ChartPattern(Primitive):
             forwardcandels: int = 5, 
             pivot_limit: int = 55, 
             scan_props: ScanProperties = None,
-            color: str = "purple",
+            show_pivots: bool = False,
             axes: str = None
     ):
         self.item = item
         self.backcandels = backcandels
         self.forwardcandels = forwardcandels
         self.pivot_limit = pivot_limit
-        self.color = color
+        self.show_pivots = show_pivots
         self.axes = axes
 
         self.scan_props = ScanProperties()
@@ -62,9 +62,10 @@ class ChartPattern(Primitive):
 
         px = [pivot.point.index for pivot in zigzag.zigzag_pivots]
         py = [pivot.point.price for pivot in zigzag.zigzag_pivots]
-        ax.scatter(px, py, color=self.color, s=10 * 10, alpha=0.5, marker=".")
-        for i, txt in enumerate(px):
-            ax.annotate(txt, (px[i], py[i]))
+        if self.show_pivots:
+            ax.scatter(px, py, color="purple", s=10 * 10, alpha=0.5, marker=".")
+            for i, txt in enumerate(px):
+                ax.annotate(txt, (px[i], py[i]))
 
         kwargs = dict(
             linestyle="-",
@@ -73,7 +74,7 @@ class ChartPattern(Primitive):
         )
 
         # For each pattern, plot line segments between its points
-        for pattern in patterns:
+        for i, pattern in enumerate(patterns):
             # Use data.index to get the correct x positions
             line1_x = [pattern.trend_line1.p1.index, pattern.trend_line1.p2.index]
             line2_x = [pattern.trend_line2.p1.index, pattern.trend_line2.p2.index]
@@ -82,15 +83,21 @@ class ChartPattern(Primitive):
             xp = [pivot.point.index for pivot in pattern.pivots]
             yp = [pivot.point.price for pivot in pattern.pivots]
 
-            color = get_color(xp[0])
+            color = get_color(i)
             ax.scatter(xp, yp, color=color, s=11 * 11, alpha=0.5, marker="o")
 
             ax.plot(line1_x, line1_y, color=color, **kwargs)
             ax.plot(line2_x, line2_y, color=color, **kwargs)
             if line1_y[0] > line2_y[0]:
-                ax.annotate(pattern.pattern_name, (line1_x[0], line1_y[0] * 1.01), color=color)
+                if line1_y[0] > line1_y[1]:
+                    ax.annotate(pattern.pattern_name, (line1_x[0], line1_y[0] * 1.01), color=color)
+                else:
+                    ax.annotate(pattern.pattern_name, (line1_x[1], line1_y[1] * 1.01), color=color)
             else:
-                ax.annotate(pattern.pattern_name, (line2_x[0], line2_y[0] * 1.01), color=color)
+                if line2_y[0] > line2_y[1]:
+                    ax.annotate(pattern.pattern_name, (line2_x[0], line2_y[0] * 1.01), color=color)
+                else:
+                    ax.annotate(pattern.pattern_name, (line2_x[1], line2_y[1] * 1.01), color=color)
 
 def extract_chart_patterns(prices, backcandels, forwardcandels, pivot_limit, scan_props):
     """

@@ -12,13 +12,10 @@ class ScanProperties:
     error_ratio: float = 0.02
     flat_ratio: float = 0.2
     flag_ratio: float = 0.8
-    check_bar_ratio: bool = True
-    bar_ratio_limit: float = 0.382
     avoid_overlap: bool = True
     repaint: bool = False
     allowed_patterns: List[bool] = None
     allowed_last_pivot_directions: List[int] = None
-    theme_colors: List[str] = None
 
 def get_pattern_name_by_id(id: int) -> str:
     pattern_names = {
@@ -39,13 +36,10 @@ def get_pattern_name_by_id(id: int) -> str:
     return pattern_names.get(id, "Error")
 
 class TrendLine:
-    def __init__(self, pivots: List[Pivot], trend_line1: Line, trend_line2: Line, 
-                 pattern_color: str, ratio_diff: float):
+    def __init__(self, pivots: List[Pivot], trend_line1: Line, trend_line2: Line):
         self.pivots = pivots
         self.trend_line1 = trend_line1
         self.trend_line2 = trend_line2
-        self.pattern_color = pattern_color
-        self.ratio_diff = ratio_diff
         self.pattern_type = 0
         self.pattern_name = ""
 
@@ -69,27 +63,29 @@ class TrendLine:
         self.trend_line1.p1 = Point(
             time=first_time,
             index=first_index,
-            price=self.trend_line1.get_price(first_index)
+            price=self.trend_line1.get_price(first_index),
+            norm_price=self.trend_line1.get_norm_price(first_index)
         )
         self.trend_line1.p2 = Point(
             time=last_time,
             index=last_index,
-            price=self.trend_line1.get_price(last_index)
+            price=self.trend_line1.get_price(last_index),
+            norm_price=self.trend_line1.get_norm_price(last_index)
         )
-        self.trend_line1.color = self.pattern_color
 
         # Update trend line 2 endpoints
         self.trend_line2.p1 = Point(
             time=first_time,
             index=first_index,
-            price=self.trend_line2.get_price(first_index)
+            price=self.trend_line2.get_price(first_index),
+            norm_price=self.trend_line2.get_norm_price(first_index)
         )
         self.trend_line2.p2 = Point(
             time=last_time,
             index=last_index,
-            price=self.trend_line2.get_price(last_index)
+            price=self.trend_line2.get_price(last_index),
+            norm_price=self.trend_line2.get_norm_price(last_index)
         )
-        self.trend_line2.color = self.pattern_color
 
         # Update pivot points to match trend lines
         for i, pivot in enumerate(self.pivots):
@@ -101,19 +97,8 @@ class TrendLine:
                 
             # Update pivot price to match trend line
             pivot.point.price = current_trend_line.get_price(pivot.point.index)
+            pivot.point.norm_price = current_trend_line.get_norm_price(pivot.point.index)
     
-        # Update ratios for last pivots
-        last_pivot = self.pivots[-1]
-        llast_pivot = self.pivots[properties.number_of_pivots - 2]
-        lllast_pivot = self.pivots[properties.number_of_pivots - 3]
-        llllast_pivot = self.pivots[properties.number_of_pivots - 4]
-    
-        # Calculate and update ratios
-        last_pivot.ratio = (abs(last_pivot.point.price - llast_pivot.point.price) / 
-                           abs(llast_pivot.point.price - lllast_pivot.point.price))
-        llast_pivot.ratio = (abs(llast_pivot.point.price - lllast_pivot.point.price) / 
-                            abs(lllast_pivot.point.price - llllast_pivot.point.price))
-
         # Resolve pattern name/type
         self.resolve_pattern_name(properties)
         return self
@@ -205,8 +190,8 @@ def calculate_cosine_diff(p1: Point, p2: Point, p3: Point, p4: Point) -> float:
         float: Cosine difference (0 to 2, where 0 means parallel)
     """
     # Calculate vectors from points
-    v1 = np.array([p2.index - p1.index, p2.price - p1.price])
-    v2 = np.array([p4.index - p3.index, p4.price - p3.price])
+    v1 = np.array([p2.index - p1.index, p2.norm_price - p1.norm_price])
+    v2 = np.array([p4.index - p3.index, p4.norm_price - p3.norm_price])
     
     # Calculate cosine similarity directly using dot product
     cos_sim = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
@@ -219,18 +204,11 @@ def is_same(first: Pivot, second: Pivot, third: Pivot, properties: ScanPropertie
         first.point, second.point,   # First line segment
         second.point, third.point    # Second line segment
     )
-    
     basic_condition = 0 < cos_diff and cos_diff <= properties.error_ratio
 
     if basic_condition:
         print(f"pivots: {first.point.index}, {second.point.index}, {third.point.index} on the same line, cos_diff={cos_diff}")
 
-    # Check bar ratios if required
-    if properties.check_bar_ratio:
-        return (basic_condition and 
-                properties.bar_ratio_limit <= third.bar_ratio <= 1/properties.bar_ratio_limit and
-                properties.bar_ratio_limit <= second.bar_ratio <= 1/properties.bar_ratio_limit)
-    
     return basic_condition
 
 def inspect_line(line: Line, starting_bar: int, ending_bar: int, other_bar: int, 
@@ -260,12 +238,12 @@ def inspect_line(line: Line, starting_bar: int, ending_bar: int, other_bar: int,
         bar_data = df.iloc[bar_index]
         
         # Determine prices based on direction
-        bar_price = bar_data['high'] if direction > 0 else bar_data['low']
-        bar_out_price = bar_data['low'] if direction > 0 else bar_data['high']
+        bar_price = bar_data['norm_high'] if direction > 0 else bar_data['norm_ low']
+        bar_out_price = bar_data['norm_low'] if direction > 0 else bar_data['norm_high']
         line_price = line.get_price(bar_index)
         
         # Check if line is below the candle body for uptrend, or above for downtrend
-        if line_price * direction < min(bar_data['open'] * direction, bar_data['close'] * direction):
+        if line_price * direction < min(bar_data['norm_open'] * direction, bar_data['norm_close'] * direction):
             valid = False
             break
             
@@ -371,42 +349,18 @@ def find_pattern(zigzag: Zigzag, offset: int, properties: ScanProperties,
                                            np.sign(pivots[-2].direction), df)
 
         if valid1 and valid2:
-            if properties.theme_colors is None:
-                properties.theme_colors = ["blue"]
 
             # Create pattern
             pattern = TrendLine(
                 pivots=pivots,
                 trend_line1=trend_line1,
                 trend_line2=trend_line2,
-                pattern_color=properties.theme_colors[0],
-                ratio_diff=calculate_ratio_diff(pivots[4], pivots[2], pivots[0])
             ).resolve(properties)
+            print(f"Pattern candidate: {pattern.pattern_name}, pivot_index={pivots[0].point.index}")
             
             # Process pattern (resolve type, check if allowed, etc.)
             if not process_pattern(pattern, properties, patterns, max_live_patterns):
                 print(f"Failed to process pattern {pattern.pattern_name}")
-
-def calculate_ratio_diff(pivot1: Pivot, pivot2: Pivot, pivot3: Pivot) -> float:
-    """
-    Calculate the difference between ratios of price changes between pivots
-    
-    Args:
-        pivots: List of pivots
-        
-    Returns:
-        float: Absolute difference between the two ratios
-    """
-    # Calculate first ratio (between pivot1 and pivot2)
-    first_ratio = ((pivot2.point.price - pivot1.point.price) / 
-                   (pivot2.point.index - pivot1.point.index))
-    
-    # Calculate second ratio (between pivot2 and pivot3)
-    second_ratio = ((pivot3.point.price - pivot2.point.price) / 
-                    (pivot3.point.index - pivot2.point.index))
-    
-    # Return absolute difference between ratios
-    return abs(first_ratio - second_ratio)
 
 def process_pattern(pattern: TrendLine, properties: ScanProperties, 
                    patterns: List[TrendLine], max_live_patterns: int) -> bool:
@@ -424,10 +378,9 @@ def process_pattern(pattern: TrendLine, properties: ScanProperties,
         bool: True if pattern was successfully processed and added
     """
     # Log warning if invalid pattern type detected
-    if pattern.pattern_type < 0:
+    if pattern.pattern_type == 0:
         print(f'Warning: Wrong Type detected {pattern.pattern_type}, ' + 
               f'Upper/Lower Line Dirs, Invalid pattern detected')
-        pattern.pattern_type = 0
         return False
     
     # Get last direction from the last pivot
