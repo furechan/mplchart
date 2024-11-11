@@ -22,12 +22,12 @@ class ChartPattern(Primitive):
     """
 
     def __init__(
-            self, 
-            item: str = None, 
+            self,
+            item: str = None,
             *,
-            backcandels: int = 5, 
-            forwardcandels: int = 5, 
-            pivot_limit: int = 55, 
+            backcandels: int = 5,
+            forwardcandels: int = 5,
+            pivot_limit: int = 55,
             scan_props: ScanProperties = None,
             show_pivots: bool = False,
             axes: str = None
@@ -47,9 +47,9 @@ class ChartPattern(Primitive):
         if self.item:
             data = getattr(data, self.item)
         return extract_chart_patterns(
-            data, 
-            backcandels=self.backcandels, 
-            forwardcandels=self.forwardcandels, 
+            data,
+            backcandels=self.backcandels,
+            forwardcandels=self.forwardcandels,
             pivot_limit=self.pivot_limit,
             scan_props=self.scan_props
         )
@@ -57,7 +57,7 @@ class ChartPattern(Primitive):
     def plot_handler(self, data, chart, ax=None):
         if ax is None:
             ax = chart.get_axes()
-        
+
         zigzag, patterns = self.process(data)
 
         px = [pivot.point.index for pivot in zigzag.zigzag_pivots]
@@ -84,20 +84,20 @@ class ChartPattern(Primitive):
             yp = [pivot.point.price for pivot in pattern.pivots]
 
             color = get_color(i)
-            ax.scatter(xp, yp, color=color, s=11 * 11, alpha=0.5, marker="o")
+            ax.scatter(xp, yp, color=color, s=10 * 10, alpha=0.5, marker="o")
 
             ax.plot(line1_x, line1_y, color=color, **kwargs)
             ax.plot(line2_x, line2_y, color=color, **kwargs)
             if line1_y[0] > line2_y[0]:
                 if line1_y[0] > line1_y[1]:
-                    ax.annotate(pattern.pattern_name, (line1_x[0], line1_y[0] * 1.01), color=color)
+                    ax.annotate(pattern.pattern_name, (line1_x[0], line1_y[0] * 1.02), color=color)
                 else:
-                    ax.annotate(pattern.pattern_name, (line1_x[1], line1_y[1] * 1.01), color=color)
+                    ax.annotate(pattern.pattern_name, (line1_x[1], line1_y[1] * 1.02), color=color)
             else:
                 if line2_y[0] > line2_y[1]:
-                    ax.annotate(pattern.pattern_name, (line2_x[0], line2_y[0] * 1.01), color=color)
+                    ax.annotate(pattern.pattern_name, (line2_x[0], line2_y[0] * 1.02), color=color)
                 else:
-                    ax.annotate(pattern.pattern_name, (line2_x[1], line2_y[1] * 1.01), color=color)
+                    ax.annotate(pattern.pattern_name, (line2_x[1], line2_y[1] * 1.02), color=color)
 
 def extract_chart_patterns(prices, backcandels, forwardcandels, pivot_limit, scan_props):
     """
@@ -111,15 +111,15 @@ def extract_chart_patterns(prices, backcandels, forwardcandels, pivot_limit, sca
     Return:
         A series of prices defined only at local peaks and equal to nan otherwize
     """
-    
+
     zigzag = Zigzag(backcandels=backcandels, forwardcandels=forwardcandels, pivot_limit=pivot_limit, offset=0)
     zigzag.calculate(prices)
 
     # Initialize pattern storage
     patterns: List[TrendLine] = []
-    
+
     # Find patterns
     for i in range(scan_props.offset, len(zigzag.zigzag_pivots)):
         find_pattern(zigzag, i, scan_props, patterns)
-    
+
     return zigzag, patterns
