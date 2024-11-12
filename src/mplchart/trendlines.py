@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 import numpy as np
 import pandas as pd
 from .line import Point, Pivot, Line
@@ -10,7 +10,7 @@ class ScanProperties:
     offset: int = 0
     number_of_pivots: int = 5
     min_periods_lapsed: int = 21
-    error_ratio: float = 0.02
+    error_ratio: float = 1e-6
     flat_ratio: float = 0.2
     flag_ratio: float = 0.8
     avoid_overlap: bool = True
@@ -199,107 +199,115 @@ def calculate_cosine_diff(p1: Point, p2: Point, p3: Point, p4: Point) -> float:
 
     return 1 - cos_sim
 
-def is_same(first: Pivot, second: Pivot, third: Pivot, properties: ScanProperties) -> bool:
+def is_aligned(first: Point, second: Point, third: Point, properties: ScanProperties) -> bool:
     # Calculate cosine difference directly from points
     cos_diff = calculate_cosine_diff(
-        first.point, second.point,   # First line segment
-        second.point, third.point    # Second line segment
+        first, second,   # First line segment
+        second, third    # Second line segment
     )
-    basic_condition = 0 < cos_diff and cos_diff <= properties.error_ratio
+    basic_condition = 0 <= cos_diff and cos_diff <= properties.error_ratio
 
     if basic_condition:
-        print(f"pivots: {first.point.index}, {second.point.index}, {third.point.index} on the same line, cos_diff={cos_diff}")
+        print(f"Points: {first.index}, {second.index}, {third.index} on the same line, cos_diff={cos_diff}")
 
     return basic_condition
 
-def inspect_line(line: Line, starting_bar: int, ending_bar: int, other_bar: int,
-                direction: float, df: Optional[pd.DataFrame] = None) -> Tuple[bool, float]:
+def inspect_line_by_point(line: Line, point_bar: int, direction: float,
+                         df: pd.DataFrame) -> Tuple[bool, float]:
     """
     Inspect a single line against price data from a pandas DataFrame
 
     Args:
         line: Line object to inspect
-        starting_bar: Start index for inspection
-        ending_bar: End index for inspection
-        other_bar: Index of the other point to check
+        point_bar: Index of the point to inspect
         direction: Direction of the trend (1 for up, -1 for down)
         df: DataFrame with 'open', 'high', 'low', 'close' columns
 
     Returns:
-        Tuple of (valid: bool, score: float)
+        Tuple of (valid: bool, diff: float)
     """
-    valid = True
-    score = 0.0
+    # Get price data from DataFrame
+    bar_data = df.iloc[point_bar]
 
-    for bar_index in range(starting_bar, ending_bar + 1):
-        if df is None or bar_index >= len(df):
-            continue
+    # Determine prices based on direction
+    line_price = line.get_norm_price(point_bar)
+    if direction > 0:
+        # upper line
+        body_high_price = max(bar_data['norm_open'], bar_data['norm_close'])
+        if line_price <= body_high_price:
+            # invalid if line is crossing the candle body
+            return False, float('inf') # make the difference as large as possible
+        elif line_price > bar_data['norm_high']:
+            # line is above the candle wick
+            return True, line_price - bar_data['norm_high']
+        else:
+            # line is crossing the candle wick
+            return True, 0
+    else:
+        # lower line
+        body_low_price = min(bar_data['norm_open'], bar_data['norm_close'])
+        if line_price >= body_low_price:
+            # invalid if line is crossing the candle body
+            return False, float('inf') # make the difference as large as possible
+        elif line_price < bar_data['norm_low']:
+            # line is below the candle wick
+            return True, bar_data['norm_low'] - line_price
+        else:
+            # line is crossing the candle wick
+            return True, 0
 
-        # Get price data from DataFrame
-        bar_data = df.iloc[bar_index]
-
-        # Determine prices based on direction
-        bar_price = bar_data['norm_high'] if direction > 0 else bar_data['norm_ low']
-        bar_out_price = bar_data['norm_low'] if direction > 0 else bar_data['norm_high']
-        line_price = line.get_price(bar_index)
-
-        # Check if line is below the candle body for uptrend, or above for downtrend
-        if line_price * direction < min(bar_data['norm_open'] * direction, bar_data['norm_close'] * direction):
-            valid = False
-            break
-
-        # Score the line fit
-        if (line_price * direction >= bar_out_price * direction and
-            line_price * direction <= bar_price * direction):
-            score += 1
-        # Check if line breaks at other bar
-        elif bar_index == other_bar:
-            valid = False
-            break
-
-    return valid, score
-
-def inspect_points(points: List[Point], starting_bar: int, ending_bar: int,
-                  direction: float, df: Optional[pd.DataFrame] = None) -> Tuple[bool, Line]:
+def inspect_points(points: List[Point], direction: float, properties: ScanProperties,
+                   df: pd.DataFrame) -> Tuple[bool, Line]:
     """
     Inspect multiple points to find the best trend line using DataFrame price data
 
     Args:
         points: List of points to create trend lines
-        starting_bar: Start index for inspection
-        ending_bar: End index for inspection
         direction: Direction of the trend
+        properties: Scan properties
         df: DataFrame with OHLC data
 
     Returns:
         Tuple of (valid: bool, best_trend_line: Line)
     """
     if len(points) == 3:
+        aligned = is_aligned(points[0], points[1], points[2], properties)
+        if not aligned:
+            return False, None
+
         # Create three possible trend lines
         trend_line1 = Line(points[0], points[2])  # First to last
-        trend_line2 = Line(points[0], points[1])  # First to middle
-        trend_line3 = Line(points[1], points[2])  # Middle to last
+        # inspect line by middle point
+        valid1, diff1 = inspect_line_by_point(trend_line1, points[1].index, direction, df)
+        if valid1 and diff1 == 0:
+            # prefer the line connecting the first and last points
+            return True, trend_line1
 
-        # Inspect each line
-        valid1, score1 = inspect_line(trend_line1, starting_bar, ending_bar, points[1].index, direction, df)
-        valid2, score2 = inspect_line(trend_line2, starting_bar, ending_bar, points[2].index, direction, df)
-        valid3, score3 = inspect_line(trend_line3, starting_bar, ending_bar, points[0].index, direction, df)
+        trend_line2 = Line(points[0], points[1])  # First to middle
+        valid2, diff2 = inspect_line_by_point(trend_line2, points[2].index, direction, df)
+
+        trend_line3 = Line(points[1], points[2])  # Middle to last
+        valid3, diff3 = inspect_line_by_point(trend_line3, points[0].index, direction, df)
+
+        if not valid1 and not valid2 and not valid3:
+            return False, None
 
         # Find the best line
-        if valid1 and score1 > max(score2, score3):
-            return True, trend_line1
-        elif valid2 and score2 > max(score1, score3):
-            return True, trend_line2
-        else:
-            return valid3, trend_line3
+        if valid1:
+            trendline = trend_line1
+        elif valid2 and diff2 < diff1:
+            trendline = trend_line2
+        elif valid3 and diff3 < min(diff1, diff2):
+            trendline = trend_line3
+
+        return True, trendline
     else:
-        # For 2 points, simply create and inspect one trend line
-        trend_line = Line(points[0], points[-1])
-        valid, _ = inspect_line(trend_line, starting_bar, ending_bar, points[0].index, direction, df)
-        return valid, trend_line
+        # For 2 points, simply create one trend line
+        trend_line = Line(points[0], points[1])
+        return True, trend_line
 
 def find_pattern(zigzag: Zigzag, offset: int, properties: ScanProperties,
-                patterns: List[TrendLine], df: Optional[pd.DataFrame] = None,
+                patterns: List[TrendLine], df: pd.DataFrame,
                 max_live_patterns: int = 20):
     """
     Find patterns using DataFrame price data
@@ -326,45 +334,34 @@ def find_pattern(zigzag: Zigzag, offset: int, properties: ScanProperties,
         pivots.insert(0, pivot.deep_copy())
 
     # Validate pattern
-    valid_pattern = False
-    if properties.number_of_pivots == 6:
-        valid_pattern = (is_same(pivots[0], pivots[2], pivots[4], properties) and
-                        is_same(pivots[1], pivots[3], pivots[5], properties))
-    else:
-        valid_pattern = is_same(pivots[0], pivots[2], pivots[4], properties)
-
-    if valid_pattern:
-        # Create point arrays for trend lines
-        trend_points1 = [pivots[0].point, pivots[2].point, pivots[4].point]
-        trend_points2 = ([pivots[1].point, pivots[3].point, pivots[5].point]
+    # Create point arrays for trend lines
+    trend_points1 = [pivots[0].point, pivots[2].point, pivots[4].point]
+    trend_points2 = ([pivots[1].point, pivots[3].point, pivots[5].point]
                         if properties.number_of_pivots == 6
                         else [pivots[1].point, pivots[3].point])
 
-        first_index = pivots[0].point.index
-        last_index = pivots[-1].point.index
+    # Validate trend lines using DataFrame
+    valid1, trend_line1 = inspect_points(trend_points1,
+                                        np.sign(pivots[-1].direction),
+                                        properties, df)
+    valid2, trend_line2 = inspect_points(trend_points2,
+                                        np.sign(pivots[-2].direction),
+                                        properties, df)
 
-        # Validate trend lines using DataFrame
-        valid1, trend_line1 = inspect_points(trend_points1, first_index, last_index,
-                                           np.sign(pivots[-1].direction), df)
-        valid2, trend_line2 = inspect_points(trend_points2, first_index, last_index,
-                                           np.sign(pivots[-2].direction), df)
+    if valid1 and valid2:
+        time_delta = pivots[-1].point.time - pivots[0].point.time
+        # only consider patterns with enough time lapsed
+        if time_delta.days + 1 >= properties.min_periods_lapsed:
+            # Create pattern
+            pattern = TrendLine(
+                pivots=pivots,
+                trend_line1=trend_line1,
+                trend_line2=trend_line2,
+            ).resolve(properties)
 
-        if valid1 and valid2:
-
-            time_delta = pivots[-1].point.time - pivots[0].point.time
-            # only consider patterns with enough time lapsed
-            if time_delta.days >= properties.min_periods_lapsed:
-                # Create pattern
-                pattern = TrendLine(
-                    pivots=pivots,
-                    trend_line1=trend_line1,
-                    trend_line2=trend_line2,
-                ).resolve(properties)
-                print(f"Pattern candidate: {pattern.pattern_name}, pivot_index={pivots[0].point.index}")
-
-                # Process pattern (resolve type, check if allowed, etc.)
-                if not process_pattern(pattern, properties, patterns, max_live_patterns):
-                    print(f"Failed to process pattern {pattern.pattern_name}")
+            # Process pattern (resolve type, check if allowed, etc.)
+            if not process_pattern(pattern, properties, patterns, max_live_patterns):
+                print(f"Failed to process pattern {pattern.pattern_name}")
 
 def process_pattern(pattern: TrendLine, properties: ScanProperties,
                    patterns: List[TrendLine], max_live_patterns: int) -> bool:
