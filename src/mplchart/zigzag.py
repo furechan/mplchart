@@ -54,6 +54,8 @@ class Zigzag:
                 (value - last_value) / (pivot.point.index - last_index),
                 3
             )
+            # Calculate difference between last and current pivot
+            pivot.diff = round(abs(value - last_value), 3)
 
             if len(self.zigzag_pivots) >= 2:
                 llast_pivot = self.zigzag_pivots[1]

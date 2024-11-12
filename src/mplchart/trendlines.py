@@ -12,9 +12,8 @@ class ScanProperties:
     min_periods_lapsed: int = 21
     error_ratio: float = 1e-6
     flat_ratio: float = 0.2
-    flag_ratio: float = 0.8
+    flag_ratio: float = 1.5
     avoid_overlap: bool = True
-    repaint: bool = False
     allowed_patterns: List[bool] = None
     allowed_last_pivot_directions: List[int] = None
 
@@ -32,7 +31,11 @@ def get_pattern_name_by_id(id: int) -> str:
         10: "Falling Wedge (Contracting)",
         11: "Converging Triangle",
         12: "Descending Triangle (Contracting)",
-        13: "Ascending Triangle (Contracting)"
+        13: "Ascending Triangle (Contracting)",
+        14: "Bull Pennant",
+        15: "Bear Pennant",
+        16: "Bull Flag",
+        17: "Bear Flag"
     }
     return pattern_names.get(id, "Error")
 
@@ -177,6 +180,32 @@ class TrendLine:
                 self.pattern_type = 12 if upper_line_dir < 0 else 1  # Descending Triangle (Contracting)
             elif upper_line_dir == 0:
                 self.pattern_type = 13 if lower_line_dir > 0 else 2  # Ascending Triangle (Contracting)
+
+        if properties.number_of_pivots == 4:
+            # check flag ratio and difference
+            flag_pole = abs(self.pivots[0].diff)
+            flag_size = abs(self.pivots[0].point.norm_price - self.pivots[1].point.norm_price)
+            if flag_size * properties.flag_ratio < flag_pole: # flag size must be smaller than its pole
+                print(f"Pivot {self.pivots[0].point.index} ratio: {self.pivots[0].ratio} direction: {self.pivots[0].direction}, flag_pole: {flag_pole}, flag_size: {flag_size}")
+                if self.pattern_type == 1 or self.pattern_type == 2 or self.pattern_type == 3:
+                    # channel patterns
+                    if self.pivots[0].direction > 0 and not self.pattern_type == 1:
+                        self.pattern_type = 16  # Bull Flag
+                    elif self.pivots[0].direction < 0 and not self.pattern_type == 2:
+                        self.pattern_type = 17  # Bear Flag
+                    else:
+                        self.pattern_type = 0
+                elif self.pattern_type == 11 or self.pattern_type == 12 or self.pattern_type == 13:
+                    # pennant patterns
+                    if self.pivots[0].direction > 0:
+                        self.pattern_type = 14  # Bull Pennant
+                    else:
+                        self.pattern_type = 15  # Bear Pennant
+                else:
+                    self.pattern_type = 0
+            else:
+                # invalidate other pattern types
+                self.pattern_type = 0
 
         return self
 
@@ -325,6 +354,9 @@ def find_pattern(zigzag: Zigzag, offset: int, properties: ScanProperties,
         int: Index of the pivot that was used to find the pattern
     """
     # Get pivots
+    if properties.number_of_pivots < 4 or properties.number_of_pivots > 6:
+        raise ValueError("Number of pivots must be between 4 and 6")
+
     pivots = []
     for i in range(properties.number_of_pivots):
         pivot = zigzag.get_pivot(i + offset)
@@ -335,7 +367,9 @@ def find_pattern(zigzag: Zigzag, offset: int, properties: ScanProperties,
 
     # Validate pattern
     # Create point arrays for trend lines
-    trend_points1 = [pivots[0].point, pivots[2].point, pivots[4].point]
+    trend_points1 = ([pivots[0].point, pivots[2].point]
+                        if properties.number_of_pivots == 4
+                        else [pivots[0].point, pivots[2].point, pivots[4].point])
     trend_points2 = ([pivots[1].point, pivots[3].point, pivots[5].point]
                         if properties.number_of_pivots == 6
                         else [pivots[1].point, pivots[3].point])
@@ -350,18 +384,20 @@ def find_pattern(zigzag: Zigzag, offset: int, properties: ScanProperties,
 
     if valid1 and valid2:
         time_delta = pivots[-1].point.time - pivots[0].point.time
-        # only consider patterns with enough time lapsed
-        if time_delta.days + 1 >= properties.min_periods_lapsed:
-            # Create pattern
-            pattern = TrendLine(
-                pivots=pivots,
-                trend_line1=trend_line1,
-                trend_line2=trend_line2,
-            ).resolve(properties)
+        if time_delta.days + 1 < properties.min_periods_lapsed and \
+            properties.number_of_pivots >= 5:
+            # only consider patterns with enough time lapsed
+                return
 
-            # Process pattern (resolve type, check if allowed, etc.)
-            if not process_pattern(pattern, properties, patterns, max_live_patterns):
-                print(f"Failed to process pattern {pattern.pattern_name}")
+        # Create pattern
+        pattern = TrendLine(
+            pivots=pivots,
+            trend_line1=trend_line1,
+            trend_line2=trend_line2,
+        ).resolve(properties)
+
+        # Process pattern (resolve type, check if allowed, etc.)
+        process_pattern(pattern, properties, patterns, max_live_patterns)
 
 def process_pattern(pattern: TrendLine, properties: ScanProperties,
                    patterns: List[TrendLine], max_live_patterns: int) -> bool:
@@ -380,8 +416,6 @@ def process_pattern(pattern: TrendLine, properties: ScanProperties,
     """
     # Log warning if invalid pattern type detected
     if pattern.pattern_type == 0:
-        print(f'Warning: Wrong Type detected {pattern.pattern_type}, ' +
-              f'Upper/Lower Line Dirs, Invalid pattern detected')
         return False
 
     # Get last direction from the last pivot
