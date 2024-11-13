@@ -8,14 +8,14 @@ from .zigzag import Zigzag
 @dataclass
 class ScanProperties:
     offset: int = 0
-    number_of_pivots: int = 5
-    min_periods_lapsed: int = 21
-    error_ratio: float = 1e-6
-    flat_ratio: float = 0.2
-    flag_ratio: float = 1.5
-    avoid_overlap: bool = True
-    allowed_patterns: List[bool] = None
-    allowed_last_pivot_directions: List[int] = None
+    number_of_pivots: int = 5 # minimum number of pivots to form a pattern
+    min_periods_lapsed: int = 21 # minimum number of days to form a pattern
+    error_ratio: float = 1e-6 # maximum allowed cosine difference between trend lines
+    flat_ratio: float = 0.1 # maximum allowed flat ratio between trend lines
+    flag_ratio: float = 1.5 # minimum allowed flag ratio between flag pole and flag width
+    avoid_overlap: bool = True # whether to avoid overlapping patterns
+    allowed_patterns: List[bool] = None # allowed pattern types
+    allowed_last_pivot_directions: List[int] = None # allowed last pivot directions
 
 def get_pattern_name_by_id(id: int) -> str:
     pattern_names = {
@@ -109,10 +109,10 @@ class TrendLine:
 
     def resolve_pattern_name(self, properties: ScanProperties) -> 'TrendLine':
         """Determine the pattern type based on trend lines and angles"""
-        t1p1 = self.trend_line1.p1.price
-        t1p2 = self.trend_line1.p2.price
-        t2p1 = self.trend_line2.p1.price
-        t2p2 = self.trend_line2.p2.price
+        t1p1 = self.trend_line1.p1.norm_price
+        t1p2 = self.trend_line1.p2.norm_price
+        t2p1 = self.trend_line2.p1.norm_price
+        t2p2 = self.trend_line2.p2.norm_price
 
         # Calculate angles between trend lines
         upper_angle = ((t1p2 - min(t2p1, t2p2)) / (t1p1 - min(t2p1, t2p2))
@@ -184,7 +184,8 @@ class TrendLine:
         if properties.number_of_pivots == 4:
             # check flag ratio and difference
             flag_pole = abs(self.pivots[0].diff)
-            flag_size = abs(self.pivots[0].point.norm_price - self.pivots[1].point.norm_price)
+            flag_size = max(abs(self.pivots[0].point.norm_price - self.pivots[1].point.norm_price),
+                            abs(self.pivots[2].point.norm_price - self.pivots[3].point.norm_price))
             if flag_size * properties.flag_ratio < flag_pole: # flag size must be smaller than its pole
                 print(f"Pivot {self.pivots[0].point.index} ratio: {self.pivots[0].ratio} direction: {self.pivots[0].direction}, flag_pole: {flag_pole}, flag_size: {flag_size}")
                 if self.pattern_type == 1 or self.pattern_type == 2 or self.pattern_type == 3:
@@ -195,7 +196,9 @@ class TrendLine:
                         self.pattern_type = 17  # Bear Flag
                     else:
                         self.pattern_type = 0
-                elif self.pattern_type == 11 or self.pattern_type == 12 or self.pattern_type == 13:
+                elif self.pattern_type == 9 or self.pattern_type == 10 or \
+                    self.pattern_type == 11 or self.pattern_type == 12 or \
+                    self.pattern_type == 13:
                     # pennant patterns
                     if self.pivots[0].direction > 0:
                         self.pattern_type = 14  # Bull Pennant
