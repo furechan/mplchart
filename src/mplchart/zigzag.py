@@ -138,35 +138,30 @@ class Zigzag:
             if not (pd.isna(pivot_highs.iloc[i]) and pd.isna(pivot_lows.iloc[i])):
                 current_index = i
                 current_time = df.index[i]
-
+                take_high = True
                 if not pd.isna(pivot_highs.iloc[i]) and not pd.isna(pivot_lows.iloc[i]):
-                    # Both high and low pivot - take the more extreme one
+                    # both high and low pivot, take the more extreme one
                     if last_pivot_price is not None:
-                        high_change = abs(pivot_highs.iloc[i] - last_pivot_price)
-                        low_change = abs(pivot_lows.iloc[i] - last_pivot_price)
-                        if high_change > low_change:
-                            current_norm_price = pivot_highs.iloc[i]
-                            current_price = df.iloc[i]['high']
-                            # 1 for bullish, -1 for bearish
-                            current_direction = 1
+                        assert last_pivot_direction != 0
+                        if last_pivot_direction == 1:
+                            if pivot_highs.iloc[i] <= last_pivot_price:
+                                # the current pivot high is lower than the last pivot high, take low instead
+                                take_high = False
                         else:
-                            current_norm_price = pivot_lows.iloc[i]
-                            current_price = df.iloc[i]['low']
-                            current_direction = -1
-                    else:
-                        # First pivot - take the high
-                        current_norm_price = pivot_highs.iloc[i]
-                        current_price = df.iloc[i]['high']
-                        current_direction = 1
+                            if pivot_lows.iloc[i] < last_pivot_price:
+                                # the current pivot low is lower than the last pivot low, take low instead
+                                take_high = False
+                elif pd.isna(pivot_highs.iloc[i]):
+                    take_high = False
 
-                elif not pd.isna(pivot_highs.iloc[i]):
+                if take_high:
                     current_norm_price = pivot_highs.iloc[i]
                     current_price = df.iloc[i]['high']
-                    current_direction = 1
+                    current_direction = 1 # bullish
                 else:
                     current_norm_price = pivot_lows.iloc[i]
                     current_price = df.iloc[i]['low']
-                    current_direction = -1
+                    current_direction = -1 # bearish
 
                 # Create and add pivot if valid
                 if last_pivot_price is None or last_pivot_direction != current_direction:
