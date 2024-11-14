@@ -4,13 +4,13 @@ from typing import List
 from dataclasses import replace
 
 from ..model import Primitive
-from ..trendlines import Zigzag, ScanProperties, TrendLine, find_pattern
+from ..trendline_patterns import Zigzag, TrendLineProperties, TrendLinePattern, find_trend_lines
 
 def get_color(i) -> str:
     colors = ["red", "blue", "green", "purple", "orange", "brown"]
     return colors[i % len(colors)]
 
-class ChartPattern(Primitive):
+class TrendLine(Primitive):
     """
     Chart Pattern Primitive
     Used to plot chart patterns
@@ -28,7 +28,7 @@ class ChartPattern(Primitive):
             backcandels: int = 5,
             forwardcandels: int = 5,
             pivot_limit: int = 55,
-            scan_props: ScanProperties = None,
+            scan_props: TrendLineProperties = None,
             show_pivots: bool = False,
             axes: str = None
     ):
@@ -39,7 +39,7 @@ class ChartPattern(Primitive):
         self.show_pivots = show_pivots
         self.axes = axes
 
-        self.scan_props = ScanProperties()
+        self.scan_props = TrendLineProperties()
         if scan_props is not None:
             self.scan_props = replace(self.scan_props, **scan_props.__dict__)
 
@@ -116,10 +116,10 @@ def extract_chart_patterns(prices, backcandels, forwardcandels, pivot_limit, sca
     zigzag.calculate(prices)
 
     # Initialize pattern storage
-    patterns: List[TrendLine] = []
+    patterns: List[TrendLinePattern] = []
 
     # Find patterns
     for i in range(scan_props.offset, len(zigzag.zigzag_pivots)):
-        find_pattern(zigzag, i, scan_props, patterns, prices)
+        find_trend_lines(zigzag, i, scan_props, patterns, prices)
 
     return zigzag, patterns

@@ -4,50 +4,44 @@ import numpy as np
 import pandas as pd
 from .line import Point, Pivot, Line
 from .zigzag import Zigzag
-
+from .chart_pattern import ChartPattern, ChartPatternProperties, get_pivots_from_zigzag
 @dataclass
-class ScanProperties:
-    offset: int = 0
+class TrendLineProperties(ChartPatternProperties):
     number_of_pivots: int = 5 # minimum number of pivots to form a pattern
-    min_periods_lapsed: int = 21 # minimum number of days to form a pattern
     error_ratio: float = 1e-6 # maximum allowed cosine difference between trend lines
     flat_ratio: float = 0.1 # maximum allowed flat ratio between trend lines
     flag_ratio: float = 1.5 # minimum allowed flag ratio between flag pole and flag width
     avoid_overlap: bool = True # whether to avoid overlapping patterns
-    allowed_patterns: List[bool] = None # allowed pattern types
-    allowed_last_pivot_directions: List[int] = None # allowed last pivot directions
 
-def get_pattern_name_by_id(id: int) -> str:
-    pattern_names = {
-        1: "Ascending Channel",
-        2: "Descending Channel",
-        3: "Ranging Channel",
-        4: "Rising Wedge (Expanding)",
-        5: "Falling Wedge (Expanding)",
-        6: "Diverging Triangle",
-        7: "Ascending Triangle (Expanding)",
-        8: "Descending Triangle (Expanding)",
-        9: "Rising Wedge (Contracting)",
-        10: "Falling Wedge (Contracting)",
-        11: "Converging Triangle",
-        12: "Descending Triangle (Contracting)",
-        13: "Ascending Triangle (Contracting)",
-        14: "Bull Pennant",
-        15: "Bear Pennant",
-        16: "Bull Flag",
-        17: "Bear Flag"
-    }
-    return pattern_names.get(id, "Error")
-
-class TrendLine:
+class TrendLinePattern(ChartPattern):
     def __init__(self, pivots: List[Pivot], trend_line1: Line, trend_line2: Line):
         self.pivots = pivots
         self.trend_line1 = trend_line1
         self.trend_line2 = trend_line2
-        self.pattern_type = 0
-        self.pattern_name = ""
 
-    def resolve(self, properties: ScanProperties) -> 'TrendLine':
+    def get_pattern_name_by_id(self, id: int) -> str:
+        pattern_names = {
+            1: "Ascending Channel",
+            2: "Descending Channel",
+            3: "Ranging Channel",
+            4: "Rising Wedge (Expanding)",
+            5: "Falling Wedge (Expanding)",
+            6: "Diverging Triangle",
+            7: "Ascending Triangle (Expanding)",
+            8: "Descending Triangle (Expanding)",
+            9: "Rising Wedge (Contracting)",
+            10: "Falling Wedge (Contracting)",
+            11: "Converging Triangle",
+            12: "Descending Triangle (Contracting)",
+            13: "Ascending Triangle (Contracting)",
+            14: "Bull Pennant",
+            15: "Bear Pennant",
+            16: "Bull Flag",
+            17: "Bear Flag"
+        }
+        return pattern_names.get(id, "Error")
+
+    def resolve(self, properties: TrendLineProperties) -> 'TrendLinePattern':
         """
         Resolve pattern by updating trend lines, pivot points, and ratios
 
@@ -107,7 +101,7 @@ class TrendLine:
         self.resolve_pattern_name(properties)
         return self
 
-    def resolve_pattern_name(self, properties: ScanProperties) -> 'TrendLine':
+    def resolve_pattern_name(self, properties: TrendLineProperties) -> 'TrendLinePattern':
         """Determine the pattern type based on trend lines and angles"""
         t1p1 = self.trend_line1.p1.norm_price
         t1p2 = self.trend_line1.p2.norm_price
@@ -187,7 +181,7 @@ class TrendLine:
             flag_size = max(abs(self.pivots[0].point.norm_price - self.pivots[1].point.norm_price),
                             abs(self.pivots[2].point.norm_price - self.pivots[3].point.norm_price))
             if flag_size * properties.flag_ratio < flag_pole: # flag size must be smaller than its pole
-                print(f"Pivot {self.pivots[0].point.index} ratio: {self.pivots[0].ratio} direction: {self.pivots[0].direction}, flag_pole: {flag_pole}, flag_size: {flag_size}")
+                print(f"Pivot {self.pivots[0].point.index} direction: {self.pivots[0].direction}, flag_pole: {flag_pole}, flag_size: {flag_size}")
                 if self.pattern_type == 1 or self.pattern_type == 2 or self.pattern_type == 3:
                     # channel patterns
                     if self.pivots[0].direction > 0 and not self.pattern_type == 1:
@@ -231,7 +225,7 @@ def calculate_cosine_diff(p1: Point, p2: Point, p3: Point, p4: Point) -> float:
 
     return 1 - cos_sim
 
-def is_aligned(first: Point, second: Point, third: Point, properties: ScanProperties) -> bool:
+def is_aligned(first: Point, second: Point, third: Point, properties: TrendLineProperties) -> bool:
     # Calculate cosine difference directly from points
     cos_diff = calculate_cosine_diff(
         first, second,   # First line segment
@@ -266,7 +260,7 @@ def inspect_line_by_point(line: Line, point_bar: int, direction: float,
     if direction > 0:
         # upper line
         body_high_price = max(bar_data['norm_open'], bar_data['norm_close'])
-        if line_price <= body_high_price:
+        if line_price < body_high_price:
             # invalid if line is crossing the candle body
             return False, float('inf') # make the difference as large as possible
         elif line_price > bar_data['norm_high']:
@@ -278,7 +272,7 @@ def inspect_line_by_point(line: Line, point_bar: int, direction: float,
     else:
         # lower line
         body_low_price = min(bar_data['norm_open'], bar_data['norm_close'])
-        if line_price >= body_low_price:
+        if line_price > body_low_price:
             # invalid if line is crossing the candle body
             return False, float('inf') # make the difference as large as possible
         elif line_price < bar_data['norm_low']:
@@ -288,7 +282,7 @@ def inspect_line_by_point(line: Line, point_bar: int, direction: float,
             # line is crossing the candle wick
             return True, 0
 
-def inspect_points(points: List[Point], direction: float, properties: ScanProperties,
+def inspect_points(points: List[Point], direction: float, properties: TrendLineProperties,
                    df: pd.DataFrame) -> Tuple[bool, Line]:
     """
     Inspect multiple points to find the best trend line using DataFrame price data
@@ -338,9 +332,8 @@ def inspect_points(points: List[Point], direction: float, properties: ScanProper
         trend_line = Line(points[0], points[1])
         return True, trend_line
 
-def find_pattern(zigzag: Zigzag, offset: int, properties: ScanProperties,
-                patterns: List[TrendLine], df: pd.DataFrame,
-                max_live_patterns: int = 20):
+def find_trend_lines(zigzag: Zigzag, offset: int, properties: TrendLineProperties,
+                patterns: List[TrendLinePattern], df: pd.DataFrame) -> bool:
     """
     Find patterns using DataFrame price data
 
@@ -348,10 +341,8 @@ def find_pattern(zigzag: Zigzag, offset: int, properties: ScanProperties,
         zigzag: ZigZag calculator instance
         offset: Offset to start searching for pivots
         properties: Scan properties
-        d_properties: Drawing properties
         patterns: List to store found patterns
         df: DataFrame with columns ['open', 'high', 'low', 'close']
-        max_live_patterns: Maximum number of patterns to track
 
     Returns:
         int: Index of the pivot that was used to find the pattern
@@ -361,12 +352,9 @@ def find_pattern(zigzag: Zigzag, offset: int, properties: ScanProperties,
         raise ValueError("Number of pivots must be between 4 and 6")
 
     pivots = []
-    for i in range(properties.number_of_pivots):
-        pivot = zigzag.get_pivot(i + offset)
-        if pivot is None:
-            return
-        # zigzag pivots are in reverse order
-        pivots.insert(0, pivot.deep_copy())
+    min_pivots = get_pivots_from_zigzag(zigzag, pivots, offset, properties.number_of_pivots)
+    if min_pivots != properties.number_of_pivots:
+        return False
 
     # Validate pattern
     # Create point arrays for trend lines
@@ -390,95 +378,14 @@ def find_pattern(zigzag: Zigzag, offset: int, properties: ScanProperties,
         if time_delta.days + 1 < properties.min_periods_lapsed and \
             properties.number_of_pivots >= 5:
             # only consider patterns with enough time lapsed
-                return
+            return False
 
         # Create pattern
-        pattern = TrendLine(
+        pattern = TrendLinePattern(
             pivots=pivots,
             trend_line1=trend_line1,
             trend_line2=trend_line2,
         ).resolve(properties)
 
         # Process pattern (resolve type, check if allowed, etc.)
-        process_pattern(pattern, properties, patterns, max_live_patterns)
-
-def process_pattern(pattern: TrendLine, properties: ScanProperties,
-                   patterns: List[TrendLine], max_live_patterns: int) -> bool:
-    """
-    Process a new pattern: validate it, check if it's allowed, and manage pattern list
-
-    Args:
-        pattern: The pattern to process
-        properties: Scan properties
-        patterns: List of existing patterns
-        max_live_patterns: Maximum number of patterns to keep
-        draw: Whether to draw the pattern
-
-    Returns:
-        bool: True if pattern was successfully processed and added
-    """
-    # Log warning if invalid pattern type detected
-    if pattern.pattern_type == 0:
-        return False
-
-    # Get last direction from the last pivot
-    last_dir = np.sign(pattern.pivots[-1].direction)
-
-    # Get allowed last pivot direction for this pattern type
-    allowed_last_pivot_direction = 0
-    if properties.allowed_last_pivot_directions is not None:
-        if pattern.pattern_type < len(properties.allowed_last_pivot_directions):
-            allowed_last_pivot_direction = properties.allowed_last_pivot_directions[pattern.pattern_type]
-
-    # Check if pattern type is allowed
-    pattern_allowed = True
-    if properties.allowed_patterns is not None:
-        if pattern.pattern_type >= len(properties.allowed_patterns):
-            pattern_allowed = False
-        else:
-            pattern_allowed = (pattern.pattern_type >= 0 and
-                             properties.allowed_patterns[pattern.pattern_type])
-
-    # Check if direction is allowed
-    direction_allowed = (allowed_last_pivot_direction == 0 or
-                        allowed_last_pivot_direction == last_dir)
-
-    if pattern_allowed and direction_allowed:
-        # Check for existing pattern with same pivots
-        existing_pattern = False
-        existing_pattern_index = -1
-        existing_ratio_diff = 5.0
-
-        for idx, existing in enumerate(patterns):
-            # Check if pivots match
-            match = True
-            for i in range(len(pattern.pivots)):
-                if pattern.pivots[i].point.index != existing.pivots[i].point.index:
-                    match = False
-                    break
-
-            if match:
-                existing_pattern = True
-                existing_pattern_index = idx
-                existing_ratio_diff = existing.ratio_diff
-                break
-
-        # Determine if we should replace existing pattern
-        delete_old = existing_pattern and existing_ratio_diff > pattern.ratio_diff
-
-        if delete_old or not existing_pattern:
-            # Set pattern name
-            pattern.pattern_name = get_pattern_name_by_id(pattern.pattern_type)
-
-            # Delete old pattern if necessary
-            if delete_old:
-                patterns.pop(existing_pattern_index)
-
-            # Add new pattern and manage list size
-            patterns.append(pattern)
-            while len(patterns) > max_live_patterns:
-                patterns.pop(0)
-
-            return True
-
-    return False
+        return pattern.process_pattern(properties, patterns)

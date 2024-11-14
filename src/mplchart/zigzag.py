@@ -24,6 +24,28 @@ class Zigzag:
         self.zigzag_pivots: List[Pivot] = []
         self.flags = ZigzagFlags()
 
+    def update_pivot_properties(self, pivot: Pivot) -> 'Zigzag':
+        """
+        Update the properties of the pivot
+        """
+        if len(self.zigzag_pivots) >= 1:
+            dir = np.sign(pivot.direction)
+            value = pivot.point.norm_price
+            last_pivot = self.zigzag_pivots[0]
+            last_value = last_pivot.point.norm_price
+
+            # Calculate difference between last and current pivot
+            pivot.diff = round(abs(value - last_value), 3)
+
+            if len(self.zigzag_pivots) >= 2:
+                llast_pivot = self.zigzag_pivots[1]
+                llast_value = llast_pivot.point.norm_price
+                # Calculate slope between last and current pivot
+                pivot.cross_diff = round((value - llast_value), 3)
+                # Determine if trend is strong (2) or weak (1)
+                new_dir = dir * 2 if dir * value > dir * llast_value else dir
+                pivot.direction = int(new_dir)
+
     def add_new_pivot(self, pivot: Pivot) -> 'Zigzag':
         """
         Add a new pivot to the zigzag
@@ -37,34 +59,12 @@ class Zigzag:
         Raises:
             ValueError: If direction mismatch with last pivot
         """
-        dir = np.sign(pivot.direction)
-
         if len(self.zigzag_pivots) >= 1:
-            value = pivot.point.norm_price
-            last_pivot = self.zigzag_pivots[0]
-            last_value = last_pivot.point.norm_price
-            last_index = last_pivot.point.index
-
-             # Check direction mismatch
-            if np.sign(last_pivot.direction) == np.sign(dir):
+            # Check direction mismatch
+            if np.sign(self.zigzag_pivots[0].direction) == np.sign(pivot.direction):
                 raise ValueError('Direction mismatch')
 
-            # Calculate slope between last and current pivot
-            pivot.ratio = round(
-                (value - last_value) / (pivot.point.index - last_index),
-                3
-            )
-            # Calculate difference between last and current pivot
-            pivot.diff = round(abs(value - last_value), 3)
-
-            if len(self.zigzag_pivots) >= 2:
-                llast_pivot = self.zigzag_pivots[1]
-                llast_value = llast_pivot.point.norm_price
-
-                # Determine if trend is strong (2) or weak (1)
-                new_dir = dir * 2 if dir * value > dir * llast_value else dir
-                pivot.direction = int(new_dir)
-
+        self.update_pivot_properties(pivot)
         # Insert at beginning and maintain max size
         self.zigzag_pivots.insert(0, pivot)
         if len(self.zigzag_pivots) > self.pivot_limit:
@@ -187,10 +187,12 @@ class Zigzag:
                 elif ((current_direction == 1 and current_norm_price > last_pivot_price) or
                     (current_direction == -1 and current_norm_price < last_pivot_price)):
                     # Update the last pivot
-                    self.zigzag_pivots[0].point.norm_price = current_norm_price
-                    self.zigzag_pivots[0].point.price = current_price
-                    self.zigzag_pivots[0].point.index = current_index
-                    self.zigzag_pivots[0].point.time = current_time
+                    last_pivot = self.zigzag_pivots[0]
+                    last_pivot.point.norm_price = current_norm_price
+                    last_pivot.point.price = current_price
+                    last_pivot.point.index = current_index
+                    last_pivot.point.time = current_time
+                    self.update_pivot_properties(last_pivot)
                     last_pivot_price = current_norm_price
 
         return self
@@ -205,98 +207,6 @@ class Zigzag:
         """Get the most recent pivot"""
         return self.zigzag_pivots[0] if self.zigzag_pivots else None
 
-    def nextlevel(self) -> 'Zigzag':
-        """
-        Calculate Next Level Zigzag based on the current calculated zigzag object
-
-        Returns:
-            Zigzag: Next level zigzag object
-        """
-        # Create new zigzag object for next level
-        next_level = Zigzag(
-            length=self.length,
-            pivot_limit=self.pivot_limit,
-            offset=0
-        )
-        next_level.level = self.level + 1
-
-        # Process only if we have pivots
-        if len(self.zigzag_pivots) > 0:
-            temp_bullish_pivot: Optional[Pivot] = None
-            temp_bearish_pivot: Optional[Pivot] = None
-
-            # Process pivots from oldest to newest
-            for i in range(len(self.zigzag_pivots) - 1, -1, -1):
-                # Create copy of current pivot and adjust level
-                l_pivot = Pivot.deep_copy(self.zigzag_pivots[i])
-                dir = l_pivot.direction
-                new_dir = np.sign(dir)
-                value = l_pivot.point.price
-                l_pivot.level = l_pivot.level + 1
-
-                if len(next_level.zigzag_pivots) > 0:
-                    last_pivot = next_level.zigzag_pivots[0]
-                    last_dir = np.sign(last_pivot.direction)
-                    last_value = last_pivot.point.price
-
-                    if abs(dir) == 2:  # Strong trend
-                        if last_dir == new_dir:
-                            if dir * last_value < dir * value:
-                                next_level.zigzag_pivots.pop(0)
-                            else:
-                                temp_pivot = (temp_bearish_pivot if new_dir > 0
-                                            else temp_bullish_pivot)
-                                if temp_pivot is not None:
-                                    next_level.add_new_pivot(temp_pivot)
-                                else:
-                                    continue
-                        else:
-                            temp_first_pivot = (temp_bullish_pivot if new_dir > 0
-                                              else temp_bearish_pivot)
-                            temp_second_pivot = (temp_bearish_pivot if new_dir > 0
-                                               else temp_bullish_pivot)
-
-                            if (temp_first_pivot is not None and
-                                temp_second_pivot is not None):
-                                temp_val = temp_first_pivot.point.price
-                                val = l_pivot.point.price
-
-                                if new_dir * temp_val > new_dir * val:
-                                    next_level.add_new_pivot(temp_first_pivot)
-                                    next_level.add_new_pivot(temp_second_pivot)
-
-                        next_level.add_new_pivot(l_pivot)
-                        temp_bullish_pivot = None
-                        temp_bearish_pivot = None
-
-                    else:  # Weak trend
-                        temp_pivot = (temp_bullish_pivot if new_dir > 0
-                                    else temp_bearish_pivot)
-
-                        if temp_pivot is not None:
-                            temp_dir = temp_pivot.direction
-                            temp_val = temp_pivot.point.price
-                            val = l_pivot.point.price
-
-                            if val * dir > temp_val * dir:
-                                if new_dir > 0:
-                                    temp_bullish_pivot = l_pivot
-                                else:
-                                    temp_bearish_pivot = l_pivot
-                        else:
-                            if new_dir > 0:
-                                temp_bullish_pivot = l_pivot
-                            else:
-                                temp_bearish_pivot = l_pivot
-
-                elif abs(dir) == 2:  # First pivot and strong trend
-                    next_level.add_new_pivot(l_pivot)
-
-            # Clear if we didn't reduce the number of pivots
-            if len(next_level.zigzag_pivots) >= len(self.zigzag_pivots):
-                next_level.zigzag_pivots.clear()
-
-        return next_level
 
 def normalize_price(df: pd.DataFrame) -> pd.DataFrame:
     max_price = df['high'].max()

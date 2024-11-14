@@ -1,11 +1,11 @@
 import pytest
 import pandas as pd
 import numpy as np
-from mplchart.trendlines import inspect_points, Point, ScanProperties
+from mplchart.trendline_patterns import inspect_points, Point, TrendLineProperties
 
 @pytest.fixture
 def default_properties():
-    return ScanProperties(
+    return TrendLineProperties(
         error_ratio=1e-6,  # Very small error ratio
         flat_ratio=0.2,
         flag_ratio=0.8

@@ -13,17 +13,17 @@ class Point:
 @dataclass
 class Pivot:
     point: Point
-    direction: int
+    direction: int # 1 for high, -1 for low
     level: int = 0
-    ratio: float = 0.0
-    diff: float = 0.0
+    diff: float = 0.0 # price difference between the pivot and the previous pivot
+    cross_diff: float = 0.0 # price difference between the pivot and the previous pivot of the same direction
 
     def deep_copy(self):
         return Pivot(
             point=self.point.copy(),
             direction=self.direction,
             level=self.level,
-            ratio=self.ratio,
+            cross_diff=self.cross_diff,
             diff=self.diff
         )
 
@@ -47,6 +47,11 @@ class Line:
 
         slope = (self.p2.norm_price - self.p1.norm_price) / (self.p2.index - self.p1.index)
         return self.p1.norm_price + slope * (index - self.p1.index)
+
+    def get_slope(self) -> float:
+        if self.p2.index == self.p1.index:
+            return 0.0
+        return (self.p2.norm_price - self.p1.norm_price) / (self.p2.index - self.p1.index)
 
     def copy(self):
         return Line(self.p1.copy(), self.p2.copy())
