@@ -181,7 +181,6 @@ class TrendLinePattern(ChartPattern):
             flag_size = max(abs(self.pivots[0].point.norm_price - self.pivots[1].point.norm_price),
                             abs(self.pivots[2].point.norm_price - self.pivots[3].point.norm_price))
             if flag_size * properties.flag_ratio < flag_pole: # flag size must be smaller than its pole
-                print(f"Pivot {self.pivots[0].point.index} direction: {self.pivots[0].direction}, flag_pole: {flag_pole}, flag_size: {flag_size}")
                 if self.pattern_type == 1 or self.pattern_type == 2 or self.pattern_type == 3:
                     # channel patterns
                     if self.pivots[0].direction > 0 and not self.pattern_type == 1:

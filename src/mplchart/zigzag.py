@@ -28,17 +28,19 @@ class Zigzag:
         """
         Update the properties of the pivot
         """
-        if len(self.zigzag_pivots) >= 1:
+        if len(self.zigzag_pivots) > 1:
             dir = np.sign(pivot.direction)
             value = pivot.point.norm_price
-            last_pivot = self.zigzag_pivots[0]
+            last_pivot = self.zigzag_pivots[1]
             last_value = last_pivot.point.norm_price
+            if last_pivot.point.index == pivot.point.index:
+                raise ValueError(f"Last pivot index {last_pivot.point.index} is the same as current pivot index {pivot.point.index}")
 
             # Calculate difference between last and current pivot
             pivot.diff = round(abs(value - last_value), 3)
 
-            if len(self.zigzag_pivots) >= 2:
-                llast_pivot = self.zigzag_pivots[1]
+            if len(self.zigzag_pivots) > 2:
+                llast_pivot = self.zigzag_pivots[2]
                 llast_value = llast_pivot.point.norm_price
                 # Calculate slope between last and current pivot
                 pivot.cross_diff = round((value - llast_value), 3)
@@ -64,10 +66,12 @@ class Zigzag:
             if np.sign(self.zigzag_pivots[0].direction) == np.sign(pivot.direction):
                 raise ValueError('Direction mismatch')
 
-        self.update_pivot_properties(pivot)
         # Insert at beginning and maintain max size
         self.zigzag_pivots.insert(0, pivot)
+        self.update_pivot_properties(pivot)
+
         if len(self.zigzag_pivots) > self.pivot_limit:
+            print(f"Warning: pivots exceeded limit {self.pivot_limit}, popping pivot {self.zigzag_pivots[-1].point.index}")
             self.zigzag_pivots.pop()
 
         return self
@@ -175,13 +179,9 @@ class Zigzag:
                         direction=current_direction
                     )
 
-                    try:
-                        self.add_new_pivot(new_pivot)
-                        last_pivot_price = current_norm_price
-                        last_pivot_direction = current_direction
-                    except ValueError:
-                        # Handle case where pivot couldn't be added
-                        continue
+                    self.add_new_pivot(new_pivot)
+                    last_pivot_price = current_norm_price
+                    last_pivot_direction = current_direction
 
                 # Update last pivot if same direction but more extreme
                 elif ((current_direction == 1 and current_norm_price > last_pivot_price) or

@@ -9,7 +9,6 @@ import pandas as pd
 class ReversalPatternProperties(ChartPatternProperties):
     min_periods_lapsed: int = 21 # minimum number of days to form a pattern
     peak_diff_threshold: float = 2e-3 # maximum allowed
-    sandle_flat_ratio: float = 8e-3 # maximum allowed flat ratio between sandle points
 
 class ReversalPattern(ChartPattern):
     def __init__(self, pivots: List[Pivot], support_line: Line):
@@ -158,18 +157,23 @@ def find_reversal_patterns(zigzag: Zigzag, offset: int, properties: ReversalPatt
                 pattern = ReversalPattern(pivots, support_line).resolve(properties)
                 found_7_pattern = pattern.process_pattern(properties, patterns)
 
-    # 7 point pattern is not found yet, continue to inspect 5 point pattern
+    # continue to inspect 5 point pattern
     if pivots_count >= 5:
-        pivots = pivots[-5:] # check the last 5 pivots as the pivots are in reverse order
-        if inspect_five_pivot_pattern(pivots, properties):
-            # use the sandle point to form a support line
-            support_line = get_support_line(
-                [pivots[2]], pivots[0].point.index, pivots[4].point.index, df)
+        for i in range(0, pivots_count - 5 + 1):
+            pivots = []
+            get_pivots_from_zigzag(zigzag, pivots, offset + i, 5) # check the last 5 pivots as the pivots are in reverse order
+            if inspect_five_pivot_pattern(pivots, properties):
+                # use the sandle point to form a support line
+                support_line = get_support_line(
+                    [pivots[2]], pivots[0].point.index, pivots[4].point.index, df)
 
-            time_delta = pivots[-1].point.time - pivots[0].point.time
-            if support_line is not None and time_delta.days + 1 >= properties.min_periods_lapsed:
-                pattern = ReversalPattern(pivots, support_line).resolve(properties)
-                found_5_pattern = pattern.process_pattern(properties, patterns)
+                time_delta = pivots[-1].point.time - pivots[0].point.time
+                if support_line is not None and time_delta.days + 1 >= properties.min_periods_lapsed:
+                    pattern = ReversalPattern(pivots, support_line).resolve(properties)
+                    found = pattern.process_pattern(properties, patterns)
+
+                    if found:
+                        found_5_pattern = True
 
     return found_7_pattern or found_5_pattern
 

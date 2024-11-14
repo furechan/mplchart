@@ -72,20 +72,25 @@ class ChartPattern:
         if pattern_allowed and direction_allowed:
             # Check for existing pattern with same pivots
             existing_pattern = False
+            replacing_existing_pattern = False
 
             for idx, existing in enumerate(patterns):
                 # Check if pivots match
-                match = True
                 for i in range(len(self.pivots)):
-                    if self.pivots[i].point.index != existing.pivots[i].point.index:
-                        match = False
+                    existing_indexes = set([p.point.index for p in existing.pivots])
+                    self_indexes = set([p.point.index for p in self.pivots])
+                    # check if the indexes of self.pivots are a subset of existing.pivots
+                    if self_indexes.issubset(existing_indexes):
+                        existing_pattern = True
+                        break
+                    elif existing_indexes.issubset(self_indexes):
+                        replacing_existing_pattern = True
                         break
 
-                if match:
-                    existing_pattern = True
-                    break
-
             if not existing_pattern:
+                if replacing_existing_pattern:
+                    patterns.pop(idx)
+
                 # Set pattern name
                 self.pattern_name = self.get_pattern_name_by_id(self.pattern_type)
 
