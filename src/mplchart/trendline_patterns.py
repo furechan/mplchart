@@ -133,8 +133,8 @@ class TrendLinePattern(ChartPattern):
 
         probable_converging_bars = min_diff / price_diff if price_diff != 0 else float('inf')
 
-        is_expanding = abs(t1p2 - t2p2) > abs(t1p1 - t2p1)
-        is_contracting = abs(t1p2 - t2p2) < abs(t1p1 - t2p1)
+        is_expanding = end_diff > start_diff
+        is_contracting = start_diff > end_diff
 
         is_channel = (probable_converging_bars > 2 * bar_diff or
                      (not is_expanding and not is_contracting) or
@@ -178,8 +178,8 @@ class TrendLinePattern(ChartPattern):
         if properties.number_of_pivots == 4:
             # check flag ratio and difference
             flag_pole = abs(self.pivots[0].diff)
-            flag_size = max(abs(self.pivots[0].point.norm_price - self.pivots[1].point.norm_price),
-                            abs(self.pivots[2].point.norm_price - self.pivots[3].point.norm_price))
+            flag_size = max(abs(self.trend_line1.p1.norm_price - self.trend_line2.p1.norm_price),
+                            abs(self.trend_line1.p2.norm_price - self.trend_line2.p2.norm_price))
             if flag_size * properties.flag_ratio < flag_pole: # flag size must be smaller than its pole
                 if self.pattern_type == 1 or self.pattern_type == 2 or self.pattern_type == 3:
                     # channel patterns

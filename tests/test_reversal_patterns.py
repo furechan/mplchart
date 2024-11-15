@@ -7,8 +7,7 @@ from mplchart.line import Point, Line, Pivot
 def default_properties():
     return ReversalPatternProperties(
         min_periods_lapsed=5,
-        peak_diff_threshold=3e-2,
-        sandle_flat_ratio=1e-3
+        flat_ratio=0.4,
     )
 
 @pytest.fixture
@@ -65,9 +64,6 @@ def test_double_bottom_pattern(default_properties):
 
     assert pattern.pattern_type == 2  # Double Bottom
     assert pattern.get_pattern_name_by_id(pattern.pattern_type) == "Double Bottoms"
-    # Verify slopes between bottoms are similar
-    bottom_cross_diffs = [p.cross_diff for p in pattern.pivots if p.direction == -1]
-    assert abs(bottom_cross_diffs[-1]) <= default_properties.peak_diff_threshold
 
 def test_head_and_shoulders_pattern(default_properties):
     """Test head and shoulders pattern identification with slope calculations"""

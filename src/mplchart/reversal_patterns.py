@@ -7,8 +7,8 @@ import pandas as pd
 
 @dataclass
 class ReversalPatternProperties(ChartPatternProperties):
-    min_periods_lapsed: int = 21 # minimum number of days to form a pattern
-    peak_diff_threshold: float = 2e-3 # maximum allowed
+    min_periods_lapsed: int = 15 # minimum number of days to form a pattern
+    flat_ratio: float = 0.15 # maximum allowed
 
 class ReversalPattern(ChartPattern):
     def __init__(self, pivots: List[Pivot], support_line: Line):
@@ -36,35 +36,45 @@ class ReversalPattern(ChartPattern):
                 self.pattern_type = 2 # Double Bottoms
         elif self.pivots_count == 7:
             # check the flat ratio of the 4th and 6th points
-            if check_flat_ratio(self.pivots[3].cross_diff, properties) and \
-                check_flat_ratio(self.pivots[5].cross_diff, properties):
-                # 3 pivots are flat, we have a triple top or bottom
-                if self.pivots[0].direction < 0:
-                    self.pattern_type = 3 # Triple Tops
+            if is_same_height(self.pivots[1], self.pivots[5], self.pivots, properties):
+                if is_same_height(self.pivots[3], self.pivots[5], self.pivots, properties) and \
+                    is_same_height(self.pivots[1], self.pivots[3], self.pivots, properties):
+                    # 3 pivots are flat, we have a triple top or bottom
+                    if self.pivots[0].direction < 0:
+                        self.pattern_type = 3 # Triple Tops
+                    else:
+                        self.pattern_type = 4 # Triple Bottoms
                 else:
-                    self.pattern_type = 4 # Triple Bottoms
-            elif check_flat_ratio(
-                    self.pivots[1].point.norm_price - self.pivots[5].point.norm_price,
-                    properties):
-                # two shoulders should be approximately flat
-                if self.pivots[0].direction < 0 and self.pivots[3].cross_diff > 0 and \
-                    self.pivots[5].cross_diff < 0:
-                    # side peaks lower than the middle peak
-                    self.pattern_type = 5 # Head and Shoulders
-                elif self.pivots[0].direction > 0 and self.pivots[3].cross_diff < 0 and \
-                    self.pivots[5].cross_diff > 0:
-                    self.pattern_type = 6 # Inverted Head and Shoulders
+                    # two shoulders should be approximately flat
+                    if self.pivots[0].direction < 0 and self.pivots[3].cross_diff > 0 and \
+                        self.pivots[5].cross_diff < 0:
+                        # side peaks lower than the middle peak
+                        self.pattern_type = 5 # Head and Shoulders
+                    elif self.pivots[0].direction > 0 and self.pivots[3].cross_diff < 0 and \
+                        self.pivots[5].cross_diff > 0:
+                        self.pattern_type = 6 # Inverted Head and Shoulders
         else:
             raise ValueError("Invalid number of pivots")
         return self
 
-def check_flat_ratio(diff: float, properties: ReversalPatternProperties) -> bool:
-    # high pivot or low pivot is approximately flat with the previous high or low
-    return abs(diff) <= properties.peak_diff_threshold
+def is_same_height(pivot1: Pivot, pivot2: Pivot, ref_pivots: List[Pivot], properties: ReversalPatternProperties) -> bool:
+    # check if two pivots are approximately flat with a list of reference pivots
+    # use the first and last pivots in the list as reference points
+    if pivot1.direction * pivot2.direction < 0:
+        return False
+    if pivot1.direction > 0:
+        ref_prices = min(ref_pivots[0].point.norm_price, ref_pivots[-1].point.norm_price)
+    else:
+        ref_prices = max(ref_pivots[0].point.norm_price, ref_pivots[-1].point.norm_price)
+    diff1 = pivot1.point.norm_price - ref_prices
+    diff2 = pivot2.point.norm_price - ref_prices
+    ratio = diff1 / diff2
+    print(f"pivot {pivot1.point.index}: {pivot1.point.norm_price:.4f}, pivot {pivot2.point.index}: {pivot2.point.norm_price:.4f}, ref_prices: {ref_prices:.4f}, ratio: {ratio:.4f}")
+    return ratio <= 1 + properties.flat_ratio and ratio >= 1 - properties.flat_ratio
 
 def inspect_five_pivot_pattern(pivots: List[Pivot], properties: ReversalPatternProperties) -> bool:
     # check tops or bottoms are approximately flat
-    if check_flat_ratio(pivots[3].cross_diff, properties):
+    if is_same_height(pivots[1], pivots[3], pivots, properties):
         if pivots[0].direction > 0:
             # may be a double bottom, check the sandle point price
             if pivots[2].point.norm_price < pivots[0].point.norm_price or \
@@ -79,23 +89,15 @@ def inspect_five_pivot_pattern(pivots: List[Pivot], properties: ReversalPatternP
 
 def inspect_seven_pivot_pattern(pivots: List[Pivot], properties: ReversalPatternProperties) -> bool:
     # check the double sandle points price range and flat ratio
-    #if abs(pivots[4].cross_diff) > properties.sandle_flat_ratio:
-    #    return False
     if pivots[0].direction > 0:
-        # may be a triple bottome, check the double sandle points
-        if (pivots[2].point.norm_price > pivots[0].point.norm_price and \
-            pivots[2].point.norm_price > pivots[6].point.norm_price) or \
-            (pivots[4].point.norm_price > pivots[0].point.norm_price and \
-                pivots[4].point.norm_price > pivots[6].point.norm_price):
-            return False
+        if pivots[2].point.norm_price < pivots[0].point.norm_price and \
+            pivots[4].point.norm_price < pivots[0].point.norm_price:
+            return True
     else:
-        # may be a triple top, check the double sandle points
-        if (pivots[2].point.norm_price < pivots[0].point.norm_price and \
-            pivots[2].point.norm_price < pivots[6].point.norm_price) or \
-            (pivots[4].point.norm_price < pivots[0].point.norm_price and \
-                pivots[4].point.norm_price < pivots[6].point.norm_price):
-            return False
-    return True
+        if pivots[2].point.norm_price > pivots[0].point.norm_price and \
+            pivots[4].point.norm_price > pivots[0].point.norm_price:
+            return True
+    return False
 
 def find_cross_point(line: Line, start_index: int, end_index: int, df: pd.DataFrame) -> Optional[Point]:
     if start_index > end_index:
@@ -114,17 +116,20 @@ def get_support_line(pivots: List[Pivot], start_index: int, end_index: int, df: 
         raise ValueError("At most two points are required to form a line")
     if len(pivots) == 1:
         line = Line(pivots[0].point, pivots[0].point)
+        cross_point2 = find_cross_point(line, pivots[0].point.index+1, end_index, df)
     else:
         line = Line(pivots[0].point, pivots[1].point)
+        cross_point2 = find_cross_point(line, pivots[1].point.index+1, end_index, df)
 
     cross_point1 = find_cross_point(line, start_index, pivots[0].point.index, df)
     if cross_point1 is None:
         # the line is not crossing the chart on the left side
         return None
     # the cross point on the right side can be none as the chart is still trending
-    cross_point2 = Point(df.index[end_index], end_index,
-                         line.get_price(end_index),
-                         line.get_norm_price(end_index))
+    if cross_point2 is None:
+        cross_point2 = Point(df.index[end_index], end_index,
+                             line.get_price(end_index),
+                             line.get_norm_price(end_index))
     return Line(cross_point1, cross_point2)
 
 def find_reversal_patterns(zigzag: Zigzag, offset: int, properties: ReversalPatternProperties,
