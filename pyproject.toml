@@ -28,14 +28,15 @@ dev-mode-dirs = ["src"]
 only-include = ["src"]
 exclude = [".*"]
 
-[tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401"]
-"*.ipynb" = ["F401", "F811"]
+[tool.hatch.envs.default]
+type = "virtual"
+path = ".venv"
 
 [tool.pytest.ini_options]
 addopts = ["-p no:cacheprovider"]
 testpaths = ["tests"]
 
-[tool.hatch.envs.default]
-type = "virtual"
-path = ".venv"
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"*.ipynb" = ["F401", "F811"]
+

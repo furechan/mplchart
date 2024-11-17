@@ -517,13 +517,13 @@ class Chart:
         # figure.show() seems only to work if figure was not created by pyplot!
         plt.show()
 
-    def render(self, format="svg"):
+    def render(self, format="svg", *, dpi="figure"):
         """renders the chart to the specific format"""
         if not self.figure.axes:
             self.get_axes()
 
         file = io.BytesIO()
-        self.figure.savefig(file, format=format)
+        self.figure.savefig(file, format=format, dpi=dpi)
         result = file.getvalue()
 
         return result
