@@ -63,6 +63,7 @@ class Chart:
         holidays=None,
         raw_dates=False,
         color_scheme=(),
+        max_ticks=None,
     ):
         self.start = start
         self.end = end
@@ -71,6 +72,7 @@ class Chart:
         self.holidays = holidays
         self.raw_dates = raw_dates
         self.color_scheme = dict(color_scheme)
+        self.max_ticks = max_ticks
 
         if raw_dates:
             warnings.warn(
@@ -131,7 +133,8 @@ class Chart:
             )
         elif data is not None:
             self.mapper = DateIndexMapper(
-                index=data.index, start=self.start, end=self.end, max_bars=self.max_bars
+                index=data.index, start=self.start, end=self.end, max_bars=self.max_bars,
+                max_ticks=self.max_ticks
             )
         else:
             raise ValueError("Cannot create mapper. data is None!")
@@ -405,7 +408,7 @@ class Chart:
             result = self.last_result
         else:
             result = prices
-            
+
         return result
 
     def plot_indicator(self, data, indicator):

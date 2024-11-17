@@ -5,6 +5,9 @@ import pandas as pd
 
 from .line import Pivot, Point
 
+import logging
+logger = logging.getLogger(__name__)
+
 @dataclass
 class ZigzagFlags:
     """Flags required for drawing zigzag"""
@@ -71,7 +74,8 @@ class Zigzag:
         self.update_pivot_properties(pivot)
 
         if len(self.zigzag_pivots) > self.pivot_limit:
-            print(f"Warning: pivots exceeded limit {self.pivot_limit}, popping pivot {self.zigzag_pivots[-1].point.index}")
+            logger.warning(f"Warning: pivots exceeded limit {self.pivot_limit}, "
+                           f"popping pivot {self.zigzag_pivots[-1].point.index}")
             self.zigzag_pivots.pop()
 
         return self

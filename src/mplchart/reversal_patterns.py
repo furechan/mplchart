@@ -4,6 +4,9 @@ from .chart_pattern import ChartPattern, ChartPatternProperties, get_pivots_from
 from .line import Pivot, Line, Point
 from .zigzag import Zigzag
 import pandas as pd
+import logging
+
+logger = logging.getLogger(__name__)
 
 @dataclass
 class ReversalPatternProperties(ChartPatternProperties):
@@ -69,8 +72,13 @@ def is_same_height(pivot1: Pivot, pivot2: Pivot, ref_pivots: List[Pivot], proper
     diff1 = pivot1.point.norm_price - ref_prices
     diff2 = pivot2.point.norm_price - ref_prices
     ratio = diff1 / diff2
-    print(f"pivot {pivot1.point.index}: {pivot1.point.norm_price:.4f}, pivot {pivot2.point.index}: {pivot2.point.norm_price:.4f}, ref_prices: {ref_prices:.4f}, ratio: {ratio:.4f}")
-    return ratio <= 1 + properties.flat_ratio and ratio >= 1 - properties.flat_ratio
+    same_height = ratio <= 1 + properties.flat_ratio and ratio >= 1 - properties.flat_ratio
+    if same_height:
+        logger.debug(f"pivot {pivot1.point.index}: {pivot1.point.norm_price:.4f}, "
+                     f"pivot {pivot2.point.index}: {pivot2.point.norm_price:.4f} "
+                     f"are approximately the same height, "
+                     f"ref_prices: {ref_prices:.4f}, ratio: {ratio:.4f}")
+    return same_height
 
 def inspect_five_pivot_pattern(pivots: List[Pivot], properties: ReversalPatternProperties) -> bool:
     # check tops or bottoms are approximately flat

@@ -5,6 +5,10 @@ import pandas as pd
 from .line import Point, Pivot, Line
 from .zigzag import Zigzag
 from .chart_pattern import ChartPattern, ChartPatternProperties, get_pivots_from_zigzag
+
+import logging
+logger = logging.getLogger(__name__)
+
 @dataclass
 class TrendLineProperties(ChartPatternProperties):
     number_of_pivots: int = 5 # minimum number of pivots to form a pattern
@@ -233,7 +237,8 @@ def is_aligned(first: Point, second: Point, third: Point, properties: TrendLineP
     basic_condition = 0 <= cos_diff and cos_diff <= properties.error_ratio
 
     if basic_condition:
-        print(f"Points: {first.index}, {second.index}, {third.index} on the same line, cos_diff={cos_diff}")
+        logger.debug(f"Points: {first.index}, {second.index}, {third.index} "
+                     f"on the same line, cos_diff={cos_diff}")
 
     return basic_condition
 
