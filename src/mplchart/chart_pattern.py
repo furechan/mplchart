@@ -59,11 +59,11 @@ class ChartPattern:
         # Check if pattern type is allowed
         pattern_allowed = True
         if properties.allowed_patterns is not None:
-            if self.pattern_type >= len(properties.allowed_patterns):
+            if self.pattern_type > len(properties.allowed_patterns):
                 pattern_allowed = False
             else:
-                pattern_allowed = (self.pattern_type >= 0 and
-                                properties.allowed_patterns[self.pattern_type])
+                pattern_allowed = (self.pattern_type > 0 and
+                                properties.allowed_patterns[self.pattern_type-1])
 
         # Check if direction is allowed
         direction_allowed = (allowed_last_pivot_direction == 0 or
