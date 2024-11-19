@@ -1,5 +1,5 @@
 import pandas as pd
-from mplchart.zigzag import Zigzag, Pivot, Point
+from mplchart.zigzag import Zigzag, window_peaks
 
 def test_window_peaks():
     """Test window peaks calculation"""
@@ -9,8 +9,7 @@ def test_window_peaks():
     }
     df = pd.DataFrame(data, index=pd.date_range('2024-01-01', periods=len(data['norm_high'])))
 
-    zigzag = Zigzag(backcandels=2, forwardcandels=4)
-    highs, lows = zigzag.window_peaks(df, 2, 4)
+    highs, lows = window_peaks(df, 2, 4)
     assert highs.values.tolist() == [12, 12, 13, 13, 13, 13, 13, 13, 13, 12]
     assert lows.values.tolist() == [8, 8, 8, 8, 8, 7, 7, 7, 7, 7]
 

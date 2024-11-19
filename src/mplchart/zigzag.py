@@ -26,6 +26,7 @@ class Zigzag:
         self.level = level
         self.zigzag_pivots: List[Pivot] = []
         self.flags = ZigzagFlags()
+        self.df = None
 
     def update_pivot_properties(self, pivot: Pivot) -> 'Zigzag':
         """
@@ -80,35 +81,6 @@ class Zigzag:
 
         return self
 
-    def window_peaks(self, df: pd.DataFrame, before: int, after: int) -> pd.Series:
-        """
-        Faster version using numpy's stride tricks
-
-        Args:
-            df: DataFrame with 'high' and 'low' columns
-            before: Number of bars before the current bar
-            after: Number of bars after the current bar
-
-        Returns:
-            pd.Series: Series of highs and lows
-        """
-        values_high = df["norm_high"].values
-        values_low = df["norm_low"].values
-        result_high = np.zeros(len(values_high))
-        result_low = np.zeros(len(values_low))
-
-        # Handle edges with padding
-        padded_high = np.pad(values_high, (before, after), mode='edge')
-        padded_low = np.pad(values_low, (before, after), mode='edge')
-
-        # Create rolling window view
-        windows_high = np.lib.stride_tricks.sliding_window_view(padded_high, before + after + 1)
-        windows_low = np.lib.stride_tricks.sliding_window_view(padded_low, before + after + 1)
-        result_high = np.max(windows_high, axis=1)
-        result_low = np.min(windows_low, axis=1)
-
-        return pd.Series(result_high, index=df.index), pd.Series(result_low, index=df.index)
-
     def calculate(self, df: pd.DataFrame, normalize: bool = True) -> 'Zigzag':
         """
         Calculate zigzag pivots from DataFrame
@@ -124,13 +96,14 @@ class Zigzag:
         if df.get('norm_high') is None or df.get('norm_low') is None:
             if normalize:
                 df = normalize_price(df)
+                self.df = df
             else:
                 raise ValueError("Normalized prices not found in dataframe")
 
         self.zigzag_pivots = []
         self.flags = ZigzagFlags()
 
-        highs, lows = self.window_peaks(df, self.backcandels, self.forwardcandels)
+        highs, lows = window_peaks(df, self.backcandels, self.forwardcandels)
 
         # Calculate pivot highs
         pivot_highs = df['norm_high'].where((df['norm_high'] == highs))
@@ -201,22 +174,74 @@ class Zigzag:
 
         return self
 
-    def get_pivot(self, index: int) -> Optional[Pivot]:
+    def get_pivot_by_index(self, index: int) -> Optional[Pivot]:
         """Get pivot at specific index"""
-        if 0 <= index < len(self.zigzag_pivots):
-            return self.zigzag_pivots[index]
+        for i in range(len(self.zigzag_pivots)):
+            current_pivot = self.zigzag_pivots[len(self.zigzag_pivots) - i - 1]
+            if current_pivot.point.index == index:
+                return current_pivot
+        return None
+
+    def get_pivot(self, offset: int) -> Optional[Pivot]:
+        """Get pivot at specific index"""
+        if 0 <= offset < len(self.zigzag_pivots):
+            return self.zigzag_pivots[offset]
         return None
 
     def get_last_pivot(self) -> Optional[Pivot]:
         """Get the most recent pivot"""
         return self.zigzag_pivots[0] if self.zigzag_pivots else None
 
+    def get_df(self) -> Optional[pd.DataFrame]:
+        return self.df
+
+def window_peaks(data, before: int, after: int) -> tuple[pd.Series, pd.Series]:
+    """
+    Faster version using numpy's stride tricks
+
+    Args:
+        df: DataFrame with 'high' and 'low' columns
+        before: Number of bars before the current bar
+        after: Number of bars after the current bar
+
+    Returns:
+        pd.Series: Series of highs and lows
+    """
+    if isinstance(data, pd.DataFrame):
+        values_high = data["norm_high"].values
+    elif isinstance(data, pd.Series):
+        values_high = data.values
+    else:
+        raise ValueError("Unsupported dataframe type")
+
+    if isinstance(data, pd.DataFrame):
+        values_low = data["norm_low"].values
+    elif isinstance(data, pd.Series):
+        values_low = data.values
+    result_high = np.zeros(len(values_high))
+    result_low = np.zeros(len(values_low))
+
+    # Handle edges with padding
+    padded_high = np.pad(values_high, (before, after), mode='edge')
+    padded_low = np.pad(values_low, (before, after), mode='edge')
+
+    # Create rolling window view
+    windows_high = np.lib.stride_tricks.sliding_window_view(padded_high, before + after + 1)
+    windows_low = np.lib.stride_tricks.sliding_window_view(padded_low, before + after + 1)
+    result_high = np.max(windows_high, axis=1)
+    result_low = np.min(windows_low, axis=1)
+
+    return pd.Series(result_high, index=data.index), pd.Series(result_low, index=data.index)
 
 def normalize_price(df: pd.DataFrame) -> pd.DataFrame:
-    max_price = df['high'].max()
-    min_price = df['low'].min() * 0.9
-    df['norm_high'] = (df['high'] - min_price) / (max_price - min_price)
-    df['norm_low'] = (df['low'] - min_price) / (max_price - min_price)
-    df['norm_open'] = (df['open'] - min_price) / (max_price - min_price)
-    df['norm_close'] = (df['close'] - min_price) / (max_price - min_price)
-    return df
+    """
+    Normalize the price of a dataframe
+    """
+    df_copy = df.copy()
+    max_price = df_copy['high'].max()
+    min_price = df_copy['low'].min() * 0.9
+    df_copy['norm_high'] = (df_copy['high'] - min_price) / (max_price - min_price)
+    df_copy['norm_low'] = (df_copy['low'] - min_price) / (max_price - min_price)
+    df_copy['norm_open'] = (df_copy['open'] - min_price) / (max_price - min_price)
+    df_copy['norm_close'] = (df_copy['close'] - min_price) / (max_price - min_price)
+    return df_copy

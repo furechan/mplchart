@@ -165,8 +165,8 @@ def find_reversal_patterns(zigzag: Zigzag, offset: int, properties: ReversalPatt
             support_line = get_support_line(
                 [pivots[2], pivots[4]], pivots[0].point.index, pivots[6].point.index, df)
 
-            time_delta = pivots[-1].point.time - pivots[0].point.time
-            if support_line is not None and time_delta.days + 1 >= properties.min_periods_lapsed:
+            index_delta = pivots[-1].point.index - pivots[0].point.index + 1
+            if support_line is not None and index_delta >= properties.min_periods_lapsed:
                 pattern = ReversalPattern(pivots, support_line).resolve(properties)
                 found_7_pattern = pattern.process_pattern(properties, patterns)
 
@@ -180,8 +180,8 @@ def find_reversal_patterns(zigzag: Zigzag, offset: int, properties: ReversalPatt
                 support_line = get_support_line(
                     [pivots[2]], pivots[0].point.index, pivots[4].point.index, df)
 
-                time_delta = pivots[-1].point.time - pivots[0].point.time
-                if support_line is not None and time_delta.days + 1 >= properties.min_periods_lapsed:
+                index_delta = pivots[-1].point.index - pivots[0].point.index + 1
+                if support_line is not None and index_delta >= properties.min_periods_lapsed:
                     pattern = ReversalPattern(pivots, support_line).resolve(properties)
                     found = pattern.process_pattern(properties, patterns)
 

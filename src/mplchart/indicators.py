@@ -1,9 +1,12 @@
 """technical analysis indicators"""
 
+from typing import List
 from . import library
 
 from .model import Indicator
 from .utils import get_series
+from .rsi_div_patterns import RsiDivergenceProperties, RsiDivergencePattern, find_rsi_divergences, calc_rsi
+from .zigzag import Zigzag
 
 
 class SMA(Indicator):
@@ -106,14 +109,38 @@ class RSI(Indicator):
     oversold: float = 30
     overbought: float = 70
     yticks: tuple = 30, 50, 70
+    divergences: List[RsiDivergencePattern] = None
     # default_pane: str = "above"
 
-    def __init__(self, period: int = 14):
+    def __init__(self, period: int = 14, backcandels: int = 2, forwardcandels: int = 2,
+                 pivot_limit: int = 50,scan_props: RsiDivergenceProperties = None):
         self.period = period
+        self.backcandels = backcandels
+        self.forwardcandels = forwardcandels
+        self.pivot_limit = pivot_limit
+        self.scan_props = scan_props
 
     def __call__(self, prices):
         series = get_series(prices)
+        if self.scan_props is not None:
+            self.calc_divergences(prices)
         return library.calc_rsi(series, self.period)
+
+    def calc_divergences(self, prices):
+        zigzag = Zigzag(backcandels=self.backcandels,
+                        forwardcandels=self.forwardcandels,
+                        pivot_limit=self.pivot_limit,
+                        offset=0)
+        zigzag.calculate(prices)
+        rsi = calc_rsi(prices)
+        # Initialize pattern storage
+        patterns: List[RsiDivergencePattern] = []
+
+        # Find patterns
+        for i in range(self.scan_props.offset, len(zigzag.zigzag_pivots)):
+            find_rsi_divergences(zigzag, i, self.scan_props, patterns, rsi)
+
+        self.divergences = patterns
 
 
 class ADX(Indicator):

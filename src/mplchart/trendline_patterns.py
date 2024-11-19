@@ -378,8 +378,8 @@ def find_trend_lines(zigzag: Zigzag, offset: int, properties: TrendLinePropertie
                                         properties, df)
 
     if valid1 and valid2:
-        time_delta = pivots[-1].point.time - pivots[0].point.time
-        if time_delta.days + 1 < properties.min_periods_lapsed and \
+        index_delta = pivots[-1].point.index - pivots[0].point.index + 1
+        if index_delta < properties.min_periods_lapsed and \
             properties.number_of_pivots >= 5:
             # only consider patterns with enough time lapsed
             return False

@@ -139,3 +139,22 @@ class AutoWrapper(Wrapper):
                     interpolate=True,
                     alpha=0.5,
                 )
+
+        divergences = getattr(self.indicator, "divergences", None)
+        if divergences is not None:
+            for pattern in divergences:
+                # Use data.index to get the correct x positions
+                line_x = [pattern.divergence_line.p1.index, pattern.divergence_line.p2.index]
+                line_y = [pattern.divergence_line.p1.price, pattern.divergence_line.p2.price]
+
+                if pattern.pattern_type == 1 or pattern.pattern_type == 3:
+                    color = "green"
+                else:
+                    color = "red"
+                ax.plot(line_x, line_y, color=color)
+                if pattern.pivots[0].direction == 1:
+                    text_y = line_y[0] * 1.2
+                else:
+                    text_y = line_y[0] * 0.8
+                ax.annotate(pattern.pattern_name, (line_x[0], text_y), color=color)
+
