@@ -109,9 +109,17 @@ class RSI(Indicator):
     oversold: float = 30
     overbought: float = 70
     yticks: tuple = 30, 50, 70
-    divergences: List[RsiDivergencePattern] = None
     # default_pane: str = "above"
 
+    def __init__(self, period: int = 14):
+        self.period = period
+
+    def __call__(self, prices):
+        series = get_series(prices)
+        return library.calc_rsi(series, self.period)
+
+class RSIDIV(Indicator):
+    """RSI Divergences"""
     def __init__(self, period: int = 14, backcandels: int = 2, forwardcandels: int = 2,
                  pivot_limit: int = 50,scan_props: RsiDivergenceProperties = None):
         self.period = period
@@ -121,26 +129,43 @@ class RSI(Indicator):
         self.scan_props = scan_props
 
     def __call__(self, prices):
-        series = get_series(prices)
-        if self.scan_props is not None:
-            self.calc_divergences(prices)
-        return library.calc_rsi(series, self.period)
+        pass
 
-    def calc_divergences(self, prices):
+    def calc_divergences(self, prices, patterns: List[RsiDivergencePattern]):
         zigzag = Zigzag(backcandels=self.backcandels,
                         forwardcandels=self.forwardcandels,
                         pivot_limit=self.pivot_limit,
                         offset=0)
         zigzag.calculate(prices)
         rsi = calc_rsi(prices)
-        # Initialize pattern storage
-        patterns: List[RsiDivergencePattern] = []
-
         # Find patterns
         for i in range(self.scan_props.offset, len(zigzag.zigzag_pivots)):
             find_rsi_divergences(zigzag, i, self.scan_props, patterns, rsi)
 
-        self.divergences = patterns
+    def plot_handler(self, prices, chart):
+        ax = chart.get_axes()
+        # Initialize pattern storage
+        patterns: List[RsiDivergencePattern] = []
+
+        self.calc_divergences(prices, patterns)
+        for pattern in patterns:
+            # Use data.index to get the correct x positions
+            line_x = [pattern.divergence_line.p1.index, pattern.divergence_line.p2.index]
+            line_y = [pattern.divergence_line.p1.price, pattern.divergence_line.p2.price]
+
+            if pattern.pattern_type == 1 or pattern.pattern_type == 3:
+                color = "green"
+            else:
+                color = "red"
+            ax.plot(line_x, line_y, color=color)
+            if pattern.pivots[0].direction > 0:
+                text_y = line_y[0] * 1.2
+            else:
+                text_y = line_y[0] * 0.8
+            ax.annotate(pattern.pattern_name, (line_x[0], text_y), color=color)
+            # annotate line points
+            ax.annotate(line_x[0], (line_x[0], line_y[0]), color=color)
+            ax.annotate(line_x[1], (line_x[1], line_y[1]), color=color)
 
 
 class ADX(Indicator):

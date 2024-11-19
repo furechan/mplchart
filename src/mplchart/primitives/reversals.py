@@ -92,7 +92,7 @@ class Reversal(Primitive):
             sandle_point = pattern.pivots[2]
             text_x = sandle_point.point.index
             text_y = sandle_point.point.price
-            if sandle_point.direction == 1:
+            if sandle_point.direction > 0:
                 text_x
                 text_y *= 1.02
             else:

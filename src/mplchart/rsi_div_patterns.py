@@ -56,17 +56,17 @@ class RsiDivergencePattern(ChartPattern):
                   f"upper_angle: {upper_angle}, lower_angle: {lower_angle}")
 
         if upper_line_dir == 1 and lower_line_dir == -1:
-            if self.pivots[0].direction == 1:
+            if self.pivots[0].direction > 0:
                 # higher high but lower RSI
                 self.pattern_type = 2 # bearish
-            elif self.pivots[0].direction == -1:
+            elif self.pivots[0].direction < 0:
                 # higher low but lower RSI
                 self.pattern_type = 3 # hidden bullish
         elif upper_line_dir == -1 and lower_line_dir == 1:
-            if self.pivots[0].direction == 1:
+            if self.pivots[0].direction > 0:
                 # lower high but higher RSI
                 self.pattern_type = 4 # hidden bearish
-            elif self.pivots[0].direction == -1:
+            elif self.pivots[0].direction < 0:
                 # lower low but higher RSI
                 self.pattern_type = 1 # bullish
         return self
