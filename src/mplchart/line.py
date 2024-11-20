@@ -5,16 +5,14 @@ class Point:
     time: int
     index: int
     price: float
-    norm_price: float
 
     def copy(self):
-        return Point(self.time, self.index, self.price, self.norm_price)
+        return Point(self.time, self.index, self.price)
 
 @dataclass
 class Pivot:
     point: Point
     direction: int # 1 for high, -1 for low
-    level: int = 0
     diff: float = 0.0 # price difference between the pivot and the previous pivot
     cross_diff: float = 0.0 # price difference between the pivot and the previous pivot of the same direction
 
@@ -22,7 +20,6 @@ class Pivot:
         return Pivot(
             point=self.point.copy(),
             direction=self.direction,
-            level=self.level,
             cross_diff=self.cross_diff,
             diff=self.diff
         )
@@ -40,18 +37,10 @@ class Line:
         slope = (self.p2.price - self.p1.price) / (self.p2.index - self.p1.index)
         return self.p1.price + slope * (index - self.p1.index)
 
-    def get_norm_price(self, index: int) -> float:
-        """Calculate normalized price at given index using linear interpolation"""
-        if self.p2.index == self.p1.index:
-            return self.p1.norm_price
-
-        slope = (self.p2.norm_price - self.p1.norm_price) / (self.p2.index - self.p1.index)
-        return self.p1.norm_price + slope * (index - self.p1.index)
-
     def get_slope(self) -> float:
         if self.p2.index == self.p1.index:
             return 0.0
-        return (self.p2.norm_price - self.p1.norm_price) / (self.p2.index - self.p1.index)
+        return (self.p2.price - self.p1.price) / (self.p2.index - self.p1.index)
 
     def copy(self):
         return Line(self.p1.copy(), self.p2.copy())

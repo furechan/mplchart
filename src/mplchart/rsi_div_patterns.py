@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from mplchart.chart_pattern import ChartPatternProperties
 from mplchart.line import Line, Point
-from mplchart.zigzag import normalize_price, window_peaks
+from mplchart.zigzag import window_peaks
 from typing import List
 import pandas as pd
 import numpy as np
@@ -35,11 +35,11 @@ class RsiDivergencePattern:
         self.pattern_type = 0
 
         # makes prices always greater than the rsi values
-        t1p1 = self.points[0].norm_price + 1
-        t1p2 = self.points[1].norm_price + 1
+        t1p1 = self.points[0].price + 1
+        t1p2 = self.points[1].price + 1
 
-        t2p1 = self.divergence_line.p1.norm_price
-        t2p2 = self.divergence_line.p2.norm_price
+        t2p1 = self.divergence_line.p1.price
+        t2p2 = self.divergence_line.p2.price
         upper_angle = ((t1p2 - min(t2p1, t2p2)) / (t1p1 - min(t2p1, t2p2))
                       if t1p1 > t2p1 else
                       (t2p2 - min(t1p1, t1p2)) / (t2p1 - min(t1p1, t1p2)))
@@ -51,7 +51,7 @@ class RsiDivergencePattern:
         lower_line_dir = (-1 if lower_angle > 1 + properties.flat_ratio else
                           1 if lower_angle < 1 - properties.flat_ratio else 0)
         log.debug(f"points: {self.points[0].index}, {self.points[1].index}, "
-                  f"rsi: {self.divergence_line.p1.norm_price}, {self.divergence_line.p2.norm_price}, "
+                  f"rsi: {self.divergence_line.p1.price}, {self.divergence_line.p2.price}, "
                   f"upper_line_dir: {upper_line_dir}, lower_line_dir: {lower_line_dir}, "
                   f"upper_angle: {upper_angle}, lower_angle: {lower_angle}")
 
@@ -88,10 +88,10 @@ def handle_rsi_pivots(rsi_pivots: pd.DataFrame, is_high_pivots: bool,
                       properties: RsiDivergenceProperties, patterns: List[RsiDivergencePattern]):
     if is_high_pivots:
         rsi_col = 'rsi_high'
-        price_col = 'norm_high'
+        price_col = 'high'
     else:
         rsi_col = 'rsi_low'
-        price_col = 'norm_low'
+        price_col = 'low'
 
     for i in range(len(rsi_pivots)-1):
         current_row = rsi_pivots.iloc[i]
@@ -102,14 +102,14 @@ def handle_rsi_pivots(rsi_pivots: pd.DataFrame, is_high_pivots: bool,
             continue
 
         point1 = Point(current_row.name, current_index,
-                       current_row[rsi_col], current_row[rsi_col] / 100)
+                       current_row[rsi_col] / 100)
         point2 = Point(next_row.name, next_index,
-                       next_row[rsi_col], next_row[rsi_col] / 100)
+                       next_row[rsi_col] / 100)
         divergence_line = Line(point1, point2)
         price_points = [Point(current_row.name, current_index,
-                       current_row[price_col], current_row[price_col]),
+                       current_row[price_col]),
                  Point(next_row.name, next_index,
-                       next_row[price_col], next_row[price_col])]
+                       next_row[price_col])]
         pattern = RsiDivergencePattern(price_points, divergence_line, is_high_pivots).resolve(properties)
         if pattern.pattern_type != 0:
             patterns.append(pattern)
@@ -127,25 +127,23 @@ def find_rsi_divergences(backcandels: int, forwardcandels: int,
         patterns: List to store found patterns
         df: DataFrame with prices
     """
-    # normalize prices
-    prices = normalize_price(df)
     # calculate rsi
-    rsi = calc_rsi(prices)
+    rsi = calc_rsi(df)
     # get rsi peaks
     rsi_highs, rsi_lows = window_peaks(rsi, backcandels, forwardcandels)
     rsi_high_pivots = rsi.where(rsi == rsi_highs)
     rsi_low_pivots = rsi.where(rsi == rsi_lows)
     # add row number
-    prices['row_number'] = pd.RangeIndex(len(prices))
+    df['row_number'] = pd.RangeIndex(len(df))
 
     # Merge for highs - including RSI values
     rsi_pivots= pd.merge(
         # Convert Series to DataFrame with column name
         pd.DataFrame({'rsi_high': rsi_high_pivots, 'rsi_low': rsi_low_pivots}),
-        prices[['row_number', 'norm_high', 'norm_low']],
+        df[['row_number', 'high', 'low']],
         left_index=True,
         right_index=True,
         how='inner'
     )
-    handle_rsi_pivots(rsi_pivots[['rsi_high', 'norm_high','row_number']].dropna(), True, properties, patterns)
-    handle_rsi_pivots(rsi_pivots[['rsi_low', 'norm_low','row_number']].dropna(), False, properties, patterns)
+    handle_rsi_pivots(rsi_pivots[['rsi_high', 'high','row_number']].dropna(), True, properties, patterns)
+    handle_rsi_pivots(rsi_pivots[['rsi_low', 'low','row_number']].dropna(), False, properties, patterns)

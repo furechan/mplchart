@@ -34,9 +34,9 @@ class Zigzag:
         """
         if len(self.zigzag_pivots) > 1:
             dir = np.sign(pivot.direction)
-            value = pivot.point.norm_price
+            value = pivot.point.price
             last_pivot = self.zigzag_pivots[1]
-            last_value = last_pivot.point.norm_price
+            last_value = last_pivot.point.price
             if last_pivot.point.index == pivot.point.index:
                 raise ValueError(f"Last pivot index {last_pivot.point.index} is the same as current pivot index {pivot.point.index}")
 
@@ -45,7 +45,7 @@ class Zigzag:
 
             if len(self.zigzag_pivots) > 2:
                 llast_pivot = self.zigzag_pivots[2]
-                llast_value = llast_pivot.point.norm_price
+                llast_value = llast_pivot.point.price
                 # Calculate slope between last and current pivot
                 pivot.cross_diff = value - llast_value
                 # Determine if trend is strong (2) or weak (1)
@@ -81,24 +81,19 @@ class Zigzag:
 
         return self
 
-    def calculate(self, df: pd.DataFrame, normalize: bool = True) -> 'Zigzag':
+    def calculate(self, df: pd.DataFrame) -> 'Zigzag':
         """
         Calculate zigzag pivots from DataFrame
 
         Args:
             df: DataFrame with 'high' and 'low' columns
-            normalize: Whether to normalize the prices
 
         Returns:
             self: Returns zigzag object for method chaining
         """
         # rescale the dataframe using the max and low prices in the range
-        if df.get('norm_high') is None or df.get('norm_low') is None:
-            if normalize:
-                df = normalize_price(df)
-                self.df = df
-            else:
-                raise ValueError("Normalized prices not found in dataframe")
+        if df.get('high') is None or df.get('low') is None:
+            raise ValueError("High and low prices not found in dataframe")
 
         self.zigzag_pivots = []
         self.flags = ZigzagFlags()
@@ -106,10 +101,10 @@ class Zigzag:
         highs, lows = window_peaks(df, self.backcandels, self.forwardcandels)
 
         # Calculate pivot highs
-        pivot_highs = df['norm_high'].where((df['norm_high'] == highs))
+        pivot_highs = df['high'].where((df['high'] == highs))
 
         # Calculate pivot lows
-        pivot_lows = df['norm_low'].where((df['norm_low'] == lows))
+        pivot_lows = df['low'].where((df['low'] == lows))
 
         # Process pivot points into zigzag
         last_pivot_price = None
@@ -136,12 +131,10 @@ class Zigzag:
                     take_high = False
 
                 if take_high:
-                    current_norm_price = pivot_highs.iloc[i]
-                    current_price = df.iloc[i]['high']
+                    current_price = pivot_highs.iloc[i]
                     current_direction = 1 # bullish
                 else:
-                    current_norm_price = pivot_lows.iloc[i]
-                    current_price = df.iloc[i]['low']
+                    current_price = pivot_lows.iloc[i]
                     current_direction = -1 # bearish
 
                 # Create and add pivot if valid
@@ -149,7 +142,6 @@ class Zigzag:
                     new_pivot = Pivot(
                         point=Point(
                             price=current_price,
-                            norm_price=current_norm_price,
                             index=current_index,
                             time=current_time
                         ),
@@ -157,20 +149,19 @@ class Zigzag:
                     )
 
                     self.add_new_pivot(new_pivot)
-                    last_pivot_price = current_norm_price
+                    last_pivot_price = current_price
                     last_pivot_direction = current_direction
 
                 # Update last pivot if same direction but more extreme
-                elif ((current_direction == 1 and current_norm_price > last_pivot_price) or
-                    (current_direction == -1 and current_norm_price < last_pivot_price)):
+                elif ((current_direction == 1 and current_price > last_pivot_price) or
+                    (current_direction == -1 and current_price < last_pivot_price)):
                     # Update the last pivot
                     last_pivot = self.zigzag_pivots[0]
-                    last_pivot.point.norm_price = current_norm_price
                     last_pivot.point.price = current_price
                     last_pivot.point.index = current_index
                     last_pivot.point.time = current_time
                     self.update_pivot_properties(last_pivot)
-                    last_pivot_price = current_norm_price
+                    last_pivot_price = current_price
 
         return self
 
@@ -192,9 +183,6 @@ class Zigzag:
         """Get the most recent pivot"""
         return self.zigzag_pivots[0] if self.zigzag_pivots else None
 
-    def get_df(self) -> Optional[pd.DataFrame]:
-        return self.df
-
 def window_peaks(data, before: int, after: int) -> tuple[pd.Series, pd.Series]:
     """
     Faster version using numpy's stride tricks
@@ -208,14 +196,14 @@ def window_peaks(data, before: int, after: int) -> tuple[pd.Series, pd.Series]:
         pd.Series: Series of highs and lows
     """
     if isinstance(data, pd.DataFrame):
-        values_high = data["norm_high"].values
+        values_high = data["high"].values
     elif isinstance(data, pd.Series):
         values_high = data.values
     else:
         raise ValueError("Unsupported dataframe type")
 
     if isinstance(data, pd.DataFrame):
-        values_low = data["norm_low"].values
+        values_low = data["low"].values
     elif isinstance(data, pd.Series):
         values_low = data.values
     result_high = np.zeros(len(values_high))
@@ -232,16 +220,3 @@ def window_peaks(data, before: int, after: int) -> tuple[pd.Series, pd.Series]:
     result_low = np.min(windows_low, axis=1)
 
     return pd.Series(result_high, index=data.index), pd.Series(result_low, index=data.index)
-
-def normalize_price(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Normalize the price of a dataframe
-    """
-    df_copy = df.copy()
-    max_price = df_copy['high'].max()
-    min_price = df_copy['low'].min() * 0.9
-    df_copy['norm_high'] = (df_copy['high'] - min_price) / (max_price - min_price)
-    df_copy['norm_low'] = (df_copy['low'] - min_price) / (max_price - min_price)
-    df_copy['norm_open'] = (df_copy['open'] - min_price) / (max_price - min_price)
-    df_copy['norm_close'] = (df_copy['close'] - min_price) / (max_price - min_price)
-    return df_copy

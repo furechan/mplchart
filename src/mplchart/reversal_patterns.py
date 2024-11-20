@@ -40,9 +40,9 @@ class ReversalPattern(ChartPattern):
                 self.pattern_type = 2 # Double Bottoms
         elif self.pivots_count == 7:
             # check the flat ratio of the 4th and 6th points
-            if is_same_height(self.pivots[1], self.pivots[5], self.pivots, properties):
-                if is_same_height(self.pivots[3], self.pivots[5], self.pivots, properties) and \
-                    is_same_height(self.pivots[1], self.pivots[3], self.pivots, properties):
+            if is_same_height(self.pivots[1], self.pivots[5], self.pivots, properties.flat_ratio):
+                if is_same_height(self.pivots[3], self.pivots[5], self.pivots, properties.flat_ratio) and \
+                    is_same_height(self.pivots[1], self.pivots[3], self.pivots, properties.flat_ratio):
                     # 3 pivots are flat, we have a triple top or bottom
                     if self.pivots[0].direction < 0:
                         self.pattern_type = 3 # Triple Tops
@@ -63,28 +63,28 @@ class ReversalPattern(ChartPattern):
 
 def inspect_five_pivot_pattern(pivots: List[Pivot], properties: ReversalPatternProperties) -> bool:
     # check tops or bottoms are approximately flat
-    if is_same_height(pivots[1], pivots[3], pivots, properties):
+    if is_same_height(pivots[1], pivots[3], pivots, properties.flat_ratio):
         if pivots[0].direction > 0:
             # may be a double bottom, check the sandle point price
-            if pivots[2].point.norm_price < pivots[0].point.norm_price or \
-                pivots[2].point.norm_price < pivots[4].point.norm_price:
+            if pivots[2].point.price < pivots[0].point.price or \
+                pivots[2].point.price < pivots[4].point.price:
                 return True
         else:
             # may be a double top, check the sandle point price
-            if pivots[2].point.norm_price > pivots[0].point.norm_price or \
-                pivots[2].point.norm_price > pivots[4].point.norm_price:
+            if pivots[2].point.price > pivots[0].point.price or \
+                pivots[2].point.price > pivots[4].point.price:
                 return True
     return False
 
 def inspect_seven_pivot_pattern(pivots: List[Pivot], properties: ReversalPatternProperties) -> bool:
     # check the double sandle points price range and flat ratio
     if pivots[0].direction > 0:
-        if pivots[2].point.norm_price < pivots[0].point.norm_price and \
-            pivots[4].point.norm_price < pivots[0].point.norm_price:
+        if pivots[2].point.price < pivots[0].point.price and \
+            pivots[4].point.price < pivots[0].point.price:
             return True
     else:
-        if pivots[2].point.norm_price > pivots[0].point.norm_price and \
-            pivots[4].point.norm_price > pivots[0].point.norm_price:
+        if pivots[2].point.price > pivots[0].point.price and \
+            pivots[4].point.price > pivots[0].point.price:
             return True
     return False
 
@@ -93,11 +93,11 @@ def find_cross_point(line: Line, start_index: int, end_index: int, df: pd.DataFr
         return None
     for i in range(start_index, end_index):
         current = df.iloc[i]
-        high = current['norm_high']
-        low = current['norm_low']
-        norm_price = line.get_norm_price(i)
-        if high >= norm_price and low <= norm_price:
-            return Point(df.index[i], i, line.get_price(i), norm_price)
+        high = current['high']
+        low = current['low']
+        price = line.get_price(i)
+        if high >= price and low <= price:
+            return Point(df.index[i], i, price)
     return None
 
 def get_support_line(pivots: List[Pivot], start_index: int, end_index: int, df: pd.DataFrame) -> Optional[Line]:
@@ -116,9 +116,7 @@ def get_support_line(pivots: List[Pivot], start_index: int, end_index: int, df: 
         return None
     # the cross point on the right side can be none as the chart is still trending
     if cross_point2 is None:
-        cross_point2 = Point(df.index[end_index], end_index,
-                             line.get_price(end_index),
-                             line.get_norm_price(end_index))
+        cross_point2 = Point(df.index[end_index], end_index, line.get_price(end_index))
     return Line(cross_point1, cross_point2)
 
 def find_reversal_patterns(zigzag: Zigzag, offset: int, properties: ReversalPatternProperties,

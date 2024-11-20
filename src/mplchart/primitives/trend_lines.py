@@ -120,6 +120,6 @@ def extract_chart_patterns(prices, backcandels, forwardcandels, pivot_limit, sca
 
     # Find patterns
     for i in range(scan_props.offset, len(zigzag.zigzag_pivots)):
-        find_trend_lines(zigzag, i, scan_props, patterns, zigzag.get_df())
+        find_trend_lines(zigzag, i, scan_props, patterns, prices)
 
     return zigzag, patterns
