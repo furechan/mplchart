@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 @dataclass
 class RsiDivergenceProperties(ChartPatternProperties):
     min_periods_lapsed: int = 5 # minimum number of days to form a pattern
-    flat_ratio: float = 0.005 # maximum allowed
+    min_change_pct: float = 0.005 # minimum change percentage
 
 class RsiDivergencePattern:
     def __init__(self, points: List[Point], divergence_line: Line, is_high_pivots: bool):
@@ -29,40 +29,38 @@ class RsiDivergencePattern:
         }
         return pattern_names[id]
 
+    def get_change_direction(self, value1: float, value2: float,
+                             properties: RsiDivergenceProperties) -> int:
+        change_pct = (value2 - value1) / value1
+        if change_pct > properties.min_change_pct:
+            return 1
+        elif change_pct < -properties.min_change_pct:
+            return -1
+        return 0
+
     def resolve(self, properties: RsiDivergenceProperties) -> 'RsiDivergencePattern':
         if len(self.points) != 2:
             raise ValueError("Rsi Divergence must have 2 points")
         self.pattern_type = 0
 
         # makes prices always greater than the rsi values
-        t1p1 = self.points[0].price + 1
-        t1p2 = self.points[1].price + 1
+        price_change_dir = self.get_change_direction(self.points[0].price,
+            self.points[1].price, properties)
+        rsi_change_dir = self.get_change_direction(self.divergence_line.p1.price,
+            self.divergence_line.p2.price, properties)
 
-        t2p1 = self.divergence_line.p1.price
-        t2p2 = self.divergence_line.p2.price
-        upper_angle = ((t1p2 - min(t2p1, t2p2)) / (t1p1 - min(t2p1, t2p2))
-                      if t1p1 > t2p1 else
-                      (t2p2 - min(t1p1, t1p2)) / (t2p1 - min(t1p1, t1p2)))
-        lower_angle = ((t2p2 - max(t1p1, t1p2)) / (t2p1 - max(t1p1, t1p2))
-                      if t1p1 > t2p1 else
-                      (t1p2 - max(t2p1, t2p2)) / (t1p1 - max(t2p1, t2p2)))
-        upper_line_dir = (1 if upper_angle > 1 + properties.flat_ratio else
-                         -1 if upper_angle < 1 - properties.flat_ratio else 0)
-        lower_line_dir = (-1 if lower_angle > 1 + properties.flat_ratio else
-                          1 if lower_angle < 1 - properties.flat_ratio else 0)
         log.debug(f"points: {self.points[0].index}, {self.points[1].index}, "
                   f"rsi: {self.divergence_line.p1.price}, {self.divergence_line.p2.price}, "
-                  f"upper_line_dir: {upper_line_dir}, lower_line_dir: {lower_line_dir}, "
-                  f"upper_angle: {upper_angle}, lower_angle: {lower_angle}")
+                  f"price_change_dir: {price_change_dir}, rsi_change_dir: {rsi_change_dir}")
 
-        if upper_line_dir == 1 and lower_line_dir == -1:
+        if price_change_dir == 1 and rsi_change_dir == -1:
             if self.is_high_pivots:
                 # higher high but lower RSI
                 self.pattern_type = 2 # bearish
             else:
                 # higher low but lower RSI
                 self.pattern_type = 3 # hidden bullish
-        elif upper_line_dir == -1 and lower_line_dir == 1:
+        elif price_change_dir == -1 and rsi_change_dir == 1:
             if self.is_high_pivots:
                 # lower high but higher RSI
                 self.pattern_type = 4 # hidden bearish
@@ -102,9 +100,9 @@ def handle_rsi_pivots(rsi_pivots: pd.DataFrame, is_high_pivots: bool,
             continue
 
         point1 = Point(current_row.name, current_index,
-                       current_row[rsi_col] / 100)
+                       current_row[rsi_col])
         point2 = Point(next_row.name, next_index,
-                       next_row[rsi_col] / 100)
+                       next_row[rsi_col])
         divergence_line = Line(point1, point2)
         price_points = [Point(current_row.name, current_index,
                        current_row[price_col]),

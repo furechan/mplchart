@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ReversalPatternProperties(ChartPatternProperties):
     min_periods_lapsed: int = 15 # minimum number of days to form a pattern
-    flat_ratio: float = 0.15 # maximum allowed
+    max_horizontal_ratio: float = 0.04 # maximum allowed ratio between aligned horizontal pivots
 
 class ReversalPattern(ChartPattern):
     def __init__(self, pivots: List[Pivot], support_line: Line):
@@ -40,10 +40,16 @@ class ReversalPattern(ChartPattern):
                 self.pattern_type = 2 # Double Bottoms
         elif self.pivots_count == 7:
             # check the flat ratio of the 4th and 6th points
-            if is_same_height(self.pivots[1], self.pivots[5], self.pivots, properties.flat_ratio):
-                if is_same_height(self.pivots[3], self.pivots[5], self.pivots, properties.flat_ratio) and \
-                    is_same_height(self.pivots[1], self.pivots[3], self.pivots, properties.flat_ratio):
+            same_height1, ratio1 = is_same_height(self.pivots[1], self.pivots[5],
+                                                    self.pivots, properties.max_horizontal_ratio)
+            if same_height1:
+                same_height2, ratio2 = is_same_height(self.pivots[3], self.pivots[5],
+                                                       self.pivots, properties.max_horizontal_ratio)
+                ratio = ratio1 + ratio2
+                if same_height2 and ratio <= properties.max_horizontal_ratio and ratio >= -properties.max_horizontal_ratio:
                     # 3 pivots are flat, we have a triple top or bottom
+                    logger.debug(f"Pivots: {self.pivots[1].point.index}, {self.pivots[3].point.index}, "
+                                 f"{self.pivots[5].point.index} are flat, ratio: {ratio:.4f}")
                     if self.pivots[0].direction < 0:
                         self.pattern_type = 3 # Triple Tops
                     else:
@@ -63,7 +69,8 @@ class ReversalPattern(ChartPattern):
 
 def inspect_five_pivot_pattern(pivots: List[Pivot], properties: ReversalPatternProperties) -> bool:
     # check tops or bottoms are approximately flat
-    if is_same_height(pivots[1], pivots[3], pivots, properties.flat_ratio):
+    same_height, _ = is_same_height(pivots[1], pivots[3], pivots, properties.max_horizontal_ratio)
+    if same_height:
         if pivots[0].direction > 0:
             # may be a double bottom, check the sandle point price
             if pivots[2].point.price < pivots[0].point.price or \

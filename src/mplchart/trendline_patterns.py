@@ -13,9 +13,10 @@ logger = logging.getLogger(__name__)
 @dataclass
 class TrendLineProperties(ChartPatternProperties):
     number_of_pivots: int = 5 # minimum number of pivots to form a pattern
-    flat_ratio: float = 0.2 # maximum allowed flat ratio between horizontal pivots
+    flat_ratio: float = 0.2 # maximum allowed flat ratio between flat trend lines
     align_ratio: float = 0.4 # maximum allowed ratio between aligned diagonal pivots
     flag_ratio: float = 1.5 # minimum allowed flag ratio between flag pole and flag width
+    max_horizontal_ratio: float = 0.03 # maximum allowed ratio between aligned horizontal pivots
 
 class TrendLinePattern(ChartPattern):
     def __init__(self, pivots: List[Pivot], trend_line1: Line, trend_line2: Line):
@@ -204,7 +205,8 @@ class TrendLinePattern(ChartPattern):
 
         return self
 
-def is_aligned(pivots: List[Pivot], ref_pivots: List[Pivot], align_ratio: float, flat_ratio: float) -> bool:
+def is_aligned(pivots: List[Pivot], ref_pivots: List[Pivot], align_ratio: float,
+               max_horizontal_ratio: float) -> bool:
     if len(pivots) > 3:
         raise ValueError("Pivots can't be more than 3")
     if len(pivots) < 3:
@@ -219,11 +221,14 @@ def is_aligned(pivots: List[Pivot], ref_pivots: List[Pivot], align_ratio: float,
         raise ValueError("Pivots are not in the same direction")
 
     # check if the three pivots are flat with the reference pivots
-    if is_same_height(first, second, ref_pivots, flat_ratio) and \
-        is_same_height(second, third, ref_pivots, flat_ratio):
-        logger.debug(f"Pivots: {first.point.index}, {second.point.index}, {third.point.index} "
-                     f"are aligned as a horizontal line")
-        return True
+    same_height1, ratio1 = is_same_height(first, second, ref_pivots, max_horizontal_ratio)
+    same_height2, ratio2 = is_same_height(second, third, ref_pivots, max_horizontal_ratio)
+    if same_height1 and same_height2:
+        ratio = ratio1 + ratio2
+        if ratio <= max_horizontal_ratio and ratio >= -max_horizontal_ratio:
+            logger.debug(f"Pivots: {first.point.index}, {second.point.index}, {third.point.index} "
+                         f"are aligned as a horizontal line, ratio: {ratio:.4f}")
+            return True
 
     # check the ratio of the price differences to the bar differences
     price_ratio = second.cross_diff / third.cross_diff
@@ -360,8 +365,10 @@ def find_trend_lines(zigzag: Zigzag, offset: int, properties: TrendLinePropertie
                       if properties.number_of_pivots == 6
                       else [pivots[1], pivots[3]])
 
-    if not is_aligned(trend_pivots1, trend_pivots2, properties.align_ratio, properties.flat_ratio) or \
-        not is_aligned(trend_pivots2, trend_pivots1, properties.align_ratio, properties.flat_ratio):
+    if not is_aligned(trend_pivots1, trend_pivots2, properties.align_ratio,
+                      properties.max_horizontal_ratio) or \
+        not is_aligned(trend_pivots2, trend_pivots1, properties.align_ratio,
+                       properties.max_horizontal_ratio):
         return False
 
     # Validate trend lines using DataFrame
