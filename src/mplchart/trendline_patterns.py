@@ -4,7 +4,8 @@ import numpy as np
 import pandas as pd
 from .line import Point, Pivot, Line
 from .zigzag import Zigzag
-from .chart_pattern import ChartPattern, ChartPatternProperties, get_pivots_from_zigzag
+from .chart_pattern import ChartPattern, ChartPatternProperties, get_pivots_from_zigzag, \
+    is_same_height
 
 import logging
 logger = logging.getLogger(__name__)
@@ -12,10 +13,8 @@ logger = logging.getLogger(__name__)
 @dataclass
 class TrendLineProperties(ChartPatternProperties):
     number_of_pivots: int = 5 # minimum number of pivots to form a pattern
-    error_ratio: float = 1e-6 # maximum allowed cosine difference between trend lines
     flat_ratio: float = 0.1 # maximum allowed flat ratio between trend lines
     flag_ratio: float = 1.5 # minimum allowed flag ratio between flag pole and flag width
-    avoid_overlap: bool = True # whether to avoid overlapping patterns
 
 class TrendLinePattern(ChartPattern):
     def __init__(self, pivots: List[Pivot], trend_line1: Line, trend_line2: Line):
@@ -209,38 +208,40 @@ class TrendLinePattern(ChartPattern):
 
         return self
 
-def calculate_cosine_diff(p1: Point, p2: Point, p3: Point, p4: Point) -> float:
-    """Calculate cosine difference between two line segments
+def is_aligned(pivots: List[Pivot], ref_pivots: List[Pivot],
+                properties: TrendLineProperties) -> bool:
+    if len(pivots) > 3:
+        raise ValueError("Pivots can't be more than 3")
+    if len(pivots) < 3:
+        return True
 
-    Args:
-        p1, p2: Points defining first line segment
-        p3, p4: Points defining second line segment
+    first = pivots[0]
+    second = pivots[1]
+    third = pivots[2]
+    # check if the three pivots are in the same direction
+    if not (np.sign(first.direction) == np.sign(second.direction) and \
+        np.sign(second.direction) == np.sign(third.direction)):
+        raise ValueError("Pivots are not in the same direction")
 
-    Returns:
-        float: Cosine difference (0 to 2, where 0 means parallel)
-    """
-    # Calculate vectors from points
-    v1 = np.array([p2.index - p1.index, p2.norm_price - p1.norm_price])
-    v2 = np.array([p4.index - p3.index, p4.norm_price - p3.norm_price])
+    # check if the three pivots are flat with the reference pivots
+    if is_same_height(first, second, ref_pivots, properties) and \
+        is_same_height(second, third, ref_pivots, properties):
+        logger.debug(f"Pivots: {first.point.index}, {second.point.index}, {third.point.index} "
+                     f"are aligned as a horizontal line")
+        return True
 
-    # Calculate cosine similarity directly using dot product
-    cos_sim = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
-
-    return 1 - cos_sim
-
-def is_aligned(first: Point, second: Point, third: Point, properties: TrendLineProperties) -> bool:
-    # Calculate cosine difference directly from points
-    cos_diff = calculate_cosine_diff(
-        first, second,   # First line segment
-        second, third    # Second line segment
-    )
-    basic_condition = 0 <= cos_diff and cos_diff <= properties.error_ratio
-
-    if basic_condition:
-        logger.debug(f"Points: {first.index}, {second.index}, {third.index} "
-                     f"on the same line, cos_diff={cos_diff}")
-
-    return basic_condition
+    # check the ratio of the price differences to the bar differences
+    price_ratio = second.cross_diff / third.cross_diff
+    bar_ratio = (second.point.index - first.point.index) / (third.point.index - second.point.index)
+    ratio = price_ratio / bar_ratio
+    fit_pct = 1 - properties.flat_ratio
+    if ratio < 1:
+        aligned = ratio >= fit_pct
+    else:
+        aligned = ratio <= 1 / fit_pct
+    logger.debug(f"Pivots: {first.point.index}, {second.point.index}, {third.point.index} "
+                 f"price ratio: {price_ratio:.4f}, bar ratio: {bar_ratio:.4f}, ratio: {ratio:.4f}")
+    return aligned
 
 def inspect_line_by_point(line: Line, point_bar: int, direction: float,
                          df: pd.DataFrame) -> Tuple[bool, float]:
@@ -286,13 +287,13 @@ def inspect_line_by_point(line: Line, point_bar: int, direction: float,
             # line is crossing the candle wick
             return True, 0
 
-def inspect_points(points: List[Point], direction: float, properties: TrendLineProperties,
+def inspect_pivots(pivots: List[Pivot], direction: float, properties: TrendLineProperties,
                    df: pd.DataFrame) -> Tuple[bool, Line]:
     """
-    Inspect multiple points to find the best trend line using DataFrame price data
+    Inspect multiple pivots to find the best trend line using DataFrame price data
 
     Args:
-        points: List of points to create trend lines
+        pivots: List of pivots to create trend lines
         direction: Direction of the trend
         properties: Scan properties
         df: DataFrame with OHLC data
@@ -300,24 +301,20 @@ def inspect_points(points: List[Point], direction: float, properties: TrendLineP
     Returns:
         Tuple of (valid: bool, best_trend_line: Line)
     """
-    if len(points) == 3:
-        aligned = is_aligned(points[0], points[1], points[2], properties)
-        if not aligned:
-            return False, None
-
+    if len(pivots) == 3:
         # Create three possible trend lines
-        trend_line1 = Line(points[0], points[2])  # First to last
+        trend_line1 = Line(pivots[0].point, pivots[2].point)  # First to last
         # inspect line by middle point
-        valid1, diff1 = inspect_line_by_point(trend_line1, points[1].index, direction, df)
+        valid1, diff1 = inspect_line_by_point(trend_line1, pivots[1].point.index, direction, df)
         if valid1 and diff1 == 0:
             # prefer the line connecting the first and last points
             return True, trend_line1
 
-        trend_line2 = Line(points[0], points[1])  # First to middle
-        valid2, diff2 = inspect_line_by_point(trend_line2, points[2].index, direction, df)
+        trend_line2 = Line(pivots[0].point, pivots[1].point)  # First to middle
+        valid2, diff2 = inspect_line_by_point(trend_line2, pivots[2].point.index, direction, df)
 
-        trend_line3 = Line(points[1], points[2])  # Middle to last
-        valid3, diff3 = inspect_line_by_point(trend_line3, points[0].index, direction, df)
+        trend_line3 = Line(pivots[1].point, pivots[2].point)  # Middle to last
+        valid3, diff3 = inspect_line_by_point(trend_line3, pivots[0].point.index, direction, df)
 
         if not valid1 and not valid2 and not valid3:
             return False, None
@@ -333,7 +330,7 @@ def inspect_points(points: List[Point], direction: float, properties: TrendLineP
         return True, trendline
     else:
         # For 2 points, simply create one trend line
-        trend_line = Line(points[0], points[1])
+        trend_line = Line(pivots[0].point, pivots[1].point)
         return True, trend_line
 
 def find_trend_lines(zigzag: Zigzag, offset: int, properties: TrendLineProperties,
@@ -362,18 +359,22 @@ def find_trend_lines(zigzag: Zigzag, offset: int, properties: TrendLinePropertie
 
     # Validate pattern
     # Create point arrays for trend lines
-    trend_points1 = ([pivots[0].point, pivots[2].point]
-                        if properties.number_of_pivots == 4
-                        else [pivots[0].point, pivots[2].point, pivots[4].point])
-    trend_points2 = ([pivots[1].point, pivots[3].point, pivots[5].point]
-                        if properties.number_of_pivots == 6
-                        else [pivots[1].point, pivots[3].point])
+    trend_pivots1 = ([pivots[0], pivots[2]]
+                      if properties.number_of_pivots == 4
+                      else [pivots[0], pivots[2], pivots[4]])
+    trend_pivots2 = ([pivots[1], pivots[3], pivots[5]]
+                      if properties.number_of_pivots == 6
+                      else [pivots[1], pivots[3]])
+
+    if not is_aligned(trend_pivots1, trend_pivots2, properties) or \
+        not is_aligned(trend_pivots2, trend_pivots1, properties):
+        return False
 
     # Validate trend lines using DataFrame
-    valid1, trend_line1 = inspect_points(trend_points1,
+    valid1, trend_line1 = inspect_pivots(trend_pivots1,
                                         np.sign(pivots[-1].direction),
                                         properties, df)
-    valid2, trend_line2 = inspect_points(trend_points2,
+    valid2, trend_line2 = inspect_pivots(trend_pivots2,
                                         np.sign(pivots[-2].direction),
                                         properties, df)
 

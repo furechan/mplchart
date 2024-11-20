@@ -1,16 +1,22 @@
 from dataclasses import dataclass
-from typing import List, Optional
-from abc import ABC, abstractmethod
-from .line import Point, Line, Pivot
+from typing import List
+from abc import abstractmethod
+from .line import Pivot
 from .zigzag import Zigzag
+import numpy as np
+
+import logging
+logger = logging.getLogger(__name__)
 
 @dataclass
 class ChartPatternProperties:
     offset: int = 0
     min_periods_lapsed: int = 21
     max_live_patterns: int = 50
+    avoid_overlap: bool = True # whether to avoid overlapping patterns
     allowed_patterns: List[bool] = None
     allowed_last_pivot_directions: List[int] = None
+    flat_ratio: float = 0.2
 
 class ChartPattern:
     """Base class for chart patterns"""
@@ -80,10 +86,10 @@ class ChartPattern:
                     existing_indexes = set([p.point.index for p in existing.pivots])
                     self_indexes = set([p.point.index for p in self.pivots])
                     # check if the indexes of self.pivots are a subset of existing.pivots
-                    if self_indexes.issubset(existing_indexes):
+                    if self_indexes.issubset(existing_indexes) and properties.avoid_overlap:
                         existing_pattern = True
                         break
-                    elif existing_indexes.issubset(self_indexes):
+                    elif existing_indexes.issubset(self_indexes) and properties.avoid_overlap:
                         replacing_existing_pattern = True
                         break
 
@@ -110,4 +116,30 @@ def get_pivots_from_zigzag(zigzag: Zigzag, pivots: List[Pivot], offset: int, min
             return i
         pivots.insert(0, pivot.deep_copy())
     return i+1
+
+def is_same_height(pivot1: Pivot, pivot2: Pivot, ref_pivots: List[Pivot], properties: ChartPatternProperties) -> bool:
+    # check if two pivots are approximately flat with a list of reference pivots
+    # use the first and last pivots in the list as reference points
+    if np.sign(pivot1.direction) != np.sign(pivot2.direction):
+        return False
+
+    # use the reference pivots to calculate the height ratio
+    if pivot1.direction > 0:
+        ref_prices = min(ref_pivots[0].point.norm_price, ref_pivots[-1].point.norm_price)
+    else:
+        ref_prices = max(ref_pivots[0].point.norm_price, ref_pivots[-1].point.norm_price)
+    diff1 = pivot1.point.norm_price - ref_prices
+    diff2 = pivot2.point.norm_price - ref_prices
+    ratio = diff1 / diff2
+    fit_pct = 1 - properties.flat_ratio
+    if ratio < 1:
+        same_height = ratio >= fit_pct
+    else:
+        same_height = ratio <= 1 / fit_pct
+    if same_height:
+        logger.debug(f"pivot {pivot1.point.index}: {pivot1.point.norm_price:.4f}, "
+                     f"pivot {pivot2.point.index}: {pivot2.point.norm_price:.4f} "
+                     f"are approximately the same height, "
+                     f"ref_prices: {ref_prices:.4f}, ratio: {ratio:.4f}")
+    return same_height
 

@@ -41,13 +41,13 @@ class Zigzag:
                 raise ValueError(f"Last pivot index {last_pivot.point.index} is the same as current pivot index {pivot.point.index}")
 
             # Calculate difference between last and current pivot
-            pivot.diff = round(abs(value - last_value), 3)
+            pivot.diff = value - last_value
 
             if len(self.zigzag_pivots) > 2:
                 llast_pivot = self.zigzag_pivots[2]
                 llast_value = llast_pivot.point.norm_price
                 # Calculate slope between last and current pivot
-                pivot.cross_diff = round((value - llast_value), 3)
+                pivot.cross_diff = value - llast_value
                 # Determine if trend is strong (2) or weak (1)
                 new_dir = dir * 2 if dir * value > dir * llast_value else dir
                 pivot.direction = int(new_dir)

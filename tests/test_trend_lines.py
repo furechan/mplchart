@@ -1,12 +1,11 @@
 import pytest
 import pandas as pd
 import numpy as np
-from mplchart.trendline_patterns import inspect_points, Point, TrendLineProperties
+from mplchart.trendline_patterns import Pivot, TrendLineProperties, Point, is_aligned
 
 @pytest.fixture
 def default_properties():
     return TrendLineProperties(
-        error_ratio=1e-6,  # Very small error ratio
         flat_ratio=0.2,
         flag_ratio=0.8
     )
@@ -24,121 +23,77 @@ def sample_df():
         'norm_close': [0.22, 0.28, 0.27, 0.38, 0.42]
     })
 
-def test_perfectly_aligned_points(default_properties, sample_df):
-    """Test points that form a perfect straight line"""
-    points = [
-        Point(index=0, time=pd.Timestamp('2024-01-01'), price=100, norm_price=0.2),
-        Point(index=2, time=pd.Timestamp('2024-01-03'), price=110, norm_price=0.3),
-        Point(index=4, time=pd.Timestamp('2024-01-05'), price=120, norm_price=0.4)
+def test_aligned_pivots(default_properties, sample_df):
+    """Test pivots that are properly aligned"""
+    pivots = [
+        Pivot(point=Point(index=0, time=pd.Timestamp('2024-01-01'), price=100, norm_price=0.2), direction=1, diff=0),
+        Pivot(point=Point(index=2, time=pd.Timestamp('2024-01-03'), price=110, norm_price=0.3), direction=1, diff=10),
+        Pivot(point=Point(index=4, time=pd.Timestamp('2024-01-05'), price=120, norm_price=0.4), direction=1, diff=10)
     ]
 
-    valid, line = inspect_points(points, direction=1, properties=default_properties, df=sample_df)
-    assert valid
-    assert line is not None
-
-def test_slightly_misaligned_points(default_properties, sample_df):
-    """Test points that are slightly misaligned but within error ratio"""
-    points = [
-        Point(index=0, time=pd.Timestamp('2024-01-01'), price=100, norm_price=0.2),
-        Point(index=2, time=pd.Timestamp('2024-01-03'), price=110.0001, norm_price=0.3),
-        Point(index=4, time=pd.Timestamp('2024-01-05'), price=120, norm_price=0.4)
+    ref_pivots = [
+        Pivot(point=Point(index=1, time=pd.Timestamp('2024-01-02'), price=105, norm_price=0.25), direction=-1, diff=0),
+        Pivot(point=Point(index=3, time=pd.Timestamp('2024-01-04'), price=115, norm_price=0.35), direction=-1, diff=10)
     ]
 
-    valid, line = inspect_points(points, direction=1, properties=default_properties, df=sample_df)
-    assert valid
-    assert line is not None
+    assert is_aligned(pivots, ref_pivots, default_properties)
 
-def test_clearly_misaligned_points(default_properties, sample_df):
-    """Test points that are clearly not aligned"""
-    points = [
-        Point(index=0, time=pd.Timestamp('2024-01-01'), price=100, norm_price=0.2),
-        Point(index=2, time=pd.Timestamp('2024-01-03'), price=150, norm_price=0.5),  # Significant deviation
-        Point(index=4, time=pd.Timestamp('2024-01-05'), price=120, norm_price=0.4)
+def test_flat_aligned_pivots(default_properties, sample_df):
+    """Test pivots that are aligned horizontally"""
+    pivots = [
+        Pivot(point=Point(index=0, time=pd.Timestamp('2024-01-01'), price=100, norm_price=0.2), direction=1, diff=0),
+        Pivot(point=Point(index=2, time=pd.Timestamp('2024-01-03'), price=100, norm_price=0.2), direction=1, diff=0),
+        Pivot(point=Point(index=4, time=pd.Timestamp('2024-01-05'), price=100, norm_price=0.2), direction=1, diff=0)
     ]
 
-    valid, line = inspect_points(points, direction=1, properties=default_properties, df=sample_df)
-    assert not valid
-    assert line is None
-
-def test_two_points(default_properties, sample_df):
-    """Test with only two points"""
-    points = [
-        Point(index=0, time=pd.Timestamp('2024-01-01'), price=100, norm_price=0.2),
-        Point(index=2, time=pd.Timestamp('2024-01-03'), price=110, norm_price=0.3)
+    ref_pivots = [
+        Pivot(point=Point(index=1, time=pd.Timestamp('2024-01-02'), price=90, norm_price=0.1), direction=-1, diff=0),
+        Pivot(point=Point(index=3, time=pd.Timestamp('2024-01-04'), price=90, norm_price=0.1), direction=-1, diff=0)
     ]
 
-    valid, line = inspect_points(points, direction=1, properties=default_properties, df=sample_df)
-    assert valid
-    assert line is not None
+    assert is_aligned(pivots, ref_pivots, default_properties)
 
-def test_upper_trendline(default_properties, sample_df):
-    """Test upper trendline validation against candle data"""
-    points = [
-        Point(index=0, time=pd.Timestamp('2024-01-01'), price=106, norm_price=0.26),  # Above high
-        Point(index=2, time=pd.Timestamp('2024-01-03'), price=116, norm_price=0.36),  # Above high
-        Point(index=4, time=pd.Timestamp('2024-01-05'), price=126, norm_price=0.46)   # Above high
+def test_misaligned_pivots(default_properties, sample_df):
+    """Test pivots that are not aligned"""
+    pivots = [
+        Pivot(point=Point(index=0, time=pd.Timestamp('2024-01-01'), price=100, norm_price=0.2), direction=1, diff=0),
+        Pivot(point=Point(index=2, time=pd.Timestamp('2024-01-03'), price=120, norm_price=0.4), direction=1, diff=20),
+        Pivot(point=Point(index=4, time=pd.Timestamp('2024-01-05'), price=130, norm_price=0.5), direction=1, diff=10)
     ]
 
-    valid, line = inspect_points(points, direction=1, properties=default_properties, df=sample_df)
-    assert valid
-    assert line is not None
-
-def test_lower_trendline(default_properties, sample_df):
-    """Test lower trendline validation against candle data"""
-    points = [
-        Point(index=0, time=pd.Timestamp('2024-01-01'), price=94, norm_price=0.14),   # Below low
-        Point(index=2, time=pd.Timestamp('2024-01-03'), price=104, norm_price=0.24),   # Below low
-        Point(index=4, time=pd.Timestamp('2024-01-05'), price=114, norm_price=0.34)   # Below low
+    ref_pivots = [
+        Pivot(point=Point(index=1, time=pd.Timestamp('2024-01-02'), price=90, norm_price=0.1), direction=-1, diff=0),
+        Pivot(point=Point(index=3, time=pd.Timestamp('2024-01-04'), price=90, norm_price=0.1), direction=-1, diff=0)
     ]
 
-    valid, line = inspect_points(points, direction=-1, properties=default_properties, df=sample_df)
-    assert valid
-    assert line is not None
+    assert not is_aligned(pivots, ref_pivots, default_properties)
 
-def test_invalid_upper_trendline(default_properties, sample_df):
-    """Test invalid upper trendline that crosses candle bodies"""
-    points = [
-        Point(index=0, time=pd.Timestamp('2024-01-01'), price=101, norm_price=0.21),  # Crosses body
-        Point(index=2, time=pd.Timestamp('2024-01-03'), price=106, norm_price=0.26),  # Crosses body
-        Point(index=4, time=pd.Timestamp('2024-01-05'), price=121, norm_price=0.41)   # Crosses body
+def test_wrong_direction_pivots(default_properties, sample_df):
+    """Test pivots with inconsistent directions"""
+    pivots = [
+        Pivot(point=Point(index=0, time=pd.Timestamp('2024-01-01'), price=100, norm_price=0.2), direction=1, diff=0),
+        Pivot(point=Point(index=2, time=pd.Timestamp('2024-01-03'), price=110, norm_price=0.3), direction=-1, diff=10),
+        Pivot(point=Point(index=4, time=pd.Timestamp('2024-01-05'), price=120, norm_price=0.4), direction=1, diff=10)
     ]
 
-    valid, line = inspect_points(points, direction=1, properties=default_properties, df=sample_df)
-    assert not valid
-    assert line is None
-
-def test_invalid_lower_trendline(default_properties, sample_df):
-    """Test invalid lower trendline that crosses candle bodies"""
-    points = [
-        Point(index=0, time=pd.Timestamp('2024-01-01'), price=101, norm_price=0.21),  # Crosses body
-        Point(index=2, time=pd.Timestamp('2024-01-03'), price=106, norm_price=0.26),  # Crosses body
-        Point(index=4, time=pd.Timestamp('2024-01-05'), price=118, norm_price=0.38)   # Crosses body
+    ref_pivots = [
+        Pivot(point=Point(index=1, time=pd.Timestamp('2024-01-02'), price=105, norm_price=0.25), direction=-1, diff=0),
+        Pivot(point=Point(index=3, time=pd.Timestamp('2024-01-04'), price=115, norm_price=0.35), direction=-1, diff=10)
     ]
 
-    valid, line = inspect_points(points, direction=-1, properties=default_properties, df=sample_df)
-    assert not valid
-    assert line is None
+    with pytest.raises(ValueError, match="Pivots are not in the same direction"):
+        is_aligned(pivots, ref_pivots, default_properties)
 
-def test_vertical_alignment(default_properties, sample_df):
-    """Test points that are nearly vertical"""
-    points = [
-        Point(index=0, time=pd.Timestamp('2024-01-01'), price=100, norm_price=0.2),
-        Point(index=0, time=pd.Timestamp('2024-01-01'), price=110, norm_price=0.3),  # Same index
-        Point(index=1, time=pd.Timestamp('2024-01-02'), price=120, norm_price=0.4)
+def test_too_many_pivots(default_properties, sample_df):
+    """Test with more than 3 pivots"""
+    pivots = [
+        Pivot(point=Point(index=0, time=pd.Timestamp('2024-01-01'), price=100, norm_price=0.2), direction=1, diff=0),
+        Pivot(point=Point(index=1, time=pd.Timestamp('2024-01-02'), price=110, norm_price=0.3), direction=1, diff=10),
+        Pivot(point=Point(index=2, time=pd.Timestamp('2024-01-03'), price=120, norm_price=0.4), direction=1, diff=10),
+        Pivot(point=Point(index=3, time=pd.Timestamp('2024-01-04'), price=130, norm_price=0.5), direction=1, diff=10)
     ]
 
-    valid, line = inspect_points(points, direction=1, properties=default_properties, df=sample_df)
-    assert not valid  # Should fail due to vertical alignment
-    assert line is None
+    ref_pivots = []
 
-def test_horizontal_alignment(default_properties, sample_df):
-    """Test points that are nearly horizontal"""
-    points = [
-        Point(index=0, time=pd.Timestamp('2024-01-01'), price=120, norm_price=0.4),
-        Point(index=2, time=pd.Timestamp('2024-01-03'), price=120.0001, norm_price=0.4),
-        Point(index=4, time=pd.Timestamp('2024-01-05'), price=120.0002, norm_price=0.4)
-    ]
-
-    valid, line = inspect_points(points, direction=1, properties=default_properties, df=sample_df)
-    assert valid  # Should work for horizontal lines
-    assert line is not None
+    with pytest.raises(ValueError, match="Pivots can't be more than 3"):
+        is_aligned(pivots, ref_pivots, default_properties)
