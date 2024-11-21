@@ -121,7 +121,7 @@ def is_same_height(pivot1: Pivot, pivot2: Pivot, ref_pivots: List[Pivot], flat_r
     # check if two pivots are approximately flat with a list of reference pivots
     # use the first and last pivots in the list as reference points
     if np.sign(pivot1.direction) != np.sign(pivot2.direction):
-        return False
+        raise ValueError("Pivots must have the same direction")
 
     # use the reference pivots to calculate the height ratio
     if pivot1.direction > 0:
