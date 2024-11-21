@@ -77,23 +77,24 @@ class ChartPattern:
         if pattern_allowed and direction_allowed:
             # Check for existing pattern with same pivots
             existing_pattern = False
-            replacing_existing_pattern = False
+            replacing_patterns = []
 
             for idx, existing in enumerate(patterns):
                 # Check if pivots match
-                for i in range(len(self.pivots)):
-                    existing_indexes = set([p.point.index for p in existing.pivots])
-                    self_indexes = set([p.point.index for p in self.pivots])
-                    # check if the indexes of self.pivots are a subset of existing.pivots
-                    if self_indexes.issubset(existing_indexes) and properties.avoid_overlap:
-                        existing_pattern = True
-                        break
-                    elif existing_indexes.issubset(self_indexes) and properties.avoid_overlap:
-                        replacing_existing_pattern = True
-                        break
+                existing_indexes = set([p.point.index for p in existing.pivots])
+                self_indexes = set([p.point.index for p in self.pivots])
+                # check if the indexes of self.pivots are a subset of existing.pivots
+                if self_indexes == existing_indexes:
+                    existing_pattern = True
+                    break
+                elif self_indexes.issubset(existing_indexes) and properties.avoid_overlap:
+                    existing_pattern = True
+                    break
+                elif existing_indexes.issubset(self_indexes) and properties.avoid_overlap:
+                    replacing_patterns.append(idx)
 
             if not existing_pattern:
-                if replacing_existing_pattern:
+                for idx in replacing_patterns:
                     patterns.pop(idx)
 
                 # Set pattern name
@@ -116,19 +117,29 @@ def get_pivots_from_zigzag(zigzag: Zigzag, pivots: List[Pivot], offset: int, min
         pivots.insert(0, pivot.deep_copy())
     return i+1
 
-def is_same_height(pivot1: Pivot, pivot2: Pivot, ref_pivots: List[Pivot],
-                   max_horizontal_ratio: float) -> Tuple[bool, float]:
+def is_same_height(pivot1: Pivot, pivot2: Pivot, ref_pivots: List[Pivot], flat_ratio: float) -> bool:
     # check if two pivots are approximately flat with a list of reference pivots
     # use the first and last pivots in the list as reference points
     if np.sign(pivot1.direction) != np.sign(pivot2.direction):
-        return False, 0
+        return False
 
     # use the reference pivots to calculate the height ratio
-    ratio = (pivot2.point.price - pivot1.point.price) / pivot1.point.price
-    same_height = ratio <= max_horizontal_ratio and ratio >= -max_horizontal_ratio
+    if pivot1.direction > 0:
+        ref_prices = min(ref_pivots[0].point.price, ref_pivots[-1].point.price)
+    else:
+        ref_prices = max(ref_pivots[0].point.price, ref_pivots[-1].point.price)
+    diff1 = pivot1.point.price - ref_prices
+    diff2 = pivot2.point.price - ref_prices
+    ratio = diff1 / diff2
+    fit_pct = 1 - flat_ratio
+    if ratio < 1:
+        same_height = ratio >= fit_pct
+    else:
+        same_height = ratio <= 1 / fit_pct
     if same_height:
         logger.debug(f"pivot {pivot1.point.index}: {pivot1.point.price:.4f}, "
                      f"pivot {pivot2.point.index}: {pivot2.point.price:.4f} "
-                     f"are approximately the same height, ratio: {ratio:.4f}")
-    return same_height, ratio
+                     f"are approximately the same height, "
+                     f"ref_prices: {ref_prices:.4f}, ratio: {ratio:.4f}")
+    return same_height
 

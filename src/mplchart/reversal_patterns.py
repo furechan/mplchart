@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ReversalPatternProperties(ChartPatternProperties):
     min_periods_lapsed: int = 15 # minimum number of days to form a pattern
-    max_horizontal_ratio: float = 0.04 # maximum allowed ratio between aligned horizontal pivots
+    flat_ratio: float = 0.15 # maximum allowed ratio between aligned horizontal pivots
 
 class ReversalPattern(ChartPattern):
     def __init__(self, pivots: List[Pivot], support_line: Line):
@@ -40,37 +40,32 @@ class ReversalPattern(ChartPattern):
                 self.pattern_type = 2 # Double Bottoms
         elif self.pivots_count == 7:
             # check the flat ratio of the 4th and 6th points
-            same_height1, ratio1 = is_same_height(self.pivots[1], self.pivots[5],
-                                                    self.pivots, properties.max_horizontal_ratio)
-            if same_height1:
-                same_height2, ratio2 = is_same_height(self.pivots[3], self.pivots[5],
-                                                       self.pivots, properties.max_horizontal_ratio)
-                ratio = ratio1 + ratio2
-                if same_height2 and ratio <= properties.max_horizontal_ratio and ratio >= -properties.max_horizontal_ratio:
-                    # 3 pivots are flat, we have a triple top or bottom
-                    logger.debug(f"Pivots: {self.pivots[1].point.index}, {self.pivots[3].point.index}, "
-                                 f"{self.pivots[5].point.index} are flat, ratio: {ratio:.4f}")
-                    if self.pivots[0].direction < 0:
-                        self.pattern_type = 3 # Triple Tops
-                    else:
-                        self.pattern_type = 4 # Triple Bottoms
+            if is_same_height(self.pivots[1], self.pivots[5], self.pivots, properties.flat_ratio):
+                # two shoulders should be approximately flat
+                if self.pivots[0].direction < 0 and self.pivots[3].cross_diff > 0 and \
+                    self.pivots[5].cross_diff < 0:
+                    # side peaks lower than the middle peak
+                    self.pattern_type = 5 # Head and Shoulders
+                elif self.pivots[0].direction > 0 and self.pivots[3].cross_diff < 0 and \
+                    self.pivots[5].cross_diff > 0:
+                    self.pattern_type = 6 # Inverted Head and Shoulders
                 else:
-                    # two shoulders should be approximately flat
-                    if self.pivots[0].direction < 0 and self.pivots[3].cross_diff > 0 and \
-                        self.pivots[5].cross_diff < 0:
-                        # side peaks lower than the middle peak
-                        self.pattern_type = 5 # Head and Shoulders
-                    elif self.pivots[0].direction > 0 and self.pivots[3].cross_diff < 0 and \
-                        self.pivots[5].cross_diff > 0:
-                        self.pattern_type = 6 # Inverted Head and Shoulders
+                    if abs(self.pivots[3].cross_diff) < abs(self.pivots[3].diff) and \
+                        abs(self.pivots[5].cross_diff) < abs(self.pivots[4].diff):
+                        # 3 pivots are approximately flat, we have a triple top or bottom
+                        logger.debug(f"Pivots: {self.pivots[1].point.index}, {self.pivots[3].point.index}, "
+                                     f"{self.pivots[5].point.index} are flat")
+                        if self.pivots[0].direction < 0:
+                            self.pattern_type = 3 # Triple Tops
+                        else:
+                            self.pattern_type = 4 # Triple Bottoms
         else:
             raise ValueError("Invalid number of pivots")
         return self
 
 def inspect_five_pivot_pattern(pivots: List[Pivot], properties: ReversalPatternProperties) -> bool:
     # check tops or bottoms are approximately flat
-    same_height, _ = is_same_height(pivots[1], pivots[3], pivots, properties.max_horizontal_ratio)
-    if same_height:
+    if is_same_height(pivots[1], pivots[3], pivots, properties.flat_ratio):
         if pivots[0].direction > 0:
             # may be a double bottom, check the sandle point price
             if pivots[2].point.price < pivots[0].point.price or \

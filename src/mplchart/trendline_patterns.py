@@ -16,7 +16,7 @@ class TrendLineProperties(ChartPatternProperties):
     flat_ratio: float = 0.2 # maximum allowed flat ratio between flat trend lines
     align_ratio: float = 0.4 # maximum allowed ratio between aligned diagonal pivots
     flag_ratio: float = 1.5 # minimum allowed flag ratio between flag pole and flag width
-    max_horizontal_ratio: float = 0.03 # maximum allowed ratio between aligned horizontal pivots
+    max_candle_body_crosses: int = 1 # maximum allowed candle body crosses for a valid trend line
 
 class TrendLinePattern(ChartPattern):
     def __init__(self, pivots: List[Pivot], trend_line1: Line, trend_line2: Line):
@@ -206,7 +206,7 @@ class TrendLinePattern(ChartPattern):
         return self
 
 def is_aligned(pivots: List[Pivot], ref_pivots: List[Pivot], align_ratio: float,
-               max_horizontal_ratio: float) -> bool:
+               flat_ratio: float) -> bool:
     if len(pivots) > 3:
         raise ValueError("Pivots can't be more than 3")
     if len(pivots) < 3:
@@ -215,20 +215,11 @@ def is_aligned(pivots: List[Pivot], ref_pivots: List[Pivot], align_ratio: float,
     first = pivots[0]
     second = pivots[1]
     third = pivots[2]
-    # check if the three pivots are in the same direction
-    if not (np.sign(first.direction) == np.sign(second.direction) and \
-        np.sign(second.direction) == np.sign(third.direction)):
-        raise ValueError("Pivots are not in the same direction")
-
-    # check if the three pivots are flat with the reference pivots
-    same_height1, ratio1 = is_same_height(first, second, ref_pivots, max_horizontal_ratio)
-    same_height2, ratio2 = is_same_height(second, third, ref_pivots, max_horizontal_ratio)
-    if same_height1 and same_height2:
-        ratio = ratio1 + ratio2
-        if ratio <= max_horizontal_ratio and ratio >= -max_horizontal_ratio:
-            logger.debug(f"Pivots: {first.point.index}, {second.point.index}, {third.point.index} "
-                         f"are aligned as a horizontal line, ratio: {ratio:.4f}")
-            return True
+    if is_same_height(first, second, ref_pivots, flat_ratio) and \
+        is_same_height(second, third, ref_pivots, flat_ratio):
+        logger.debug(f"Pivots: {first.point.index}, {second.point.index}, {third.point.index} "
+                     f"are aligned as a horizontal line")
+        return True
 
     # check the ratio of the price differences to the bar differences
     price_ratio = second.cross_diff / third.cross_diff
@@ -243,8 +234,21 @@ def is_aligned(pivots: List[Pivot], ref_pivots: List[Pivot], align_ratio: float,
                  f"price ratio: {price_ratio:.4f}, bar ratio: {bar_ratio:.4f}, ratio: {ratio:.4f}")
     return aligned
 
+def check_if_line_cross_candle_body(line: Line, direction: float, df: pd.DataFrame) -> bool:
+    """
+    Check if a line crosses the candle body
+    """
+    crosses = 0
+    for i in range(line.p1.index + 1, line.p2.index):
+        bar_data = df.iloc[i]
+        if direction > 0 and line.get_price(i) < max(bar_data['open'], bar_data['close']):
+            crosses += 1
+        elif direction < 0 and line.get_price(i) > min(bar_data['open'], bar_data['close']):
+            crosses += 1
+    return crosses
+
 def inspect_line_by_point(line: Line, point_bar: int, direction: float,
-                         df: pd.DataFrame) -> Tuple[bool, float]:
+                         properties: TrendLineProperties, df: pd.DataFrame) -> Tuple[bool, float]:
     """
     Inspect a single line against price data from a pandas DataFrame
 
@@ -257,11 +261,18 @@ def inspect_line_by_point(line: Line, point_bar: int, direction: float,
     Returns:
         Tuple of (valid: bool, diff: float)
     """
+    if check_if_line_cross_candle_body(line, direction, df) > properties.max_candle_body_crosses:
+        return False, float('inf')
+
+    if point_bar == -1:
+        return True, 0
+
     # Get price data from DataFrame
     bar_data = df.iloc[point_bar]
 
     # Determine prices based on direction
     line_price = line.get_price(point_bar)
+    line_price_diff = abs(line.p1.price - line.p2.price)
     if direction > 0:
         # upper line
         body_high_price = max(bar_data['open'], bar_data['close'])
@@ -270,7 +281,8 @@ def inspect_line_by_point(line: Line, point_bar: int, direction: float,
             return False, float('inf') # make the difference as large as possible
         elif line_price > bar_data['high']:
             # line is above the candle wick
-            return True, line_price - bar_data['high']
+            diff = line_price - bar_data['high']
+            return diff < line_price_diff, diff
         else:
             # line is crossing the candle wick
             return True, 0
@@ -282,12 +294,13 @@ def inspect_line_by_point(line: Line, point_bar: int, direction: float,
             return False, float('inf') # make the difference as large as possible
         elif line_price < bar_data['low']:
             # line is below the candle wick
-            return True, bar_data['low'] - line_price
+            diff = bar_data['low'] - line_price
+            return diff < line_price_diff, diff
         else:
             # line is crossing the candle wick
             return True, 0
 
-def inspect_pivots(pivots: List[Pivot], direction: float,
+def inspect_pivots(pivots: List[Pivot], direction: float, properties: TrendLineProperties,
                    df: pd.DataFrame) -> Tuple[bool, Line]:
     """
     Inspect multiple pivots to find the best trend line using DataFrame price data
@@ -295,6 +308,7 @@ def inspect_pivots(pivots: List[Pivot], direction: float,
     Args:
         pivots: List of pivots to create trend lines
         direction: Direction of the trend
+        properties: TrendLineProperties object containing pattern parameters
         df: DataFrame with OHLC data
 
     Returns:
@@ -304,16 +318,19 @@ def inspect_pivots(pivots: List[Pivot], direction: float,
         # Create three possible trend lines
         trend_line1 = Line(pivots[0].point, pivots[2].point)  # First to last
         # inspect line by middle point
-        valid1, diff1 = inspect_line_by_point(trend_line1, pivots[1].point.index, direction, df)
+        valid1, diff1 = inspect_line_by_point(trend_line1, pivots[1].point.index,
+                                              direction, properties,  df)
         if valid1 and diff1 == 0:
             # prefer the line connecting the first and last points
             return True, trend_line1
 
         trend_line2 = Line(pivots[0].point, pivots[1].point)  # First to middle
-        valid2, diff2 = inspect_line_by_point(trend_line2, pivots[2].point.index, direction, df)
+        valid2, diff2 = inspect_line_by_point(trend_line2, pivots[2].point.index,
+                                              direction, properties, df)
 
         trend_line3 = Line(pivots[1].point, pivots[2].point)  # Middle to last
-        valid3, diff3 = inspect_line_by_point(trend_line3, pivots[0].point.index, direction, df)
+        valid3, diff3 = inspect_line_by_point(trend_line3, pivots[0].point.index,
+                                              direction, properties, df)
 
         if not valid1 and not valid2 and not valid3:
             return False, None
@@ -330,7 +347,8 @@ def inspect_pivots(pivots: List[Pivot], direction: float,
     else:
         # For 2 points, simply create one trend line
         trend_line = Line(pivots[0].point, pivots[1].point)
-        return True, trend_line
+        valid, diff = inspect_line_by_point(trend_line, -1, direction, properties, df)
+        return valid, trend_line
 
 def find_trend_lines(zigzag: Zigzag, offset: int, properties: TrendLineProperties,
                 patterns: List[TrendLinePattern], df: pd.DataFrame) -> bool:
@@ -366,18 +384,18 @@ def find_trend_lines(zigzag: Zigzag, offset: int, properties: TrendLinePropertie
                       else [pivots[1], pivots[3]])
 
     if not is_aligned(trend_pivots1, trend_pivots2, properties.align_ratio,
-                      properties.max_horizontal_ratio) or \
+                      properties.flat_ratio) or \
         not is_aligned(trend_pivots2, trend_pivots1, properties.align_ratio,
-                       properties.max_horizontal_ratio):
+                       properties.flat_ratio):
         return False
 
     # Validate trend lines using DataFrame
     valid1, trend_line1 = inspect_pivots(trend_pivots1,
-                                        np.sign(pivots[-1].direction),
-                                        df)
+                                        np.sign(trend_pivots1[0].direction),
+                                        properties, df)
     valid2, trend_line2 = inspect_pivots(trend_pivots2,
-                                        np.sign(pivots[-2].direction),
-                                        df)
+                                        np.sign(trend_pivots2[0].direction),
+                                        properties, df)
 
     if valid1 and valid2:
         index_delta = pivots[-1].point.index - pivots[0].point.index + 1
