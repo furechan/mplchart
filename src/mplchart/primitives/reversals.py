@@ -2,9 +2,10 @@
 
 from typing import List
 from dataclasses import replace
+from auto_chart_patterns.zigzag import Zigzag
+from auto_chart_patterns.reversal_patterns import ReversalPatternProperties, ReversalPattern, find_reversal_patterns
 
 from ..model import Primitive
-from ..reversal_patterns import Zigzag, ReversalPatternProperties, ReversalPattern, find_reversal_patterns
 
 def get_color(i) -> str:
     colors = ["darkred", "darkblue", "darkgreen", "darkorange"]

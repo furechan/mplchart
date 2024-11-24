@@ -3,8 +3,10 @@
 from typing import List
 from dataclasses import replace
 
+from auto_chart_patterns.zigzag import Zigzag
+from auto_chart_patterns.trendline_patterns import TrendLineProperties, TrendLinePattern, find_trend_lines
+
 from ..model import Primitive
-from ..trendline_patterns import Zigzag, TrendLineProperties, TrendLinePattern, find_trend_lines
 
 def get_color(i) -> str:
     colors = ["red", "blue", "green", "purple", "orange", "brown"]

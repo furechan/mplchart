@@ -5,8 +5,8 @@ from . import library
 
 from .model import Indicator
 from .utils import get_series
-from .rsi_div_patterns import RsiDivergenceProperties, RsiDivergencePattern, find_rsi_divergences, calc_rsi
-from .zigzag import Zigzag
+from auto_chart_patterns.rsi_div_patterns import RsiDivergenceProperties, RsiDivergencePattern, find_rsi_divergences, calc_rsi
+from auto_chart_patterns.zigzag import Zigzag
 
 
 class SMA(Indicator):
