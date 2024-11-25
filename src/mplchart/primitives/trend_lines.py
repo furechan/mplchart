@@ -27,16 +27,16 @@ class TrendLine(Primitive):
             self,
             item: str = None,
             *,
-            backcandels: int = 5,
-            forwardcandels: int = 5,
+            backcandles: int = 5,
+            forwardcandles: int = 5,
             pivot_limit: int = 55,
             scan_props: TrendLineProperties = None,
             show_pivots: bool = False,
             axes: str = None
     ):
         self.item = item
-        self.backcandels = backcandels
-        self.forwardcandels = forwardcandels
+        self.backcandles = backcandles
+        self.forwardcandles = forwardcandles
         self.pivot_limit = pivot_limit
         self.show_pivots = show_pivots
         self.axes = axes
@@ -50,8 +50,8 @@ class TrendLine(Primitive):
             data = getattr(data, self.item)
         return extract_chart_patterns(
             data,
-            backcandels=self.backcandels,
-            forwardcandels=self.forwardcandels,
+            backcandles=self.backcandles,
+            forwardcandles=self.forwardcandles,
             pivot_limit=self.pivot_limit,
             scan_props=self.scan_props
         )
@@ -101,20 +101,22 @@ class TrendLine(Primitive):
                 else:
                     ax.annotate(pattern.pattern_name, (line2_x[1], line2_y[1] * 1.02), color=color)
 
-def extract_chart_patterns(prices, backcandels, forwardcandels, pivot_limit, scan_props):
+def extract_chart_patterns(prices, backcandles, forwardcandles, pivot_limit, scan_props):
     """
     extracts chart patterns.
 
     Args:
-        length (int) : refers to minimum number bars required before
-        and after the local peak
-        number_of_pivots (int) : number of pivots in the pattern
+        prices (pd.DataFrame) : prices dataframe
+        backcandles (int) : refers to minimum number bars required before
+        forwardcandles (int) : refers to minimum number bars required after
+        the local peak
+        pivot_limit (int) : maximum distance between two pivots
 
     Return:
         A series of prices defined only at local peaks and equal to nan otherwize
     """
 
-    zigzag = Zigzag(backcandels=backcandels, forwardcandels=forwardcandels, pivot_limit=pivot_limit, offset=0)
+    zigzag = Zigzag(backcandles=backcandles, forwardcandles=forwardcandles, pivot_limit=pivot_limit, offset=0)
     zigzag.calculate(prices)
 
     # Initialize pattern storage
@@ -122,6 +124,5 @@ def extract_chart_patterns(prices, backcandels, forwardcandels, pivot_limit, sca
 
     # Find patterns
     for i in range(scan_props.offset, len(zigzag.zigzag_pivots)):
-        find_trend_lines(zigzag, i, scan_props, patterns, prices)
-
+        find_trend_lines(zigzag, i, scan_props, patterns)
     return zigzag, patterns

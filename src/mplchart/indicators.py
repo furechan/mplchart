@@ -120,11 +120,11 @@ class RSI(Indicator):
 
 class RSIDIV(Indicator):
     """RSI Divergences"""
-    def __init__(self, period: int = 14, backcandels: int = 2, forwardcandels: int = 2,
+    def __init__(self, period: int = 14, backcandles: int = 2, forwardcandles: int = 2,
                  show_pivots: bool = False, scan_props: RsiDivergenceProperties = None):
         self.period = period
-        self.backcandels = backcandels
-        self.forwardcandels = forwardcandels
+        self.backcandles = backcandles
+        self.forwardcandles = forwardcandles
         self.show_pivots = show_pivots
         self.scan_props = scan_props
 
@@ -136,7 +136,7 @@ class RSIDIV(Indicator):
         # Initialize pattern storage
         patterns: List[RsiDivergencePattern] = []
 
-        find_rsi_divergences(self.backcandels, self.forwardcandels, self.scan_props,
+        find_rsi_divergences(self.backcandles, self.forwardcandles, self.scan_props,
                              patterns, prices)
         for pattern in patterns:
             # Use data.index to get the correct x positions

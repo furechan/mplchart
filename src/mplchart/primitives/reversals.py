@@ -18,8 +18,8 @@ class Reversal(Primitive):
 
     Args:
         item (str) :  item to plot
-        backcandels (int) :  number of periods to lookback
-        forwardcandels (int) :  number of periods to lookforward
+        backcandles (int) :  number of periods to lookback
+        forwardcandles (int) :  number of periods to lookforward
         pivot_limit (int) :  maximum number of pivots to consider
         scan_props (ReversalPatternProperties) :  scan properties
         show_pivots (bool) :  whether to show pivots
@@ -30,16 +30,16 @@ class Reversal(Primitive):
             self,
             item: str = None,
             *,
-            backcandels: int = 5,
-            forwardcandels: int = 5,
+            backcandles: int = 5,
+            forwardcandles: int = 5,
             pivot_limit: int = 55,
             scan_props: ReversalPatternProperties = None,
             show_pivots: bool = False,
             axes: str = None
     ):
         self.item = item
-        self.backcandels = backcandels
-        self.forwardcandels = forwardcandels
+        self.backcandles = backcandles
+        self.forwardcandles = forwardcandles
         self.pivot_limit = pivot_limit
         self.show_pivots = show_pivots
         self.axes = axes
@@ -53,8 +53,8 @@ class Reversal(Primitive):
             data = getattr(data, self.item)
         return extract_chart_patterns(
             data,
-            backcandels=self.backcandels,
-            forwardcandels=self.forwardcandels,
+            backcandles=self.backcandles,
+            forwardcandles=self.forwardcandles,
             pivot_limit=self.pivot_limit,
             scan_props=self.scan_props
         )
@@ -102,20 +102,21 @@ class Reversal(Primitive):
             ax.annotate(pattern.pattern_name, (text_x, text_y), color=color)
 
 
-def extract_chart_patterns(prices, backcandels, forwardcandels, pivot_limit, scan_props):
+def extract_chart_patterns(prices, backcandles, forwardcandles, pivot_limit, scan_props):
     """
     extracts chart patterns.
 
     Args:
-        length (int) : refers to minimum number bars required before
-        and after the local peak
-        number_of_pivots (int) : number of pivots in the pattern
+        backcandles (int) : refers to minimum number bars required before
+        forwardcandles (int) : refers to minimum number bars required after
+        pivot_limit (int) : maximum distance between two pivots
+        scan_props (ReversalPatternProperties) : scan properties
 
     Return:
         A series of prices defined only at local peaks and equal to nan otherwize
     """
 
-    zigzag = Zigzag(backcandels=backcandels, forwardcandels=forwardcandels, pivot_limit=pivot_limit, offset=0)
+    zigzag = Zigzag(backcandles=backcandles, forwardcandles=forwardcandles, pivot_limit=pivot_limit, offset=0)
     zigzag.calculate(prices)
 
     # Initialize pattern storage
@@ -123,6 +124,6 @@ def extract_chart_patterns(prices, backcandels, forwardcandels, pivot_limit, sca
 
     # Find patterns
     for i in range(scan_props.offset, len(zigzag.zigzag_pivots)):
-        find_reversal_patterns(zigzag, i, scan_props, patterns, prices)
+        find_reversal_patterns(zigzag, i, scan_props, patterns)
 
     return zigzag, patterns
