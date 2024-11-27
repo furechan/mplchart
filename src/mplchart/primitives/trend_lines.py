@@ -75,14 +75,20 @@ class TrendLine(Primitive):
             alpha=0.5,
         )
 
+        df = data.copy()
+        # add row number as integer
+        df['row_number'] = pd.RangeIndex(len(df))
+
         # For each pattern, plot line segments between its points
         for i, pattern in enumerate(patterns):
             # Use data.index to get the correct x positions
-            line1_x = [pattern.trend_line1.p1.index, pattern.trend_line1.p2.index]
-            line2_x = [pattern.trend_line2.p1.index, pattern.trend_line2.p2.index]
+            line1_x = [df.loc[pattern.trend_line1.p1.time, 'row_number'],
+                       df.loc[pattern.trend_line1.p2.time, 'row_number']]
+            line2_x = [df.loc[pattern.trend_line2.p1.time, 'row_number'],
+                       df.loc[pattern.trend_line2.p2.time, 'row_number']]
             line1_y = [pattern.trend_line1.p1.price, pattern.trend_line1.p2.price]
             line2_y = [pattern.trend_line2.p1.price, pattern.trend_line2.p2.price]
-            xp = [pivot.point.index for pivot in pattern.pivots]
+            xp = [df.loc[pivot.point.time, 'row_number'] for pivot in pattern.pivots]
             yp = [pivot.point.price for pivot in pattern.pivots]
 
             color = get_color(i)
