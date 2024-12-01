@@ -28,10 +28,6 @@ dev-mode-dirs = ["src"]
 only-include = ["src"]
 exclude = [".*"]
 
-[tool.hatch.envs.default]
-type = "virtual"
-path = ".venv"
-
 [tool.pytest.ini_options]
 addopts = ["-p no:cacheprovider"]
 testpaths = ["tests"]
