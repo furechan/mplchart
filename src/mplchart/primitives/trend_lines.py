@@ -1,7 +1,9 @@
 """Triangle Pattern primitive"""
 
+import warnings
 from typing import List
 from dataclasses import replace
+import pandas as pd
 
 from auto_chart_patterns.zigzag import Zigzag
 from auto_chart_patterns.trendline_patterns import TrendLineProperties, TrendLinePattern, find_trend_lines
@@ -14,13 +16,18 @@ def get_color(i) -> str:
 
 class TrendLine(Primitive):
     """
-    Chart Pattern Primitive
-    Used to plot chart patterns
+    Trend Line Primitive
+    Used to plot trend lines
 
     Args:
-        length (int) :  number of periods to lookback
-        number_of_pivots (int) :  number of pivots in the pattern
-        color (str) :  color of the chart pattern
+        item (str) :  item to plot
+        backcandles (int) :  number of periods to lookback
+        forwardcandles (int) :  number of periods to lookforward
+        pivot_limit (int) :  maximum distance between two pivots
+        scan_props (TrendLineProperties) :  scan properties
+        show_pivots (bool) :  whether to show pivots
+        axes (str) :  axes to plot on
+        patterns (List[TrendLinePattern]) :  patterns to plot
     """
 
     def __init__(
@@ -32,7 +39,8 @@ class TrendLine(Primitive):
             pivot_limit: int = 55,
             scan_props: TrendLineProperties = None,
             show_pivots: bool = False,
-            axes: str = None
+            axes: str = None,
+            patterns: List[TrendLinePattern] = None
     ):
         self.item = item
         self.backcandles = backcandles
@@ -44,6 +52,8 @@ class TrendLine(Primitive):
         self.scan_props = TrendLineProperties()
         if scan_props is not None:
             self.scan_props = replace(self.scan_props, **scan_props.__dict__)
+
+        self.patterns = patterns
 
     def process(self, data):
         if self.item:
@@ -60,14 +70,19 @@ class TrendLine(Primitive):
         if ax is None:
             ax = chart.get_axes()
 
-        zigzag, patterns = self.process(data)
+        if not self.patterns:
+            zigzag, patterns = self.process(data)
 
-        px = [pivot.point.index for pivot in zigzag.zigzag_pivots]
-        py = [pivot.point.price for pivot in zigzag.zigzag_pivots]
-        if self.show_pivots:
-            ax.scatter(px, py, color="purple", s=10 * 10, alpha=0.5, marker=".")
-            for i, txt in enumerate(px):
-                ax.annotate(txt, (px[i], py[i]))
+            if self.show_pivots:
+                px = [pivot.point.index for pivot in zigzag.zigzag_pivots]
+                py = [pivot.point.price for pivot in zigzag.zigzag_pivots]
+                ax.scatter(px, py, color="purple", s=10 * 10, alpha=0.5, marker=".")
+                for i, txt in enumerate(px):
+                    ax.annotate(txt, (px[i], py[i]))
+        else:
+            patterns = self.patterns
+            if self.show_pivots:
+                warnings.warn("Cannot show pivots when direct plot is enabled!")
 
         kwargs = dict(
             linestyle="-",
@@ -93,6 +108,9 @@ class TrendLine(Primitive):
 
             color = get_color(i)
             ax.scatter(xp, yp, color=color, s=10 * 10, alpha=0.5, marker="o")
+            if self.patterns:
+                for i, txt in enumerate(xp):
+                    ax.annotate(xp[i], (xp[i], yp[i]))
 
             ax.plot(line1_x, line1_y, color=color, **kwargs)
             ax.plot(line2_x, line2_y, color=color, **kwargs)

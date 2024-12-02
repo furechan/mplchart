@@ -1,5 +1,7 @@
 """Triangle Pattern primitive"""
 
+import warnings
+import pandas as pd
 from typing import List
 from dataclasses import replace
 from auto_chart_patterns.zigzag import Zigzag
@@ -13,8 +15,8 @@ def get_color(i) -> str:
 
 class Reversal(Primitive):
     """
-    Chart Pattern Primitive
-    Used to plot chart patterns
+    Reversal Pattern Primitive
+    Used to plot reversal patterns
 
     Args:
         item (str) :  item to plot
@@ -24,6 +26,7 @@ class Reversal(Primitive):
         scan_props (ReversalPatternProperties) :  scan properties
         show_pivots (bool) :  whether to show pivots
         axes (str) :  axes to plot on
+        patterns (List[ReversalPattern]) :  patterns to plot
     """
 
     def __init__(
@@ -35,7 +38,8 @@ class Reversal(Primitive):
             pivot_limit: int = 55,
             scan_props: ReversalPatternProperties = None,
             show_pivots: bool = False,
-            axes: str = None
+            axes: str = None,
+            patterns: List[ReversalPattern] = None
     ):
         self.item = item
         self.backcandles = backcandles
@@ -43,7 +47,7 @@ class Reversal(Primitive):
         self.pivot_limit = pivot_limit
         self.show_pivots = show_pivots
         self.axes = axes
-
+        self.patterns = patterns
         self.scan_props = ReversalPatternProperties()
         if scan_props is not None:
             self.scan_props = replace(self.scan_props, **scan_props.__dict__)
@@ -63,14 +67,19 @@ class Reversal(Primitive):
         if ax is None:
             ax = chart.get_axes()
 
-        zigzag, patterns = self.process(data)
+        if not self.patterns:
+            zigzag, patterns = self.process(data)
 
-        px = [pivot.point.index for pivot in zigzag.zigzag_pivots]
-        py = [pivot.point.price for pivot in zigzag.zigzag_pivots]
-        if self.show_pivots:
-            ax.scatter(px, py, color="purple", s=10 * 10, alpha=0.5, marker=".")
-            for i, txt in enumerate(px):
-                ax.annotate(txt, (px[i], py[i]))
+            px = [pivot.point.index for pivot in zigzag.zigzag_pivots]
+            py = [pivot.point.price for pivot in zigzag.zigzag_pivots]
+            if self.show_pivots:
+                ax.scatter(px, py, color="purple", s=10 * 10, alpha=0.5, marker=".")
+                for i, txt in enumerate(px):
+                    ax.annotate(txt, (px[i], py[i]))
+        else:
+            patterns = self.patterns
+            if self.show_pivots:
+                warnings.warn("Cannot show pivots when direct plot is enabled!")
 
         kwargs = dict(
             linestyle="--",
@@ -78,20 +87,28 @@ class Reversal(Primitive):
             alpha=0.5,
         )
 
+        df = data.copy()
+        # add row number as integer
+        df['row_number'] = pd.RangeIndex(len(df))
+
         # For each pattern, plot line segments between its points
         for i, pattern in enumerate(patterns):
             # Use data.index to get the correct x positions
-            line1_x = [pattern.support_line.p1.index, pattern.support_line.p2.index]
+            line1_x = [df.loc[pattern.support_line.p1.time, 'row_number'],
+                       df.loc[pattern.support_line.p2.time, 'row_number']]
             line1_y = [pattern.support_line.p1.price, pattern.support_line.p2.price]
-            xp = [pivot.point.index for pivot in pattern.pivots]
+            xp = [df.loc[pivot.point.time, 'row_number'] for pivot in pattern.pivots]
             yp = [pivot.point.price for pivot in pattern.pivots]
 
             color = get_color(i)
             ax.scatter(xp, yp, color=color, s=10 * 10, alpha=0.5, marker="o")
+            if self.patterns:
+                for i, txt in enumerate(xp):
+                    ax.annotate(xp[i], (xp[i], yp[i]))
 
             ax.plot(line1_x, line1_y, color=color, **kwargs)
             sandle_point = pattern.pivots[2]
-            text_x = sandle_point.point.index
+            text_x = df.loc[sandle_point.point.time, 'row_number']
             text_y = sandle_point.point.price
             if sandle_point.direction > 0:
                 text_x
