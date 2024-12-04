@@ -45,7 +45,7 @@ class RawDateMapper:
 class DateIndexMapper:
     """Date Index Mapper maps dates to integers"""
 
-    def __init__(self, index, *, max_bars=None, start=None, end=None):
+    def __init__(self, index, *, max_bars=None, start=None, end=None, max_ticks=None):
         if start or end:
             locs = index.tz_localize(None).slice_indexer(start=start, end=end)
             index = index[locs]
@@ -54,7 +54,7 @@ class DateIndexMapper:
             index = index[-max_bars:]
 
         self.index = index
-
+        self.max_ticks = max_ticks
     def extract_df(self, data):
         """extracts dataframe by mapping date to position/coordinate"""
 
@@ -76,7 +76,10 @@ class DateIndexMapper:
     def get_locator(self):
         """locator for this mapper"""
 
-        return DateIndexLocator(index=self.index)
+        if self.max_ticks:
+            return DateIndexLocator(index=self.index, max_ticks=self.max_ticks)
+        else:
+            return DateIndexLocator(index=self.index)
 
     def get_formatter(self):
         """formatter for this mapper"""

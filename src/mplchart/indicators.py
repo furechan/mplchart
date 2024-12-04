@@ -1,9 +1,12 @@
 """technical analysis indicators"""
 
+from typing import List
 from . import library
 
 from .model import Indicator
 from .utils import get_series
+from auto_chart_patterns.rsi_div_patterns import RsiDivergenceProperties, RsiDivergencePattern, find_rsi_divergences, calc_rsi
+from auto_chart_patterns.zigzag import Zigzag
 
 
 class SMA(Indicator):
@@ -106,7 +109,7 @@ class RSI(Indicator):
     oversold: float = 30
     overbought: float = 70
     yticks: tuple = 30, 50, 70
-    default_pane: str = "above"
+    # default_pane: str = "above"
 
     def __init__(self, period: int = 14):
         self.period = period
@@ -114,6 +117,44 @@ class RSI(Indicator):
     def __call__(self, prices):
         series = get_series(prices)
         return library.calc_rsi(series, self.period)
+
+class RSIDIV(Indicator):
+    """RSI Divergences"""
+    def __init__(self, period: int = 14, backcandles: int = 2, forwardcandles: int = 2,
+                 show_pivots: bool = False, scan_props: RsiDivergenceProperties = None):
+        self.period = period
+        self.backcandles = backcandles
+        self.forwardcandles = forwardcandles
+        self.show_pivots = show_pivots
+        self.scan_props = scan_props
+
+    def __call__(self, prices):
+        pass
+
+    def plot_handler(self, prices, chart):
+        ax = chart.get_axes()
+        # Initialize pattern storage
+        patterns: List[RsiDivergencePattern] = []
+
+        find_rsi_divergences(self.backcandles, self.forwardcandles, self.scan_props,
+                             patterns, prices)
+        for pattern in patterns:
+            # Use data.index to get the correct x positions
+            line_x = [pattern.divergence_line.p1.index, pattern.divergence_line.p2.index]
+            line_y = [pattern.divergence_line.p1.price, pattern.divergence_line.p2.price]
+
+            if pattern.pattern_type == 1 or pattern.pattern_type == 3:
+                color = "green"
+                scale_factor = 0.85
+            else:
+                color = "red"
+                scale_factor = 1.05
+            ax.plot(line_x, line_y, color=color)
+
+            # annotate line points
+            if self.show_pivots:
+                ax.annotate(line_x[0], (line_x[0], line_y[0] * scale_factor), color=color)
+                ax.annotate(line_x[1], (line_x[1], line_y[1] * scale_factor), color=color)
 
 
 class ADX(Indicator):

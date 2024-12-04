@@ -37,19 +37,20 @@ FREQ_VALUES = {
 class DateIndexLocator(mticker.Locator):
     """Locator based on a pandas DateTimeIndex"""
 
-    def __init__(self, index):
+    def __init__(self, index, max_ticks=MAX_TICKS):
         if index is None:
             raise ValueError("Index is None!")
 
         self.index = index
         self.tick_values = lru_cache(self.tick_values)
+        self.max_ticks = max_ticks
 
     def __call__(self):
         vmin, vmax = self.axis.get_view_interval()
         max_ticks = self.axis.get_tick_space()
 
-        if max_ticks > MAX_TICKS:
-            max_ticks = MAX_TICKS
+        if max_ticks > self.max_ticks:
+            max_ticks = self.max_ticks
 
         return self.tick_values(vmin, vmax, max_ticks=max_ticks)
 
