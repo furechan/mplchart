@@ -114,16 +114,48 @@ class TrendLine(Primitive):
 
             ax.plot(line1_x, line1_y, color=color, **kwargs)
             ax.plot(line2_x, line2_y, color=color, **kwargs)
+            # Determine annotation position
             if line1_y[0] > line2_y[0]:
                 if line1_y[0] > line1_y[1]:
-                    ax.annotate(pattern.pattern_name, (line1_x[0], line1_y[0] * 1.02), color=color)
+                    x, y = line1_x[0], line1_y[0] * 1.01
                 else:
-                    ax.annotate(pattern.pattern_name, (line1_x[1], line1_y[1] * 1.02), color=color)
+                    x, y = line1_x[1], line1_y[1] * 1.01
             else:
                 if line2_y[0] > line2_y[1]:
-                    ax.annotate(pattern.pattern_name, (line2_x[0], line2_y[0] * 1.02), color=color)
+                    x, y = line2_x[0], line2_y[0] * 1.01
                 else:
-                    ax.annotate(pattern.pattern_name, (line2_x[1], line2_y[1] * 1.02), color=color)
+                    x, y = line2_x[1], line2_y[1] * 1.01
+
+            # Define box style for price action
+            box_style = dict(
+                boxstyle='round,pad=0.5',
+                facecolor='white',
+                alpha=0.7,
+                edgecolor=color,
+                linewidth=1
+            )
+            text = pattern.pattern_name
+            if 'price_action' in pattern.extra_props:
+                text += f"\naction: {pattern.extra_props['price_action']}" \
+                        f"\nretrace: {pattern.extra_props['max_retrace_short_period']*100:.2f}%" \
+                        f"\nmid profit: {pattern.extra_props['max_profit_mid_period']*100:.2f}%" \
+                        f"\nlong profit: {pattern.extra_props['max_profit_long_period']*100:.2f}%"
+            # Add callout box annotation
+            ax.annotate(
+                text,
+                xy=(x, y),
+                xytext=(10, 10),  # 10 points offset
+                textcoords='offset points',
+                bbox=box_style,
+                color=color,
+                ha='left',  # horizontal alignment
+                va='bottom',  # vertical alignment
+                arrowprops=dict(
+                    arrowstyle='->',
+                    connectionstyle='arc3,rad=0',
+                    color=color
+                )
+            )
 
 def extract_chart_patterns(prices, backcandles, forwardcandles, pivot_limit, scan_props):
     """

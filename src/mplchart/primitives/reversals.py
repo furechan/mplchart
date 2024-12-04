@@ -111,12 +111,43 @@ class Reversal(Primitive):
             text_x = df.loc[sandle_point.point.time, 'row_number']
             text_y = sandle_point.point.price
             if sandle_point.direction > 0:
-                text_x
-                text_y *= 1.02
+                text_y *= 1.01
+                xytext = (10, 40)  # Offset upward
+                va = 'bottom'  # Align text to bottom of bbox
             else:
-                text_x
-                text_y *= 0.97
-            ax.annotate(pattern.pattern_name, (text_x, text_y), color=color)
+                text_y *= 0.99
+                xytext = (10, -40)  # Offset downward
+                va = 'top'  # Align text to top of bbox
+            # Define box style for price action
+            box_style = dict(
+                boxstyle='round,pad=0.5',
+                facecolor='white',
+                alpha=0.7,
+                edgecolor=color,
+                linewidth=1
+            )
+            text = pattern.pattern_name
+            if 'price_action' in pattern.extra_props:
+                text += f"\naction: {pattern.extra_props['price_action']}" \
+                        f"\nretrace: {pattern.extra_props['max_retrace_short_period']*100:.2f}%" \
+                        f"\nmid profit: {pattern.extra_props['max_profit_mid_period']*100:.2f}%" \
+                        f"\nlong profit: {pattern.extra_props['max_profit_long_period']*100:.2f}%"
+            # Add callout box annotation
+            ax.annotate(
+                text,
+                xy=(text_x, text_y),
+                xytext=xytext,  # 10 points offset
+                textcoords='offset points',
+                bbox=box_style,
+                color=color,
+                ha='left',  # horizontal alignment
+                va=va,  # vertical alignment
+                arrowprops=dict(
+                    arrowstyle='->',
+                    connectionstyle='arc3,rad=0',
+                    color=color
+                )
+            )
 
 
 def extract_chart_patterns(prices, backcandles, forwardcandles, pivot_limit, scan_props):
