@@ -1,5 +1,6 @@
 """technical analysis indicators"""
 
+import pandas as pd
 from typing import List
 from . import library
 
@@ -121,26 +122,36 @@ class RSI(Indicator):
 class RSIDIV(Indicator):
     """RSI Divergences"""
     def __init__(self, period: int = 14, backcandles: int = 2, forwardcandles: int = 2,
-                 show_pivots: bool = False, scan_props: RsiDivergenceProperties = None):
+                 show_pivots: bool = False, scan_props: RsiDivergenceProperties = None,
+                 patterns: List[RsiDivergencePattern] = None):
         self.period = period
         self.backcandles = backcandles
         self.forwardcandles = forwardcandles
         self.show_pivots = show_pivots
         self.scan_props = scan_props
+        self.patterns = patterns
 
     def __call__(self, prices):
         pass
 
     def plot_handler(self, prices, chart):
         ax = chart.get_axes()
-        # Initialize pattern storage
-        patterns: List[RsiDivergencePattern] = []
+        if self.patterns is None:
+            # Initialize pattern storage
+            patterns: List[RsiDivergencePattern] = []
+            find_rsi_divergences(self.backcandles, self.forwardcandles, self.scan_props,
+                                 patterns, prices, self.period)
+        else:
+            patterns = self.patterns
 
-        find_rsi_divergences(self.backcandles, self.forwardcandles, self.scan_props,
-                             patterns, prices)
+        df = prices.copy()
+        # add row number as integer
+        df['row_number'] = pd.RangeIndex(len(df))
+
         for pattern in patterns:
             # Use data.index to get the correct x positions
-            line_x = [pattern.divergence_line.p1.index, pattern.divergence_line.p2.index]
+            line_x = [df.loc[pattern.divergence_line.p1.time, 'row_number'],
+                       df.loc[pattern.divergence_line.p2.time, 'row_number']]
             line_y = [pattern.divergence_line.p1.price, pattern.divergence_line.p2.price]
 
             if pattern.pattern_type == 1 or pattern.pattern_type == 3:
