@@ -7,9 +7,8 @@ name = "mplchart"
 version = "0.0.15"
 requires-python = ">=3.9"
 readme = "output/README.md"
-license = { text = "MIT License" }
 description = "Classic Stock Charts in Python"
-urls = { homepage = "https://github.com/furechan/mplchart" }
+urls.homepage = "https://github.com/furechan/mplchart"
 authors = [{ name = "Furechan", email = "furechan@xsmail.com" }]
 keywords = ["finance", "charting", "matplotlib", "candlesticks"]
 dependencies = ["matplotlib", "numpy", "pandas"]
@@ -19,8 +18,9 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
-[project.optional-dependencies]
-dev = ["yfinance", "pytest", "nbmake", "ipykernel", "ta-lib", "ruff", "jinja2"]
+[dependency-groups]
+dev = ["numpy<2.0.0", "yfinance", "pytest", "nbmake", "ipykernel", "ta-lib", "ruff"]
+
 
 [tool.hatch.build]
 targets.wheel.sources = ["src"]
