@@ -7,6 +7,19 @@ from inspect import Signature, Parameter
 TALIB_SAME_SCALE = "Output scale same as input"
 
 
+
+def get_info(indicator, name: str, default=None):
+    """get indicator info"""
+
+    if hasattr(indicator, "info"):  # talib
+        info = indicator.info
+    else:
+        info = vars(indicator)
+
+    return info.get(name, default)
+
+
+
 def same_scale(indicator):
     """Whether indicator uses the same scale as inputs"""
 
@@ -14,7 +27,7 @@ def same_scale(indicator):
         flags = indicator.function_flags or ()
         return TALIB_SAME_SCALE in flags
 
-    return getattr(indicator, "same_scale", False)
+    return get_info(indicator, "same_scale", False)
 
 
 def get_name(indicator):

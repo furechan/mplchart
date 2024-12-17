@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from functools import singledispatch
 
 from .model import Wrapper
-from .utils import get_name, get_label
+from .utils import get_name, get_label, get_info
 
 
 @singledispatch
@@ -107,12 +107,12 @@ class AutoWrapper(Wrapper):
             )
             counter += 1
 
-        yticks = getattr(self.indicator, "yticks", ())
+        yticks = get_info(self.indicator, "yticks", ())
         if yticks:
             ax.set_yticks(yticks)
             ax.grid(axis="y", which="major", linestyle="-", linewidth=2)
 
-        oversold = getattr(self.indicator, "oversold", None)
+        oversold = get_info(self.indicator, "oversold", None)
         if oversold is not None:
             color = chart.get_color("oversold", ax, self.indicator, fallback="fill")
             with np.errstate(invalid="ignore"):
@@ -126,7 +126,7 @@ class AutoWrapper(Wrapper):
                     alpha=0.5,
                 )
 
-        overbought = getattr(self.indicator, "overbought", None)
+        overbought = get_info(self.indicator, "overbought", None)
         if overbought is not None:
             color = chart.get_color("overbought", ax, self.indicator, fallback="fill")
             with np.errstate(invalid="ignore"):

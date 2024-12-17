@@ -19,7 +19,7 @@ classifiers = [
 ]
 
 [dependency-groups]
-dev = ["numpy<2.0.0", "yfinance", "pytest", "nbmake", "ipykernel", "ta-lib", "ruff"]
+dev = ["numpy<2.0.0", "yfinance", "ta-lib", "pytest", "nbmake", "ipykernel", "jinja2", "ipywidgets", "ruff"]
 
 
 [tool.hatch.build]

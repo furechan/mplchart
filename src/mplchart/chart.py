@@ -11,7 +11,7 @@ from collections import Counter
 
 from .wrappers import get_wrapper
 from .colors import closest_color
-from .utils import series_xy, same_scale
+from .utils import series_xy, same_scale, get_info
 from .layout import make_twinx, StandardLayout
 from .mapper import RawDateMapper, DateIndexMapper
 
@@ -297,7 +297,7 @@ class Chart:
         if indicator is None:
             return "same"
 
-        default_pane = getattr(indicator, "default_pane", None)
+        default_pane = get_info(indicator, "default_pane", None)
         if default_pane is not None:
             return default_pane
 
@@ -433,7 +433,7 @@ class Chart:
             indicator = wrapper
 
         # Select axes according to indicator properties (default_pane, same_scale)
-        # target = self.default_pane(indicator)
+        # target = self.get_target(indicator)
         # ax = self.get_axes(target)
         ax = None
 
