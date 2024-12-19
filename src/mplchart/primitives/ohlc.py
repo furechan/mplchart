@@ -16,8 +16,9 @@ class OHLC(Primitive):
     Used to plot prices as OHLC bars
     """
 
-    def __init__(self, *, width: float = 0.8, colorup: str = None, colordn: str = None):
+    def __init__(self, *, width: float = 0.8, alpha: float = 1.0, colorup: str = None, colordn: str = None):
         self.width = width
+        self.alpha = alpha
         self.colorup = colorup
         self.colordn = colordn
 
@@ -30,19 +31,25 @@ class OHLC(Primitive):
 
         data = chart.extract_df(prices)
 
-        edgecolor = plt.rcParams["text.color"]
+        textcolor = plt.rcParams["text.color"]
 
         label = str(self)
         width = self.width
-        colorup = self.colorup or edgecolor
-        colordn = self.colordn or edgecolor
+        alpha = self.alpha
+        colorup = self.colorup or textcolor
+        colordn = self.colordn or textcolor
 
         return plot_ohlc(
-            data=data, ax=ax, width=width, colorup=colorup, colordn=colordn, label=label
+            data=data, ax=ax,
+            width=width,
+            alpha=alpha,
+            colorup=colorup,
+            colordn=colordn,
+            label=label
         )
 
 
-def plot_ohlc(data, ax=None, width=0.8, colorup=None, colordn=None, label=None):
+def plot_ohlc(data, ax=None, width=0.8, alpha=0.5, colorup=None, colordn=None, label=None):
     """plots open-high-low-close charts as polygons"""
 
     edgecolor = plt.rcParams["text.color"]
@@ -88,7 +95,7 @@ def plot_ohlc(data, ax=None, width=0.8, colorup=None, colordn=None, label=None):
     linewidths = (1.0,)
 
     poly = PolyCollection(
-        verts, edgecolors=edgecolor, linewidths=linewidths, label=label
+        verts, edgecolors=edgecolor, linewidths=linewidths, alpha=alpha, label=label
     )
 
     ax.add_collection(poly)

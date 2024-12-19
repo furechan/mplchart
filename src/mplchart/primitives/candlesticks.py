@@ -23,11 +23,13 @@ class Candlesticks(Primitive):
         self,
         *,
         width: float = 0.8,
+        alpha: float = 1.0,
         colorup: str = None,
         colordn: str = None,
         use_bars: bool = False,
     ):
         self.width = width
+        self.alpha = alpha
         self.colorup = colorup
         self.colordn = colordn
         self.use_bars = use_bars
@@ -43,6 +45,8 @@ class Candlesticks(Primitive):
 
         label = str(self)
         width = self.width
+        alpha = self.alpha
+
 
         edgecolor = plt.rcParams["text.color"]
         facecolor = plt.rcParams["axes.facecolor"]
@@ -51,30 +55,24 @@ class Candlesticks(Primitive):
         colordn = self.colordn or edgecolor
         coloroff = self.colorup or facecolor
 
+        kwds = dict(
+            ax=ax,
+            width=width,
+            alpha=alpha,
+            colorup=colorup,
+            colordn=colordn,
+            coloroff=coloroff,
+            label=label
+        )
+
         if self.use_bars:
-            return plot_csbars(
-                data=data,
-                ax=ax,
-                width=width,
-                colorup=colorup,
-                colordn=colordn,
-                coloroff=coloroff,
-                label=label,
-            )
+            return plot_csbars(data, **kwds)
         else:
-            return plot_cspoly(
-                data=data,
-                ax=ax,
-                width=width,
-                colorup=colorup,
-                colordn=colordn,
-                coloroff=coloroff,
-                label=label,
-            )
+            return plot_cspoly(data, **kwds)
 
 
 def plot_cspoly(
-    data, ax=None, width=0.6, colorup=None, colordn=None, coloroff=None, label=None
+    data, *, ax=None, width=0.6, alpha=0.2, colorup=None, colordn=None, coloroff=None, label=None
 ):
     """plots candlesticks as polygons"""
 
@@ -126,6 +124,7 @@ def plot_cspoly(
 
     poly = PolyCollection(
         verts,
+        alpha=alpha,
         facecolors=facecolor,
         edgecolors=edgecolor,
         linewidths=linewidths,
@@ -137,7 +136,7 @@ def plot_cspoly(
 
 
 def plot_csbars(
-    data, ax=None, width=0.6, colorup=None, colordn=None, coloroff=None, label=None
+    data, *, ax=None, width=0.6, alpha=0.2, colorup=None, colordn=None, coloroff=None, label=None
 ):
     """plots candlesticks as bars"""
 
@@ -160,6 +159,7 @@ def plot_csbars(
         bottom=low,
         edgecolor=edgecolor,
         width=0.0,
+        alpha=alpha,
         linewidth=0.7,
         label=label,
     )
@@ -170,6 +170,7 @@ def plot_csbars(
         color=facecolor,
         edgecolor=edgecolor,
         width=width,
+        alpha=alpha,
         fill=True,
         linewidth=0.7,
     )

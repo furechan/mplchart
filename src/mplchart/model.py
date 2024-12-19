@@ -3,9 +3,10 @@
 import copy
 
 from abc import ABC, abstractmethod
-
+from types import MappingProxyType
 
 from .utils import short_repr
+
 
 
 class Primitive(ABC):
@@ -38,7 +39,12 @@ class Wrapper(ABC):
 class Indicator(ABC):
     """Indicator Base Class"""
 
-    __repr__ = short_repr
+    __str__ = short_repr
+
+    def __init_subclass__(cls, **kwargs):
+        """Save indicator extra kwargs as info dictionary"""
+        if kwargs:
+            cls.info = MappingProxyType(kwargs)
 
     @abstractmethod
     def __call__(self, data): ...
@@ -57,6 +63,9 @@ class ComposedIndicator(Indicator):
             raise TypeError("Arguments must be callable")
         self.args = args
 
+    def __str__(self):
+        return repr(self)
+
     def __repr__(self):
         return " @ ".join(repr(fn) for fn in self.args)
 
@@ -70,4 +79,3 @@ class ComposedIndicator(Indicator):
         if callable(other):
             return self.__class__(*self.args, other)
         return self(other)
-

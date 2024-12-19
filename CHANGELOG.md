@@ -1,5 +1,9 @@
 # Change Log
 
+
+## 0.0.15
+- Added `alpha` parameter to `Price`, `OHLC`, `Candlesticks`, `Volume`
+
 ## 0.0.14
 - Added `STOCH` Indicator (Stochastic Oscillator)
 - Added `LinePlot`, `AreaPlot` and `BarPlot` primitives

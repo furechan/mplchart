@@ -297,6 +297,10 @@ class Chart:
         if indicator is None:
             return "same"
 
+        target_pane = getattr(indicator, "target_pane", None)
+        if target_pane is not None:
+            return target_pane
+
         default_pane = get_info(indicator, "default_pane", None)
         if default_pane is not None:
             return default_pane

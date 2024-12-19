@@ -38,7 +38,7 @@ class NewAxes:
             return NotImplemented
         
         result = copy.copy(indicator)
-        result.default_pane = self.target
+        result.target_pane = self.target
         return result
 
 

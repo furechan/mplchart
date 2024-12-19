@@ -22,12 +22,14 @@ class Volume(Primitive):
         sma: int = None,
         *,
         width: float = 0.8,
+        alpha: float = 0.5,
         colorup: str = None,
         colordn: str = None,
         colorma: str = None,
     ):
         self.sma = sma
         self.width = width
+        self.alpha = alpha
         self.colorup = colorup
         self.colordn = colordn
         self.colorma = colorma
@@ -60,6 +62,7 @@ class Volume(Primitive):
         change = data.change
 
         width = self.width
+        alpha = self.alpha
         colorup = closest_color("green")
         colordn = closest_color("red")
         colorma = closest_color("gray")
@@ -74,8 +77,8 @@ class Volume(Primitive):
             ax.set_ylim(0.0, vmax * 4.0)
             ax.yaxis.set_visible(False)
 
-        ax.bar(index, volume, width=width, alpha=0.3, color=color)
+        ax.bar(index, volume, width=width, alpha=alpha, color=color)
 
         if self.sma:
             average = data.average
-            ax.plot(index, average, linewidth=0.7, color=colorma)
+            ax.plot(index, average, linewidth=0.7, alpha=alpha, color=colorma)

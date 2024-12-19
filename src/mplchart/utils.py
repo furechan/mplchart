@@ -2,22 +2,27 @@
 
 import pandas as pd
 
+from types import MappingProxyType
 from inspect import Signature, Parameter
 
 TALIB_SAME_SCALE = "Output scale same as input"
 
 
 
+def make_info(**kwargs):
+    """make info mapping"""
+
+    return MappingProxyType(kwargs)
+
+
 def get_info(indicator, name: str, default=None):
-    """get indicator info"""
+    """get metadata from from `info` dict or attributes"""
 
-    if hasattr(indicator, "info"):  # talib
+    if hasattr(indicator, "info"):  # info dict
         info = indicator.info
-    else:
-        info = vars(indicator)
-
-    return info.get(name, default)
-
+        return info.get(name, default)
+    
+    return getattr(indicator, name, default)
 
 
 def same_scale(indicator):
