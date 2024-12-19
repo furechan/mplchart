@@ -90,7 +90,7 @@ class ATRP(Indicator):
 
 
 class SLOPE(Indicator):
-    """Slope (Linear regression with time)"""
+    """Slope (Time linear regression)"""
 
     def __init__(self, period: int = 20):
         self.period = period
@@ -98,6 +98,17 @@ class SLOPE(Indicator):
     def __call__(self, prices):
         series = get_series(prices)
         return library.calc_slope(series, self.period)
+
+
+class RVALUE(Indicator):
+    """RValue (Time linear regression)"""
+
+    def __init__(self, period: int = 20):
+        self.period = period
+
+    def __call__(self, prices):
+        series = get_series(prices)
+        return library.calc_rvalue(series, self.period)
 
 
 class RSI(Indicator):
@@ -180,7 +191,7 @@ class BBANDS(Indicator):
 
 
 class STOCH(Indicator):
-    """Stochastik Oscillator"""
+    """Stochastic Oscillator"""
 
     def __init__(self, period: int = 14, fastn: int = 3, slown: int = 3):
         self.period = period

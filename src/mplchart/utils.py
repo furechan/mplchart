@@ -74,6 +74,7 @@ def series_xy(data, item=None, *, dropna=False):
 
 
 def series_data(data, item: str = None, *, default_item: str = None, strict: bool = False):
+    """extract series data depending on data type and parameters"""
     if isinstance(data, pd.DataFrame):
         if item is not None:
             return data[item]

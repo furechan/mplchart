@@ -167,7 +167,7 @@ def calc_bbands(prices, period: int = 20, nbdev: float = 2.0):
 
 
 def calc_slope(series, period: int = 20):
-    """calculates the slope (lnear regression) over a rolling window"""
+    """calculates the slope (time linear regression) over a rolling window"""
 
     xx = np.arange(period) - (period - 1) / 2.0
 
@@ -180,8 +180,22 @@ def calc_slope(series, period: int = 20):
     return series.rolling(window=period).apply(func, raw=True)
 
 
+def calc_rvalue(series, period: int = 20):
+    """calculates the rvalue (time linear regression) over a rolling window"""
+
+    xx = np.arange(period) - (period - 1) / 2.0
+
+    def func(xs):
+        if np.any(np.isnan(xs)):
+            return np.nan
+
+        return np.corrcoef(xx, xs)[0, 1]
+
+    return series.rolling(window=period).apply(func, raw=True)
+
+
 def calc_stoch(prices, period: int = 14, fastn: int = 3, slown: int = 3):
-    """Stochastik Oscillator"""
+    """Stochastic Oscillator"""
 
     high = prices["high"].rolling(period).max()
     low = prices["low"].rolling(period).min()

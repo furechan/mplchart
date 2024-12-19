@@ -74,36 +74,3 @@ class CrossMarker(Marker):
 
         ax.add_collection(lc)
 
-
-class Stripes(Marker):
-    """Stripes Primitive"""
-
-    COLOR = "green"
-    ALPHA = 0.1
-
-    def plot_handler(self, prices, chart, ax=None):
-        if ax is None:
-            ax = chart.root_axes()
-
-        data = self.process(prices)
-        data = chart.extract_df(data)
-        flag = data.flag
-
-        mask = flag.diff().fillna(0).ne(0)
-
-        color = self.COLOR
-        alpha = self.ALPHA
-
-        xv = data.index[mask]
-        sv = data.flag[mask]
-        x = s = px = None
-
-        for x, s in zip(xv, sv):
-            if s > 0 and px is None:
-                px = x
-            if s <= 0 and px is not None:
-                ax.axvspan(px, x, color=color, alpha=alpha)
-                px = None
-
-        if s <= 0 and px is not None:
-            ax.axvspan(px, x, color=color, alpha=alpha)

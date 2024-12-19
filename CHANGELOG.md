@@ -2,6 +2,7 @@
 
 
 ## 0.0.15
+- Added `Stripes` primitive to plot vertical stripes depending on a flag value (experimental)
 - Added `alpha` parameter to `Price`, `OHLC`, `Candlesticks`, `Volume`
 
 ## 0.0.14
