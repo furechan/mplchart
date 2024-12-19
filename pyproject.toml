@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mplchart"
-version = "0.0.15"
+version = "0.0.16"
 requires-python = ">=3.9"
 readme = "output/README.md"
 description = "Classic Stock Charts in Python"
@@ -36,3 +36,5 @@ testpaths = ["tests"]
 "__init__.py" = ["F401"]
 "*.ipynb" = ["F401", "F811"]
 
+[tool.pydev]
+allow-publish = true
