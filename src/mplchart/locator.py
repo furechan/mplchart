@@ -22,7 +22,10 @@ FREQ_VALUES = {
     '30min': 30 / 1440,
     '1h': 1 / 24,
     '2h': 2 / 24,
+    '8h': 8 / 24,
     'D': 1,
+    '2D': 2,
+    '3D': 3,
     'W': 7,
     '2W': 14,
     'MS': 30,
@@ -37,20 +40,25 @@ FREQ_VALUES = {
 class DateIndexLocator(mticker.Locator):
     """Locator based on a pandas DateTimeIndex"""
 
-    def __init__(self, index, max_ticks=MAX_TICKS):
+    def __init__(self, index, max_ticks=MAX_TICKS, min_px_between_ticks=20):
         if index is None:
             raise ValueError("Index is None!")
 
         self.index = index
         self.tick_values = lru_cache(self.tick_values)
         self.max_ticks = max_ticks
+        self.min_px_between_ticks = min_px_between_ticks
 
     def __call__(self):
         vmin, vmax = self.axis.get_view_interval()
-        max_ticks = self.axis.get_tick_space()
 
-        if max_ticks > self.max_ticks:
-            max_ticks = self.max_ticks
+        # Get the axis width in pixels
+        bbox = self.axis.axes.get_window_extent()
+        axis_width_px = bbox.width
+
+        # Calculate maximum possible ticks
+        dynamic_max_ticks = int(axis_width_px / self.min_px_between_ticks)
+        max_ticks = min(dynamic_max_ticks, self.max_ticks)
 
         return self.tick_values(vmin, vmax, max_ticks=max_ticks)
 

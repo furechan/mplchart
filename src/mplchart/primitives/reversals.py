@@ -127,7 +127,7 @@ class Reversal(Primitive):
                 linewidth=1
             )
             text = pattern.pattern_name
-            if 'price_action' in pattern.extra_props:
+            if pattern.extra_props is not None and 'price_action' in pattern.extra_props:
                 text += f"\naction: {pattern.extra_props['price_action']}" \
                         f"\nretrace: {pattern.extra_props['max_retrace_short_period']*100:.2f}%" \
                         f"\nmid profit: {pattern.extra_props['max_profit_mid_period']*100:.2f}%" \
