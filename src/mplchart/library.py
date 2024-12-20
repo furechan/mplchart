@@ -65,6 +65,10 @@ def calc_rsi(series, period: int = 14):
 
     return result
 
+def calc_rsi_roc(series, period=14, roc_period=5):
+    rsi = calc_rsi(series, period=period)
+    rsi_roc = ((rsi - rsi.shift(roc_period)) / rsi.shift(roc_period)) * 100
+    return rsi_roc
 
 def calc_atr(prices, period: int = 14, *, percent: bool = False):
     """Average True Range"""
@@ -186,7 +190,7 @@ def calc_stoch(prices, period: int = 14, fastn: int = 3, slown: int = 3):
     high = prices["high"].rolling(period).max()
     low = prices["low"].rolling(period).min()
     close = prices["close"]
-    
+
     fastk = (close - low) / (high - low) * 100
     slowk = calc_sma(fastk, fastn)
     slowd = calc_sma(slowk, slown)

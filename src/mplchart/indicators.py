@@ -119,12 +119,26 @@ class RSI(Indicator):
         series = get_series(prices)
         return library.calc_rsi(series, self.period)
 
+class RSIROC(Indicator):
+    """RSI Rate of Change"""
+
+    oversold: float = -30
+    overbought: float = 30
+    yticks: tuple = -30, 0, 30
+
+    def __init__(self, period: int = 14, roc_period: int = 5):
+        self.period = period
+        self.roc_period = roc_period
+
+    def __call__(self, prices):
+        series = get_series(prices)
+        return library.calc_rsi_roc(series, self.period, self.roc_period)
+
 class RSIDIV(Indicator):
     """RSI Divergences"""
-    def __init__(self, period: int = 14, backcandles: int = 2, forwardcandles: int = 2,
+    def __init__(self, backcandles: int = 2, forwardcandles: int = 2,
                  show_pivots: bool = False, scan_props: RsiDivergenceProperties = None,
                  patterns: List[RsiDivergencePattern] = None):
-        self.period = period
         self.backcandles = backcandles
         self.forwardcandles = forwardcandles
         self.show_pivots = show_pivots
@@ -140,7 +154,7 @@ class RSIDIV(Indicator):
             # Initialize pattern storage
             patterns: List[RsiDivergencePattern] = []
             find_rsi_divergences(self.backcandles, self.forwardcandles, self.scan_props,
-                                 patterns, prices, self.period)
+                                 patterns, prices)
         else:
             patterns = self.patterns
 

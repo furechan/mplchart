@@ -55,6 +55,7 @@ class DateIndexMapper:
 
         self.index = index
         self.max_ticks = max_ticks
+
     def extract_df(self, data):
         """extracts dataframe by mapping date to position/coordinate"""
 

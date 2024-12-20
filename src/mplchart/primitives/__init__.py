@@ -11,3 +11,4 @@ from .areaplot import AreaPlot
 from .barplot import BarPlot
 from .trend_lines import TrendLine, TrendLineProperties
 from .reversals import Reversal, ReversalPatternProperties
+from .flag_pennants import FlagPennant, FlagPennantProperties
