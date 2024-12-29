@@ -8,7 +8,7 @@ import matplotlib.ticker as mticker
 """
 strftime formats specifiers
 %Y  Year with century
-%b  Month abbreviated name
+%m  Month zero-padded
 %d  Day of the month zero-padded
 %H  Hour (24-hour clock) zero-padded
 %M  Minute zero-padded
@@ -27,13 +27,13 @@ def date_labels(dates):
     if interval > 300:
         formats = ("%Y",)
     elif interval > 30:
-        formats = ("%Y", "%b")
+        formats = ("%Y", "%m")
     elif interval > 0.5:
-        formats = ("%Y", "%b", "%d") if months else ("%Y", "%b-%d")
+        formats = ("%Y", "%m", "%d") #if months else ("%Y", "%m/%d")
     elif interval > 0:
-        formats = ("%b-%d", "%H:%M")
+        formats = ("%m", "%d", "%H:")
     else:
-        formats = ("%Y-%b-%d",)
+        formats = ("%Y-%m-%d",)
 
     pdate = None
     labels = []
