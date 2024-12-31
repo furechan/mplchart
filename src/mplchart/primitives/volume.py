@@ -55,7 +55,7 @@ class Volume(Primitive):
             ax = chart.get_axes("twinx")
 
         data = self.process(prices)
-        data = chart.extract_df(data)
+        data = chart.reindex(data)
 
         index = data.index
         volume = data.volume

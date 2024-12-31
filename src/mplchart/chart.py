@@ -18,9 +18,9 @@ from .mapper import RawDateMapper, DateIndexMapper
 
 """
 How primitives/indicators are plotted
-1) try plot_handler. No processing or no extract_df yet
+1) try plot_handler. No processing or no reindexing yet
 2) call indicator / process data
-3) call extract_df / map dataframe
+3) call reindex / map dataframe
 3) replace indicator with wrapper if applicable
 4) select/create axes
 5) try indicator plot_result if applicable
@@ -145,8 +145,8 @@ class Chart:
             warnings.warn("No source data to rebase to!")
             return data
 
-        source_data = self.mapper.extract_df(self.source_data)
-        mapped_data = self.mapper.extract_df(data)
+        source_data = self.mapper.reindex(self.source_data)
+        mapped_data = self.mapper.reindex(data)
 
         if not len(data) or not len(source_data):
             warnings.warn("No intersection of data!")
@@ -207,6 +207,15 @@ class Chart:
             self.init_mapper(data)
 
         return self.mapper.extract_df(data)
+
+    def reindex(self, data):
+        """extract dataframe subset"""
+
+        if self.mapper is None:
+            self.init_mapper(data)
+
+        return self.mapper.reindex(data)
+
 
     def map_date(self, date):
         """map date to value"""
@@ -418,16 +427,16 @@ class Chart:
         # Call the indicator's plot_handler if defined (before any calc)
         # this is the only location where plot_handler is called
         # plot_handler is currently defined only for Primitives
-        # Note that dates have not been mapped yet (see extract_df)
+        # Note that dates have not been mapped yet (see reindex)
         if hasattr(indicator, "plot_handler"):
             indicator.plot_handler(data, chart=self)
             return
 
         # Invoke indicator and compute result if indicator is callable
-        # Result data is mapped to the charting view (see extract_df)
+        # Result data is mapped to the charting view (see reindex)
         if callable(indicator):
             result = self.calc_result(data, indicator)
-            result = self.extract_df(result)
+            result = self.reindex(result)
         else:
             raise ValueError(f"Indicator {indicator!r} not callable")
 

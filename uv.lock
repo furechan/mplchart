@@ -1008,7 +1008,7 @@ wheels = [
 
 [[package]]
 name = "mplchart"
-version = "0.0.15"
+version = "0.0.16"
 source = { editable = "." }
 dependencies = [
     { name = "matplotlib" },
@@ -1022,6 +1022,7 @@ dev = [
     { name = "ipywidgets" },
     { name = "jinja2" },
     { name = "nbmake" },
+    { name = "nbmask" },
     { name = "numpy" },
     { name = "pytest" },
     { name = "ruff" },
@@ -1042,6 +1043,7 @@ dev = [
     { name = "ipywidgets" },
     { name = "jinja2" },
     { name = "nbmake" },
+    { name = "nbmask", specifier = ">=0.0.4" },
     { name = "numpy", specifier = "<2.0.0" },
     { name = "pytest" },
     { name = "ruff" },
@@ -1102,6 +1104,14 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/db/25/46a5818e699dc72e708754a8b6cfe4383d714d6d2578a795e9393bd5a0a8/nbmake-1.5.4.tar.gz", hash = "sha256:56417fe80d50069671122955532df6e26369a23f68b9c6e2191ae9cfef19abb2", size = 11306 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/fd/b6/4c8649228a418b0a4ea0577fcc921d9facef9f2b1d8669f2808f2cdf1429/nbmake-1.5.4-py3-none-any.whl", hash = "sha256:8e440a61a7d4ab303064aa86b8d2c088177c89960e2b4a0f91a768dc9f68382b", size = 12860 },
+]
+
+[[package]]
+name = "nbmask"
+version = "0.0.4"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c9/5f/928229ca6627138db3467028452499fddbd4b2315efe3b22e4bca0b062b6/nbmask-0.0.4-py3-none-any.whl", hash = "sha256:e144338ad6817fc0b85847ff767af01d835cca1b9881704e7c03a566e085eccc", size = 4098 },
 ]
 
 [[package]]

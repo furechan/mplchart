@@ -29,7 +29,7 @@ class OHLC(Primitive):
         if ax is None:
             ax = chart.get_axes()
 
-        data = chart.extract_df(prices)
+        data = chart.reindex(prices)
 
         textcolor = plt.rcParams["text.color"]
 

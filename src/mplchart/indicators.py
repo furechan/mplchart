@@ -80,7 +80,7 @@ class ATR(Indicator):
 
 
 class ATRP(Indicator):
-    """Average True Range (Percent)"""
+    """Average True Range (percent)"""
 
     def __init__(self, period: int = 14):
         self.period = period
@@ -90,7 +90,7 @@ class ATRP(Indicator):
 
 
 class SLOPE(Indicator):
-    """Slope (Time linear regression)"""
+    """Slope (time linear regression)"""
 
     def __init__(self, period: int = 20):
         self.period = period
@@ -100,8 +100,22 @@ class SLOPE(Indicator):
         return library.calc_slope(series, self.period)
 
 
+class TSF(Indicator):
+    """Time Siries Forecast (time linear regression)"""
+
+    same_scale = True
+
+    def __init__(self, period: int = 20, offset: int =0):
+        self.period = period
+        self.offset = offset
+
+    def __call__(self, prices):
+        series = get_series(prices)
+        return library.calc_tsf(series, period=self.period, offset=self.offset)
+
+
 class RVALUE(Indicator):
-    """RValue (Time linear regression)"""
+    """R-Value (time linear regression)"""
 
     def __init__(self, period: int = 20):
         self.period = period

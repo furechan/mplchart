@@ -3,6 +3,8 @@
 import numpy as np
 import pandas as pd
 
+import warnings
+
 from .locator import DateIndexLocator
 from .formatter import DateIndexFormatter
 
@@ -22,7 +24,17 @@ class RawDateMapper:
         self.end = index[-1]
 
     def extract_df(self, data):
-        """slice data"""
+        """extracts dataframe by mapping date to position/coordinate"""
+
+        warnings.warn("extract_df is deprecated. Use reindex instead!", DeprecationWarning, stacklevel=2)
+
+        if self.start or self.end:
+            data = data.loc[self.start : self.end]
+
+        return data
+
+    def reindex(self, data):
+        """reindex dataframe by mapping dates to positions"""
 
         if self.start or self.end:
             data = data.loc[self.start : self.end]
@@ -58,6 +70,8 @@ class DateIndexMapper:
     def extract_df(self, data):
         """extracts dataframe by mapping date to position/coordinate"""
 
+        warnings.warn("extract_df is deprecated. Use reindex instead!", DeprecationWarning, stacklevel=2)
+
         xloc = pd.Series(np.arange(len(self.index)), index=self.index)
 
         xloc, data = xloc.align(data, join="inner")
@@ -65,6 +79,20 @@ class DateIndexMapper:
         data = data.set_axis(xloc)
 
         return data
+
+
+    def reindex(self, data):
+        """reindex dataframe by mapping dates to positions"""
+
+        xloc = pd.Series(np.arange(len(self.index)), index=self.index, name='xloc')
+
+        xloc, data = xloc.align(data, join="inner")
+
+        data = data.set_axis(xloc)
+
+        return data
+
+
 
     def map_date(self, date):  # nedded for plot_vline
         """location of date in index"""

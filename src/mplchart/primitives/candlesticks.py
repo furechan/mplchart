@@ -41,7 +41,7 @@ class Candlesticks(Primitive):
         if ax is None:
             ax = chart.get_axes()
 
-        data = chart.extract_df(prices)
+        data = chart.reindex(prices)
 
         label = str(self)
         width = self.width

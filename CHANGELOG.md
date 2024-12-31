@@ -1,6 +1,11 @@
 # Change Log
 
 
+## 0.0.16
+- Added `TSF` Indicator (Time Series Forecast)
+- Added `Markers` primitive 
+- Deprecated `extract_df`. Use `reindex` instead
+
 ## 0.0.15
 - Added `Stripes` primitive to plot vertical stripes depending on a flag value (experimental)
 - Added `alpha` parameter to `Price`, `OHLC`, `Candlesticks`, `Volume`

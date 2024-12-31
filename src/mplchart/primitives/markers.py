@@ -4,17 +4,24 @@ import numpy as np
 
 from ..model import Primitive
 
-from matplotlib.collections import LineCollection
 
-
-class Marker(Primitive):
-    """Base class for flag based markers"""
+class Markers(Primitive):
+    """Marker Primitive"""
 
     indicator = None
-    expr = None
 
-    def __init__(self, expr=None):
+    def __init__(
+        self,
+        expr: str = None,
+        *,
+        color: str = None,
+        marker: str = ".",
+        alpha: float = 0.6,
+    ):
         self.expr = expr
+        self.color = color
+        self.marker = marker
+        self.alpha = alpha
 
     def __ror__(self, indicator):
         if not callable(indicator):
@@ -22,55 +29,37 @@ class Marker(Primitive):
 
         return self.clone(indicator=indicator)
 
-    def process(self, prices):
-        """adds indicator result and flag to prices"""
-
-        data = self.calc_result(prices, self.indicator)
-        prices = prices.join(data)
-
-        flag = np.where(prices.eval(self.expr) > 0.0, 1.0, 0.0)
-        prices = prices.assign(flag=flag)
-
-        return prices
-
-
-class CrossMarker(Marker):
-    """Cross Marker Primitive"""
-
-    COLORENTRY = "green"
-    COLOREXIT = "red"
-
     def plot_handler(self, prices, chart, ax=None):
         if ax is None:
             ax = chart.main_axes()
 
-        data = self.process(prices)
-        data = chart.extract_df(data)
+        result = chart.calc_result(prices, self.indicator)
 
-        mask = data.flag.diff().fillna(0).ne(0)
+        if self.expr is not None:
+            result = result.eval(self.expr)
 
-        xv = data.index[mask]
-        yv = data.close[mask]
-        flag = data.flag[mask]
+        flag = np.clip(np.sign(result), 0, 1)
 
-        colorn = self.COLORENTRY
-        colorx = self.COLOREXIT
+        result = prices.assign(flag=flag)
 
-        cv = np.where(flag > 0, colorn, colorx)
+        result = chart.reindex(result)
 
-        ax.scatter(xv, yv, c=cv, s=12 * 12, alpha=0.6, marker=".")
+        mask = result.flag.ffill().diff().fillna(0).ne(0)
 
-        points = np.array([xv, yv]).T.reshape(-1, 1, 2)
-        segments = np.concatenate([points[:-1], points[1:]], axis=1)
+        if not mask.sum():
+            return
 
-        pos_color = (0.0, 0.0, 0.0, 1.0)
-        neg_color = (0.0, 0.0, 0.0, 0.0)
+        result = result[mask]
 
-        colors = [
-            pos_color if flag.iloc[i] else neg_color for i in range(len(segments))
-        ]
+        xv = result.index
+        yv = result.close
+        flag = result.flag
 
-        lc = LineCollection(segments, colors=colors, linestyles="solid", linewidths=1.0)
+        marker = self.marker
+        color = self.color
+        alpha = self.alpha
 
-        ax.add_collection(lc)
+        if isinstance(self.color, list):
+            color = np.where(flag > 0, color[1], color[0])
 
+        ax.scatter(xv, yv, c=color, s=12 * 12, alpha=alpha, marker=marker)

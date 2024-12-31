@@ -27,7 +27,7 @@ class Stripes(Primitive):
             ax = chart.root_axes()
 
         result = chart.calc_result(prices, self.indicator)
-        result = chart.extract_df(result)
+        result = chart.reindex(result)
 
         if not len(result):
             return

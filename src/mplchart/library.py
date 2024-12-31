@@ -167,7 +167,7 @@ def calc_bbands(prices, period: int = 20, nbdev: float = 2.0):
 
 
 def calc_slope(series, period: int = 20):
-    """calculates the slope (time linear regression) over a rolling window"""
+    """Slope (time linear regression)"""
 
     xx = np.arange(period) - (period - 1) / 2.0
 
@@ -180,8 +180,23 @@ def calc_slope(series, period: int = 20):
     return series.rolling(window=period).apply(func, raw=True)
 
 
+def calc_tsf(series, period: int = 20, offset: int = 0):
+    """Time series forecast (time linear regression)"""
+
+    xx = np.arange(period) - (period - 1) / 2.0
+    xo = xx[-1] + offset
+
+    def func(xs):
+        if np.any(np.isnan(xs)):
+            return np.nan
+        a, b = np.polyfit(xx, xs, 1)
+        return a * xo + b
+
+    return series.rolling(window=period).apply(func, raw=True)
+
+
 def calc_rvalue(series, period: int = 20):
-    """calculates the rvalue (time linear regression) over a rolling window"""
+    """R-Value (time linear regression) over a rolling window"""
 
     xx = np.arange(period) - (period - 1) / 2.0
 

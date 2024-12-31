@@ -66,7 +66,7 @@ class LinePlot(Primitive):
 
         data = series_data(result, self.item, strict=True)
 
-        data = chart.extract_df(data)
+        data = chart.reindex(data)
 
         label = get_label(self.indicator)
 

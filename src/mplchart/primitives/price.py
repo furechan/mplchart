@@ -38,7 +38,7 @@ class Price(Primitive):
             ax = chart.get_axes()
 
         data = series_data(prices, self.item)
-        data = chart.extract_df(data)
+        data = chart.reindex(data)
 
         textcolor = plt.rcParams["text.color"]
 

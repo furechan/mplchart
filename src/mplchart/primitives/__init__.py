@@ -7,6 +7,7 @@ from .ohlc import OHLC
 from .candlesticks import Candlesticks
 from .peaks import Peaks
 from .stripes import Stripes
+from .markers import Markers
 from .lineplot import LinePlot
 from .areaplot import AreaPlot
 from .barplot import BarPlot
