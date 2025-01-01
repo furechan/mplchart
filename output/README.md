@@ -56,7 +56,7 @@ with columns `open`, `high`, `low`, `close` `volume`
 and a datetime index named `date` or `datetime`.
 Indicators require lower case column names, however, as a courtesy,
 the chart object will automatically convert column and index names
-to lower case before any indicator.
+to lower case before calling any indicator.
 
 
 ## Drawing Primitives
