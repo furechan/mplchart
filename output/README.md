@@ -54,8 +54,9 @@ chart.show()
 Price data is expected to be presented as a pandas DataFrame
 with columns `open`, `high`, `low`, `close` `volume`
 and a datetime index named `date` or `datetime`.
-Please note, the library will automatically convert column
-and index names to lower case for its internal use.
+Indicators require lower case column names, however, as a courtesy,
+the chart object will automatically convert column and index names
+to lower case before any indicator.
 
 
 ## Drawing Primitives
@@ -111,6 +112,7 @@ Some of the indicators included are:
 - `SLOPE` Slope (time linear regression)
 - `STOCH` Stochastic Oscillator
 - `BBANDS` Bollinger Bands
+- `KELTNER` Keltner Channel
 
 
 
