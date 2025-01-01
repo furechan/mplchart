@@ -93,25 +93,6 @@ def series_data(data, item: str = None, *, default_item: str = None, strict: boo
 
 
 
-def get_series_old(prices, item: str = None):
-    """extract column by name if applicable"""
-
-    if isinstance(prices, pd.Series):
-        if item is not None:
-            raise ValueError(f"Expected dataframe with an {item!r} column")
-        else:
-            return prices
-
-    # rename columns to make lookup case insensitive
-    prices = prices.rename(columns=str.lower)
-
-    if item is not None:
-        return prices[item.lower()]
-
-    if isinstance(prices, pd.DataFrame):
-        return prices["close"]
-
-
 def get_series(prices, item: str = None):
     """extract column by name if applicable"""
 
@@ -122,9 +103,9 @@ def get_series(prices, item: str = None):
             return prices
 
     if isinstance(prices, pd.DataFrame):
-        prices = prices.rename(columns=str.lower)
+        # prices = prices.rename(columns=str.lower)
         item = item or "close"
-        return prices[item.lower()]
+        return prices[item]
 
     raise TypeError(f"Invalid series type {type(prices).__name__} !")
 

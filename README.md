@@ -51,12 +51,15 @@ chart.show()
 
 ## Conventions
 
-Price data is expected to be presented as a pandas DataFrame
+Prices data is expected to be presented as a pandas DataFrame
 with columns `open`, `high`, `low`, `close` `volume`
 and a datetime index named `date` or `datetime`.
-Indicators require lower case column names, however, as a courtesy,
-the chart object will automatically convert column and index names
-to lower case before calling any indicator.
+
+Even though the chart object automatically converts price
+column names to lower case before calling any indicator,
+if you intend on using indicators independently from the chart object,
+you must use prices dataframes with with lower case column names!
+
 
 
 ## Drawing Primitives

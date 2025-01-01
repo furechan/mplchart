@@ -9,8 +9,17 @@ from .utils import short_repr, get_series
 
 
 
+class Wrapper(ABC):
+    """Indicator plotting wrapper"""
+
+    @abstractmethod
+    def plot_result(self, data, chart, ax=None): ...
+
+
 class Primitive(ABC):
     """Primitive abstract base class"""
+
+    __repr__ = short_repr
 
     @abstractmethod
     def plot_handler(self, data, chart, ax=None):
@@ -27,13 +36,6 @@ class Primitive(ABC):
         result = copy.copy(self)
         result.__dict__.update(self.__dict__, **kwargs)
         return result
-
-
-class Wrapper(ABC):
-    """Indicator plotting wrapper"""
-
-    @abstractmethod
-    def plot_result(self, data, chart, ax=None): ...
 
 
 class Indicator(ABC):

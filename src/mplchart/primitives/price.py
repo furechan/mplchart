@@ -3,7 +3,8 @@
 from matplotlib import pyplot as plt
 
 from ..model import Primitive
-from ..utils import series_data, series_xy
+from ..utils import series_xy
+from ..library import calc_price
 
 
 class Price(Primitive):
@@ -13,12 +14,15 @@ class Price(Primitive):
     Used to plot price as a line plot
 
     Args:
-        item (str) :  name of the column to plot. default 'close'
+        item (str) :  name of the price item. default 'close'
+        One of 'open', 'high', 'low', 'close', 'avg', 'mid', 'typ', 'wcl', ...
 
     Example:
         Price('close')  # plot the close price series
         Price('open')   # plot the open price series
     """
+
+    same_scale: bool = True
 
     def __init__(
         self,
@@ -33,16 +37,21 @@ class Price(Primitive):
         self.alpha = alpha
         self.color = color
 
+
+    def __call__(self, prices):
+        return calc_price(prices, self.item)
+
+
     def plot_handler(self, prices, chart, ax=None):
         if ax is None:
             ax = chart.get_axes()
 
-        data = series_data(prices, self.item)
+        data = self(prices)
         data = chart.reindex(data)
 
         textcolor = plt.rcParams["text.color"]
 
-        label = self.item
+        label = repr(self)
         width = self.width
         alpha = self.alpha
         color = self.color or textcolor

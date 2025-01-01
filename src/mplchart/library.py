@@ -10,6 +10,26 @@ from .utils import get_series  # noqa F401
 # TODO remove get_series import
 
 
+def calc_price(prices, item):
+    """get or compute price item from prices"""
+    if item in prices:
+        return prices[item]
+
+    if item in ("mid", "hl", "hl2"):
+        return (prices["high"] + prices["low"]) / 2
+
+    if item in ("typ", "hlc", "hlc3"):
+        return (prices["high"] + prices["low"] + prices["close"]) / 3
+
+    if item in ("wcl", "hlcc", "hlcc4"):
+        return (prices["high"] + prices["low"] + prices["close"] * 2) / 4
+
+    if item in ("avg", "ohlc", "ohlc4"):
+        return (prices["open"] + prices["high"] + prices["low"] + prices["close"]) / 4
+
+    raise ValueError(f"Invalid price item {item!r}")
+
+
 def calc_roc(series, period: int = 1):
     """Rate of Change"""
     return series.pct_change(period)
@@ -30,7 +50,7 @@ def calc_ema(series, period: int = 20):
 def calc_rma(series, period: int = 14):
     """Rolling Moving Average (RSI style)"""
     return series.ewm(
-        alpha=1/period, min_periods=period, adjust=True, ignore_na=True
+        alpha=1 / period, min_periods=period, adjust=True, ignore_na=True
     ).mean()
 
 
@@ -60,13 +80,13 @@ def calc_hma(series, period: int = 20):
     return result
 
 
-def calc_alma(series, window: int = 9, offset : float = 0.85, sigma: float = 6.0):
+def calc_alma(series, window: int = 9, offset: float = 0.85, sigma: float = 6.0):
     """Arnaud Legoux Moving Average"""
     m = offset * (window - 1)
     s = window / sigma
-    w = np.array([np.exp(-(i - m) ** 2 / (2 * s ** 2)) for i in range(window)])
+    w = np.array([np.exp(-((i - m) ** 2) / (2 * s**2)) for i in range(window)])
     w = w / w.sum()
-    res = np.correlate(series, w, 'valid')
+    res = np.correlate(series, w, "valid")
     res = np.insert(res, 0, [np.nan] * (window - 1))
     return pd.Series(res, index=series.index)
 
@@ -170,7 +190,6 @@ def calc_ndi(prices, period: int = 14):
     return calc_dmi(prices, period).ndi
 
 
-
 def calc_slope(series, period: int = 20):
     """Slope (time linear regression)"""
 
@@ -220,7 +239,7 @@ def calc_stoch(prices, period: int = 14, fastn: int = 3, slown: int = 3):
     high = prices["high"].rolling(period).max()
     low = prices["low"].rolling(period).min()
     close = prices["close"]
-    
+
     fastk = (close - low) / (high - low) * 100
     slowk = calc_sma(fastk, fastn)
     slowd = calc_sma(slowk, slown)
@@ -229,7 +248,6 @@ def calc_stoch(prices, period: int = 14, fastn: int = 3, slown: int = 3):
     slowd = slowk.rolling(window=slown).mean()
 
     return pd.DataFrame(dict(slowk=slowk, slowd=slowd))
-
 
 
 def calc_bbands(prices, period: int = 20, nbdev: float = 2.0):
@@ -244,7 +262,7 @@ def calc_bbands(prices, period: int = 20, nbdev: float = 2.0):
     return pd.DataFrame(result)
 
 
-def calc_keltner(prices, period : int = 20, nbatr : float = 2.0):
+def calc_keltner(prices, period: int = 20, nbatr: float = 2.0):
     """Keltner Channel"""
 
     midprc = (prices["high"] + prices["low"] + prices["close"]) / 3.0

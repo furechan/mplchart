@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.0.18
+- `Price` primitive now accepts calculation items like 'hlc', 'hlcc', ...
+- `Price` can now be used and composed as an indicator like in ```EMA(20) @ Price('hlcc')```
+
 ## 0.0.17
 - Added `ALMA` Indicator (Arnaud Legoux Moving Average)
 - Added `KELTNER` indicator (Keltner Channel)
