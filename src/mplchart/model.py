@@ -5,7 +5,7 @@ import copy
 from abc import ABC, abstractmethod
 from types import MappingProxyType
 
-from .utils import short_repr
+from .utils import short_repr, get_series
 
 
 
@@ -39,7 +39,7 @@ class Wrapper(ABC):
 class Indicator(ABC):
     """Indicator Base Class"""
 
-    __str__ = short_repr
+    __repr__ = short_repr
 
     def __init_subclass__(cls, **kwargs):
         """Save indicator extra kwargs as info dictionary"""
@@ -53,6 +53,10 @@ class Indicator(ABC):
         if callable(other):
             return ComposedIndicator(self, other)
         return self(other)
+
+    def get_series(self, data):
+        item = getattr(self, "item", None)
+        return get_series(data, item=item)
 
 
 class ComposedIndicator(Indicator):

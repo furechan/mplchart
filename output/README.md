@@ -158,7 +158,7 @@ indicators = [
 Indicators usually plot in a new axes below, except for a few indicators that plot by default in the main axes. You can change the target axes for any indicator by piping it into an axes primitive as in the example below.
 
 ```python
-# Plotting two indicators on the same axes with SameAxes
+# Plotting two indicators on the same axes with SameAxes primitive
 
 from mplchart.indicators import SMA, EMA, ROC
 from mplchart.primitives import Candlesticks, SameAxes
@@ -180,7 +180,7 @@ You can also implement a custom indicator as a subclass of `Indicator`.
 # Custom Indicator Example
 
 from mplchart.model import Indicator
-from mplchart.library import get_series, calc_ema
+from mplchart.library import calc_ema
 
 class DEMA(Indicator):
     """Double Exponential Moving Average"""
@@ -188,13 +188,13 @@ class DEMA(Indicator):
     same_scale = True
     # same_scale is an optional class attribute
     # to specify that the indicator can be drawn
-    # on the same axes as the previous indicator
+    # on the same axes as the prices
 
     def __init__(self, period: int = 20):
         self.period = period
 
     def __call__(self, prices):
-        series = get_series(prices)
+        series = self.get_series(prices)
         ema1 = calc_ema(series, self.period)
         ema2 = calc_ema(ema1, self.period)
         return 2 * ema1 - ema2

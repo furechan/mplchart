@@ -27,6 +27,13 @@ def calc_ema(series, period: int = 20):
     ).mean()
 
 
+def calc_rma(series, period: int = 14):
+    """Rolling Moving Average (RSI style)"""
+    return series.ewm(
+        alpha=1/period, min_periods=period, adjust=True, ignore_na=True
+    ).mean()
+
+
 def calc_wma(series, period: int = 20):
     """Weighted Moving Average"""
     weights = np.arange(1, period + 1, dtype=float)
@@ -51,6 +58,17 @@ def calc_hma(series, period: int = 20):
     result = calc_wma(m3, round(math.sqrt(period)))
 
     return result
+
+
+def calc_alma(series, window: int = 9, offset : float = 0.85, sigma: float = 6.0):
+    """Arnaud Legoux Moving Average"""
+    m = offset * (window - 1)
+    s = window / sigma
+    w = np.array([np.exp(-(i - m) ** 2 / (2 * s ** 2)) for i in range(window)])
+    w = w / w.sum()
+    res = np.correlate(series, w, 'valid')
+    res = np.insert(res, 0, [np.nan] * (window - 1))
+    return pd.Series(res, index=series.index)
 
 
 def calc_rsi(series, period: int = 14):
@@ -106,8 +124,7 @@ def calc_ppo(series, n1: int = 20, n2: int = 26, n3: int = 9):
     hist = ppo - signal
 
     result = dict(ppo=ppo, pposignal=signal, ppohist=hist)
-    result = pd.DataFrame(result)
-    return result
+    return pd.DataFrame(result)
 
 
 def calc_dmi(prices, period: int = 14):
@@ -153,18 +170,6 @@ def calc_ndi(prices, period: int = 14):
     return calc_dmi(prices, period).ndi
 
 
-def calc_bbands(prices, period: int = 20, nbdev: float = 2.0):
-    """Bollinger Bands"""
-    midprc = (prices["high"] + prices["low"] + prices["close"]) / 3.0
-    std = midprc.rolling(period).std(ddof=0)
-    middle = midprc.rolling(period).mean()
-    upper = middle + nbdev * std
-    lower = middle - nbdev * std
-
-    result = dict(upperband=upper, middleband=middle, lowerband=lower)
-    result = pd.DataFrame(result)
-    return result
-
 
 def calc_slope(series, period: int = 20):
     """Slope (time linear regression)"""
@@ -196,7 +201,7 @@ def calc_tsf(series, period: int = 20, offset: int = 0):
 
 
 def calc_rvalue(series, period: int = 20):
-    """R-Value (time linear regression) over a rolling window"""
+    """R-Value (time linear regression)"""
 
     xx = np.arange(period) - (period - 1) / 2.0
 
@@ -224,3 +229,29 @@ def calc_stoch(prices, period: int = 14, fastn: int = 3, slown: int = 3):
     slowd = slowk.rolling(window=slown).mean()
 
     return pd.DataFrame(dict(slowk=slowk, slowd=slowd))
+
+
+
+def calc_bbands(prices, period: int = 20, nbdev: float = 2.0):
+    """Bollinger Bands"""
+    midprc = (prices["high"] + prices["low"] + prices["close"]) / 3.0
+    std = midprc.rolling(period).std(ddof=0)
+    middle = midprc.rolling(period).mean()
+    upper = middle + nbdev * std
+    lower = middle - nbdev * std
+
+    result = dict(upperband=upper, middleband=middle, lowerband=lower)
+    return pd.DataFrame(result)
+
+
+def calc_keltner(prices, period : int = 20, nbatr : float = 2.0):
+    """Keltner Channel"""
+
+    midprc = (prices["high"] + prices["low"] + prices["close"]) / 3.0
+    atr = calc_atr(prices, period)
+    middle = calc_ema(midprc, period)
+    upper = middle + nbatr * atr
+    lower = middle - nbatr * atr
+
+    result = dict(upperband=upper, middleband=middle, lowerband=lower)
+    return pd.DataFrame(result)

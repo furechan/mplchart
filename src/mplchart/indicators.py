@@ -3,7 +3,6 @@
 from . import library
 
 from .model import Indicator
-from .utils import get_series
 
 
 class SMA(Indicator):
@@ -15,7 +14,7 @@ class SMA(Indicator):
         self.period = period
 
     def __call__(self, prices):
-        series = get_series(prices)
+        series = self.get_series(prices)
         return library.calc_sma(series, self.period)
 
 
@@ -28,7 +27,7 @@ class EMA(Indicator):
         self.period = period
 
     def __call__(self, prices):
-        series = get_series(prices)
+        series = self.get_series(prices)
         return library.calc_ema(series, self.period)
 
 
@@ -41,7 +40,7 @@ class WMA(Indicator):
         self.period = period
 
     def __call__(self, prices):
-        series = get_series(prices)
+        series = self.get_series(prices)
         return library.calc_wma(series, self.period)
 
 
@@ -54,8 +53,23 @@ class HMA(Indicator):
         self.period = period
 
     def __call__(self, prices):
-        series = get_series(prices)
+        series = self.get_series(prices)
         return library.calc_hma(series, self.period)
+
+
+class ALMA(Indicator):
+    """Arnaud Legoux Moving Average"""
+
+    same_scale: bool = True
+
+    def __init__(self, window: int = 9, offset: float = 0.85, sigma: float = 6.0):
+        self.window = window
+        self.offset = offset
+        self.sigma = sigma
+
+    def __call__(self, prices):
+        series = self.get_series(prices)
+        return library.calc_alma(series, self.window, self.offset, self.sigma)
 
 
 class ROC(Indicator):
@@ -65,7 +79,7 @@ class ROC(Indicator):
         self.period = period
 
     def __call__(self, prices):
-        series = get_series(prices)
+        series = self.get_series(prices)
         return library.calc_roc(series, self.period)
 
 
@@ -96,7 +110,7 @@ class SLOPE(Indicator):
         self.period = period
 
     def __call__(self, prices):
-        series = get_series(prices)
+        series = self.get_series(prices)
         return library.calc_slope(series, self.period)
 
 
@@ -110,7 +124,7 @@ class TSF(Indicator):
         self.offset = offset
 
     def __call__(self, prices):
-        series = get_series(prices)
+        series = self.get_series(prices)
         return library.calc_tsf(series, period=self.period, offset=self.offset)
 
 
@@ -121,7 +135,7 @@ class RVALUE(Indicator):
         self.period = period
 
     def __call__(self, prices):
-        series = get_series(prices)
+        series = self.get_series(prices)
         return library.calc_rvalue(series, self.period)
 
 
@@ -137,7 +151,7 @@ class RSI(Indicator):
         self.period = period
 
     def __call__(self, prices):
-        series = get_series(prices)
+        series = self.get_series(prices)
         return library.calc_rsi(series, self.period)
 
 
@@ -174,7 +188,7 @@ class MACD(Indicator):
         self.n3 = n3
 
     def __call__(self, prices):
-        series = get_series(prices)
+        series = self.get_series(prices)
         return library.calc_macd(series, self.n1, self.n2, self.n3)
 
 
@@ -187,8 +201,21 @@ class PPO(Indicator):
         self.n3 = n3
 
     def __call__(self, prices):
-        series = get_series(prices)
+        series = self.get_series(prices)
         return library.calc_ppo(series, self.n1, self.n2, self.n3)
+
+
+
+class STOCH(Indicator):
+    """Stochastic Oscillator"""
+
+    def __init__(self, period: int = 14, fastn: int = 3, slown: int = 3):
+        self.period = period
+        self.fastn = fastn
+        self.slown = slown
+
+    def __call__(self, prices):
+        return library.calc_stoch(prices, self.period)
 
 
 class BBANDS(Indicator):
@@ -204,17 +231,17 @@ class BBANDS(Indicator):
         return library.calc_bbands(prices, self.period, self.nbdev)
 
 
-class STOCH(Indicator):
-    """Stochastic Oscillator"""
+class KELTNER(Indicator):
+    """Keltner Channels"""
 
-    def __init__(self, period: int = 14, fastn: int = 3, slown: int = 3):
+    same_scale: bool = True
+
+    def __init__(self, period: int = 20, nbatr: float = 2.0):
         self.period = period
-        self.fastn = fastn
-        self.slown = slown
+        self.nbatr = nbatr
 
     def __call__(self, prices):
-        return library.calc_stoch(prices, self.period)
-
+        return library.calc_keltner(prices, period=self.period, nbatr = self.nbatr)
 
 
 __all__ = [k for k in dir() if k.isupper()]

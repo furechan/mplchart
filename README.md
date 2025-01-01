@@ -111,6 +111,7 @@ Some of the indicators included are:
 - `SLOPE` Slope (time linear regression)
 - `STOCH` Stochastic Oscillator
 - `BBANDS` Bollinger Bands
+- `KELTNER` Keltner Channel
 
 
 
@@ -180,7 +181,7 @@ You can also implement a custom indicator as a subclass of `Indicator`.
 # Custom Indicator Example
 
 from mplchart.model import Indicator
-from mplchart.library import get_series, calc_ema
+from mplchart.library import calc_ema
 
 class DEMA(Indicator):
     """Double Exponential Moving Average"""
@@ -188,13 +189,13 @@ class DEMA(Indicator):
     same_scale = True
     # same_scale is an optional class attribute
     # to specify that the indicator can be drawn
-    # on the same axes as the previous indicator
+    # on the same axes as the prices
 
     def __init__(self, period: int = 20):
         self.period = period
 
     def __call__(self, prices):
-        series = get_series(prices)
+        series = self.get_series(prices)
         ema1 = calc_ema(series, self.period)
         ema2 = calc_ema(ema1, self.period)
         return 2 * ema1 - ema2

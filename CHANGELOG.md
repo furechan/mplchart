@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.0.17
+- Added `ALMA` Indicator (Arnaud Legoux Moving Average)
+- Added `KELTNER` indicator (Keltner Channel)
+- Added `get_series` method to `Indicator` as a wrapper to `utils.get_series`
 
 ## 0.0.16
 - Added `TSF` Indicator (Time Series Forecast)
@@ -14,7 +18,6 @@
 - Added `STOCH` Indicator (Stochastic Oscillator)
 - Added `LinePlot`, `AreaPlot` and `BarPlot` primitives
 
-
 ## 0.0.13
 - Updated Pypi README
 
@@ -23,12 +26,6 @@
 - Added `ATRP` indicator (Average True Range Percentage)
 - Plotting Logic moved out of indicators
 - Experimental `color_scheme` and `Color` modifier
-
-## 0.0.11
-- Refactorings
-
-## 0.0.10
-- Refactorings
 
 ## 0.0.9
 - Moved indicator ploting logic to `indicators` module
@@ -67,9 +64,6 @@
 - Column names are converted to lower case automatically
 - Helper module is deprecated.
 - Added `tox` config with sdist packaging
-
-## 0.0.2
-- Minor update
 
 ## 0.0.1
 - Initial release
