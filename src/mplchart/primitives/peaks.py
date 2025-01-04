@@ -42,7 +42,7 @@ class Peaks(Primitive):
 
         data = chart.calc_result(data, self.indicator)
         data = self.process(data)
-        data = chart.reindex(data)
+        data = chart.slice(data)
 
         xv, yv = data.index, data
         color = self.color or plt.rcParams["text.color"]

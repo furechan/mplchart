@@ -20,7 +20,7 @@ from .mapper import RawDateMapper, DateIndexMapper
 How primitives/indicators are plotted
 1) try plot_handler. No processing or no reindexing yet
 2) call indicator / process data
-3) call reindex / map dataframe
+3) call slice or reindex / map dataframe
 3) replace indicator with wrapper if applicable
 4) select/create axes
 5) try indicator plot_result if applicable
@@ -145,8 +145,8 @@ class Chart:
             warnings.warn("No source data to rebase to!")
             return data
 
-        source_data = self.mapper.reindex(self.source_data)
-        mapped_data = self.mapper.reindex(data)
+        source_data = self.mapper.slice(self.source_data)
+        mapped_data = self.mapper.slice(data)
 
         if not len(data) or not len(source_data):
             warnings.warn("No intersection of data!")
@@ -201,7 +201,7 @@ class Chart:
         return color
 
     def extract_df(self, data):
-        """extract dataframe subset"""
+        """extract dataframe subset (deprecated)"""
 
         if self.mapper is None:
             self.init_mapper(data)
@@ -209,12 +209,20 @@ class Chart:
         return self.mapper.extract_df(data)
 
     def reindex(self, data):
-        """extract dataframe subset"""
+        """re-index data"""
 
         if self.mapper is None:
             self.init_mapper(data)
 
         return self.mapper.reindex(data)
+
+    def slice(self, data):
+        """re-index and slice data"""
+
+        if self.mapper is None:
+            self.init_mapper(data)
+
+        return self.mapper.slice(data)
 
 
     def map_date(self, date):
@@ -427,16 +435,16 @@ class Chart:
         # Call the indicator's plot_handler if defined (before any calc)
         # this is the only location where plot_handler is called
         # plot_handler is currently defined only for Primitives
-        # Note that dates have not been mapped yet (see reindex)
+        # Note that dates have not been mapped yet (see slice)
         if hasattr(indicator, "plot_handler"):
             indicator.plot_handler(data, chart=self)
             return
 
         # Invoke indicator and compute result if indicator is callable
-        # Result data is mapped to the charting view (see reindex)
+        # Result data is mapped to the charting view (see slice)
         if callable(indicator):
             result = self.calc_result(data, indicator)
-            result = self.reindex(result)
+            result = self.slice(result)
         else:
             raise ValueError(f"Indicator {indicator!r} not callable")
 

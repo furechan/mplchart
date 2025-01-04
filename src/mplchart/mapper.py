@@ -24,9 +24,9 @@ class RawDateMapper:
         self.end = index[-1]
 
     def extract_df(self, data):
-        """extracts dataframe by mapping date to position/coordinate"""
+        """extract data by mapping date to positions (deprecated)"""
 
-        warnings.warn("extract_df is deprecated. Use reindex instead!", DeprecationWarning, stacklevel=2)
+        warnings.warn("extract_df is deprecated. Use slice instead!", DeprecationWarning, stacklevel=2)
 
         if self.start or self.end:
             data = data.loc[self.start : self.end]
@@ -34,12 +34,23 @@ class RawDateMapper:
         return data
 
     def reindex(self, data):
-        """reindex dataframe by mapping dates to positions"""
+        """re-index data by mapping dates to positions"""
+
+        warnings.warn("reindex is deprecated. Use slice instead!", DeprecationWarning, stacklevel=2)
 
         if self.start or self.end:
             data = data.loc[self.start : self.end]
 
         return data
+
+    def slice(self, data):
+        """re-index and slice data"""
+
+        if self.start or self.end:
+            data = data.loc[self.start : self.end]
+
+        return data
+
 
     def map_date(self, date):  # needed for plot_vline
         return date
@@ -68,9 +79,9 @@ class DateIndexMapper:
         self.index = index
 
     def extract_df(self, data):
-        """extracts dataframe by mapping date to position/coordinate"""
+        """extract data by mapping date to positions (deprecated)"""
 
-        warnings.warn("extract_df is deprecated. Use reindex instead!", DeprecationWarning, stacklevel=2)
+        warnings.warn("extract_df is deprecated. Use slice instead!", DeprecationWarning, stacklevel=2)
 
         xloc = pd.Series(np.arange(len(self.index)), index=self.index)
 
@@ -82,7 +93,9 @@ class DateIndexMapper:
 
 
     def reindex(self, data):
-        """reindex dataframe by mapping dates to positions"""
+        """re-index data by mapping dates to positions"""
+
+        warnings.warn("reindex is deprecated. Use slice instead!", DeprecationWarning, stacklevel=2)
 
         xloc = pd.Series(np.arange(len(self.index)), index=self.index, name='xloc')
 
@@ -92,6 +105,17 @@ class DateIndexMapper:
 
         return data
 
+
+    def slice(self, data):
+        """re-index and slice data by mapping dates to positions"""
+
+        xloc = pd.Series(np.arange(len(self.index)), index=self.index, name='xloc')
+
+        xloc, data = xloc.align(data, join="inner")
+
+        data = data.set_axis(xloc)
+
+        return data
 
 
     def map_date(self, date):  # nedded for plot_vline

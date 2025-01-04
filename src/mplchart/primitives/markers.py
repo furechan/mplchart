@@ -42,7 +42,7 @@ class Markers(Primitive):
 
         result = prices.assign(flag=flag)
 
-        result = chart.reindex(result)
+        result = chart.slice(result)
 
         mask = result.flag.ffill().diff().fillna(0).ne(0)
 

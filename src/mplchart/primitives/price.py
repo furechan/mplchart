@@ -47,7 +47,7 @@ class Price(Primitive):
             ax = chart.get_axes()
 
         data = self(prices)
-        data = chart.reindex(data)
+        data = chart.slice(data)
 
         textcolor = plt.rcParams["text.color"]
 

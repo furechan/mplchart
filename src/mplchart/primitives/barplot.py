@@ -61,7 +61,7 @@ class BarPlot(Primitive):
 
         data = series_data(result, self.item, strict=True)
 
-        data = chart.reindex(data)
+        data = chart.slice(data)
 
         label = self.label or get_label(self.indicator)
 

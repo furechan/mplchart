@@ -63,7 +63,7 @@ class ZigZag(Primitive):
             ax = chart.get_axes(target)
 
         series = calc_zigzag(prices, threshold=self.threshold)
-        series = chart.reindex(series)
+        series = chart.slice(series)
 
         label = repr(self)
 

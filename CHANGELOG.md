@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.19
+- Replacing chart `reindex` method with `slice`. The `reindex` method will be repurposed, do not use.
+
 ## 0.0.18
 - Added `ZigZag` Primitive (Experimental)
 - `Price` primitive now accepts calculation items like 'hlc', 'hlcc', ...
