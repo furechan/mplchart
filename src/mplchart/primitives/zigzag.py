@@ -1,9 +1,8 @@
-"""Zigzag Primitive"""
+"""ZigZag Primitive"""
 
 import pandas as pd
 from ..model import Primitive
 from ..utils import series_xy
-
 
 
 def calc_zigzag(prices, threshold=5.0):
