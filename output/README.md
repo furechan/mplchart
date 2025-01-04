@@ -89,6 +89,7 @@ The main drawing primitives are :
 - `LinePlot` draw an indicator as line plot
 - `AreaPlot` draw an indicator as area plot
 - `BarPlot` draw an indicator as bar plot
+- `ZigZag` lines between pivot points
 
 
 
