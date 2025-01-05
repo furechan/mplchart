@@ -71,10 +71,10 @@ def extract_peaks(prices, span=1):
 
     peaks = pd.Series(np.nan, prices.index)
 
-    mask = high.rolling(window).max().shift(-span) == high
+    mask = high.rolling(window, center=True).max() == high
     peaks.mask(mask, high, inplace=True)
 
-    mask = low.rolling(window).min().shift(-span) == low
+    mask = low.rolling(window, center=True).min() == low
     peaks.mask(mask, low, inplace=True)
 
     return peaks.dropna()
