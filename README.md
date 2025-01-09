@@ -58,7 +58,7 @@ and a datetime index named `date` or `datetime`.
 Even though the chart object automatically converts price
 column names to lower case before calling any indicator,
 if you intend on using indicators independently from the chart object,
-you must use prices dataframes with with lower case column names!
+you must use prices dataframes with all lower case column names!
 
 
 
