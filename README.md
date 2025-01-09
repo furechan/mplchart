@@ -113,7 +113,11 @@ Some of the indicators included are:
 - `DMI` Directional Movement Index
 - `MACD` Moving Average Convergence Divergence
 - `PPO` Price Percentage Oscillator 
-- `SLOPE` Slope (time linear regression)
+- `CCI` Commodity Channel Index
+- `BOP` Balance of Power
+- `CMF` Chaikin Money Flow
+- `MFI` Money Flow Index
+- `SLOPE` Slope (linear regression)
 - `STOCH` Stochastic Oscillator
 - `BBANDS` Bollinger Bands
 - `KELTNER` Keltner Channel

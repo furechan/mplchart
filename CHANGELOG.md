@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.0.20
+- Added `CCI` Indicator (Commodity Channel Index)
+- Added `BOP` Indicator (Balance of Power)
+- Added `CMF` Indicator (Chaikin Money Flow)
+- Added `MFI` Indicator (Money Flow Index)
+
 ## 0.0.19
 - Replacing chart `reindex` method with `slice`. The `reindex` method will be repurposed, do not use.
 

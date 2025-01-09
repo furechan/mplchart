@@ -54,6 +54,12 @@ def calc_rma(series, period: int = 14):
     ).mean()
 
 
+def calc_mad(series, period: int = 14):
+    """Rolling Mean Absolute Deviation"""
+    diff = series - series.rolling(window=period).mean()
+    return diff.abs().rolling(window=period).mean()
+
+
 def calc_wma(series, period: int = 20):
     """Weighted Moving Average"""
     weights = np.arange(1, period + 1, dtype=float)
@@ -98,8 +104,46 @@ def calc_rsi(series, period: int = 14):
     diff = series.diff()
     ups = diff.clip(lower=0).ewm(**ewm).mean()
     downs = diff.clip(upper=0).abs().ewm(**ewm).mean()
-
     result = 100.0 - (100.0 / (1.0 + ups / downs))
+    return result
+
+
+def calc_cci(prices, period: int = 20):
+    """Commodity Channel Index"""
+
+    prc = calc_price(prices, "hlc")
+    sma = calc_sma(prc, period)
+    div = calc_mad(prc, period) * 0.015
+    return (prc - sma) / div
+
+
+def calc_bop(prices, period: int = 20):
+    """Balance of Power"""
+
+    bop = (prices.close - prices.open) / (prices.high - prices.low)
+    return calc_sma(bop, period)
+
+
+def calc_cmf(prices, period: int = 20):
+    """Chaiking Money Flow"""
+
+    mult = (2 * prices.close - prices.high - prices.low) / (prices.high - prices.low) * prices.volume
+    num = mult.rolling(window=period).sum()
+    div = prices.volume.rolling(window=period).sum()
+    return num / div
+
+
+def calc_mfi(prices, period: int = 14):
+    """Money Flow Index"""
+    prc = calc_price(prices, "hlc")
+
+    flow = prc * prices.volume * np.sign(prc.diff(1))
+    pflow = np.clip(flow, 0.0, None)
+    nflow = -np.clip(flow, None, 0.0)
+
+    ratio = pflow.rolling(window=period).sum() / nflow.rolling(window=period).sum()
+
+    result = 100 - 100 / (1 + ratio)
 
     return result
 

@@ -155,6 +155,59 @@ class RSI(Indicator):
         return library.calc_rsi(series, self.period)
 
 
+
+class CCI(Indicator):
+    """Commodity Channel Index"""
+
+    oversold: float = -100
+    overbought: float = 100
+    yticks: tuple = -100, 0, 100
+
+    def __init__(self, period: int = 20):
+        self.period = period
+
+    def __call__(self, prices):
+        return library.calc_cci(prices, self.period)
+
+
+class BOP(Indicator):
+    """Balance of Power"""
+
+    def __init__(self, period: int = 20):
+        self.period = period
+
+    def __call__(self, prices):
+        return library.calc_bop(prices, self.period)
+
+
+class CMF(Indicator):
+    """Chaikin Money Flow"""
+
+    overbought = 0
+    oversold = 0
+
+    def __init__(self, period: int = 20):
+        self.period = period
+
+    def __call__(self, prices):
+        return library.calc_cmf(prices, self.period)
+
+
+class MFI(Indicator):
+    """Money Flow Index"""
+
+    overbought = 80
+    oversold = 20
+    yticks = 20, 50, 80
+
+    def __init__(self, period: int = 14):
+        self.period = period
+
+    def __call__(self, prices):
+        return library.calc_mfi(prices, self.period)
+
+
+
 class ADX(Indicator):
     """Average Directinal Index"""
 
