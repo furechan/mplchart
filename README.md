@@ -232,6 +232,6 @@ python -mpip install git+https://github.com/furechan/mplchart.git
 - [stockcharts.com](https://stockcharts.com/) Classic stock charts and technical analysis reference
 - [mplfinance](https://pypi.org/project/mplfinance/) Matplotlib utilities for the visualization, and visual analysis, of financial data
 - [matplotlib](https://github.com/matplotlib/matplotlib) Matplotlib: plotting with Python
-- [pandas](https://github.com/pandas-dev/pandas) Flexible and powerful data analysis / manipulation library for Python, providing labeled data structures similar to R data.frame objects, statistical functions, and much more
+- [pandas](https://github.com/pandas-dev/pandas) Flexible and powerful data analysis / manipulation library for Python
 - [yfinance](https://github.com/ranaroussi/yfinance) Download market data from Yahoo! Finance's API
 - [ta-lib](https://github.com/mrjbq7/ta-lib) Python wrapper for TA-Lib
