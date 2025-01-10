@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.0.21
+- Refactored `wrappers.py` into `plotters.py`
+- Single line indicators now accept a `line_style` attribute
+
 ## 0.0.20
 - Added `CCI` Indicator (Commodity Channel Index)
 - Added `BOP` Indicator (Balance of Power)

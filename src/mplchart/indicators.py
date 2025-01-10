@@ -117,7 +117,7 @@ class SLOPE(Indicator):
 class TSF(Indicator):
     """Time Siries Forecast (time linear regression)"""
 
-    same_scale = True
+    same_scale: bool = True
 
     def __init__(self, period: int = 20, offset: int =0):
         self.period = period
@@ -183,8 +183,7 @@ class BOP(Indicator):
 class CMF(Indicator):
     """Chaikin Money Flow"""
 
-    overbought = 0
-    oversold = 0
+    line_style: str = "area"
 
     def __init__(self, period: int = 20):
         self.period = period
@@ -196,9 +195,9 @@ class CMF(Indicator):
 class MFI(Indicator):
     """Money Flow Index"""
 
-    overbought = 80
-    oversold = 20
-    yticks = 20, 50, 80
+    overbought: float = 80
+    oversold: float = 20
+    yticks: tuple = 20, 50, 80
 
     def __init__(self, period: int = 14):
         self.period = period
@@ -256,7 +255,6 @@ class PPO(Indicator):
     def __call__(self, prices):
         series = self.get_series(prices)
         return library.calc_ppo(series, self.n1, self.n2, self.n3)
-
 
 
 class STOCH(Indicator):

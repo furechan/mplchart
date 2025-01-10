@@ -5,15 +5,14 @@ import warnings
 
 import matplotlib.pyplot as plt
 
-from functools import cached_property
 from collections import Counter
+from functools import cached_property
 
-
-from .wrappers import get_wrapper
 from .colors import closest_color
-from .utils import series_xy, same_scale, get_info
+from .utils import same_scale, get_info
 from .layout import make_twinx, StandardLayout
 from .mapper import RawDateMapper, DateIndexMapper
+from .plotters import AutoPlotter
 
 
 """
@@ -79,7 +78,6 @@ class Chart:
                 stacklevel=2,
             )
 
-
         if bgcolor is not None:
             warnings.warn(
                 "bgcolor parameter is deprecated. Use matplotlib styles instead!",
@@ -112,6 +110,7 @@ class Chart:
 
     @staticmethod
     def normalize(prices):
+        """normalize prices dataframe"""
         prices = prices.rename(columns=str.lower).rename_axis(index=str.lower)
         return prices
 
@@ -234,7 +233,7 @@ class Chart:
         return self.mapper.map_date(date)
 
     def set_title(self, title):
-        """Sets chart title on root axes. Must be called after init_axes!"""
+        """Set chart title on root axes. Must be called after init_axes!"""
 
         if title is None:
             return
@@ -245,7 +244,7 @@ class Chart:
         ax.set_title(title)
 
     def config_axes(self, ax, root=False):
-        """configures axes"""
+        """configure axes"""
 
         ax.set_xmargin(0.0)
         ax.set_axisbelow(True)
@@ -286,7 +285,7 @@ class Chart:
         self.config_axes(ax, root=True)
 
     def root_axes(self):
-        """returns root axes, usualy axes[0]"""
+        """root axes (usualy axes[0])"""
 
         if not self.figure.axes:
             warnings.warn("root_axes called before init_axes!")
@@ -295,7 +294,7 @@ class Chart:
         return self.figure.axes[0]
 
     def main_axes(self):
-        """returns main axes, usualy axes[1]"""
+        """main axes (usualy axes[1])"""
 
         if not self.figure.axes:
             warnings.warn("main_axes called before init_axes!")
@@ -348,7 +347,7 @@ class Chart:
 
     def get_axes(self, target=None, *, height_ratio=None):
         """
-        selects existing axes or creates new axes depending on target
+        select existing axes or creates new axes depending on target
 
         Args:
             target: one of "main", "same", twinx", "above", "below"
@@ -405,7 +404,7 @@ class Chart:
             print(i, label, xlim, ylim)
 
     def count_axes(self, include_root=False, include_twins=False):
-        """ " counts axes that are neither root or twinx"""
+        """count axes that are neither root or twinx"""
         count = 0
         for ax in self.figure.axes:
             label = getattr(ax, "_label", None)
@@ -417,7 +416,7 @@ class Chart:
         return count
 
     def calc_result(self, prices, indicator):
-        """ calculates indicator result saving last result"""
+        """calculate indicator result saving last result"""
 
         if indicator is not None:
             result = indicator(prices)
@@ -430,75 +429,44 @@ class Chart:
         return result
 
     def plot_indicator(self, data, indicator):
-        """calculates and plots an indicator"""
+        """calculate and plot an indicator"""
 
         # Call the indicator's plot_handler if defined (before any calc)
         # this is the only location where plot_handler is called
         # plot_handler is currently defined only for Primitives
-        # Note that dates have not been mapped yet (see slice)
+        # Note that data have not been mapped/sliced yet
         if hasattr(indicator, "plot_handler"):
             indicator.plot_handler(data, chart=self)
             return
 
         # Invoke indicator and compute result if indicator is callable
-        # Result data is mapped to the charting view (see slice)
+        # Result data is mapped to the charting view
         if callable(indicator):
             result = self.calc_result(data, indicator)
             result = self.slice(result)
         else:
             raise ValueError(f"Indicator {indicator!r} not callable")
 
-        # Use wrapper in place of indicator if applicable
-        wrapper = get_wrapper(indicator)
-        if wrapper is not None:
-            indicator = wrapper
+        plotter = AutoPlotter(self, indicator, result)
+        plotter.plot_all()
 
-        # Select axes according to indicator properties (default_pane, same_scale)
-        # target = self.get_target(indicator)
-        # ax = self.get_axes(target)
-        ax = None
-
-        # Calling indicator plot_result if present
-        # Note here we are calling plot_result with a defined axes
-        if hasattr(indicator, "plot_result"):
-            indicator.plot_result(result, chart=self, ax=ax)
-            return
-
-        self.plot_result(result, indicator, ax=ax)
-
-    def plot_result(self, result, indicator, ax=None):
-        """last resort plot_result handler"""
-
-        raise RuntimeError("Last resort handler is legacy!")
-
-        name = getattr(indicator, "__name__", str(indicator))
-
-        if result.__class__.__name__ == "Series":
-            result = result.to_frame()
-
-        for colnum, colname in enumerate(result):
-            label = name if colnum == 0 else colname
-            series = result[colname]
-            xv, yv = series_xy(series)
-            ax.plot(xv, yv, label=label)
 
     def add_legends(self):
-        """adds legends to all axes"""
+        """add legends to all axes"""
         for ax in self.figure.axes:
             handles, labels = ax.get_legend_handles_labels()
             if handles:
                 ax.legend(loc="upper left")
 
     def plot(self, prices, indicators, *, target=None, rebase=False):
-        """plots a list of indicators
+        """plot list of indicators
 
         Parameters
         ----------
         prices: dataframe
             the prices data frame
         indicators: list of indicators
-            list of indciators to plot
-
+            list of indicators to plot
         """
 
         self.last_result = None
@@ -517,7 +485,7 @@ class Chart:
         self.add_legends()
 
     def plot_vline(self, date):
-        """plots a vertical line across all axes"""
+        """plot vertical line across all axes"""
 
         if not self.figure.axes:
             raise RuntimeError("axes not initialized!")
@@ -528,7 +496,7 @@ class Chart:
         ax.axvline(xv, linestyle="dashed")
 
     def show(self):
-        """shows the chart"""
+        """show chart"""
         if not self.figure.axes:
             self.get_axes()
 
@@ -536,7 +504,7 @@ class Chart:
         plt.show()
 
     def render(self, format="svg", *, dpi="figure"):
-        """renders the chart to the specific format"""
+        """render chart to the specific format"""
         if not self.figure.axes:
             self.get_axes()
 

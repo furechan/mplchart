@@ -10,9 +10,17 @@ from .model import Wrapper
 from .utils import get_name, get_label, get_info
 
 
+warnings.warn(f"Module {__name__} is deprecated!", DeprecationWarning, stacklevel=2)
+
+
+# TODO Remove Wrappers
+
+
 @singledispatch
 def get_wrapper(indicator):
     """create rendering wrapper for indicator"""
+
+    warnings.warn("get_wrapper is deprecated!", DeprecationWarning, stacklevel=2)
 
     if hasattr(indicator, "plot_handler"):
         return None
@@ -22,6 +30,7 @@ def get_wrapper(indicator):
 
 class AutoWrapper(Wrapper):
     def __init__(self, indicator):
+        warnings.warn("AutoWrapper is deprecated!", DeprecationWarning, stacklevel=2)
         self.indicator = indicator
 
     def __call__(self, data):
