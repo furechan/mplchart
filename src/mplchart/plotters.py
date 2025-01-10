@@ -1,4 +1,4 @@
-"""auto indicator ploters"""
+"""auto indicator plotters"""
 
 import numpy as np
 import matplotlib.pyplot as plt
