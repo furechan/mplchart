@@ -228,7 +228,7 @@ class Chart:
         """map date to value"""
 
         if self.mapper is None:
-            raise ValueError("mapper was not configure yet!")
+            raise ValueError("mapper was not configured yet!")
 
         return self.mapper.map_date(date)
 
