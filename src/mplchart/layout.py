@@ -24,7 +24,7 @@ def make_twinx(ax, label="twinx"):
 
 
 class StandardLayout:
-    """Grispec Baeed Layout"""
+    """Grispec Based Layout"""
 
     use_tight_layout = True
 
@@ -93,7 +93,7 @@ class StandardLayout:
 
 
 class FixedLayout:
-    """Fixed Layout"""
+    """Fixed Layout (legacy)"""
 
     use_tight_layout = False
 
