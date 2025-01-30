@@ -74,8 +74,7 @@ class DateIndexFormatter(mticker.Formatter):
         size = len(self.index)
         idx = np.floor(value).astype(int).clip(0, size - 1)
         date = self.index[idx]
-        result = date.strftime(self.fmt)
-        return result
+        return date.strftime(self.fmt)
 
     def format_ticks(self, values):
         """date labels"""
