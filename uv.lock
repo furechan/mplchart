@@ -1049,12 +1049,12 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "invoke", specifier = ">=2.2.0" },
+    { name = "invoke" },
     { name = "ipykernel" },
     { name = "ipywidgets" },
     { name = "jinja2" },
     { name = "nbmake" },
-    { name = "nbmask", specifier = ">=0.0.4" },
+    { name = "nbmask" },
     { name = "numpy", specifier = "<2.0.0" },
     { name = "pytest" },
     { name = "ruff" },

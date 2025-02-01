@@ -20,6 +20,7 @@ classifiers = [
 
 [dependency-groups]
 dev = [
+    # numpy<2.0.0 to test with ta-lib
     "numpy<2.0.0",
     "yfinance",
     "ta-lib",
@@ -29,8 +30,8 @@ dev = [
     "jinja2",
     "ipywidgets",
     "ruff",
-    "nbmask>=0.0.4",
-    "invoke>=2.2.0",
+    "nbmask",
+    "invoke",
 ]
 
 
