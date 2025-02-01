@@ -30,6 +30,7 @@ dev = [
     "ipywidgets",
     "ruff",
     "nbmask>=0.0.4",
+    "invoke>=2.2.0",
 ]
 
 
