@@ -58,7 +58,7 @@ and a datetime index named `date` or `datetime`.
 Even though the chart object automatically converts price
 column names to lower case before calling any indicator,
 if you intend on using indicators independently from the chart object,
-you must use prices dataframes with with lower case column names!
+you must use prices dataframes with all lower case column names!
 
 
 
@@ -113,7 +113,11 @@ Some of the indicators included are:
 - `DMI` Directional Movement Index
 - `MACD` Moving Average Convergence Divergence
 - `PPO` Price Percentage Oscillator 
-- `SLOPE` Slope (time linear regression)
+- `CCI` Commodity Channel Index
+- `BOP` Balance of Power
+- `CMF` Chaikin Money Flow
+- `MFI` Money Flow Index
+- `SLOPE` Slope (linear regression)
 - `STOCH` Stochastic Oscillator
 - `BBANDS` Bollinger Bands
 - `KELTNER` Keltner Channel
@@ -207,17 +211,16 @@ class DEMA(Indicator):
 ```
 
 
-
 ## Examples
 
 You can find example notebooks and scripts in the `examples` folder. 
 
 ## Installation
 
-You can install the current version of this package with pip
+You can install this package with pip
 
 ```console
-python -mpip install git+https://github.com/furechan/mplchart.git
+pip install mplchart
 ```
 
 ## Dependencies
@@ -232,6 +235,6 @@ python -mpip install git+https://github.com/furechan/mplchart.git
 - [stockcharts.com](https://stockcharts.com/) Classic stock charts and technical analysis reference
 - [mplfinance](https://pypi.org/project/mplfinance/) Matplotlib utilities for the visualization, and visual analysis, of financial data
 - [matplotlib](https://github.com/matplotlib/matplotlib) Matplotlib: plotting with Python
-- [pandas](https://github.com/pandas-dev/pandas) Flexible and powerful data analysis / manipulation library for Python, providing labeled data structures similar to R data.frame objects, statistical functions, and much more
+- [pandas](https://github.com/pandas-dev/pandas) Flexible and powerful data analysis / manipulation library for Python
 - [yfinance](https://github.com/ranaroussi/yfinance) Download market data from Yahoo! Finance's API
 - [ta-lib](https://github.com/mrjbq7/ta-lib) Python wrapper for TA-Lib
