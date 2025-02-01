@@ -2,8 +2,8 @@
 
 import copy
 
-from abc import ABC, abstractmethod
 from types import MappingProxyType
+from abc import ABC, abstractmethod
 
 from .utils import short_repr, get_series
 

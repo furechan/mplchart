@@ -211,17 +211,16 @@ class DEMA(Indicator):
 ```
 
 
-
 ## Examples
 
 You can find example notebooks and scripts in the `examples` folder. 
 
 ## Installation
 
-You can install the current version of this package with pip
+You can install this package with pip
 
 ```console
-python -mpip install git+https://github.com/furechan/mplchart.git
+pip install mplchart
 ```
 
 ## Dependencies
