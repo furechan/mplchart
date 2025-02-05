@@ -283,7 +283,7 @@ class BBANDS(Indicator):
 
 
 class KELTNER(Indicator):
-    """Keltner Channels"""
+    """Keltner Channel"""
 
     same_scale: bool = True
 
@@ -293,6 +293,19 @@ class KELTNER(Indicator):
 
     def __call__(self, prices):
         return library.calc_keltner(prices, period=self.period, nbatr = self.nbatr)
+
+
+class DONCHIAN(Indicator):
+    """donchian Channel"""
+
+    same_scale: bool = True
+
+    def __init__(self, period: int = 20, nbatr: float = 2.0):
+        self.period = period
+
+    def __call__(self, prices):
+        return library.calc_donchian(prices, period=self.period)
+
 
 
 __all__ = [k for k in dir() if k.isupper()]

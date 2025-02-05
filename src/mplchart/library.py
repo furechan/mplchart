@@ -317,3 +317,13 @@ def calc_keltner(prices, period: int = 20, nbatr: float = 2.0):
 
     result = dict(upperband=upper, middleband=middle, lowerband=lower)
     return pd.DataFrame(result)
+
+def calc_donchian(prices, period: int = 20):
+    """Donchian Channel"""
+
+    upper = prices["high"].rolling(period).max()
+    lower = prices["low"].rolling(period).min()
+    middle = (upper + lower) / 2
+
+    result = dict(upperband=upper, middleband=middle, lowerband=lower)
+    return pd.DataFrame(result)
