@@ -300,7 +300,7 @@ class DONCHIAN(Indicator):
 
     same_scale: bool = True
 
-    def __init__(self, period: int = 20, nbatr: float = 2.0):
+    def __init__(self, period: int = 20):
         self.period = period
 
     def __call__(self, prices):
