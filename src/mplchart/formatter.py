@@ -20,9 +20,8 @@ def date_labels(dates):
     start, end, count = dates[0], dates[-1], len(dates)
     years = end.year - start.year
     months = years * 12 + end.month - start.month
-
-    delta = (end - start) / pd.Timedelta(days=1)
-    interval = delta / (count - 1) if count > 1 else 0
+    days = (end - start) / pd.Timedelta(days=1)
+    interval = days / (count - 1) if count > 1 else 0
 
     if interval > 300:
         formats = ("%Y",)

@@ -51,8 +51,8 @@ def dump(ctx):
 @task
 def publish(ctx, testpypi=False):
     """Publish to PyPI with twine"""
-    repoarg = "--repository testpypi" if testpypi else ""
-    ctx.run(f"twine upload {repoarg} dist/*.whl")
+    flags = "--repository testpypi" if testpypi else ""
+    ctx.run(f"twine upload {flags} dist/*.whl")
 
 
 @task
