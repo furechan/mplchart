@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.0.23
+- Added `QSF` Indicator (Qadratil Series Forecast)
+- Added `CURVE` Indicator (Curve)
+
 ## 0.0.22
 - Added `DONCHIAN` Indicator (Donchian Channel)
 

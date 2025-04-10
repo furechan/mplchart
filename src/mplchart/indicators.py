@@ -104,7 +104,7 @@ class ATRP(Indicator):
 
 
 class SLOPE(Indicator):
-    """Slope (time linear regression)"""
+    """Slope (Linear Regression)"""
 
     def __init__(self, period: int = 20):
         self.period = period
@@ -113,9 +113,21 @@ class SLOPE(Indicator):
         series = self.get_series(prices)
         return library.calc_slope(series, self.period)
 
+class CURVE(Indicator):
+    """Curve (Quadratic Regression)"""
+
+    line_style: str = "area"
+
+    def __init__(self, period: int = 20):
+        self.period = period
+
+    def __call__(self, prices):
+        series = self.get_series(prices)
+        return library.calc_curve(series, self.period)
+
 
 class TSF(Indicator):
-    """Time Siries Forecast (time linear regression)"""
+    """Time Series Forecast (Linear Regression)"""
 
     same_scale: bool = True
 
@@ -126,6 +138,20 @@ class TSF(Indicator):
     def __call__(self, prices):
         series = self.get_series(prices)
         return library.calc_tsf(series, period=self.period, offset=self.offset)
+
+
+class QSF(Indicator):
+    """Quadratic Series Forecast (Qquadratic Regression)"""
+
+    same_scale: bool = True
+
+    def __init__(self, period: int = 20, offset: int =0):
+        self.period = period
+        self.offset = offset
+
+    def __call__(self, prices):
+        series = self.get_series(prices)
+        return library.calc_qsf(series, period=self.period, offset=self.offset)
 
 
 class RVALUE(Indicator):
@@ -173,7 +199,7 @@ class CCI(Indicator):
 class BOP(Indicator):
     """Balance of Power"""
 
-    def __init__(self, period: int = 20):
+    def __init__(self, period: int = 14):
         self.period = period
 
     def __call__(self, prices):

@@ -117,7 +117,7 @@ def calc_cci(prices, period: int = 20):
     return (prc - sma) / div
 
 
-def calc_bop(prices, period: int = 20):
+def calc_bop(prices, period: int = 14):
     """Balance of Power"""
 
     bop = (prices.close - prices.open) / (prices.high - prices.low)
@@ -235,9 +235,9 @@ def calc_ndi(prices, period: int = 14):
 
 
 def calc_slope(series, period: int = 20):
-    """Slope (time linear regression)"""
+    """Slope (Linear Regression)"""
 
-    xx = np.arange(period) - (period - 1) / 2.0
+    xx = np.arange(period, dtype=float)
 
     def func(xs):
         if np.any(np.isnan(xs)):
@@ -248,23 +248,55 @@ def calc_slope(series, period: int = 20):
     return series.rolling(window=period).apply(func, raw=True)
 
 
-def calc_tsf(series, period: int = 20, offset: int = 0):
-    """Time series forecast (time linear regression)"""
+def calc_curve(series, period: int = 20):
+    """Curve (Quadratic Regression)"""
 
-    xx = np.arange(period) - (period - 1) / 2.0
-    xo = xx[-1] + offset
+    xx = np.arange(period, dtype=float)
+
+    def func(xs):
+        if np.any(np.isnan(xs)):
+            return np.nan
+
+        return np.polyfit(xx, xs, 2)[0]
+
+    return series.rolling(window=period).apply(func, raw=True)
+
+
+
+def calc_tsf(series, period: int = 20, offset: int = 0):
+    """Time Series Forecast (Linear Regression)"""
+
+    xx = np.arange(period, dtype=float)
+    x1 = period - 1 + offset
 
     def func(xs):
         if np.any(np.isnan(xs)):
             return np.nan
         a, b = np.polyfit(xx, xs, 1)
-        return a * xo + b
+        return a * x1 + b
 
     return series.rolling(window=period).apply(func, raw=True)
 
 
+def calc_qsf(series, period: int = 20, offset: int = 0):
+    """Quadratic Series Forecast (Quadratic Regression)"""
+
+    xx = np.arange(period, dtype=float)
+    x1 = period - 1 + offset
+    x2 = x1 * x1
+
+    def func(xs):
+        if np.any(np.isnan(xs)):
+            return np.nan
+        a, b, c = np.polyfit(xx, xs, 2)
+        return a * x2 + b * x1 + c
+
+    return series.rolling(window=period).apply(func, raw=True)
+
+
+
 def calc_rvalue(series, period: int = 20):
-    """R-Value (time linear regression)"""
+    """R-Value (Linear Regression)"""
 
     xx = np.arange(period) - (period - 1) / 2.0
 

@@ -34,6 +34,7 @@ dev = [
     "nbmask",
     "invoke",
     "pdoc>=15.0.1",
+    "numba"
 ]
 
 
