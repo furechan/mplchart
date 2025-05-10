@@ -333,5 +333,35 @@ class DONCHIAN(Indicator):
         return library.calc_donchian(prices, period=self.period)
 
 
+class DEMA(Indicator):
+    """Double Exponential Moving Average"""
+
+    same_scale: bool = True 
+
+    def __init__(self, period: int = 20):
+        self.period = period
+
+    def __call__(self, prices):
+        series = self.get_series(prices)
+        ema1 = library.calc_ema(series, self.period)
+        ema2 = library.calc_ema(ema1, self.period)
+        return 2 * ema1 - ema2
+
+
+class TEMA(Indicator):
+    """Tripple Exponential Moving Average"""
+
+    same_scale: bool = True
+
+    def __init__(self, period: int = 20):
+        self.period = period
+
+    def __call__(self, prices):
+        series = self.get_series(prices)
+        ema1 = library.calc_ema(series, self.period)
+        ema2 = library.calc_ema(ema1, self.period)
+        ema3 = library.calc_ema(ema2, self.period)
+        return 3 * ema1 - 3 * ema2 + ema3
+
 
 __all__ = [k for k in dir() if k.isupper()]

@@ -1,8 +1,10 @@
 # Change Log
 
 ## 0.0.23
-- Added `QSF` Indicator (Qadratil Series Forecast)
-- Added `CURVE` Indicator (Curve)
+- Added `QSF` Indicator (Quadratic Series Forecast)
+- Added `CURVE` Indicator (Quadratic Regression)
+- Added `DEMA` Indicator (Double Exponential Moving Average)
+- Added `TEMA` Indicator (Triple Exponential Moving Average)
 
 ## 0.0.22
 - Added `DONCHIAN` Indicator (Donchian Channel)
