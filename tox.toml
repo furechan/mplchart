@@ -11,5 +11,5 @@ set_env = { PYTHONDONTWRITEBYTECODE="1" }
 [env.ruff]
 deps = ["ruff"]
 commands = [["python", "-m", "ruff", "check"]]
-set_env = { RUFF_CACHE_DIR="~/.cache/ruff" }
+set_env = { RUFF_CACHE_DIR=".venv/ruff_cache" }
 skip_install = true
