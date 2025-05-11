@@ -79,7 +79,7 @@ class Color:
         
         colors = getattr(indicator, 'colors', {})
         if not isinstance(colors, Mapping):
-            raise TypeError("colors attribute is a ot a mapping!")
+            raise TypeError("colors attribute is not a mapping!")
         colors = dict(colors)
 
         if self.color:

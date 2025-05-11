@@ -13,7 +13,7 @@ def make_info(**kwargs):
 
 
 def get_info(indicator, name: str, default=None):
-    """get metadata from from `info` dict or attributes"""
+    """get metadata from `info` dict is present or attributes"""
 
     metadata = getattr(indicator, "metadata", None)
     if metadata is not None:  # metadata dict
