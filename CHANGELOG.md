@@ -5,6 +5,7 @@
 - Added `CURVE` Indicator (Quadratic Regression)
 - Added `DEMA` Indicator (Double Exponential Moving Average)
 - Added `TEMA` Indicator (Triple Exponential Moving Average)
+- Switched to `tox.toml`
 
 ## 0.0.22
 - Added `DONCHIAN` Indicator (Donchian Channel)
