@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 name = "mplchart"
 version = "0.0.23"
 requires-python = ">=3.9"
-readme = "output/README.md"
+readme = "output/pypi-readme.md"
 description = "Classic Stock Charts in Python"
 urls.homepage = "https://github.com/furechan/mplchart"
 authors = [{ name = "Furechan", email = "furechan@xsmail.com" }]

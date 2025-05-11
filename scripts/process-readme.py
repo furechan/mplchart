@@ -68,7 +68,7 @@ def main():
     options = parser.parse_args()
 
     readme = ROOTDIR.joinpath("README.md").resolve(strict=True)
-    outfile = ROOTDIR.joinpath("output/README.md").resolve()
+    outfile = ROOTDIR.joinpath("output/pypi-readme.md").resolve()
 
     project_url = get_project_url()
 

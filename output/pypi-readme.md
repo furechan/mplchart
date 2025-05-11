@@ -121,6 +121,8 @@ Some of the indicators included are:
 - `STOCH` Stochastic Oscillator
 - `BBANDS` Bollinger Bands
 - `KELTNER` Keltner Channel
+- `DEMA` Double Exponential Moving Average
+- `TEMA` Triple Exponential Moving Average
 
 
 
@@ -195,9 +197,8 @@ from mplchart.library import calc_ema
 class DEMA(Indicator):
     """Double Exponential Moving Average"""
 
-    same_scale = True
-    # same_scale is an optional class attribute
-    # to specify that the indicator can be drawn
+    same_scale: bool = True
+    # boolean, whether the indicator can be drawn
     # on the same axes as the prices
 
     def __init__(self, period: int = 20):
