@@ -343,9 +343,7 @@ class DEMA(Indicator):
 
     def __call__(self, prices):
         series = self.get_series(prices)
-        ema1 = library.calc_ema(series, self.period)
-        ema2 = library.calc_ema(ema1, self.period)
-        return 2 * ema1 - ema2
+        return library.calc_dema(series, self.period)
 
 
 class TEMA(Indicator):
@@ -358,10 +356,7 @@ class TEMA(Indicator):
 
     def __call__(self, prices):
         series = self.get_series(prices)
-        ema1 = library.calc_ema(series, self.period)
-        ema2 = library.calc_ema(ema1, self.period)
-        ema3 = library.calc_ema(ema2, self.period)
-        return 3 * ema1 - 3 * ema2 + ema3
+        return library.calc_tema(series, self.period)
 
 
 __all__ = [k for k in dir() if k.isupper()]

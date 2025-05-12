@@ -138,8 +138,8 @@ def calc_mfi(prices, period: int = 14):
     prc = calc_price(prices, "hlc")
 
     flow = prc * prices.volume * np.sign(prc.diff(1))
-    pflow = np.clip(flow, 0.0, None)
-    nflow = -np.clip(flow, None, 0.0)
+    pflow = np.clip(+flow, 0.0, None)
+    nflow = np.clip(-flow, 0.0, None)
 
     ratio = pflow.rolling(window=period).sum() / nflow.rolling(window=period).sum()
 
@@ -359,3 +359,17 @@ def calc_donchian(prices, period: int = 20):
 
     result = dict(upperband=upper, middleband=middle, lowerband=lower)
     return pd.DataFrame(result)
+
+def calc_dema(series, period: int = 20):
+    """Double Exponential Moving Average"""
+    ema1 = calc_ema(series, period)
+    ema2 = calc_ema(ema1, period)
+    return 2 * ema1 - ema2
+
+def calc_tema(series, period: int = 20):
+    """Triple Exponential Moving Average"""
+    ema1 = calc_ema(series, period)
+    ema2 = calc_ema(ema1, period)
+    ema3 = calc_ema(ema2, period)
+    return 3 * (ema1 - ema2) + ema3
+
