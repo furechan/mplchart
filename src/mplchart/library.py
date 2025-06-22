@@ -67,7 +67,8 @@ def calc_rsi(series, period: int = 14):
 
 def calc_rsi_roc(series, period=14, roc_period=5):
     rsi = calc_rsi(series, period=period)
-    rsi_roc = ((rsi - rsi.shift(roc_period)) / rsi.shift(roc_period)) * 100
+    rsi_ma = rsi.rolling(window=roc_period).mean()
+    rsi_roc = ((rsi - rsi_ma.shift(1)) / rsi_ma.shift(1)) * 100
     return rsi_roc
 
 def calc_atr(prices, period: int = 14, *, percent: bool = False):

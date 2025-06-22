@@ -122,9 +122,9 @@ class RSI(Indicator):
 class RSIROC(Indicator):
     """RSI Rate of Change"""
 
-    oversold: float = -30
-    overbought: float = 30
-    yticks: tuple = -30, 0, 30
+    oversold: float = -10
+    overbought: float = 10
+    yticks: tuple = -10, 0, 10
 
     def __init__(self, period: int = 14, roc_period: int = 5):
         self.period = period
