@@ -2,11 +2,13 @@
 
 import pandas as pd
 
+from functools import lru_cache
 from importlib import resources
 
 TIMEZONE = "America/New_York"
 
 
+@lru_cache
 def sample_prices(freq: str = "daily", *, max_bars: int = 0):
     """Sample prices"""
 
