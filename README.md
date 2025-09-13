@@ -125,11 +125,9 @@ Some of the indicators included are:
 - `TEMA` Triple Exponential Moving Average
 
 
+## Talib Indicators
 
-## Talib Functions
-
-If you have [ta-lib](https://github.com/mrjbq7/ta-lib) installed you can use the library abstract functions as indicators.
-The indicators are created by calling `Function` with the name of the indicator and its parameters.
+If you have `ta-lib` installed you can use its abstract functions as indicators. The indicators are created by calling `Function` with the name of the indicator and its parameters.
 
 ```python
 # Candlesticks chart with talib indicators
@@ -145,7 +143,6 @@ indicators = [
     Function('MACD'),
 ]
 ```
-
 
 ## Override indicator rendering with the plotting primitives
 
@@ -238,4 +235,3 @@ pip install mplchart
 - [matplotlib](https://github.com/matplotlib/matplotlib) Matplotlib: plotting with Python
 - [pandas](https://github.com/pandas-dev/pandas) Flexible and powerful data analysis / manipulation library for Python
 - [yfinance](https://github.com/ranaroussi/yfinance) Download market data from Yahoo! Finance's API
-- [ta-lib](https://github.com/mrjbq7/ta-lib) Python wrapper for TA-Lib

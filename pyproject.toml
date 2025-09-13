@@ -1,6 +1,8 @@
+# See https://docs.astral.sh/uv/concepts/build-backend/
+
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["uv_build>=0.8.0,<0.9.0"]
+build-backend = "uv_build"
 
 
 [project]
@@ -21,10 +23,8 @@ classifiers = [
 
 [dependency-groups]
 dev = [
-    # numpy<2.0.0 to test with ta-lib
-    "numpy<2.0.0",
+    "numpy",
     "yfinance",
-    "ta-lib",
     "pytest",
     "nbmake",
     "ipykernel",
@@ -33,12 +33,16 @@ dev = [
     "ruff",
     "nbmask",
     "invoke",
-    "pdoc>=15.0.1",
-    "numba"
+    "pdoc",
+    "numba",
+    "ta-lib>=0.6.7",
 ]
 
+[tool.legacy.build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.hatch.build]
+[tool.legacy.hatch.build]
 targets.wheel.sources = ["src"]
 dev-mode-dirs = ["src"]
 only-include = ["src"]

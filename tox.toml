@@ -4,7 +4,7 @@
 
 work_dir = ".venv/tox"
 requires = ["tox>=4.19"]
-env_list = ["3.9", "3.10", "3.11", "3.12", "ruff"]
+env_list = ["3.9", "3.10", "3.11", "3.12", "3.13", "ruff"]
 
 [env_run_base]
 deps = ["pytest"]

@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.24
+- Swithed to ub-build backend
+
 ## 0.0.23
 - Added `QSF` Indicator (Quadratic Series Forecast)
 - Added `CURVE` Indicator (Quadratic Regression)
