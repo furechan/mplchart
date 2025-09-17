@@ -2,6 +2,9 @@
 
 ## 0.0.24
 - Swithed to ub-build backend
+- Added `BBP` Indicator (Bollinger Bands Percent)
+- Added `BBW` Indicator (Bollinger Bands Width)
+
 
 ## 0.0.23
 - Added `QSF` Indicator (Quadratic Series Forecast)
