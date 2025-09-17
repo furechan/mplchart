@@ -328,14 +328,39 @@ def calc_stoch(prices, period: int = 14, fastn: int = 3, slown: int = 3):
 
 def calc_bbands(prices, period: int = 20, nbdev: float = 2.0):
     """Bollinger Bands"""
-    midprc = (prices["high"] + prices["low"] + prices["close"]) / 3.0
-    std = midprc.rolling(period).std(ddof=0)
-    middle = midprc.rolling(period).mean()
+    prc = (prices["high"] + prices["low"] + prices["close"]) / 3.0
+    std = prc.rolling(period).std(ddof=0)
+    middle = prc.rolling(period).mean()
     upper = middle + nbdev * std
     lower = middle - nbdev * std
 
     result = dict(upperband=upper, middleband=middle, lowerband=lower)
     return pd.DataFrame(result)
+
+
+def calc_bbp(prices, period: int = 20, nbdev: float = 2.0):
+    """Bollinger Bands Percent (%B)"""
+    prc = (prices["high"] + prices["low"] + prices["close"]) / 3.0
+    std = prc.rolling(period).std(ddof=0)
+    middle = prc.rolling(period).mean()
+    upper = middle + nbdev * std
+    lower = middle - nbdev * std
+
+    result = (prc - lower) / (upper - lower) * 100
+    return result
+
+
+def calc_bbw(prices, period: int = 20, nbdev: float = 2.0):
+    """Bollinger Bands Width"""
+    prc = (prices["high"] + prices["low"] + prices["close"]) / 3.0
+    std = prc.rolling(period).std(ddof=0)
+    middle = prc.rolling(period).mean()
+    upper = middle + nbdev * std
+    lower = middle - nbdev * std
+
+    result = (upper - lower) / middle * 100
+    return result
+
 
 
 def calc_keltner(prices, period: int = 20, nbatr: float = 2.0):

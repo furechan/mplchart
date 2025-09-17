@@ -308,6 +308,29 @@ class BBANDS(Indicator):
         return library.calc_bbands(prices, self.period, self.nbdev)
 
 
+class BBP(Indicator):
+    """Bollinger Bands Percent (%B)"""
+
+    def __init__(self, period: int = 20, nbdev: float = 2.0):
+        self.period = period
+        self.nbdev = nbdev
+
+    def __call__(self, prices):
+        return library.calc_bbp(prices, self.period, self.nbdev)
+
+
+class BBW(Indicator):
+    """Bollinger Bands Width"""
+
+    def __init__(self, period: int = 20, nbdev: float = 2.0):
+        self.period = period
+        self.nbdev = nbdev
+
+    def __call__(self, prices):
+        return library.calc_bbw(prices, self.period, self.nbdev)
+
+
+
 class KELTNER(Indicator):
     """Keltner Channel"""
 
