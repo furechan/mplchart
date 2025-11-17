@@ -166,18 +166,6 @@ def calc_atr(prices, period: int = 14, *, percent: bool = False):
     return result
 
 
-def calc_macd(series, n1: int = 20, n2: int = 26, n3: int = 9):
-    """Moving Average Convergence Divergence"""
-    ema1 = calc_ema(series, n1)
-    ema2 = calc_ema(series, n2)
-    macd = ema1 - ema2
-    signal = calc_ema(macd, n3)
-    hist = macd - signal
-
-    result = dict(macd=macd, macdsignal=signal, macdhist=hist)
-    result = pd.DataFrame(result)
-    return result
-
 
 def calc_ppo(series, n1: int = 20, n2: int = 26, n3: int = 9):
     """Price Percentage Oscillator"""
@@ -189,6 +177,32 @@ def calc_ppo(series, n1: int = 20, n2: int = 26, n3: int = 9):
 
     result = dict(ppo=ppo, pposignal=signal, ppohist=hist)
     return pd.DataFrame(result)
+
+
+def calc_macd(series, n1: int = 20, n2: int = 26, n3: int = 9):
+    """Moving Average Convergence Divergence"""
+    ema1 = calc_ema(series, n1)
+    ema2 = calc_ema(series, n2)
+    macd = ema1 - ema2
+    signal = calc_ema(macd, n3)
+    hist = macd - signal
+
+    result = dict(macd=macd, macdsignal=signal, macdhist=hist)
+    return pd.DataFrame(result)
+
+
+def calc_macdv(prices, n1: int = 20, n2: int = 26, n3: int = 9):
+    """Moving Average Convergence Divergence - Volatility Normalized"""
+    ema1 = calc_ema(prices.close, n1)
+    ema2 = calc_ema(prices.close, n2)
+    atr = calc_atr(prices, period=n2)
+    macd = (ema1 - ema2) / atr * 100
+    signal = calc_ema(macd, n3)
+    hist = macd - signal
+
+    result = dict(macd=macd, macdsignal=signal, macdhist=hist)
+    return pd.DataFrame(result)
+
 
 
 def calc_dmi(prices, period: int = 14):
@@ -211,9 +225,7 @@ def calc_dmi(prices, period: int = 14):
     adx = dx.ewm(**ewm).mean()
 
     result = dict(adx=adx, pdi=pdi, ndi=ndi)
-    result = pd.DataFrame(result)
-
-    return result
+    return pd.DataFrame(result)
 
 
 def calc_adx(prices, period: int = 14):

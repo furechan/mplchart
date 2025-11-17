@@ -1,14 +1,13 @@
-# See https://docs.astral.sh/uv/concepts/build-backend/
-
 [build-system]
-requires = ["uv_build>=0.8.0,<0.9.0"]
 build-backend = "uv_build"
+requires = ["uv_build>=0.8.0,<0.9.0"]
+# See https://docs.astral.sh/uv/concepts/build-backend/
 
 
 [project]
 name = "mplchart"
-version = "0.0.24"
-requires-python = ">=3.9"
+version = "0.0.25"
+requires-python = ">=3.10"
 readme = "output/pypi-readme.md"
 description = "Classic Stock Charts in Python"
 urls.homepage = "https://github.com/furechan/mplchart"
