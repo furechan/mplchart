@@ -37,16 +37,6 @@ dev = [
     "ta-lib>=0.6.7",
 ]
 
-[tool.legacy.build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.legacy.hatch.build]
-targets.wheel.sources = ["src"]
-dev-mode-dirs = ["src"]
-only-include = ["src"]
-exclude = [".*"]
-
 [tool.pytest.ini_options]
 addopts = ["-p no:cacheprovider"]
 testpaths = ["tests"]
