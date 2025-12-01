@@ -35,6 +35,7 @@ dev = [
     "pdoc",
     "numba",
     "ta-lib>=0.6.7",
+    "marimo>=0.18.1",
 ]
 
 [tool.pytest.ini_options]
