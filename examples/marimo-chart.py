@@ -38,10 +38,5 @@ def _(Candlesticks, Chart, MACD, RSI, SMA, Volume, plt, ticker, yf):
     return
 
 
-@app.cell
-def _():
-    return
-
-
 if __name__ == "__main__":
     app.run()
