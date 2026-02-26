@@ -5,8 +5,8 @@ import pandas as pd
 
 import warnings
 
-from .locator import DateIndexLocator
-from .formatter import DateIndexFormatter
+from .locators import DateIndexLocator
+from .formatters import DateIndexFormatter
 
 
 class RawDateMapper:

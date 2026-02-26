@@ -10,10 +10,12 @@ from functools import cached_property
 
 from .colors import closest_color
 from .utils import same_scale, get_info
-from .layout import make_twinx, StandardLayout
+from .layout import make_twinx, init_vplot, add_vplot
 from .mapper import RawDateMapper, DateIndexMapper
 from .plotters import AutoPlotter
 
+
+USE_TIGHT_LAYOUT = True
 
 """
 How primitives/indicators are plotted
@@ -46,7 +48,6 @@ class Chart:
     source_data = None
     next_target = None
     last_result = None
-    layout = StandardLayout
 
     DEFAULT_FIGSIZE = (12, 9)
 
@@ -94,7 +95,7 @@ class Chart:
         if title:
             self.set_title(title)
 
-        if self.layout.use_tight_layout:
+        if USE_TIGHT_LAYOUT:
             self.figure.set_layout_engine("tight")
 
     @cached_property
@@ -281,7 +282,7 @@ class Chart:
         # Must be called after the layout is set !
         # The root axes is needed before set_title, config_mapping
 
-        ax = self.layout.init_vplot(self.figure)
+        ax = init_vplot(self.figure)
         self.config_axes(ax, root=True)
 
     def root_axes(self):
@@ -372,7 +373,7 @@ class Chart:
         axes = [ax for ax in self.figure.axes if ax._label not in ("root", "twinx")]
 
         if not axes:
-            ax = self.layout.add_vplot(figure=figure)
+            ax = add_vplot(figure=figure)
         else:
             if target == "main":
                 return axes[0]
@@ -388,7 +389,7 @@ class Chart:
             if not height_ratio:
                 height_ratio = 0.2
 
-            ax = self.layout.add_vplot(
+            ax = add_vplot(
                 figure=figure, height_ratio=height_ratio, append=append
             )
 

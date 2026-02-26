@@ -1,9 +1,7 @@
 """ ticker formatters """
 
-import numpy as np
 import pandas as pd
 
-import matplotlib.ticker as mticker
 
 """
 strftime formats specifiers
@@ -17,6 +15,8 @@ strftime formats specifiers
 
 
 def date_labels(dates):
+    """labels for a sequence of dates (pandas based)"""
+    
     start, end, count = dates[0], dates[-1], len(dates)
     years = end.year - start.year
     months = years * 12 + end.month - start.month
@@ -55,29 +55,3 @@ def date_labels(dates):
 
     return labels
 
-
-class DateIndexFormatter(mticker.Formatter):
-    """Formatter based on a pandas DateTimeIndex"""
-
-    def __init__(self, index, *, fmt="%Y-%m-%d"):
-        if index is None:
-            raise ValueError("index is None!")
-        self.index = index
-        self.fmt = fmt
-
-    def __call__(self, value, pos=None):
-        return self.format_data(value)
-
-    def format_data(self, value):
-        """date label"""
-        size = len(self.index)
-        idx = np.floor(value).astype(int).clip(0, size - 1)
-        date = self.index[idx]
-        return date.strftime(self.fmt)
-
-    def format_ticks(self, values):
-        """date labels"""
-        size = len(self.index)
-        idx = np.floor(values).astype(int).clip(0, size - 1)
-        dates = self.index[idx]
-        return date_labels(dates)
