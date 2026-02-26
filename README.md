@@ -223,15 +223,15 @@ pip install mplchart
 
 ## Dependencies
 
-- python >= 3.9
+- python >= 3.10
 - matplotlib
 - pandas
 - numpy
 
 
 ## Related Projects & Resources
-- [stockcharts.com](https://stockcharts.com/) Classic stock charts and technical analysis reference
-- [mplfinance](https://pypi.org/project/mplfinance/) Matplotlib utilities for the visualization, and visual analysis, of financial data
-- [matplotlib](https://github.com/matplotlib/matplotlib) Matplotlib: plotting with Python
-- [pandas](https://github.com/pandas-dev/pandas) Flexible and powerful data analysis / manipulation library for Python
-- [yfinance](https://github.com/ranaroussi/yfinance) Download market data from Yahoo! Finance's API
+- [stockcharts.com](https://stockcharts.com/) - Classic stock charts and technical analysis reference
+- [mplfinance](https://pypi.org/project/mplfinance/) - Matplotlib utilities for the visualization, and visual analysis, of financial data
+- [matplotlib](https://github.com/matplotlib/matplotlib) - Matplotlib: plotting with Python
+- [pandas](https://github.com/pandas-dev/pandas) - Flexible and powerful data analysis / manipulation library for Python
+- [yfinance](https://github.com/ranaroussi/yfinance) - Download market data from Yahoo! Finance's API

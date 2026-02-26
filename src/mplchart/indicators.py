@@ -257,6 +257,19 @@ class DMI(Indicator):
         return library.calc_dmi(prices, self.period)
 
 
+class PPO(Indicator):
+    """Price Percentage Oscillator"""
+
+    def __init__(self, n1: int = 12, n2: int = 26, n3: int = 9):
+        self.n1 = n1
+        self.n2 = n2
+        self.n3 = n3
+
+    def __call__(self, prices):
+        series = self.get_series(prices)
+        return library.calc_ppo(series, self.n1, self.n2, self.n3)
+
+
 class MACD(Indicator):
     """Moving Average Convergence Divergence"""
 
@@ -270,8 +283,8 @@ class MACD(Indicator):
         return library.calc_macd(series, self.n1, self.n2, self.n3)
 
 
-class PPO(Indicator):
-    """Price Percentage Oscillator"""
+class MACDV(Indicator):
+    """Moving Average Convergence Divergence - Volatility Normalized"""
 
     def __init__(self, n1: int = 12, n2: int = 26, n3: int = 9):
         self.n1 = n1
@@ -279,8 +292,7 @@ class PPO(Indicator):
         self.n3 = n3
 
     def __call__(self, prices):
-        series = self.get_series(prices)
-        return library.calc_ppo(series, self.n1, self.n2, self.n3)
+        return library.calc_macdv(prices, self.n1, self.n2, self.n3)
 
 
 class STOCH(Indicator):

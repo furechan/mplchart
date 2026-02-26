@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.0.25
+- Python-rewquires >= 10
+- Added `MACDV` Indicator (MACD - Volatility Normalized)
+
 ## 0.0.24
 - Swithed to ub-build backend
 - Added `BBP` Indicator (Bollinger Bands Percent)
