@@ -200,14 +200,6 @@ class Chart:
 
         return color
 
-    def extract_df(self, data):
-        """extract dataframe subset (deprecated)"""
-
-        if self.mapper is None:
-            self.init_mapper(data)
-
-        return self.mapper.extract_df(data)
-
     def reindex(self, data):
         """re-index data"""
 

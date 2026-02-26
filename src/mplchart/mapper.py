@@ -23,16 +23,6 @@ class RawDateMapper:
         self.start = index[0]
         self.end = index[-1]
 
-    def extract_df(self, data):
-        """extract data by mapping date to positions (deprecated)"""
-
-        warnings.warn("extract_df is deprecated. Use slice instead!", DeprecationWarning, stacklevel=2)
-
-        if self.start or self.end:
-            data = data.loc[self.start : self.end]
-
-        return data
-
     def reindex(self, data):
         """re-index data by mapping dates to positions"""
 
@@ -77,19 +67,6 @@ class DateIndexMapper:
             index = index[-max_bars:]
 
         self.index = index
-
-    def extract_df(self, data):
-        """extract data by mapping date to positions (deprecated)"""
-
-        warnings.warn("extract_df is deprecated. Use slice instead!", DeprecationWarning, stacklevel=2)
-
-        xloc = pd.Series(np.arange(len(self.index)), index=self.index)
-
-        xloc, data = xloc.align(data, join="inner")
-
-        data = data.set_axis(xloc)
-
-        return data
 
 
     def reindex(self, data):
