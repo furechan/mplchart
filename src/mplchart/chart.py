@@ -21,12 +21,21 @@ USE_TIGHT_LAYOUT = True
 How primitives/indicators are plotted
 1) try plot_handler. No processing or no reindexing yet
 2) call indicator / process data
-3) call slice or reindex / map dataframe
+3) call slice / map index and slice data to charting view
 3) replace indicator with wrapper if applicable
 4) select/create axes
 5) try indicator plot_result if applicable
 6) otherwise plot series as lines
 """
+
+# TODO include an early transformation phase before calculation to prepare the data for indicators
+# This should initialize the mapper and prepare the data, possibly modifying the index
+# This phase could reset the index to a range index and move dates to a `datetime` columns  
+# This phase could possibly align data along the date axis when plotting multiple prices 
+# Create mapper then prepare/transform data. This may be done in place of `normalize`
+# The mapper could be backend specific like pandas/polars etc ...
+# This should be the single place where mapper is created, instead of Chart.slice
+# If we decide to reset the index to a range index then the slicing logic is different 
 
 
 class Chart:
