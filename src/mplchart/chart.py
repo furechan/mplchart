@@ -35,7 +35,8 @@ How primitives/indicators are plotted
 # Create mapper then prepare/transform data. This may be done in place of `normalize`
 # The mapper could be backend specific like pandas/polars etc ...
 # This should be the single place where mapper is created, instead of Chart.slice
-# If we decide to reset the index to a range index then the slicing logic is different 
+# If we decide to reset the index to a range index then the slicing logic is different
+# Forcing a range index could facilitate porting logic to polars dataframes or not ?
 
 
 class Chart:
