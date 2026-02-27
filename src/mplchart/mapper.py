@@ -23,16 +23,6 @@ class RawDateMapper:
         self.start = index[0]
         self.end = index[-1]
 
-    def reindex(self, data):
-        """re-index data by mapping dates to positions"""
-
-        warnings.warn("reindex is deprecated. Use slice instead!", DeprecationWarning, stacklevel=2)
-
-        if self.start or self.end:
-            data = data.loc[self.start : self.end]
-
-        return data
-
     def slice(self, data):
         """re-index and slice data"""
 
@@ -68,19 +58,6 @@ class DateIndexMapper:
 
         self.index = index
 
-
-    def reindex(self, data):
-        """re-index data by mapping dates to positions"""
-
-        warnings.warn("reindex is deprecated. Use slice instead!", DeprecationWarning, stacklevel=2)
-
-        xloc = pd.Series(np.arange(len(self.index)), index=self.index, name='xloc')
-
-        xloc, data = xloc.align(data, join="inner")
-
-        data = data.set_axis(xloc)
-
-        return data
 
 
     def slice(self, data):

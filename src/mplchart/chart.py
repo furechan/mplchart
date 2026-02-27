@@ -118,6 +118,9 @@ class Chart:
     def init_mapper(self, data):
         """initalizes chart and mapper with price data"""
 
+        # currently this is only called once in Chart.slice
+        # mapper is also used in plot_vline but not initialized there
+
         if self.mapper is not None:
             warnings.warn("init_mapper was already called!", stacklevel=2)
             return
@@ -144,9 +147,9 @@ class Chart:
         if self.source_data is None:
             warnings.warn("No source data to rebase to!")
             return data
-
-        source_data = self.mapper.slice(self.source_data)
-        mapped_data = self.mapper.slice(data)
+        
+        source_data = self.slice(self.source_data)
+        mapped_data = self.slice(data)
 
         if not len(data) or not len(source_data):
             warnings.warn("No intersection of data!")
@@ -200,13 +203,6 @@ class Chart:
 
         return color
 
-    def reindex(self, data):
-        """re-index data"""
-
-        if self.mapper is None:
-            self.init_mapper(data)
-
-        return self.mapper.reindex(data)
 
     def slice(self, data):
         """re-index and slice data"""
@@ -464,6 +460,7 @@ class Chart:
 
         self.last_result = None
 
+        # TODO remove force_target option. it has been deprecated !
         if target is not None:
             self.force_target(target)
 

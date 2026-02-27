@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.26
+- `rebase` option has been deprecated
+
 ## 0.0.25
 - Python-rewquires >= 10
 - Added `MACDV` Indicator (MACD - Volatility Normalized)
