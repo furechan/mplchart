@@ -5,9 +5,8 @@ import numpy as np
 import pandas as pd
 
 
-from .utils import get_series  # noqa F401
-
 # TODO remove get_series import
+# from .utils import get_series  # noqa F401
 
 
 def calc_price(prices, item):
@@ -397,11 +396,13 @@ def calc_donchian(prices, period: int = 20):
     result = dict(upperband=upper, middleband=middle, lowerband=lower)
     return pd.DataFrame(result)
 
+
 def calc_dema(series, period: int = 20):
     """Double Exponential Moving Average"""
     ema1 = calc_ema(series, period)
     ema2 = calc_ema(ema1, period)
     return 2 * ema1 - ema2
+
 
 def calc_tema(series, period: int = 20):
     """Triple Exponential Moving Average"""
