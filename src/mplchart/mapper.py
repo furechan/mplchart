@@ -7,6 +7,7 @@ from .locators import DTArrayLocator
 from .formatters import DTArrayFormatter
 
 # TODO create a slice_xy function to return xloc, data for either dataframe or series inputs
+# TODO create a prepape method to prepare prices data like normalize + possibly index reset
 
 
 class RawDateMapper:
