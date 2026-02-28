@@ -28,6 +28,8 @@ How primitives/indicators are plotted
 6) otherwise plot series as lines
 """
 
+# TODO remove rebase option and rebase_data method
+
 # TODO include an early transformation phase before calculation to prepare the data for indicators
 # This should initialize the mapper and prepare the data, possibly modifying the index
 # This phase could reset the index to a range index and move dates to a `datetime` columns  
@@ -154,6 +156,9 @@ class Chart:
             self.mapper.config_axes(ax)
 
     def rebase_data(self, data):
+        warnings.warn("rebase option is deprecated! Use the rebase_series example instead.",
+            DeprecationWarning, stacklevel=2)
+
         if self.source_data is None:
             warnings.warn("No source data to rebase to!")
             return data

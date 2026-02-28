@@ -1,7 +1,9 @@
 # Change Log
 
 ## 0.0.26
-- `rebase` option has been deprecated
+- Multi source logic will be removed. Merge/rebase data before plotting see rebase-series.ipynb example
+- Chart `rebase` option and `rebase_data` has been deprecated
+- Added `pandas` helper module for merging/rebasing pandas series
 
 ## 0.0.25
 - Python-rewquires >= 10
