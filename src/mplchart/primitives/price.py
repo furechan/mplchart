@@ -46,8 +46,9 @@ class Price(Primitive):
         if ax is None:
             ax = chart.get_axes()
 
-        data = self(prices)
-        data = chart.slice(data)
+        series = self(prices)
+        series = chart.slice(series)
+        xv, yv = series_xy(series)
 
         textcolor = plt.rcParams["text.color"]
 
@@ -56,5 +57,4 @@ class Price(Primitive):
         alpha = self.alpha
         color = self.color or textcolor
 
-        xv, yv = series_xy(data)
         ax.plot(xv, yv, label=label, linewidth=width, alpha=alpha, color=color)

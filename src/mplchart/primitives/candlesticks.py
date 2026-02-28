@@ -41,7 +41,7 @@ class Candlesticks(Primitive):
         if ax is None:
             ax = chart.get_axes()
 
-        data = chart.slice(prices)
+        prices = chart.slice(prices)
 
         label = str(self)
         width = self.width
@@ -66,9 +66,9 @@ class Candlesticks(Primitive):
         )
 
         if self.use_bars:
-            return plot_csbars(data, **kwds)
+            return plot_csbars(prices, **kwds)
         else:
-            return plot_cspoly(data, **kwds)
+            return plot_cspoly(prices, **kwds)
 
 
 def plot_cspoly(

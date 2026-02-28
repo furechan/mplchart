@@ -52,9 +52,9 @@ class AreaPlot(Primitive):
 
         result = chart.calc_result(prices, self.indicator)
 
-        data = series_data(result, self.item, strict=True)
+        series = series_data(result, self.item, strict=True)
 
-        data = chart.slice(data)
+        series = chart.slice(series)
 
         label = self.label or get_label(self.indicator)
 
@@ -63,7 +63,7 @@ class AreaPlot(Primitive):
             alpha=self.alpha,
         )
 
-        xv, yv = series_xy(data)
+        xv, yv = series_xy(series)
         ax.fill_between(
             xv,
             yv,

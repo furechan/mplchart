@@ -64,8 +64,8 @@ class LinePlot(Primitive):
 
         result = chart.calc_result(prices, self.indicator)
 
-        data = series_data(result, self.item, strict=True)
-        data = chart.slice(data)
+        series = series_data(result, self.item, strict=True)
+        series = chart.slice(series)
 
         label = get_label(self.indicator)
 
@@ -77,6 +77,6 @@ class LinePlot(Primitive):
             alpha=self.alpha,
         )
 
-        xv, yv = series_xy(data)
+        xv, yv = series_xy(series)
         ax.plot(xv, yv, label=label, **kwargs)
 

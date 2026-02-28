@@ -30,6 +30,9 @@ How primitives/indicators are plotted
 
 # TODO remove rebase option and rebase_data method
 
+# TODO move slicing logic from plot_indicator to AutoPlotter.
+
+
 # TODO include an early transformation phase before calculation to prepare the data for indicators
 # This should initialize the mapper and prepare the data, possibly modifying the index
 # This phase could reset the index to a range index and move dates to a `datetime` columns  

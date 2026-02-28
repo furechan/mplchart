@@ -6,6 +6,10 @@ import matplotlib.pyplot as plt
 from .utils import get_name, get_label, get_info
 
 
+# TODO rename AutoPlotter.series_xy to data_xy or something like that to differentiate from utils series_xy
+# TODO add slicing logic to AutoPlotter (after removing it from plot_indicator)
+
+
 class AutoPlotter():
     def __init__(self, chart, indicator, data, ax=None):
         if ax is None:

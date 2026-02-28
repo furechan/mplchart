@@ -55,7 +55,7 @@ class Volume(Primitive):
             ax = chart.get_axes("twinx")
 
         data = self.process(prices)
-        data = chart.slice(data)
+        data = chart.slice(data)    
 
         index = data.index
         volume = data.volume

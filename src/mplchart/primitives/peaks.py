@@ -44,6 +44,7 @@ class Peaks(Primitive):
         data = self.process(data)
         data = chart.slice(data)
 
+        # xy, yv = series_xy(data)
         xv, yv = data.index, data
         color = self.color or plt.rcParams["text.color"]
 
