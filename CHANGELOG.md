@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.27
+- removed `target` option,`force_target` method and `next_target` attributes
+
 ## 0.0.26
 - Multi source logic will be removed. Merge/rebase data before plotting see rebase-series.ipynb example
 - Chart `rebase` option and `rebase_data` has been deprecated

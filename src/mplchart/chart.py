@@ -58,7 +58,6 @@ class Chart:
 
     mapper = None
     source_data = None
-    next_target = None
     last_result = None
 
     DEFAULT_FIGSIZE = (12, 9)
@@ -335,20 +334,6 @@ class Chart:
         """whether the target bname is valid"""
         return target in ("main", "same", "samex", "twinx", "above", "below")
 
-    def force_target(self, target):
-        """force target for next get_axes"""
-
-        warnings.warn(
-            "Chart.force_target is legacy! Use axes modifier to select axes.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
-        if not self.valid_target(target):
-            raise ValueError("Invalid target %r" % target)
-
-        self.next_target = target
-
     def get_axes(self, target=None, *, height_ratio=None):
         """
         select existing axes or creates new axes depending on target
@@ -356,10 +341,6 @@ class Chart:
         Args:
             target: one of "main", "same", twinx", "above", "below"
         """
-
-        if self.next_target:
-            target = self.next_target
-            del self.next_target
 
         if target is None:
             target = "same"
@@ -462,7 +443,7 @@ class Chart:
             if handles:
                 ax.legend(loc="upper left")
 
-    def plot(self, prices, indicators, *, target=None, rebase=False):
+    def plot(self, prices, indicators, *, rebase=False):
         """plot list of indicators
 
         Parameters
@@ -474,10 +455,6 @@ class Chart:
         """
 
         self.last_result = None
-
-        # TODO remove force_target option. it has been deprecated !
-        if target is not None:
-            self.force_target(target)
 
         prices = self.normalize(prices)
 

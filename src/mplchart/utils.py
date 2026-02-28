@@ -2,14 +2,11 @@
 
 import pandas as pd
 
-from types import MappingProxyType
 from inspect import Signature, Parameter
 
 
-def make_info(**kwargs):
-    """make info mapping"""
-
-    return MappingProxyType(kwargs)
+# MAYBE rename `get_info` to `get metadata` ?
+# MAYBE use `metadata` name instead of `info`
 
 
 def get_info(indicator, name: str, default=None):
