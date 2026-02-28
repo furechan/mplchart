@@ -13,7 +13,7 @@ from .datetimes import date_ticks
 
 logger = logging.getLogger(__name__)
 
-MAX_TICKS = 18
+MAX_TICKS = 12
 
 FREQ_VALUES = {
     '1min': 1 / 1400,
@@ -91,6 +91,9 @@ class DTArrayLocator(mticker.Locator):
     """Locator based on a numpy array of datetimes"""
 
     def __init__(self, dtarray):
+        if hasattr(dtarray, "tz_localize"):
+            dtarray = dtarray.tz_localize(None)
+
         dtarray = np.asarray(dtarray, 'datetime64[s]')
         self.dtarray = dtarray
         self.tick_values = lru_cache(self.tick_values)

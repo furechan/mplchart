@@ -52,14 +52,25 @@ FREQ_VALUES = {
 }
 
 
+FREQ_VALUES = {
+    'm': 1 / 1400,
+    'h': 1 / 24,
+    'D': 1,
+    'W': 7,
+    'M': 30,
+    'Y': 360,
+}
+
+
 INTERVAL_STRETCH = 1.2
 
 
-def round_number(value, levels=(1, 2, 5, 10)):
+def round_up(value, levels=(1, 2, 5, 10, 15, 30)):
     """round a number to the nearest level"""
-    levels = [x for x in levels if x > value]
-    level = max(levels) if levels else 1
-    return (value // level) * level
+
+    levels = [x for x in levels if x >= value]
+    level = min(levels) if levels else value // 1
+    return level
 
 
 def interval_freq(interval):
@@ -97,10 +108,9 @@ def date_ticks(dates, count=10):
     logger.debug("dates_ticks %r, %r, %r", interval, freq, step)
 
     values = dates.astype(f"datetime64[{freq}]").astype(int)
+    values = np.cumsum(np.r_[0, values[1:] != values[:-1]])
 
-    if freq in ("D", ):
-        values = np.cumsum(np.r_[0, values[1:] != values[:-1]])
-        # step = (values[-1] - values[0]) // count
+    step = round_up((values[-1] - values[0]) / count)
 
     values = values // step
 
@@ -121,22 +131,16 @@ def date_labels(dates):
     if count <= 1:
         return [d.strftime("%Y-%b-%d") for d in dates]
     
-    start, end = dates[0], dates[-1]
-    dayspan = (end - start) / dt.timedelta(days=1)
-    interval = dayspan / (count - 1)
+    #start, end = dates[0], dates[-1]
+    #dayspan = (end - start) / dt.timedelta(days=1)
+    #interval = dayspan / (count - 1)
 
-    if interval >=1 :
-        formats = {
-            "%Y": "%Y",
-            "%b": "%b",
-            "%d": "%d",
-        }
-    else:
-        formats = {
-            "%Y-%b-%d": "%Y-%b-%d",
-            "%H:%M": "%H:%M",
-            "%S": "%S",
-        }
+    formats = {
+        "%Y": "%Y",
+        "%b-%d": "%b-%d",
+        "%H:%M": "%H:%M",
+        "%S": "%S",
+    }
 
     labels = []
     pdate = dates[0] - (dates[1] - dates[0])

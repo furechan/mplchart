@@ -38,6 +38,9 @@ class DTArrayFormatter(mticker.Formatter):
     """Formatter for a numpy array of datetime (numpy based)"""
 
     def __init__(self, dtarray, *, fmt="%Y-%m-%d"):
+        if hasattr(dtarray, "tz_localize"):
+            dtarray = dtarray.tz_localize(None)
+            
         dtarray = np.asarray(dtarray, 'datetime64[s]')
         self.dtarray = dtarray
         self.fmt = fmt
