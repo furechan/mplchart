@@ -3,8 +3,6 @@
 import numpy as np
 import pandas as pd
 
-import warnings
-
 from .locators import DateIndexLocator
 from .formatters import DateIndexFormatter
 
