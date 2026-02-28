@@ -10,7 +10,7 @@ and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
 
 
 > **Warning**
-> This project is experimental and the interface can change.
+> This project is experimental and the interface is likely to change.
 > For a similar project with a mature api you may want to look into
 > [mplfinance](https://pypi.org/project/mplfinance/).
 
