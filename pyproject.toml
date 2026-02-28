@@ -13,7 +13,7 @@ description = "Classic Stock Charts in Python"
 urls.homepage = "https://github.com/furechan/mplchart"
 authors = [{ name = "Furechan", email = "furechan@xsmail.com" }]
 keywords = ["finance", "charting", "matplotlib", "candlesticks"]
-dependencies = ["matplotlib", "numpy", "pandas"]
+dependencies = ["matplotlib", "pandas", "numpy"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -23,6 +23,8 @@ classifiers = [
 [dependency-groups]
 dev = [
     "numpy",
+    "pandas",
+    "polars",
     "yfinance",
     "pytest",
     "nbmake",
