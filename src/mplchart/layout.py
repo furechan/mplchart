@@ -25,7 +25,7 @@ def make_twinx(ax, label="twinx"):
 
 
 def init_vplot(figure, *, label="root"):
-    """Returns or creates the root axes"""
+    """Return or create the root axes"""
 
     if figure.axes:
         return figure.axes[0]
@@ -37,7 +37,7 @@ def init_vplot(figure, *, label="root"):
 
 def add_vplot(figure, *, label=None, height_ratio=1.0, append=True):
     """
-    Returns or create new plots vertically respecting height rations
+    Return or create new plots vertically respecting height rations
     This version uses add_subplot api
     Requires tight_layout=True!
     """
