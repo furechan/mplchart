@@ -2,6 +2,7 @@
 
 import math
 import logging
+import warnings
 import numpy as np
 import pandas as pd
 
@@ -36,10 +37,15 @@ FREQ_VALUES = {
 }
 
 
+# TODO remove DateIndexLocator
+
 class DateIndexLocator(mticker.Locator):
     """Locator based on a pandas DateTimeIndex"""
 
     def __init__(self, index):
+        warnings.warn("DateIndexLocator is deprecated, use DTArrayLocator instead",
+                      DeprecationWarning, stacklevel=2)
+
         if index is None:
             raise ValueError("Index is None!")
 

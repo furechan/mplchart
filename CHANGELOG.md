@@ -1,10 +1,11 @@
 # Change Log
 
 ## 0.0.27
-- removed `target` option,`force_target` method and `next_target` attributes
+- removed `target` option`force_target` method and `next_target` attributes
+- `DateIndexLocator` and `DateIndexFormatter` have been deprecated, replaced by DTArray clases
 
 ## 0.0.26
-- Multi source logic will be removed. Merge/rebase data before plotting see rebase-series.ipynb example
+- Multi source logic will be removed. Merge/rebase data before plotting see rebase-series.ipynb
 - Chart `rebase` option and `rebase_data` has been deprecated
 - Added `pandas` helper module for merging/rebasing pandas series
 

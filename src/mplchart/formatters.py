@@ -1,16 +1,22 @@
 """ ticker formatters """
 
+import warnings
 import numpy as np
 
 import matplotlib.ticker as mticker
 
 from .datetimes import date_labels
 
+# TODO remove DateIndexFormatter
+
 
 class DateIndexFormatter(mticker.Formatter):
     """Formatter based on a pandas DateTimeIndex (pandas based)"""
 
     def __init__(self, index, *, fmt="%Y-%m-%d"):
+        warnings.warn("DateIndexFormatter is deprecated, use DTArrayFormatter instead",
+                      DeprecationWarning, stacklevel=2)
+
         if index is None:
             raise ValueError("index is None!")
         self.index = index
@@ -40,7 +46,7 @@ class DTArrayFormatter(mticker.Formatter):
     def __init__(self, dtarray, *, fmt="%Y-%m-%d"):
         if hasattr(dtarray, "tz_localize"):
             dtarray = dtarray.tz_localize(None)
-            
+
         dtarray = np.asarray(dtarray, 'datetime64[s]')
         self.dtarray = dtarray
         self.fmt = fmt

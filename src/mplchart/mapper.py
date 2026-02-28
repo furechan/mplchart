@@ -3,8 +3,9 @@
 import numpy as np
 import pandas as pd
 
-from .locators import DateIndexLocator
-from .formatters import DateIndexFormatter
+from .locators import DTArrayLocator
+from .formatters import DTArrayFormatter
+
 
 
 class RawDateMapper:
@@ -33,12 +34,6 @@ class RawDateMapper:
     def map_date(self, date):  # needed for plot_vline
         return date
 
-    def get_locator(self):
-        return None
-
-    def get_formatter(self):
-        return None
-
     def config_axes(self, ax):
         pass
 
@@ -55,7 +50,6 @@ class DateIndexMapper:
             index = index[-max_bars:]
 
         self.index = index
-
 
 
     def slice(self, data):
@@ -77,20 +71,13 @@ class DateIndexMapper:
 
         return result[0]
 
-    def get_locator(self):
-        """locator for this mapper"""
-
-        return DateIndexLocator(index=self.index)
-
-    def get_formatter(self):
-        """formatter for this mapper"""
-
-        return DateIndexFormatter(index=self.index)
 
     def config_axes(self, ax):
         """set locator and formatter"""
-        locator = self.get_locator()
-        formatter = self.get_formatter()
+
+        dtarray = self.index.tz_localize(None)
+        locator = DTArrayLocator(dtarray)
+        formatter =  DTArrayFormatter(dtarray)
 
         if locator:
             ax.xaxis.set_major_locator(locator)

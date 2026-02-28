@@ -4,8 +4,6 @@ import re
 import logging
 
 import numpy as np
-import datetime as dt
-
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +86,9 @@ def interval_freq(interval):
 
 
 def date_ticks(dates, count=10):
+    if hasattr(dates, "tz_localize"):
+        dates = dates.tz_localize(None)
+
     dates = np.asarray(dates, 'datetime64[s]')
 
     logger.debug("dates_ticks %r, %r, %r", dates[0], dates[-1], count)
@@ -126,6 +127,9 @@ def date_ticks(dates, count=10):
 def date_labels(dates):
     """labels for a sequence of dates (numpy array of datetime)"""
     
+    if hasattr(dates, "tz_localize"):
+        dates = dates.tz_localize(None)
+
     dates = np.asarray(dates, 'datetime64[s]').astype('O')
 
     count = len(dates)
@@ -133,10 +137,6 @@ def date_labels(dates):
     if count <= 1:
         return [d.strftime("%Y-%b-%d") for d in dates]
     
-    #start, end = dates[0], dates[-1]
-    #dayspan = (end - start) / dt.timedelta(days=1)
-    #interval = dayspan / (count - 1)
-
     formats = {
         "%Y": "%Y",
         "%b-%d": "%b-%d",
