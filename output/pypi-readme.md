@@ -43,7 +43,7 @@ Chart(prices, title=ticker, max_bars=250).plot(
 ).plot(
     RSI(), target="above"
 ).plot(
-    MACD(), target="below
+    MACD(), target="below"
 ).show()
 ```
 
@@ -72,9 +72,9 @@ Primitives are classes and must be instantiated as objects before being used wit
 from mplchart.chart import Chart
 from mplchart.primitives import Candlesticks
 
-indicators = [Candlesticks()]
-chart = Chart(title=title, max_bars=max_bars)
-chart.plot(prices, indicators)
+chart = Chart(prices.title=title, max_bars=250).plot(
+    Candlesticsk()
+).show()
 ```
 
 The main drawing primitives are :
@@ -136,6 +136,8 @@ indicators = [
     Function('SMA', 50),
     Function('SMA', 200),
 ]
+
+Chart(prices).plot(indicators).show()
 ```
 
 ## Override indicator rendering with the plotting primitives
@@ -153,6 +155,8 @@ indicators = [
     Candlesticks(),
     SMA(20) | LinePlot(style="dashed", color="red", alpha=0.5, width=3)
 ]
+
+Chart(prices).plot(indicators)
 ```
 
 

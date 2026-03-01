@@ -3,6 +3,8 @@
 ## 0.0.27
 - Removed `rebase` option and `rebase_data` method
 - Removed `target` option`force_target` method and `next_target` attributes
+- Chart now accepts `prices` as first argument, instead of the plot method
+- Remove SameAxes, NewAxes primitives. No longer neede with plot `target` arguement.
 - `DateIndexLocator` and `DateIndexFormatter` have been deprecated, replaced by DTArray clases
 
 ## 0.0.26
