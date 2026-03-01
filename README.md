@@ -43,7 +43,7 @@ Chart(prices, title=ticker, max_bars=250).plot(
 ).plot(
     RSI(), target="above"
 ).plot(
-    MACD(), target="below
+    MACD(), target="below"
 ).show()
 ```
 
