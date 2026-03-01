@@ -16,7 +16,7 @@ class BarPlot(Primitive):
         color (str) : color name or value
         alpha (float) : opacity value between 0.0 and 1.0
         width (float) : bar width setting
-        axes (str) : target axes like 'same', 'above', 'below'
+        target (str) : target pane as 'same', 'above', 'below'
         label (str) : plot label
 
     Examples:
@@ -32,7 +32,7 @@ class BarPlot(Primitive):
         color: str = None,
         alpha: float = None,
         width: float = None,
-        axes: str = None,
+        target: str = None,
         label: str = None
 
     ):
@@ -43,7 +43,7 @@ class BarPlot(Primitive):
         self.color = color
         self.alpha = alpha
         self.width = width
-        self.axes = axes
+        self.target = target
         self.label = label
 
     def __ror__(self, indicator):
@@ -54,7 +54,7 @@ class BarPlot(Primitive):
 
     def plot_handler(self, prices, chart, ax=None):
         if ax is None:
-            target = self.axes or chart.get_target(self.indicator)
+            target = self.target or chart.get_target(self.indicator)
             ax = chart.get_axes(target)
 
         result = chart.calc_result(prices, self.indicator)

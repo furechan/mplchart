@@ -18,7 +18,7 @@ class LinePlot(Primitive):
         width (float) : line width override
         color (str) : color name or value
         alpha (float) : opacity value between 0.0 and 1.0
-        axes (str) : target axes like 'same', 'above', 'below'
+        target (str) : target pane as 'same', 'above', 'below'
 
     Examples:
         SMA(50) | LinePlot(style="dashdot", color="red")
@@ -35,7 +35,7 @@ class LinePlot(Primitive):
         width: float = None,
         color: str = None,
         alpha: float = None,
-        axes: str = None
+        target: str = None
     ):
         if style == "marker":
             marker = marker or "."
@@ -47,7 +47,7 @@ class LinePlot(Primitive):
         self.color = color
         self.width = width
         self.alpha = alpha
-        self.axes = axes
+        self.target = target
 
 
     def __ror__(self, indicator):
@@ -59,7 +59,7 @@ class LinePlot(Primitive):
 
     def plot_handler(self, prices, chart, ax=None):
         if ax is None:
-            target = self.axes or chart.get_target(self.indicator)
+            target = self.target or chart.get_target(self.indicator)
             ax = chart.get_axes(target)
 
         result = chart.calc_result(prices, self.indicator)

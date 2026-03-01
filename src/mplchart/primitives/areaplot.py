@@ -15,7 +15,7 @@ class AreaPlot(Primitive):
         item (str) :  name of the column to plot. default None
         color (str) : color name or value
         alpha (float) : opacity value between 0.0 and 1.0
-        axes (str) : target axes like 'same', 'above', 'below'
+        target (str) : target pane as like 'same', 'above', 'below'
         label (str) : plot label
 
     Examples:
@@ -30,13 +30,13 @@ class AreaPlot(Primitive):
         *,
         color: str = None,
         alpha: float = None,
-        axes: str = None,
+        target: str = None,
         label: str = None,
     ):
         self.item = item
         self.color = color
         self.alpha = alpha
-        self.axes = axes
+        self.target = target
         self.label = label
 
     def __ror__(self, indicator):
@@ -47,7 +47,7 @@ class AreaPlot(Primitive):
 
     def plot_handler(self, prices, chart, ax=None):
         if ax is None:
-            target = self.axes or chart.get_target(self.indicator)
+            target = self.target or chart.get_target(self.indicator)
             ax = chart.get_axes(target)
 
         result = chart.calc_result(prices, self.indicator)

@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 
 from mplchart.chart import Chart
 from mplchart.primitives import Candlesticks, Volume
-from mplchart.indicators import SMA, RSI, MACD
+from mplchart.indicators import SMA
 
 symbol = "AAPL"
 period = "25Y"
@@ -24,11 +24,10 @@ with ui.pyplot(figsize=(9, 6), close=False) as plot:
 
 def update_chart():
     prices = yf.Ticker(ticker.value).history(period=period, auto_adjust=True)
-    indicators = [Candlesticks(), SMA(50), SMA(200), Volume(), RSI(), MACD()]
+    indicators = [Candlesticks(), SMA(50), SMA(200), Volume()]
 
     with plot:
-        chart = Chart(title=ticker.value, max_bars=max_bars, figure=plot.fig)
-        chart.plot(prices, indicators)
+        Chart(prices, title=ticker.value, max_bars=max_bars, figure=plot.fig).plot(indicators)
         ui.update(plot)
 
 

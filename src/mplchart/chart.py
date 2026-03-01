@@ -60,13 +60,16 @@ class Chart:
     """
 
     mapper = None
-    source_data = None
+    prices = None
     last_result = None
+    force_target = None
 
     DEFAULT_FIGSIZE = (12, 9)
 
     def __init__(
         self,
+        prices=None,
+        *,
         title=None,
         max_bars=None,
         start=None,
@@ -106,6 +109,9 @@ class Chart:
 
         self.init_axes()
 
+        if prices is not None:
+            self.init_mapper(prices)
+
         if title:
             self.set_title(title)
 
@@ -124,12 +130,15 @@ class Chart:
         return plt.figure(figsize=figsize)
 
     @staticmethod
-    def normalize(prices):
-        """normalize prices dataframe"""
+    def prepare(prices):
+        """prepare prices dataframe"""
+
         prices = prices.rename(columns=str.lower).rename_axis(index=str.lower)
+
         return prices
 
-    def init_mapper(self, data):
+
+    def init_mapper(self, prices):
         """initalizes chart and mapper with price data"""
 
         # currently this is only called once in Chart.slice
@@ -139,16 +148,20 @@ class Chart:
             warnings.warn("init_mapper was already called!", stacklevel=2)
             return
 
-        if self.source_data is None:
-            self.source_data = data
+        if self.prices is not None:
+            warnings.warn("init_mapper was already called with different data!", stacklevel=2)
+
+        prices = self.prepare(prices)
+
+        self.prices = prices
 
         if self.raw_dates:
             self.mapper = RawDateMapper(
-                index=data.index, start=self.start, end=self.end, max_bars=self.max_bars
+                index=prices.index, start=self.start, end=self.end, max_bars=self.max_bars
             )
-        elif data is not None:
+        elif prices is not None:
             self.mapper = DateIndexMapper(
-                index=data.index, start=self.start, end=self.end, max_bars=self.max_bars
+                index=prices.index, start=self.start, end=self.end, max_bars=self.max_bars
             )
         else:
             raise ValueError("Cannot create mapper. data is None!")
@@ -156,6 +169,8 @@ class Chart:
         if self.mapper:
             ax = self.root_axes()
             self.mapper.config_axes(ax)
+        
+        return prices
 
 
     def next_line_color(self, ax):
@@ -205,6 +220,8 @@ class Chart:
         """re-index and slice data"""
 
         if self.mapper is None:
+            # TODO remove this warning and fallback logic and raise an error instead
+            warnings.warn("slice called before mapper was initialized! Calling init_mapper now.", stacklevel=2)
             self.init_mapper(data)
 
         return self.mapper.slice(data)
@@ -214,7 +231,7 @@ class Chart:
         """map date to value"""
 
         if self.mapper is None:
-            raise ValueError("mapper was not configured yet!")
+            raise ValueError("Date mapper was not configured yet. prices not provided!")
 
         return self.mapper.map_date(date)
 
@@ -295,6 +312,9 @@ class Chart:
 
     def get_target(self, indicator):
         """target axes for indicator"""
+
+        if self.force_target:
+            return self.force_target
 
         if indicator is None:
             return "same"
@@ -426,7 +446,8 @@ class Chart:
             if handles:
                 ax.legend(loc="upper left")
 
-    def plot(self, prices, indicators):
+    def plot(self, *args, target: str|None = None):
+#    def plot(self, prices, indicators):
         """plot list of indicators
 
         Parameters
@@ -437,14 +458,36 @@ class Chart:
             list of indicators to plot
         """
 
+        if len(args) and hasattr(args[0], "columns"):
+            self.init_mapper(args[0])
+            args = args[1:]
+        
+        indicators = [
+            y for arg in args for y in (arg if isinstance(arg, list) else (arg,))
+        ]
+
+        if not indicators:
+            raise ValueError("No indicators provided!")
+
+        if self.prices is not None:
+            prices = self.prices
+        else:
+            raise ValueError("Np prices data provided! plot(prices, indicators) expected!")
+    
         self.last_result = None
 
-        prices = self.normalize(prices)
+        if target:
+            self.get_axes(target)
+            self.force_target = "same"
+        else:
+            self.force_target = None
 
         for indicator in indicators:
             self.plot_indicator(prices, indicator)
 
         self.add_legends()
+
+        return self
 
     def plot_vline(self, date):
         """plot vertical line across all axes"""

@@ -58,8 +58,7 @@ class ZigZag(Primitive):
 
     def plot_handler(self, prices, chart, ax=None):
         if ax is None:
-            target = chart.get_target(self)
-            ax = chart.get_axes(target)
+            ax = chart.get_axes()
 
         series = calc_zigzag(prices, threshold=self.threshold)
         series = chart.slice(series)

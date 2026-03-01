@@ -14,9 +14,7 @@ def main():
 
     max_bars = 250
     indicators = [Candlesticks(), SMA(50), SMA(200), Volume(), RSI(), MACD()]
-    chart = Chart(title=ticker, max_bars=max_bars)
-    chart.plot(prices, indicators)
-    chart.show()
+    Chart(prices, title=ticker, max_bars=max_bars).plot(indicators).show()
 
 
 if __name__ == "__main__":

@@ -10,8 +10,11 @@ and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
 
 
 > **Warning**
+> The interface has changed. You must pass `prices` as the first parameter of `Chart`. 
+
+> **Warning**
 > This project is experimental and the interface is likely to change.
-> For a similar project with a mature api you may want to look into
+> For a related project with a mature api you may want to look into
 > [mplfinance](https://pypi.org/project/mplfinance/).
 
 
@@ -32,20 +35,16 @@ from mplchart.indicators import SMA, EMA, ROC, RSI, MACD
 ticker = 'AAPL'
 prices = yf.Ticker(ticker).history('5y')
 
-max_bars = 250
-
-indicators = [
+Chart(prices, title=ticker, max_bars=250).plot(
     Candlesticks(),
     Volume(),
     SMA(50),
     SMA(200),
-    RSI(),
-    MACD(),
-]
-
-chart = Chart(title=ticker, max_bars=max_bars)
-chart.plot(prices, indicators)
-chart.show()
+).plot(
+    RSI(), target="above"
+).plot(
+    MACD(), target="below
+).show()
 ```
 
 
@@ -84,13 +83,10 @@ The main drawing primitives are :
 - `Price` for price line plots
 - `Volume` for volume bar plots
 - `Peaks` to mark peaks and valleys
-- `SameAxes` to use same axes as last plot
-- `NewAxes` to use new axes above or below
 - `LinePlot` draw an indicator as line plot
 - `AreaPlot` draw an indicator as area plot
 - `BarPlot` draw an indicator as bar plot
 - `ZigZag` lines between pivot points
-
 
 
 
@@ -139,8 +135,6 @@ indicators = [
     Candlesticks(),
     Function('SMA', 50),
     Function('SMA', 200),
-    Function('RSI'),
-    Function('MACD'),
 ]
 ```
 
@@ -158,24 +152,6 @@ from mplchart.primitives import Candlesticks, LinePlot
 indicators = [
     Candlesticks(),
     SMA(20) | LinePlot(style="dashed", color="red", alpha=0.5, width=3)
-]
-```
-
-
-## Override target axes with `NewAxes` and `SameAxes` primitives
-
-Indicators usually plot in a new axes below, except for a few indicators that plot by default in the main axes. You can change the target axes for any indicator by piping it into an axes primitive as in the example below.
-
-```python
-# Plotting two indicators on the same axes with SameAxes primitive
-
-from mplchart.indicators import SMA, EMA, ROC
-from mplchart.primitives import Candlesticks, SameAxes
-
-indicators = [
-    Candlesticks(),
-    ROC(20),
-    ROC(50) | SameAxes(),
 ]
 ```
 
