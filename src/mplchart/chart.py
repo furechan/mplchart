@@ -28,6 +28,8 @@ How primitives/indicators are plotted
 6) otherwise plot series as lines
 """
 
+# TODO make prices a parameter of Chart instead of plot methods
+
 # TODO move slicing logic from plot_indicator to AutoPlotter.
 
 
