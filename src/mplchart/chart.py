@@ -28,8 +28,6 @@ How primitives/indicators are plotted
 6) otherwise plot series as lines
 """
 
-# TODO remove rebase option and rebase_data method
-
 # TODO move slicing logic from plot_indicator to AutoPlotter.
 
 
@@ -157,26 +155,6 @@ class Chart:
             ax = self.root_axes()
             self.mapper.config_axes(ax)
 
-    def rebase_data(self, data):
-        warnings.warn("rebase option is deprecated! Use the rebase_series example instead.",
-            DeprecationWarning, stacklevel=2)
-
-        if self.source_data is None:
-            warnings.warn("No source data to rebase to!")
-            return data
-        
-        source_data = self.slice(self.source_data)
-        mapped_data = self.slice(data)
-
-        if not len(data) or not len(source_data):
-            warnings.warn("No intersection of data!")
-            return data
-
-        sp = source_data.loc[0].close
-        mp = mapped_data.loc[0].close
-        factor = sp / mp
-
-        return data.filter(["open", "high", "low", "close"]) * factor
 
     def next_line_color(self, ax):
         """Next line color either text.color or cycled color"""
@@ -446,7 +424,7 @@ class Chart:
             if handles:
                 ax.legend(loc="upper left")
 
-    def plot(self, prices, indicators, *, rebase=False):
+    def plot(self, prices, indicators):
         """plot list of indicators
 
         Parameters
@@ -460,9 +438,6 @@ class Chart:
         self.last_result = None
 
         prices = self.normalize(prices)
-
-        if rebase:
-            prices = self.rebase_data(prices)
 
         for indicator in indicators:
             self.plot_indicator(prices, indicator)

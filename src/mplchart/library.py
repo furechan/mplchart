@@ -5,10 +5,6 @@ import numpy as np
 import pandas as pd
 
 
-# TODO remove get_series import
-# from .utils import get_series  # noqa F401
-
-
 def calc_price(prices, item):
     """get or compute price item from prices"""
     if item in prices:

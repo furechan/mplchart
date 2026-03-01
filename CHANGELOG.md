@@ -1,7 +1,8 @@
 # Change Log
 
 ## 0.0.27
-- removed `target` option`force_target` method and `next_target` attributes
+- Removed `rebase` option and `rebase_data` method
+- Removed `target` option`force_target` method and `next_target` attributes
 - `DateIndexLocator` and `DateIndexFormatter` have been deprecated, replaced by DTArray clases
 
 ## 0.0.26
