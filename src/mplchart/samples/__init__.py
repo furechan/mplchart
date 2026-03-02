@@ -5,11 +5,15 @@ import pandas as pd
 from functools import lru_cache
 from importlib import resources
 
+from ..utils import convert_dataframe
+
+
 TIMEZONE = "America/New_York"
+SAMPLE_FREQUENCIES = "daily", "hourly", "minute"
 
 
 @lru_cache
-def sample_prices(freq: str = "daily", *, max_bars: int = 0):
+def sample_prices(freq: str = "daily", *, max_bars: int = 0, backend: str = None):
     """Sample prices"""
 
     fname = f"{freq}-prices.csv"
@@ -24,5 +28,8 @@ def sample_prices(freq: str = "daily", *, max_bars: int = 0):
 
     if max_bars > 0:
         prices = prices.tail(max_bars)
+
+    if backend is not None:
+        prices = convert_dataframe(prices, backend)
 
     return prices
