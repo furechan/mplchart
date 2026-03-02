@@ -131,7 +131,17 @@ class Chart:
     def prepare(prices):
         """prepare prices dataframe"""
 
-        prices = prices.rename(columns=str.lower).rename_axis(index=str.lower)
+        if hasattr(prices, "to_pandas"):
+            prices = prices.to_pandas()
+
+        prices.rename(columns=str.lower, inplace=True)
+
+        if "datetime" in prices.columns:
+            prices.set_index("datetime", inplace=True)
+        elif "date" in prices.columns:
+            prices.set_index("date", inplace=True)
+        else:
+            prices.rename_axis(index=str.lower, inplace=True)
 
         return prices
 
@@ -450,7 +460,6 @@ class Chart:
                 ax.legend(loc="upper left")
 
     def plot(self, *args, target: str|None = "same"):
-#    def plot(self, prices, indicators):
         """plot list of indicators
 
         Parameters
@@ -461,6 +470,7 @@ class Chart:
             list of indicators to plot
         """
 
+        # TODO remove handling for legacy prices argument
         if len(args) and hasattr(args[0], "columns"):
             self.init_mapper(args[0])
             args = args[1:]

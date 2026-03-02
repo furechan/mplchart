@@ -2,6 +2,7 @@
 
 ## 0.0.28
 - Removed `DateIndexFormatter` and `DateIndexLocator`
+- Chart objects automatically converts polars dataframes to pandas
 
 ## 0.0.27
 - Removed `rebase` option and `rebase_data` method
