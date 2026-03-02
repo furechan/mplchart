@@ -28,8 +28,6 @@ How primitives/indicators are plotted
 6) otherwise plot series as lines
 """
 
-# TODO make prices a parameter of Chart instead of plot methods
-
 # TODO move slicing logic from plot_indicator to AutoPlotter.
 
 
@@ -416,21 +414,28 @@ class Chart:
             
         return result
 
-    def plot_indicator(self, data, indicator):
+    def plot_indicator(self, indicator):
         """calculate and plot an indicator"""
+
+        prices = self.prices
+
+        if self.prices is None:
+            raise ValueError("No prices data provided!")
+
+        prices = self.prices
 
         # Call the indicator's plot_handler if defined (before any calc)
         # this is the only location where plot_handler is called
         # plot_handler is currently defined only for Primitives
         # Note that data have not been mapped/sliced yet
         if hasattr(indicator, "plot_handler"):
-            indicator.plot_handler(data, chart=self)
+            indicator.plot_handler(prices, chart=self)
             return
 
         # Invoke indicator and compute result if indicator is callable
         # Result data is mapped to the charting view
         if callable(indicator):
-            result = self.calc_result(data, indicator)
+            result = self.calc_result(prices, indicator)
             result = self.slice(result)
         else:
             raise ValueError(f"Indicator {indicator!r} not callable")
@@ -469,10 +474,8 @@ class Chart:
         if not indicators:
             raise ValueError("No indicators provided!")
 
-        if self.prices is not None:
-            prices = self.prices
-        else:
-            raise ValueError("Np prices data provided! plot(prices, indicators) expected!")
+        if self.prices is None:
+            raise ValueError("Np prices data provided!")
     
         self.last_result = None
 
@@ -483,7 +486,7 @@ class Chart:
             self.force_target = None
 
         for indicator in indicators:
-            self.plot_indicator(prices, indicator)
+            self.plot_indicator(indicator)
 
         self.add_legends()
 

@@ -5,8 +5,8 @@ import pandas as pd
 from inspect import Signature, Parameter
 
 
-# MAYBE rename `get_info` to `get metadata` ?
-# MAYBE use `metadata` name instead of `info`
+# TODO rename `get_info` to `get_metadata` ?
+# TODO use `metadata` name instead of `info`
 
 
 def get_info(indicator, name: str, default=None):
