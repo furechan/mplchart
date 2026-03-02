@@ -449,7 +449,7 @@ class Chart:
             if handles:
                 ax.legend(loc="upper left")
 
-    def plot(self, *args, target: str|None = None):
+    def plot(self, *args, target: str|None = "same"):
 #    def plot(self, prices, indicators):
         """plot list of indicators
 
