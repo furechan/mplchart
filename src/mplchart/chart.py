@@ -218,9 +218,7 @@ class Chart:
         """re-index and slice data"""
 
         if self.mapper is None:
-            # TODO remove this warning and fallback logic and raise an error instead
-            warnings.warn("slice called before mapper was initialized! Calling init_mapper now.", stacklevel=2)
-            self.init_mapper(data)
+            raise ValueError("Date mapper was not configured yet. prices not provided!")
 
         return self.mapper.slice(data)
 
