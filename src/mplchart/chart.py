@@ -31,16 +31,6 @@ How primitives/indicators are plotted
 # TODO move slicing logic from plot_indicator to AutoPlotter.
 
 
-# TODO include an early transformation phase before calculation to prepare the data for indicators
-# This should initialize the mapper and prepare the data, possibly modifying the index
-# This phase could reset the index to a range index and move dates to a `datetime` columns  
-# This phase could possibly align data along the date axis when plotting multiple prices 
-# Create mapper then prepare/transform data. This may be done in place of `normalize`
-# The mapper could be backend specific like pandas/polars etc ...
-# This should be the single place where mapper is created, instead of Chart.slice
-# If we decide to reset the index to a range index then the slicing logic is different
-# Forcing a range index could facilitate porting logic to polars dataframes or not ?
-
 
 class Chart:
     """

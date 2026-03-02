@@ -82,11 +82,11 @@ The main drawing primitives are :
 - `OHLC` for open, high, low, close bar plots
 - `Price` for price line plots
 - `Volume` for volume bar plots
-- `Peaks` to mark peaks and valleys
 - `LinePlot` draw an indicator as line plot
 - `AreaPlot` draw an indicator as area plot
 - `BarPlot` draw an indicator as bar plot
 - `ZigZag` lines between pivot points
+- `Peaks` to mark peaks and valleys
 
 
 
