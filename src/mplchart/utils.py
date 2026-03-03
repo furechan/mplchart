@@ -1,24 +1,14 @@
 """mplchart utils"""
 
-import pandas as pd
-
 from inspect import Signature, Parameter
 
 
-# TODO rename `get_info` to `get_metadata` ?
-# TODO use `metadata` name instead of `info`
-
-
-def get_info(indicator, name: str, default=None):
-    """get metadata from `info` dict is present or attributes"""
+def get_metadata(indicator, name: str, default=None):
+    """get metadata from `metadata` dict if present or attributes"""
 
     metadata = getattr(indicator, "metadata", None)
-    if metadata is not None:  # metadata dict
+    if metadata is not None:
         return metadata.get(name, default)
-
-    info = getattr(indicator, "info", None)
-    if info is not None:  # info dict
-        return info.get(name, default)
 
     return getattr(indicator, name, default)
 
@@ -32,7 +22,7 @@ def same_scale(indicator):
         flags = indicator.function_flags or ()
         return TALIB_SAME_SCALE in flags
 
-    return get_info(indicator, "same_scale", False)
+    return get_metadata(indicator, "same_scale", False)
 
 
 def get_name(indicator):
@@ -73,9 +63,15 @@ def series_xy(data, item=None, *, dropna=False):
     return x, y
 
 
-def series_data(data, item: str = None, *, default_item: str = None, strict: bool = False):
+
+# TODO Do we need both get_series and series_data methods
+# They are the same except for the default_item paramater
+
+
+def series_data(data, item: str = None, *, default_item: str = None):
     """extract series data depending on data type and parameters"""
-    if isinstance(data, pd.DataFrame):
+
+    if hasattr(data, "columns"):
         if item is not None:
             return data[item]
         elif default_item is not None:
@@ -83,32 +79,17 @@ def series_data(data, item: str = None, *, default_item: str = None, strict: boo
         else:
             raise ValueError("Item is required for a DataFrame")
 
-    if isinstance(data, pd.Series):
-        if item is None or not strict:
-            return data
-        else:
-            raise ValueError("Item must be None for a Series")
-
-    raise TypeError(f"Invalid series type {type(data).__name__} !")
+    if item is not None:
+        raise ValueError("Cannot specify item for non-DataFrame data.")
+    else:
+        return data
 
 
 
 def get_series(prices, item: str = None):
     """extract column by name if applicable"""
 
-    if isinstance(prices, pd.Series):
-        if item is not None:
-            raise ValueError(f"Expected dataframe with an {item!r} column")
-        else:
-            return prices
-
-    if isinstance(prices, pd.DataFrame):
-        # prices = prices.rename(columns=str.lower)
-        item = item or "close"
-        return prices[item]
-
-    raise TypeError(f"Invalid series type {type(prices).__name__} !")
-
+    return series_data(prices, item, default_item="close")
 
 
 def short_repr(self):

@@ -3,7 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from .utils import get_name, get_label, get_info
+from .utils import get_name, get_label, get_metadata
 
 
 # TODO rename AutoPlotter.series_xy to data_xy or something like that to differentiate from utils series_xy
@@ -90,13 +90,13 @@ class AutoPlotter():
         )
 
     def plot_yticks(self):
-        yticks = get_info(self.indicator, "yticks", ())
+        yticks = get_metadata(self.indicator, "yticks", ())
         if yticks:
             self.ax.set_yticks(yticks)
             self.ax.grid(axis="y", which="major", linestyle="-", linewidth=2)
 
     def plot_oversold(self):
-        oversold = get_info(self.indicator, "oversold", None)
+        oversold = get_metadata(self.indicator, "oversold", None)
         if oversold is not None:
             # color = self.chart.get_color("oversold", self.ax, self.indicator, fallback="fill")
             with np.errstate(invalid="ignore"):
@@ -111,7 +111,7 @@ class AutoPlotter():
                 )
 
     def plot_overbought(self):
-        overbought = get_info(self.indicator, "overbought", None)
+        overbought = get_metadata(self.indicator, "overbought", None)
         if overbought is not None:
             # color = self.chart.get_color("overbought", self.ax, self.indicator, fallback="fill")
             with np.errstate(invalid="ignore"):
@@ -134,7 +134,7 @@ class AutoPlotter():
         columns = self.get_columns()
 
         if not columns:
-            line_style = get_info(self.indicator, "line_style", "solid")
+            line_style = get_metadata(self.indicator, "line_style", "solid")
 
             if line_style == "bars":
                 self.plot_bars(name, label=label)

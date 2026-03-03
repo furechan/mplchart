@@ -9,7 +9,7 @@ from collections import Counter
 from functools import cached_property
 
 from .colors import closest_color
-from .utils import same_scale, get_info
+from .utils import same_scale, get_metadata
 from .layout import make_twinx, init_vplot, add_vplot
 from .mapper import RawDateMapper, DateIndexMapper
 from .plotters import AutoPlotter
@@ -319,7 +319,7 @@ class Chart:
         if target_pane is not None:
             return target_pane
 
-        default_pane = get_info(indicator, "default_pane", None)
+        default_pane = get_metadata(indicator, "default_pane", None)
         if default_pane is not None:
             return default_pane
 

@@ -64,7 +64,7 @@ class LinePlot(Primitive):
 
         result = chart.calc_result(prices, self.indicator)
 
-        series = series_data(result, self.item, strict=True)
+        series = series_data(result, self.item)
         series = chart.slice(series)
 
         label = get_label(self.indicator)
