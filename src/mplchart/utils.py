@@ -64,7 +64,7 @@ def series_xy(data, item=None, *, dropna=False):
 
 
 
-# TODO Do we need both get_series and series_data methods
+# QUESTION Do we need both get_series and series_data methods
 # They are the same except for the default_item paramater
 
 

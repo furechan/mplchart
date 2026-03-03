@@ -28,8 +28,6 @@ How primitives/indicators are plotted
 6) otherwise plot series as lines
 """
 
-# TODO move slicing logic from plot_indicator to AutoPlotter.
-
 
 
 class Chart:

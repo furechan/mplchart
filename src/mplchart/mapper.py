@@ -6,8 +6,6 @@ import pandas as pd
 from .locators import DTArrayLocator
 from .formatters import DTArrayFormatter
 
-# TODO create a slice_xy function to return xloc, data for either dataframe or series inputs
-
 
 class RawDateMapper:
     """Raw Date Mapper (no mapping, just slices dates)"""
