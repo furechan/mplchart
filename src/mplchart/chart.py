@@ -190,11 +190,6 @@ class Chart:
         if colors and name in colors:
             color = colors[name] or color
 
-        if hasattr(indicator, "colors"):
-            colors = indicator.colors
-            if colors and name in colors:
-                color = colors[name] or color
-
         if isinstance(color, list):
             ckey = ax, name
             count = self.counter[ckey]

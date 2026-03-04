@@ -10,6 +10,16 @@ from .utils import get_name, get_label, get_metadata
 
 
 class AutoPlotter():
+    """
+    Default plotter for indicators
+
+    Args:
+        chart: Chart instance
+        indicator: indicator to plot
+        data: indicator result post-slice (DataFrame or Series)
+        ax: axes to plot on (optional, will be determined by chart if not provided)
+    """
+
     def __init__(self, chart, indicator, data, ax=None):
         if ax is None:
             target = chart.get_target(indicator)
