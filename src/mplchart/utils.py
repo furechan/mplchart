@@ -68,7 +68,7 @@ def series_xy(data, item=None, *, dropna=False):
 # They are the same except for the default_item paramater
 
 
-def series_data(data, item: str = None, *, default_item: str = None):
+def series_data(data, item: str | None = None, *, default_item: str | None = None):
     """extract series data depending on data type and parameters"""
 
     if hasattr(data, "columns"):
@@ -86,7 +86,7 @@ def series_data(data, item: str = None, *, default_item: str = None):
 
 
 
-def get_series(prices, item: str = None):
+def get_series(prices, item: str | None = None):
     """extract column by name if applicable"""
 
     return series_data(prices, item, default_item="close")

@@ -10,7 +10,7 @@ from mplchart.indicators import SMA, EMA, WMA, HMA, TSF, RSI, ATR, ATRP, ADX, MA
 try:
     from talib import abstract
 except ImportError:
-    abstract = None
+    abstract = None  # type: ignore[assignment]
 
 
 FREQS = ["daily", "hourly", "minute"]
@@ -65,6 +65,7 @@ def test_indicators(indicator, freq, max_bars=250):
 @pytest.mark.skipif(abstract is None, reason="requires talib")
 @pytest.mark.parametrize("freq", FREQS)
 def test_talib(freq, max_bars=250):
+    assert abstract is not None
     prices = sample_prices(freq=freq)
 
     indicators = [

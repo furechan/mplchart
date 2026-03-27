@@ -28,14 +28,14 @@ class LinePlot(Primitive):
 
     def __init__(
         self,
-        item: str = None,
+        item: str | None = None,
         *,
-        style: str = None,
-        marker: str = None,
-        width: float = None,
-        color: str = None,
-        alpha: float = None,
-        target: str = None
+        style: str | None = None,
+        marker: str | None = None,
+        width: float | None = None,
+        color: str | None = None,
+        alpha: float | None = None,
+        target: str | None = None
     ):
         if style == "marker":
             marker = marker or "."

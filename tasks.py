@@ -3,7 +3,7 @@
 import re
 
 from pathlib import Path
-from invoke import task  # type: ignore
+from invoke import task
 
 PACKAGE = "mplchart"
 ROOT = Path(__file__).parent

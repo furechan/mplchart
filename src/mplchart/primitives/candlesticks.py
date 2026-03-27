@@ -24,8 +24,8 @@ class Candlesticks(Primitive):
         *,
         width: float = 0.8,
         alpha: float = 1.0,
-        colorup: str = None,
-        colordn: str = None,
+        colorup: str | None = None,
+        colordn: str | None = None,
         use_bars: bool = False,
     ):
         self.width = width
@@ -55,28 +55,24 @@ class Candlesticks(Primitive):
         colordn = self.colordn or edgecolor
         coloroff = self.colorup or facecolor
 
-        kwds = dict(
-            ax=ax,
-            width=width,
-            alpha=alpha,
-            colorup=colorup,
-            colordn=colordn,
-            coloroff=coloroff,
-            label=label
-        )
-
         if self.use_bars:
-            return plot_csbars(prices, **kwds)
+            return plot_csbars(prices, ax=ax, width=width, alpha=alpha, colorup=colorup, colordn=colordn, coloroff=coloroff, label=label)
         else:
-            return plot_cspoly(prices, **kwds)
+            return plot_cspoly(prices, ax=ax, width=width, alpha=alpha, colorup=colorup, colordn=colordn, coloroff=coloroff, label=label)
 
 
 def plot_cspoly(
-    data, *, ax=None, width=0.6, alpha=0.2, colorup=None, colordn=None, coloroff=None, label=None
+    data, *, ax=None, width=0.6, alpha=0.2, colorup: str | None = None, colordn: str | None = None, coloroff: str | None = None, label=None
 ):
     """plots candlesticks as polygons"""
 
     ax = ax or plt.gca()
+
+    textcolor = plt.rcParams["text.color"]
+    facecolor_ = plt.rcParams["axes.facecolor"]
+    colorup = colorup or textcolor
+    colordn = colordn or textcolor
+    coloroff = coloroff or facecolor_
 
     count = len(data)
 
@@ -118,8 +114,6 @@ def plot_cspoly(
         for xv, bt, tp, lo, hi in zip(xvalues, bottom, top, low, high)
     ]
 
-    verts = np.asarray(verts)
-
     linewidths = (0.7,)
 
     poly = PolyCollection(
@@ -136,11 +130,17 @@ def plot_cspoly(
 
 
 def plot_csbars(
-    data, *, ax=None, width=0.6, alpha=0.2, colorup=None, colordn=None, coloroff=None, label=None
+    data, *, ax=None, width=0.6, alpha=0.2, colorup: str | None = None, colordn: str | None = None, coloroff: str | None = None, label=None
 ):
     """plots candlesticks as bars"""
 
     ax = ax or plt.gca()
+
+    textcolor = plt.rcParams["text.color"]
+    facecolor_ = plt.rcParams["axes.facecolor"]
+    colorup = colorup or textcolor
+    colordn = colordn or textcolor
+    coloroff = coloroff or facecolor_
 
     xvalues = data.index.values
 

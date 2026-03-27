@@ -18,8 +18,8 @@ class DTArrayFormatter(mticker.Formatter):
         self.dtarray = dtarray
         self.fmt = fmt
 
-    def __call__(self, value, pos=None):
-        return self.format_data(value)
+    def __call__(self, x: float, pos: int | None = None) -> str:
+        return self.format_data(x)
 
     def format_data(self, value):
         """date label"""

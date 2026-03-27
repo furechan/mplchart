@@ -16,5 +16,5 @@ def closest_color(color, color_cycle=None):
         return sum((a - b) ** 2 for a, b in zip(v1, v2))
 
     dist = [distance(color, c) for c in color_cycle]
-    argmin = min(range(len(dist)), key=dist.__getitem__)
+    argmin = min(range(len(dist)), key=lambda i: dist[i])
     return f"C{argmin}"

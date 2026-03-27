@@ -30,7 +30,7 @@ class Price(Primitive):
         *,
         width: float = 1.0,
         alpha: float = 1.0,
-        color: str = None,
+        color: str | None = None,
     ):
         self.item = item
         self.width = width

@@ -19,13 +19,13 @@ class Volume(Primitive):
 
     def __init__(
         self,
-        sma: int = None,
+        sma: int | None = None,
         *,
         width: float = 0.8,
         alpha: float = 0.5,
-        colorup: str = None,
-        colordn: str = None,
-        colorma: str = None,
+        colorup: str | None = None,
+        colordn: str | None = None,
+        colorma: str | None = None,
     ):
         self.sma = sma
         self.width = width

@@ -27,13 +27,13 @@ class BarPlot(Primitive):
 
     def __init__(
         self,
-        item: str = None,
+        item: str | None = None,
         *,
-        color: str = None,
-        alpha: float = None,
-        width: float = None,
-        target: str = None,
-        label: str = None
+        color: str | None = None,
+        alpha: float | None = None,
+        width: float | None = None,
+        target: str | None = None,
+        label: str | None = None
 
     ):
         if width is  None:

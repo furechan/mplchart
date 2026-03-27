@@ -11,7 +11,7 @@ class Stripes(Primitive):
 
     indicator = None
 
-    def __init__(self, expr: str = None, *, color: str = None, alpha: float = None):
+    def __init__(self, expr: str | None = None, *, color: str | None = None, alpha: float | None = None):
         self.expr = expr
         self.color = color
         self.alpha = alpha

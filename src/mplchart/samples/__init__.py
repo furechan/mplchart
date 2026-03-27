@@ -13,7 +13,7 @@ SAMPLE_FREQUENCIES = "daily", "hourly", "minute"
 
 
 @lru_cache
-def sample_prices(freq: str = "daily", *, max_bars: int = 0, backend: str = None):
+def sample_prices(freq: str = "daily", *, max_bars: int = 0, backend: str | None = None):
     """Sample prices"""
 
     fname = f"{freq}-prices.csv"

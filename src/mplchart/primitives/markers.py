@@ -12,9 +12,9 @@ class Markers(Primitive):
 
     def __init__(
         self,
-        expr: str = None,
+        expr: str | None = None,
         *,
-        color: str = None,
+        color: list[str] | str | None = None,
         marker: str = ".",
         alpha: float = 0.6,
     ):
@@ -59,7 +59,7 @@ class Markers(Primitive):
         color = self.color
         alpha = self.alpha
 
-        if isinstance(self.color, list):
+        if isinstance(color, list):
             color = np.where(flag > 0, color[1], color[0])
 
         ax.scatter(xv, yv, c=color, s=12 * 12, alpha=alpha, marker=marker)

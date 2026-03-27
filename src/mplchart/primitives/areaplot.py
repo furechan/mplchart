@@ -26,12 +26,12 @@ class AreaPlot(Primitive):
 
     def __init__(
         self,
-        item: str = None,
+        item: str | None = None,
         *,
-        color: str = None,
-        alpha: float = None,
-        target: str = None,
-        label: str = None,
+        color: str | None = None,
+        alpha: float | None = None,
+        target: str | None = None,
+        label: str | None = None,
     ):
         self.item = item
         self.color = color

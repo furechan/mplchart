@@ -20,7 +20,7 @@ class Peaks(Primitive):
 
     indicator = None
 
-    def __init__(self, span=1, *, item: str = None, color: str = None):
+    def __init__(self, span=1, *, item: str | None = None, color: str | None = None):
         self.span = span
         self.color = color
         self.item = item
@@ -36,11 +36,11 @@ class Peaks(Primitive):
             data = getattr(data, self.item)
         return extract_peaks(data, span=self.span)
 
-    def plot_handler(self, data, chart, ax=None):
+    def plot_handler(self, prices, chart, ax=None):
         if ax is None:
             ax = chart.get_axes()
 
-        data = chart.calc_result(data, self.indicator)
+        data = chart.calc_result(prices, self.indicator)
         data = self.process(data)
         data = chart.slice(data)
 

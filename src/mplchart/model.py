@@ -22,7 +22,7 @@ class Primitive(ABC):
     __repr__ = short_repr
 
     @abstractmethod
-    def plot_handler(self, data, chart, ax=None):
+    def plot_handler(self, prices, chart, ax=None):
         """Plot handler is called before any callculation"""
         ...
 
@@ -49,7 +49,7 @@ class Indicator(ABC):
             cls.info = MappingProxyType(kwargs)
 
     @abstractmethod
-    def __call__(self, data): ...
+    def __call__(self, prices): ...
 
     def __matmul__(self, other):
         if callable(other):
@@ -75,8 +75,8 @@ class ComposedIndicator(Indicator):
     def __repr__(self):
         return " @ ".join(repr(fn) for fn in self.args)
 
-    def __call__(self, data):
-        result = data
+    def __call__(self, prices):
+        result = prices
         for fn in reversed(self.args):
             result = fn(result)
         return result

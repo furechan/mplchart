@@ -16,7 +16,7 @@ class OHLC(Primitive):
     Used to plot prices as OHLC bars
     """
 
-    def __init__(self, *, width: float = 0.8, alpha: float = 1.0, colorup: str = None, colordn: str = None):
+    def __init__(self, *, width: float = 0.8, alpha: float = 1.0, colorup: str | None = None, colordn: str | None = None):
         self.width = width
         self.alpha = alpha
         self.colorup = colorup
@@ -89,8 +89,6 @@ def plot_ohlc(data, ax=None, width=0.8, alpha=0.5, colorup=None, colordn=None, l
             xvalues, data.open, data.high, data.low, data.close
         )
     ]
-
-    verts = np.asarray(verts)
 
     linewidths = (1.0,)
 
