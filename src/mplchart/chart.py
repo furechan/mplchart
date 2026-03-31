@@ -475,8 +475,7 @@ class Chart:
         add indicators to the existing chart without needing prices again.
 
         Args:
-            *args: A prices DataFrame (first call only) followed by any number
-                of indicators or lists of indicators. Indicators may be
+            *args: Any number of indicators or lists of indicators. Indicators may be
                 ``Indicator`` instances, ``Primitive`` instances, or any callable
                 that accepts a prices DataFrame.
             target (str or None): Target pane for the first indicator in this
@@ -492,11 +491,6 @@ class Chart:
             chart.plot(SMA(20), SMA(50))
             chart.plot(RSI(14))
         """
-
-        # TODO remove handling for legacy prices argument
-        if len(args) and hasattr(args[0], "columns"):
-            self.init_mapper(args[0])
-            args = args[1:]
         
         indicators = [
             y for arg in args for y in (arg if isinstance(arg, list) else (arg,))

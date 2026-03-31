@@ -25,8 +25,8 @@ def test_talib(freq, max_bars=250):
         abstract.Function("MACD"),
     ]
 
-    chart = Chart(title="Test", max_bars=max_bars)
-    chart.plot(prices, indicators)
+    chart = Chart(prices, title="Test", max_bars=max_bars)
+    chart.plot(indicators)
 
     assert chart.count_axes() > 0
 
