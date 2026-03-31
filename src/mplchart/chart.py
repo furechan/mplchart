@@ -113,6 +113,8 @@ class Chart:
 
         if prices is not None:
             self.init_mapper(prices)
+        else:
+            raise ValueError("Prices data must be provided at initialization!")
 
         if title:
             self.set_title(title)
@@ -153,8 +155,7 @@ class Chart:
     def init_mapper(self, prices):
         """Initialize the chart date mapper with price data.
 
-        Called automatically by ``plot()`` on the first invocation with a prices
-        DataFrame. Normalizes column names to lowercase, sets the index, and
+        Normalizes column names to lowercase, sets the index, and
         creates the appropriate date mapper (integer-based or raw-date).
 
         Args:
@@ -470,10 +471,6 @@ class Chart:
     def plot(self, *args, target: str|None = "same"):
         """Plot one or more indicators onto the chart.
 
-        On the first call the prices DataFrame must be provided as the first
-        positional argument to initialize the date mapper. Subsequent calls
-        add indicators to the existing chart without needing prices again.
-
         Args:
             *args: Any number of indicators or lists of indicators. Indicators may be
                 ``Indicator`` instances, ``Primitive`` instances, or any callable
@@ -487,9 +484,9 @@ class Chart:
             Chart: ``self``, for method chaining.
 
         Examples:
-            chart.plot(prices, Candlesticks(), Volume())
-            chart.plot(SMA(20), SMA(50))
-            chart.plot(RSI(14))
+            chart.plot(Candlesticks(), Volume())
+            chart.plot(RSI(14), target="above)
+            chart.plot(MACD(), target="below")
         """
         
         indicators = [
