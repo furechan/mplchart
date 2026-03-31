@@ -13,53 +13,61 @@ ROOT = Path(__file__).parent
 
 @task
 def info(ctx):
-    """Check package versions"""
+    """Show installed package version"""
     ctx.run(f"uv pip show {PACKAGE}")
 
 
 @task
 def clean(ctx):
-    """Cleanup and remove dist folder"""
+    """Remove dist folder"""
     ctx.run("rm -rf dist")
 
 
 @task
 def check(ctx):
-    """Check package"""
+    """Lint with ruff and check example notebooks with nbcheck"""
     ctx.run("nbcheck examples")
     ctx.run("ruff check")
 
 
 @task
 def make(ctx):
-    """Update readme"""
+    """Regenerate README from scripts/process-readme.py"""
     with ctx.cd("scripts"):
         ctx.run("python process-readme.py")
 
 
 @task(clean, make)
 def build(ctx):
-    """Build project wheel"""
+    """Build project wheel (runs clean and make first)"""
     ctx.run("uv build --wheel")
 
 
 @task
 def dump(ctx):
-    """Dump wheel contents"""
+    """List contents of the built wheel"""
     for file in ROOT.glob("dist/*.whl"):
         ctx.run(f"unzip -l {file}")
 
 
 @task
 def publish(ctx, testpypi=False):
-    """Publish to PyPI with twine"""
+    """Upload dist/*.whl to PyPI via twine (use --testpypi for TestPyPI)
+
+    Publishing order: check → build → publish → bump
+    Note: bump runs *after* publishing, not before.
+    """
     flags = "--repository testpypi" if testpypi else ""
     ctx.run(f"twine upload {flags} dist/*.whl")
 
 
 @task
 def depcheck(ctx):
-    """Upgrade packages flagged by Dependabot security alerts"""
+    """Fetch open Dependabot alerts, upgrade flagged packages in uv.lock, and sync
+
+    After running, review changes and commit uv.lock:
+        git add uv.lock && git commit -m "Update dependencies to address security alerts"
+    """
     result = subprocess.run(
         ["gh", "api", "repos/Furechan/mplchart/dependabot/alerts",
          "--jq", "[.[] | select(.state==\"open\") | .dependency.package.name]"],
@@ -77,7 +85,7 @@ def depcheck(ctx):
 
 @task
 def bump(ctx):
-    """Bump patch version in pyproject"""
+    """Bump patch version in pyproject.toml"""
     pyproject = Path(__file__).joinpath("../pyproject.toml").resolve(strict=True)
     buffer = pyproject.read_text()
     pattern = r"^version \s* = \s* \"(.+)\" \s*"
