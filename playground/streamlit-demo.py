@@ -1,4 +1,4 @@
-""" mplchart with streamlit example """
+""" mplchart with streamlit demo """
 
 import streamlit as st
 import yfinance as yf
