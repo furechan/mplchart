@@ -468,7 +468,7 @@ class Chart:
             if handles:
                 ax.legend(loc="upper left")
 
-    def plot(self, *args, target: str|None = "same"):
+    def plot(self, *args, target: str | None = "same"):
         """Plot one or more indicators onto the chart.
 
         Args:
