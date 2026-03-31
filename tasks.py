@@ -1,6 +1,8 @@
 # noinspection PyUnresolvedReferences
 
 import re
+import json
+import subprocess
 
 from pathlib import Path
 from invoke import task
@@ -53,6 +55,24 @@ def publish(ctx, testpypi=False):
     """Publish to PyPI with twine"""
     flags = "--repository testpypi" if testpypi else ""
     ctx.run(f"twine upload {flags} dist/*.whl")
+
+
+@task
+def depcheck(ctx):
+    """Upgrade packages flagged by Dependabot security alerts"""
+    result = subprocess.run(
+        ["gh", "api", "repos/Furechan/mplchart/dependabot/alerts",
+         "--jq", "[.[] | select(.state==\"open\") | .dependency.package.name]"],
+        capture_output=True, text=True, check=True
+    )
+    packages = list(dict.fromkeys(json.loads(result.stdout)))
+    if not packages:
+        print("No open Dependabot alerts.")
+        return
+    print(f"Upgrading: {', '.join(packages)}")
+    upgrade_flags = " ".join(f"--upgrade-package {p}" for p in packages)
+    ctx.run(f"uv lock {upgrade_flags}")
+    ctx.run("uv sync")
 
 
 @task
