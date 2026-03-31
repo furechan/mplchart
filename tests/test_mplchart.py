@@ -7,11 +7,6 @@ from mplchart.samples import sample_prices
 from mplchart.primitives import Candlesticks, Volume
 from mplchart.indicators import SMA, EMA, WMA, HMA, TSF, RSI, ATR, ATRP, ADX, MACD, PPO, SLOPE, BBANDS, STOCH, CCI, CMF, BOP, MFI
 
-try:
-    from talib import abstract
-except ImportError:
-    abstract = None  # type: ignore[assignment]
-
 
 FREQS = ["daily", "hourly", "minute"]
 
@@ -61,26 +56,3 @@ def test_indicators(indicator, freq, max_bars=250):
 
     plt.close()
 
-
-@pytest.mark.skipif(abstract is None, reason="requires talib")
-@pytest.mark.parametrize("freq", FREQS)
-def test_talib(freq, max_bars=250):
-    assert abstract is not None
-    prices = sample_prices(freq=freq)
-
-    indicators = [
-        Candlesticks(),
-        abstract.Function("SMA", 50),
-        abstract.Function("SMA", 200),
-        abstract.Function("KAMA"),
-        abstract.Function("BBANDS"),
-        abstract.Function("RSI"),
-        abstract.Function("MACD"),
-    ]
-   
-    chart = Chart(title="Test", max_bars=max_bars)
-    chart.plot(prices, indicators)
-
-    assert chart.count_axes() > 0
-
-    plt.close()

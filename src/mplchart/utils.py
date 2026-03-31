@@ -48,7 +48,7 @@ def get_label(indicator):
     return str(indicator)
 
 
-def series_xy(data, item=None, *, dropna=False):
+def series_xy(data, item: str | None = None, *, dropna: bool = False):
     """split data into x, y arrays"""
 
     if item is not None:

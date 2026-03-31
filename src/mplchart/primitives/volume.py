@@ -8,13 +8,24 @@ from ..colors import closest_color
 
 
 class Volume(Primitive):
-    """
-    Volume Primitive
+    """Volume primitive.
 
-    Plot volume with optional moving average
+    Plots volume bars colored by price direction (green for up-bars, red for
+    down-bars). Rendered as a twinx overlay on the main pane so it does not
+    affect the price axis. An optional SMA of volume can be overlaid.
 
     Args:
-        sma (int) : the period of the simple moving average, optional
+        sma (int, optional): Period for the volume SMA overlay. Omit to skip
+            the moving average line.
+        width (float): Width of each volume bar as a fraction of bar spacing.
+            Defaults to 0.8.
+        alpha (float): Opacity of the bars, between 0.0 and 1.0. Defaults to 0.5.
+        colorup (str, optional): Color for bars where price closed up.
+            Defaults to green.
+        colordn (str, optional): Color for bars where price closed down.
+            Defaults to red.
+        colorma (str, optional): Color for the SMA overlay line.
+            Defaults to gray.
     """
 
     def __init__(

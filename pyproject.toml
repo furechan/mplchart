@@ -41,6 +41,7 @@ dev = [
     "nicegui>=3.9.0",
     "streamlit>=1.55.0",
     "nbcheck>=0.0.2",
+    "ty>=0.0.26",
 ]
 
 [tool.pytest.ini_options]

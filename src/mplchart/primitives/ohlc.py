@@ -10,10 +10,19 @@ from ..model import Primitive
 
 
 class OHLC(Primitive):
-    """
-    Open High Low Close Primitive
+    """Open High Low Close primitive.
 
-    Used to plot prices as OHLC bars
+    Plots OHLC prices as traditional bar charts with horizontal tick marks for
+    the open (left tick) and close (right tick) prices.
+
+    Args:
+        width (float): Width of each bar as a fraction of bar spacing.
+            Defaults to 0.8.
+        alpha (float): Opacity of the bars, between 0.0 and 1.0. Defaults to 1.0.
+        colorup (str, optional): Color for up-bars (close ≥ previous close).
+            Defaults to the current ``text.color`` matplotlib parameter.
+        colordn (str, optional): Color for down-bars. Defaults to the current
+            ``text.color`` matplotlib parameter.
     """
 
     def __init__(self, *, width: float = 0.8, alpha: float = 1.0, colorup: str | None = None, colordn: str | None = None):

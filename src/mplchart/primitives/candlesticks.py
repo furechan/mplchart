@@ -13,10 +13,22 @@ from ..model import Primitive
 
 
 class Candlesticks(Primitive):
-    """
-    Candlesticks Primitive
+    """Candlesticks primitive.
 
-    Used to plot prices as candlesticks
+    Plots OHLC prices as candlestick chart. Up-bars (close ≥ open) are drawn
+    hollow (fill matches the background); down-bars (close < open) are filled.
+
+    Args:
+        width (float): Width of each candlestick body as a fraction of bar
+            spacing. Defaults to 0.8.
+        alpha (float): Opacity of the candlesticks, between 0.0 and 1.0.
+            Defaults to 1.0.
+        colorup (str, optional): Color for up-bars. Defaults to the current
+            ``text.color`` matplotlib parameter.
+        colordn (str, optional): Color for down-bars. Defaults to the current
+            ``text.color`` matplotlib parameter.
+        use_bars (bool): If ``True``, render using bar charts instead of
+            polygons. Defaults to ``False``.
     """
 
     def __init__(

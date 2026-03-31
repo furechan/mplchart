@@ -8,18 +8,24 @@ from ..library import calc_price
 
 
 class Price(Primitive):
-    """
-    Price Primitive
+    """Price primitive.
 
-    Used to plot price as a line plot
+    Plots a single price series as a line. Rendered on the same scale as the
+    main price chart.
 
     Args:
-        item (str) :  name of the price item. default 'close'
-        One of 'open', 'high', 'low', 'close', 'avg', 'mid', 'typ', 'wcl', ...
+        item (str): Name of the price series to plot. One of ``"open"``,
+            ``"high"``, ``"low"``, ``"close"``, ``"avg"``, ``"mid"``,
+            ``"typ"``, ``"wcl"``, or any column in the prices DataFrame.
+            Defaults to ``"close"``.
+        width (float): Line width. Defaults to 1.0.
+        alpha (float): Opacity of the line, between 0.0 and 1.0. Defaults to 1.0.
+        color (str, optional): Line color. Defaults to the current
+            ``text.color`` matplotlib parameter.
 
-    Example:
-        Price('close')  # plot the close price series
-        Price('open')   # plot the open price series
+    Examples:
+        Price()           # plot the close price
+        Price("open")     # plot the open price
     """
 
     same_scale: bool = True

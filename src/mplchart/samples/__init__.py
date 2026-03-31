@@ -14,7 +14,23 @@ SAMPLE_FREQUENCIES = "daily", "hourly", "minute"
 
 @lru_cache
 def sample_prices(freq: str = "daily", *, max_bars: int = 0, backend: str | None = None):
-    """Sample prices"""
+    """Load bundled sample OHLCV prices for testing and examples.
+
+    Results are cached after the first call (per unique combination of arguments).
+
+    Args:
+        freq (str): Data frequency. One of ``"daily"``, ``"hourly"``, or
+            ``"minute"``. Defaults to ``"daily"``.
+        max_bars (int): If greater than 0, return only the most recent
+            ``max_bars`` rows. Defaults to 0 (return all rows).
+        backend (str, optional): Target DataFrame backend. Pass ``"polars"``
+            to convert the result to a Polars DataFrame. Defaults to ``None``
+            (returns a pandas DataFrame).
+
+    Returns:
+        DataFrame: OHLCV prices with a datetime index (pandas) or datetime
+        column (Polars).
+    """
 
     fname = f"{freq}-prices.csv"
     path = resources.files(__name__).joinpath(fname)

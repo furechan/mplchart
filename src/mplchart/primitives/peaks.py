@@ -9,13 +9,21 @@ from ..model import Primitive
 
 
 class Peaks(Primitive):
-    """
-    Peeks Primitive
-    Used to plot peaks and valey points
+    """Peaks primitive.
+
+    Plots local peak (high) and valley (low) points as scatter markers on the
+    chart. A point is considered a local peak or valley if it is the highest
+    high (or lowest low) within a window of ``2 * span + 1`` bars centered on
+    that bar.
 
     Args:
-        span (int) :  minimum number bars required before and after the local peak
-
+        span (int): Minimum number of bars required on each side of a local
+            extremum for it to qualify as a peak or valley. Defaults to 1.
+        item (str, optional): Column name to use as the price series for peak
+            detection. If ``None``, uses the ``high``/``low`` columns of the
+            prices DataFrame.
+        color (str, optional): Marker color. Defaults to the current
+            ``text.color`` matplotlib parameter.
     """
 
     indicator = None
@@ -52,15 +60,18 @@ class Peaks(Primitive):
 
 
 def extract_peaks(prices, span=1):
-    """
-    extracts local peaks.
+    """Extract local peak and valley points from a price series or DataFrame.
 
     Args:
-        span (int) : refers to minimum number bars required before
-        and after the local peak
+        prices (Series or DataFrame): Price data. If a DataFrame, the ``high``
+            and ``low`` columns are used; otherwise the same series is used for
+            both high and low detection.
+        span (int): Minimum number of bars required on each side of a local
+            extremum. Defaults to 1.
 
-    Return:
-        A series of prices defined only at local peaks and equal to nan otherwize
+    Returns:
+        Series: Price values at local peaks and valleys only; all other
+        positions are dropped (not NaN — the series is sparse).
     """
 
     window = 2 * span + 1

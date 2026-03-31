@@ -20,6 +20,7 @@ uv run python ...    # run scripts
 ## Dev dependencies
 
 Includes `nicegui` and `streamlit` as dev deps for example scripts.
+Includes `ty` for type checking and `ruff` for linting.
 
 ## Publishing workflow
 
@@ -29,7 +30,6 @@ Only wheels are built and published — no sdist.
 inv check        # lint (ruff) + nbcheck examples
 inv build        # clean → update README → uv build --wheel
 inv publish      # twine upload dist/*.whl to PyPI
-inv publish --testpypi  # upload to TestPyPI first
 inv bump         # bump patch version in pyproject.toml
 ```
 

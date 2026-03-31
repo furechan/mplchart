@@ -31,18 +31,34 @@ How primitives/indicators are plotted
 
 
 class Chart:
-    """
-    Chart Object
+    """Main charting class for creating financial charts with technical indicators.
+
+    Creates a matplotlib figure with one or more panes. The first call to
+    ``plot()`` initializes the date mapper from the prices DataFrame. Subsequent
+    calls add indicators to existing or new panes.
 
     Args:
-        title (str) : the chart title
-        max_bars (int) : the maximum number of bars to plot
-        start, end (datetime | str) :  the start and end date of the range to plot
-        figsize (tuple) : the size of the figure
+        prices (DataFrame, optional): OHLCV prices DataFrame used to initialize
+            the date mapper immediately. Can also be passed to ``plot()`` later.
+        title (str, optional): Chart title displayed above the main pane.
+        max_bars (int, optional): Maximum number of bars to display. When set,
+            only the most recent ``max_bars`` bars are shown.
+        start (datetime or str, optional): Start of the display range.
+        end (datetime or str, optional): End of the display range.
+        figure (Figure, optional): Existing matplotlib Figure to draw on.
+            The figure is cleared before use.
+        figsize (tuple, optional): Figure size as ``(width, height)`` in inches.
+            Defaults to ``(12, 9)``.
+        holidays (list, optional): List of dates to exclude from the x-axis
+            when using the integer date mapper.
+        color_scheme (dict or iterable of pairs, optional): Mapping of color
+            role names to color values used to override default colors (e.g.
+            ``colorup``, ``colordn``, ``bgcolor``).
 
-    Example:
-        chart = Chart(title=tiltle, ...)
-        chart.plot(prices, indicators)
+    Examples:
+        chart = Chart(title="AAPL", max_bars=252)
+        chart.plot(prices, [Candlesticks(), SMA(50), Volume()])
+        chart.show()
     """
 
     mapper = None
@@ -135,7 +151,16 @@ class Chart:
 
 
     def init_mapper(self, prices):
-        """initalizes chart and mapper with price data"""
+        """Initialize the chart date mapper with price data.
+
+        Called automatically by ``plot()`` on the first invocation with a prices
+        DataFrame. Normalizes column names to lowercase, sets the index, and
+        creates the appropriate date mapper (integer-based or raw-date).
+
+        Args:
+            prices (DataFrame): OHLCV prices DataFrame with a datetime index
+                or a ``date``/``datetime`` column.
+        """
 
         # currently this is only called once in Chart.slice
         # mapper is also used in plot_vline but not initialized there
@@ -443,14 +468,29 @@ class Chart:
                 ax.legend(loc="upper left")
 
     def plot(self, *args, target: str|None = "same"):
-        """plot list of indicators
+        """Plot one or more indicators onto the chart.
 
-        Parameters
-        ----------
-        prices: dataframe
-            the prices data frame
-        indicators: list of indicators
-            list of indicators to plot
+        On the first call the prices DataFrame must be provided as the first
+        positional argument to initialize the date mapper. Subsequent calls
+        add indicators to the existing chart without needing prices again.
+
+        Args:
+            *args: A prices DataFrame (first call only) followed by any number
+                of indicators or lists of indicators. Indicators may be
+                ``Indicator`` instances, ``Primitive`` instances, or any callable
+                that accepts a prices DataFrame.
+            target (str or None): Target pane for the first indicator in this
+                call. One of ``"same"``, ``"main"``, ``"above"``, ``"below"``,
+                ``"twinx"``. Use ``None`` to let each indicator choose its own
+                pane. Defaults to ``"same"``.
+
+        Returns:
+            Chart: ``self``, for method chaining.
+
+        Examples:
+            chart.plot(prices, Candlesticks(), Volume())
+            chart.plot(SMA(20), SMA(50))
+            chart.plot(RSI(14))
         """
 
         # TODO remove handling for legacy prices argument
@@ -484,7 +524,11 @@ class Chart:
         return self
 
     def plot_vline(self, date):
-        """plot vertical line across all axes"""
+        """Plot a vertical dashed line across all panes at the given date.
+
+        Args:
+            date (datetime or str): The date at which to draw the vertical line.
+        """
 
         if not self.figure.axes:
             raise RuntimeError("axes not initialized!")
@@ -503,7 +547,17 @@ class Chart:
         plt.show()
 
     def render(self, format="svg", *, dpi="figure"):
-        """render chart to the specific format"""
+        """Render the chart to bytes in the specified image format.
+
+        Args:
+            format (str): Output format, e.g. ``"svg"``, ``"png"``, ``"pdf"``.
+                Defaults to ``"svg"``.
+            dpi (float or str): Resolution in dots per inch. Pass ``"figure"``
+                to use the figure's own DPI setting. Defaults to ``"figure"``.
+
+        Returns:
+            bytes: The rendered image as a byte string.
+        """
         if not self.figure.axes:
             self.get_axes()
 

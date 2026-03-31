@@ -6,7 +6,27 @@ from ..model import Primitive
 
 
 class Markers(Primitive):
-    """Marker Primitive"""
+    """Markers primitive.
+
+    Plots scatter markers on the main pane at the close price whenever a
+    condition changes. The condition is evaluated from an indicator result or a
+    pandas ``eval`` expression. Use the ``|`` operator to attach to an
+    indicator.
+
+    Args:
+        expr (str, optional): A pandas ``eval`` expression applied to the
+            indicator result to produce a boolean/numeric signal. Omit if the
+            indicator itself already returns the signal.
+        color (str or list of str, optional): Marker color. Pass a two-element
+            list ``[color_off, color_on]`` to use different colors for signal
+            transitions. Defaults to the matplotlib default color cycle.
+        marker (str): Matplotlib marker symbol. Defaults to ``"."``.
+        alpha (float): Opacity of the markers, between 0.0 and 1.0.
+            Defaults to 0.6.
+
+    Examples:
+        RSI(14) | Markers(expr="rsi < 30", color=["gray", "green"])
+    """
 
     indicator = None
 

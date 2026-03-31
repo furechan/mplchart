@@ -10,20 +10,46 @@ from .utils import short_repr, get_series
 
 
 class Wrapper(ABC):
-    """Indicator plotting wrapper"""
+    """Abstract base class for indicator plotting wrappers.
+
+    A ``Wrapper`` is returned by an ``Indicator.__call__`` when the indicator
+    wants to take full control of how its result is rendered. The chart calls
+    ``plot_result`` with the already-sliced data instead of delegating to
+    ``AutoPlotter``.
+    """
 
     @abstractmethod
     def plot_result(self, data, chart, ax=None): ...
 
 
 class Primitive(ABC):
-    """Primitive abstract base class"""
+    """Abstract base class for chart primitives.
+
+    Primitives draw directly from the raw prices DataFrame without going through
+    the indicator calculation pipeline. They implement ``plot_handler`` which is
+    invoked before any indicator calculation takes place.
+
+    Primitives support the ``|`` operator to compose them with an indicator::
+
+        SMA(50) | LinePlot(style="dashed", color="blue")
+    """
 
     __repr__ = short_repr
 
     @abstractmethod
     def plot_handler(self, prices, chart, ax=None):
-        """Plot handler is called before any callculation"""
+        """Draw the primitive onto the chart.
+
+        Called before any indicator calculation. The prices DataFrame has not
+        been sliced yet; use ``chart.slice(data)`` to restrict the data to the
+        current view window.
+
+        Args:
+            prices (DataFrame): Full (unsliced) OHLCV prices DataFrame.
+            chart (Chart): The parent chart instance.
+            ax (Axes, optional): Target axes. If ``None``, the primitive should
+                call ``chart.get_axes()`` to obtain or create the target pane.
+        """
         ...
 
     def clone_legacy(self, **kwargs):
@@ -39,7 +65,20 @@ class Primitive(ABC):
 
 
 class Indicator(ABC):
-    """Indicator Base Class"""
+    """Abstract base class for technical analysis indicators.
+
+    Subclasses implement ``__call__(prices)`` to compute indicator values from
+    a prices DataFrame and return a Series or DataFrame.
+
+    Indicators support the ``@`` operator for composition and for applying an
+    indicator to data directly::
+
+        # Compose two indicators (applied right-to-left):
+        SMA(20) @ EMA(10)   # applies EMA first, then SMA
+
+        # Apply an indicator to prices directly:
+        SMA(20) @ prices    # equivalent to SMA(20)(prices)
+    """
 
     __repr__ = short_repr
 
@@ -49,7 +88,17 @@ class Indicator(ABC):
             cls.info = MappingProxyType(kwargs)
 
     @abstractmethod
-    def __call__(self, prices): ...
+    def __call__(self, prices):
+        """Compute the indicator value.
+
+        Args:
+            prices (DataFrame): OHLCV prices DataFrame with a datetime index.
+
+        Returns:
+            Series or DataFrame: Computed indicator values aligned to the
+            prices index.
+        """
+        ...
 
     def __matmul__(self, other):
         if callable(other):
@@ -62,7 +111,15 @@ class Indicator(ABC):
 
 
 class ComposedIndicator(Indicator):
-    """Composed Indicator"""
+    """An indicator formed by composing two or more indicators in sequence.
+
+    Created by the ``@`` operator. Indicators are applied right-to-left, so
+    ``ind1 @ ind2`` first applies ``ind2`` and then passes the result to
+    ``ind1``.
+
+    Example:
+        SMA(20) @ EMA(10)   # compute EMA(10) then smooth with SMA(20)
+    """
 
     def __init__(self, *args):
         if not all(callable(arg) for arg in args):

@@ -6,6 +6,21 @@ from ..utils import series_xy
 
 
 def calc_zigzag(prices, threshold=5.0):
+    """Compute ZigZag pivot points from OHLC prices.
+
+    Identifies successive swing highs and lows where each reversal exceeds the
+    given percentage threshold from the previous pivot.
+
+    Args:
+        prices (DataFrame): OHLCV prices DataFrame with ``high``, ``low``, and
+            ``close`` columns.
+        threshold (float): Minimum percentage move required to confirm a
+            reversal. Defaults to 5.0.
+
+    Returns:
+        Series: Pivot prices (highs and lows) at each identified swing point,
+        indexed by the corresponding row in ``prices``.
+    """
     pi = pv = pdir = None
     index = []
     values = []
@@ -51,6 +66,17 @@ def calc_zigzag(prices, threshold=5.0):
 
 
 class ZigZag(Primitive):
+    """ZigZag primitive.
+
+    Plots a line connecting successive swing highs and lows, filtering out
+    moves smaller than a percentage threshold. Rendered on the same scale as
+    the price series.
+
+    Args:
+        threshold (float): Minimum percentage reversal required to register a
+            new pivot. Defaults to 5.0.
+    """
+
     same_scale = True
 
     def __init__(self, threshold=5.0):

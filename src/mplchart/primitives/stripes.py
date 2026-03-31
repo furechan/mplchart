@@ -7,7 +7,24 @@ from ..model import Primitive
 
 
 class Stripes(Primitive):
-    """Stripes Primitive"""
+    """Stripes primitive.
+
+    Shades vertical bands across all chart panes (using the root axes) during
+    periods when a condition is active. The condition is derived from an
+    indicator result or a pandas ``eval`` expression. Use the ``|`` operator to
+    attach to an indicator.
+
+    Args:
+        expr (str, optional): A pandas ``eval`` expression applied to the
+            indicator result to produce a boolean/numeric signal. Omit if the
+            indicator itself already returns the signal.
+        color (str, optional): Fill color for the shaded regions.
+        alpha (float, optional): Opacity of the shaded regions, between 0.0
+            and 1.0.
+
+    Examples:
+        RSI(14) | Stripes(expr="rsi < 30", color="green", alpha=0.15)
+    """
 
     indicator = None
 
