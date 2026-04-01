@@ -63,7 +63,7 @@ def publish(ctx, testpypi=False):
 
 @task
 def depcheck(ctx):
-    """Fetch open Dependabot alerts, upgrade flagged packages in uv.lock, and sync
+    """Fetch dependabot alerts, upgrade flagged packages in uv.lock, and sync
 
     After running, review changes and commit uv.lock:
         git add uv.lock && git commit -m "Update dependencies to address security alerts"
