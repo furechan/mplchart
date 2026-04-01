@@ -9,10 +9,8 @@ based on a set of drawing primitives like `Candlesticks`, `Volume`
 and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
 
 
-> **Warning**
-> The interface has changed. You must pass `prices` as the first parameter of `Chart`. 
 
-> **Warning**
+> **Warning:** 
 > This project is experimental and the interface is likely to change.
 > For a related project with a mature api you may want to look into
 > [mplfinance](https://pypi.org/project/mplfinance/).
