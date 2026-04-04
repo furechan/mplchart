@@ -1,5 +1,6 @@
 # noinspection PyUnresolvedReferences
 
+import os
 import re
 import json
 import subprocess
@@ -9,6 +10,21 @@ from invoke import task
 
 PACKAGE = "mplchart"
 ROOT = Path(__file__).parent
+
+
+def load_direnv(path: str | Path = ROOT):
+    """Load direnv environment for `path` in os.environ. Requires direnv installed."""
+    output = subprocess.check_output(
+        ["direnv", "export", "json"],
+        cwd=path,
+        text=True
+        )
+    if output:
+        data = json.loads(output)
+        os.environ.update(data)
+
+
+load_direnv()
 
 
 @task
