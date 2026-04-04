@@ -21,7 +21,11 @@ def load_direnv(path: str | Path = ROOT):
         )
     if output:
         data = json.loads(output)
-        os.environ.update(data)
+        for k, v in data.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
 
 
 load_direnv()
