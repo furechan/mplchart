@@ -38,10 +38,10 @@ Chart(prices, title=ticker, max_bars=250).plot(
     Volume(),
     SMA(50),
     SMA(200),
-).plot(
-    RSI(), target="above"
-).plot(
-    MACD(), target="below"
+).pane("above").plot(
+    RSI()
+).pane("below").plot(
+    MACD()
 ).show()
 ```
 

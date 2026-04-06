@@ -399,6 +399,13 @@ class Chart:
 
         return ax
 
+    def pane(self, target="below", *, height_ratio=None):
+        """get axes for target or None for all axes except root"""
+
+        self.get_axes(target, height_ratio=height_ratio)
+
+        return self
+
     def dump_axes(self):
         for i, ax in enumerate(self.figure.axes):
             label = getattr(ax, "_label") or "none"
@@ -468,7 +475,7 @@ class Chart:
             if handles:
                 ax.legend(loc="upper left")
 
-    def plot(self, *args, target: str | None = "below"):
+    def plot(self, *args, target: str | None = "same"):
         """Plot one or more indicators onto the chart.
 
         Args:

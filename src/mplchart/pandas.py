@@ -17,7 +17,7 @@ def rebase_series(series, prices):
         Series scaled to match prices.close at the first common date
     """
     
-    close, values=prices["close"].align(series.dropna(), join="inner")
+    close, values = prices.rename(columns=str.lower)["close"].align(series.dropna(), join="inner")
 
     if len(values):
         factor = close.iloc[0] / values.iloc[0]
@@ -49,6 +49,7 @@ def merge_prices(prices, rebase=False, **kwargs):
     
     for name, series in kwargs.items():
         if isinstance(series, pd.DataFrame):
+            series = series.rename(columns=str.lower)
             if "close" not in series.columns:
                 raise ValueError(f"Expected a 'close' column in {name} DataFrame")
             series = series["close"]
