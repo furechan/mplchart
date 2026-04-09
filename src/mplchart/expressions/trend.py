@@ -26,9 +26,11 @@ def RMA(period: int = 14, *, src: pl.Expr = CLOSE) -> pl.Expr:
 @wrap_expression
 def WMA(period: int = 20, *, src: pl.Expr = CLOSE) -> pl.Expr:
     """Weighted Moving Average"""
-    weights = list(range(1, period + 1))
-    total = sum(weights)
-    return src.rolling_sum(period, weights=[w / total for w in weights], min_samples=period)
+    weights = [w / (period * (period + 1) / 2) for w in range(1, period + 1)]
+    # rolling_sum with weights panics on null values; sum weighted shifts instead
+    return pl.sum_horizontal(
+        src.shift(period - 1 - i) * w for i, w in enumerate(weights)
+    ).set_sorted(descending=False)
 
 
 @wrap_expression
