@@ -51,15 +51,14 @@ class AutoPlotter():
         window = getattr(self.chart, "window", None)
 
         if window is not None:
-            # polars path: use mapper rownum + col_to_numpy
+            # polars path: self.data is already sliced; pair with rownum[window]
+            xv = self.chart.mapper.rownum[window]
             if hasattr(self.data, "columns"):
-                # DataFrame: use item if given, else first column
                 col = item if item is not None else self.data.columns[0]
-                values = col_to_numpy(self.data, col)
+                yv = col_to_numpy(self.data, col)
             else:
-                # Series: ignore item
-                values = np.asarray(self.data)
-            return self.chart.mapper.series_xy(values, window)
+                yv = np.asarray(self.data)
+            return xv, yv
 
         # pandas legacy path: index carries rownum
         if self.data.__class__.__name__ == "Series":

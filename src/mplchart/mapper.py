@@ -38,78 +38,64 @@ class RawDateMapper:
 class DateIndexMapper:
     """Date Index Mapper — maps dates to integer row positions (rownum).
 
-    Stores a tz-naive numpy datetime array and computes a window slice
-    via np.searchsorted. No pandas dependency.
+    Stores the full tz-naive numpy datetime array and computes the visible
+    window as an absolute slice via calc_window(). Indicators are computed
+    on the full dataset; only the final slice is handed to the plotter.
+
+    Args:
+        datetime_array: Full datetime array from the prices DataFrame.
+        max_bars: Maximum number of bars to show (from the end).
+        start: Start datetime filter.
+        end: End datetime filter.
     """
 
     def __init__(self, datetime_array: np.ndarray, *, max_bars=None, start=None, end=None):
-        datetime_array = np.asarray(datetime_array, dtype="datetime64[ns]")
+        self.datetime_array = np.asarray(datetime_array, dtype="datetime64[ns]")
+        self.rownum = np.arange(len(self.datetime_array))
+        self.max_bars = max_bars
+        self.start = start
+        self.end = end
 
-        lo, hi = 0, len(datetime_array)
+    def calc_window(self) -> slice:
+        """Return the visible window as an absolute slice into datetime_array."""
+        dt = self.datetime_array
+        lo, hi = 0, len(dt)
 
-        if start is not None:
-            lo = int(np.searchsorted(datetime_array, np.datetime64(start, "ns")))
-        if end is not None:
-            hi = int(np.searchsorted(datetime_array, np.datetime64(end, "ns"), side="right"))
-
-        offset = lo  # rows trimmed from front by start filter
-        datetime_array = datetime_array[lo:hi]
-
-        if max_bars and max_bars > 0:
-            trim = max(0, len(datetime_array) - max_bars)
-            offset += trim
-            datetime_array = datetime_array[trim:]
-
-        self.offset = offset  # total rows trimmed from the original array
-        self.datetime_array = datetime_array
-        self.rownum = np.arange(len(datetime_array))
-
-    def data_window(self, window: slice) -> slice:
-        """Convert a view-relative window to an absolute slice for full-length arrays."""
-        return slice(self.offset + window.start, self.offset + window.stop)
-
-    def calc_window(self, start=None, end=None, max_bars=None) -> slice:
-        """Return a slice(start_row, end_row) for the visible bar range."""
-        lo, hi = 0, len(self.datetime_array)
-
-        if start is not None:
-            lo = int(np.searchsorted(self.datetime_array, np.datetime64(start, "ns")))
-        if end is not None:
-            hi = int(np.searchsorted(self.datetime_array, np.datetime64(end, "ns"), side="right"))
-        if max_bars and max_bars > 0:
-            lo = max(lo, hi - max_bars)
+        if self.start is not None:
+            lo = int(np.searchsorted(dt, np.datetime64(self.start, "ns")))
+        if self.end is not None:
+            hi = int(np.searchsorted(dt, np.datetime64(self.end, "ns"), side="right"))
+        if self.max_bars and self.max_bars > 0:
+            lo = max(lo, hi - self.max_bars)
 
         return slice(lo, hi)
 
     def series_xy(self, values, window: slice):
-        """Return (x, y) numpy arrays for the given window.
+        """Return (x, y) numpy arrays for a full-length values array.
 
-        ``values`` must already be windowed (length == window.stop - window.start),
-        as returned by chart.slice() or data[data_window(window)].
+        ``values`` must be the same length as the full datetime_array.
+        ``window`` is an absolute slice as returned by calc_window().
         """
         return self.rownum[window], np.asarray(values)[window]
 
     def slice(self, data):
-        """Legacy slice — maps data index to rownum positions.
+        """Slice data to the visible window.
 
-        Used by existing indicator/primitive code until primitives are
-        fully migrated to series_xy. Returns data re-indexed to integer
-        row positions (pandas) or positionally sliced (polars).
+        For pandas: re-indexes to rownum positions (integer x-axis).
+        For polars: returns a positional slice.
         """
         import pandas as pd
 
         window = self.calc_window()
 
-        # polars: positional slice offset by self.offset to account for trimmed rows
+        # polars: positional slice using the absolute window
         if not hasattr(data, "index"):
-            lo = self.offset + window.start
-            hi = self.offset + window.stop
-            return data[lo:hi]
+            return data[window]
 
+        # pandas: align by datetime to rownum
         dt = self.datetime_array[window]
         xloc = pd.Series(self.rownum[window], index=pd.DatetimeIndex(dt), name="xloc")
 
-        # strip tz from data index if needed to allow alignment with tz-naive xloc
         if hasattr(data.index, "tz") and data.index.tz is not None:
             data = data.set_axis(data.index.tz_localize(None))
 
@@ -122,7 +108,7 @@ class DateIndexMapper:
         return int(np.searchsorted(self.datetime_array, np.datetime64(date, "ns"), side="left"))
 
     def config_axes(self, ax):
-        """Set locator and formatter on the x-axis."""
+        """Set locator and formatter on the x-axis using the full datetime array."""
         locator = DTArrayLocator(self.datetime_array)
         formatter = DTArrayFormatter(self.datetime_array)
 

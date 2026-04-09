@@ -92,12 +92,12 @@ class ZigZag(Primitive):
 
         window = chart.mapper.calc_window()
         chart.window = window
-        dwindow = chart.mapper.data_window(window)
 
-        # run zigzag only on the windowed slice so indices are 0-based within window
-        windowed = prices[dwindow] if not hasattr(prices, "index") else chart.slice(prices)
+        # run zigzag on the windowed slice; returned indices are 0-based within window
+        windowed = chart.slice(prices) if hasattr(prices, "index") else prices[window]
         row_indices, values = calc_zigzag(windowed, threshold=self.threshold)
 
-        xv = chart.mapper.rownum[row_indices]
+        # map local indices to absolute rownums
+        xv = chart.mapper.rownum[window][row_indices]
         label = repr(self)
         ax.plot(xv, values, label=label, color=None)

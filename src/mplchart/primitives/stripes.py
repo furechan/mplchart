@@ -52,10 +52,9 @@ class Stripes(Primitive):
 
         window = chart.mapper.calc_window()
         chart.window = window
-        dwindow = chart.mapper.data_window(window)
         rownum = chart.mapper.rownum
 
-        values = np.asarray(signal)[dwindow]
+        values = np.asarray(signal)[window]
 
         if not len(values):
             return
