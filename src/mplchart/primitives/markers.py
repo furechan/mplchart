@@ -62,14 +62,15 @@ class Markers(Primitive):
 
         window = chart.mapper.calc_window()
         chart.window = window
+        dwindow = chart.mapper.data_window(window)
         rownum = chart.mapper.rownum
 
         flag = np.clip(np.sign(np.asarray(signal, dtype=float)), 0, 1)
         close = np.asarray(col_to_numpy(prices, "close"), dtype=float)
 
-        # apply window
-        flag = flag[window]
-        close = close[window]
+        # apply window (use dwindow for full-length arrays)
+        flag = flag[dwindow]
+        close = close[dwindow]
 
         # forward-fill NaNs in flag
         nan_mask = np.isnan(flag)
@@ -85,7 +86,7 @@ class Markers(Primitive):
         if not mask.sum():
             return
 
-        xv = rownum[window.start + np.where(mask)[0]]
+        xv = rownum[np.where(mask)[0]]
         yv = close[mask]
         flag_at = flag[mask]
 

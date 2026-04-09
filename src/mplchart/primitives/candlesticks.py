@@ -53,7 +53,8 @@ class Candlesticks(Primitive):
 
         window = chart.mapper.calc_window()
         xvalues = chart.mapper.rownum[window]
-        prices = chart.slice(prices)
+        dwindow = chart.mapper.data_window(window)
+        prices = chart.slice(prices) if hasattr(prices, "index") else prices[dwindow]
 
         label = str(self)
         width = self.width

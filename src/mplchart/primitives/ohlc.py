@@ -41,12 +41,13 @@ class OHLC(Primitive):
 
         window = chart.mapper.calc_window()
         chart.window = window
+        dwindow = chart.mapper.data_window(window)
 
         xvalues = chart.mapper.rownum[window]
-        open_ = np.asarray(col_to_numpy(prices, "open"))[window]
-        high = np.asarray(col_to_numpy(prices, "high"))[window]
-        low = np.asarray(col_to_numpy(prices, "low"))[window]
-        close = np.asarray(col_to_numpy(prices, "close"))[window]
+        open_ = np.asarray(col_to_numpy(prices, "open"))[dwindow]
+        high = np.asarray(col_to_numpy(prices, "high"))[dwindow]
+        low = np.asarray(col_to_numpy(prices, "low"))[dwindow]
+        close = np.asarray(col_to_numpy(prices, "close"))[dwindow]
 
         textcolor = plt.rcParams["text.color"]
 

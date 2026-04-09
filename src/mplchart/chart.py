@@ -260,12 +260,14 @@ class Chart:
     def plot_xy(self, data):
         """Return (xv, yv) numpy arrays for a same-length series (pandas or polars).
 
+        ``data`` must be full-length (same number of rows as the original prices).
         Applies the current view window and maps row numbers to x-coordinates.
         Use this instead of chart.slice() + series_xy() in primitives.
         """
         window = self.mapper.calc_window()
         self.window = window
-        return self.mapper.series_xy(np.asarray(data), window)
+        dwindow = self.mapper.data_window(window)
+        return self.mapper.rownum[window], np.asarray(data)[dwindow]
 
     def map_date(self, date):
         """map date to value"""

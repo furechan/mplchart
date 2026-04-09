@@ -52,13 +52,21 @@ class DateIndexMapper:
         if end is not None:
             hi = int(np.searchsorted(datetime_array, np.datetime64(end, "ns"), side="right"))
 
+        offset = lo  # rows trimmed from front by start filter
         datetime_array = datetime_array[lo:hi]
 
         if max_bars and max_bars > 0:
-            datetime_array = datetime_array[-max_bars:]
+            trim = max(0, len(datetime_array) - max_bars)
+            offset += trim
+            datetime_array = datetime_array[trim:]
 
+        self.offset = offset  # total rows trimmed from the original array
         self.datetime_array = datetime_array
         self.rownum = np.arange(len(datetime_array))
+
+    def data_window(self, window: slice) -> slice:
+        """Convert a view-relative window to an absolute slice for full-length arrays."""
+        return slice(self.offset + window.start, self.offset + window.stop)
 
     def calc_window(self, start=None, end=None, max_bars=None) -> slice:
         """Return a slice(start_row, end_row) for the visible bar range."""
@@ -74,7 +82,11 @@ class DateIndexMapper:
         return slice(lo, hi)
 
     def series_xy(self, values, window: slice):
-        """Return (x, y) numpy arrays for the given window."""
+        """Return (x, y) numpy arrays for the given window.
+
+        ``values`` must already be windowed (length == window.stop - window.start),
+        as returned by chart.slice() or data[data_window(window)].
+        """
         return self.rownum[window], np.asarray(values)[window]
 
     def slice(self, data):
@@ -88,9 +100,11 @@ class DateIndexMapper:
 
         window = self.calc_window()
 
-        # polars: positional slice (same-length result, no index)
+        # polars: positional slice offset by self.offset to account for trimmed rows
         if not hasattr(data, "index"):
-            return data[window]
+            lo = self.offset + window.start
+            hi = self.offset + window.stop
+            return data[lo:hi]
 
         dt = self.datetime_array[window]
         xloc = pd.Series(self.rownum[window], index=pd.DatetimeIndex(dt), name="xloc")

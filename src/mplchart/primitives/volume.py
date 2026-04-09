@@ -54,9 +54,10 @@ class Volume(Primitive):
 
         window = chart.mapper.calc_window()
         chart.window = window
+        dwindow = chart.mapper.data_window(window)
 
-        volume = np.asarray(col_to_numpy(prices, "volume"))[window]
-        close = np.asarray(col_to_numpy(prices, "close"))[window]
+        volume = np.asarray(col_to_numpy(prices, "volume"))[dwindow]
+        close = np.asarray(col_to_numpy(prices, "close"))[dwindow]
 
         with np.errstate(invalid="ignore"):
             change = np.diff(close, prepend=np.nan) / np.roll(close, 1)

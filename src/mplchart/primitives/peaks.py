@@ -51,15 +51,14 @@ class Peaks(Primitive):
         if ax is None:
             ax = chart.get_axes()
 
-        data = chart.calc_result(prices, self.indicator)
-        row_indices, values = self.process(data)
-
-        # apply view window
         window = chart.mapper.calc_window()
         chart.window = window
-        mask = (row_indices >= window.start) & (row_indices < window.stop)
-        row_indices = row_indices[mask]
-        values = values[mask]
+        dwindow = chart.mapper.data_window(window)
+
+        data = chart.calc_result(prices, self.indicator)
+        # slice to view window so row_indices are 0-based within window
+        windowed = data[dwindow] if not hasattr(data, "index") else chart.slice(data)
+        row_indices, values = self.process(windowed)
 
         xv = chart.mapper.rownum[row_indices]
         color = self.color or plt.rcParams["text.color"]

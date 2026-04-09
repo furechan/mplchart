@@ -90,14 +90,13 @@ class ZigZag(Primitive):
         if ax is None:
             ax = chart.get_axes()
 
-        row_indices, values = calc_zigzag(prices, threshold=self.threshold)
-
-        # apply the view window — keep only pivots within the window
         window = chart.mapper.calc_window()
         chart.window = window
-        mask = (row_indices >= window.start) & (row_indices < window.stop)
-        row_indices = row_indices[mask]
-        values = values[mask]
+        dwindow = chart.mapper.data_window(window)
+
+        # run zigzag only on the windowed slice so indices are 0-based within window
+        windowed = prices[dwindow] if not hasattr(prices, "index") else chart.slice(prices)
+        row_indices, values = calc_zigzag(windowed, threshold=self.threshold)
 
         xv = chart.mapper.rownum[row_indices]
         label = repr(self)
