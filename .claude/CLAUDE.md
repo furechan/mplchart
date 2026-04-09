@@ -2,6 +2,11 @@
 
 Python project managed with [uv](https://docs.astral.sh/uv/).
 
+## Local Memory
+
+<!-- @mention here (not in rules/) so the memory index is auto-loaded -->
+If present use local memory @.claude/memory/MEMORY.md instead of global memory
+
 ## Setup
 
 ```bash
