@@ -159,59 +159,44 @@ use `rownum[their_row_indices]` for x — document that they own their coordinat
 ### Phase 6 — Expression support in the plot API
 
 **6.1** Create `PolarsExprIndicator` in `model.py`: wraps a `pl.Expr`, evaluates via
-`prices.select(expr)`, returns a same-length polars Series
+`prices.select(expr)`, returns a same-length polars Series or struct
 
 **6.2** Modify `Chart.plot()` to detect `polars.Expr` objects and auto-wrap in
 `PolarsExprIndicator`
 
 **6.3** Wire `calc_result()` in `chart.py` for `PolarsExprIndicator` — result is a
-same-length Series, fed into `col_to_numpy()` + `series_xy()` like any other
+same-length Series or struct, fed into `col_to_numpy()` + `series_xy()` like any other
+
+**6.4** Handle tuple-of-Expr results: evaluate each expression independently and call
+`series_xy` once per element — same as iterating over columns of a multi-column DataFrame
 
 ---
 
-### Phase 7 — `item=` parameter accepts polars Expr
+### Phase 7 — `expressions/` subpackage
 
-**7.1** Extend `series_data()` / `get_series()` to accept `polars.Expr` as `item`
-_(evaluate `df.select(item)` and return the first column)_
+**7.1** Create `src/mplchart/expressions/` subpackage with the same conventions as bearta:
+- `wrap_expression` decorator enabling `SMA(20, pl.col("close"))` or `SMA(20)` (defaults to `CLOSE`)
+- Prelude constants: `OPEN`, `HIGH`, `LOW`, `CLOSE`, `VOLUME`
+- Factory functions returning `pl.Expr`: `SMA`, `EMA`, `WMA`, `HMA`, `DEMA`, `TEMA`
+- Momentum: `ROC`, `MOM`, `RSI`, `MACD`, `STOCH`
+- Volatility: `ATR`, `TRANGE`, `BBANDS`, `DONCHIAN`, `KELTNER`
+- Prices: `MIDPRICE`, `TYPPRICE`, `WCLPRICE`
 
-**7.2** Update `LinePlot` and `Peaks` to accept `polars.Expr` for `item=` and thread
-it through to `series_data()`
+**7.2** Multi-column expressions (MACD, BBANDS, etc.) return a tuple of `pl.Expr`, one per
+output series — each evaluated independently, `series_xy` called once per element
 
----
-
-### Phase 8 — Library functions: polars dispatch (single-series)
-
-**8.1** Create `library_polars.py` with polars implementations of single-series rolling
-functions: `calc_sma`, `calc_ema`, `calc_wma`, `calc_roc`, `calc_mom`, `calc_std`,
-`calc_slope`, `calc_curve`
-
-**8.2** Add `dispatch(fn_pandas, fn_polars)` wrapper in `library.py` routing on input type
-
-**8.3** Wire dispatch for all single-series functions
+**7.3** Add `item=` support for `polars.Expr` in `LinePlot` and `Peaks` — thread through
+to `series_data()`
 
 ---
 
-### Phase 9 — Library functions: polars dispatch (multi-column)
+### Phase 8 — End-to-end polars path + test coverage
 
-**9.1** Polars implementations of multi-column functions: `calc_macd`, `calc_bbands`,
-`calc_donchian`, `calc_keltner`
+**8.1** Verify all `Indicator.__call__` implementations still work correctly with pandas
+after the mapper/primitive refactor
 
-**9.2** Polars implementations of OHLCV functions: `calc_atr`, `calc_cci`, `calc_bop`,
-`calc_adx`, `calc_dmi`
-
-**9.3** Wire dispatch for all multi-column and OHLCV functions
-
----
-
-### Phase 10 — End-to-end polars path + test coverage
-
-**10.1** Verify all `Indicator.__call__` implementations flow through correctly once
-library dispatch is wired — most need no changes
-
-**10.2** Fix any indicator that hard-codes pandas operations (`pd.concat`, `pd.Series(...)`,
-explicit `.index` access)
-
-**10.3** Expand `tests/test_polars.py` to cover all indicators with polars input
+**8.2** Expand `tests/test_polars.py` to cover expressions from the `expressions/`
+subpackage with polars input
 
 ---
 
@@ -225,7 +210,7 @@ Phase 1 (infra)
                          └─ Phase 5 (primitives use helpers)
                                 ├─ Phase 6 (Expr in plot API)   ← early value
                                 ├─ Phase 7 (item= Expr)
-                                └─ Phases 8–10 (library dispatch)
+                                └─ Phase 8 (end-to-end test coverage)
 ```
 
 Phases 2–5 are the load-bearing refactor. Once prices are flat and `series_xy` works
