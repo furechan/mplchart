@@ -2,7 +2,7 @@
 
 
 from ..model import Primitive
-from ..utils import get_label, series_data, series_xy
+from ..utils import get_label, series_data
 
 
 class AreaPlot(Primitive):
@@ -54,8 +54,6 @@ class AreaPlot(Primitive):
 
         series = series_data(result, self.item)
 
-        series = chart.slice(series)
-
         label = self.label or get_label(self.indicator)
 
         kwargs = dict(
@@ -63,7 +61,7 @@ class AreaPlot(Primitive):
             alpha=self.alpha,
         )
 
-        xv, yv = series_xy(series)
+        xv, yv = chart.plot_xy(series)
         ax.fill_between(
             xv,
             yv,

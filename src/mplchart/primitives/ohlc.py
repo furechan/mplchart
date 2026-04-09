@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection
 
 from ..model import Primitive
+from ..utils import col_to_numpy
 
 
 class OHLC(Primitive):
@@ -38,7 +39,14 @@ class OHLC(Primitive):
         if ax is None:
             ax = chart.get_axes()
 
-        data = chart.slice(prices)
+        window = chart.mapper.calc_window()
+        chart.window = window
+
+        xvalues = chart.mapper.rownum[window]
+        open_ = np.asarray(col_to_numpy(prices, "open"))[window]
+        high = np.asarray(col_to_numpy(prices, "high"))[window]
+        low = np.asarray(col_to_numpy(prices, "low"))[window]
+        close = np.asarray(col_to_numpy(prices, "close"))[window]
 
         textcolor = plt.rcParams["text.color"]
 
@@ -49,31 +57,28 @@ class OHLC(Primitive):
         colordn = self.colordn or textcolor
 
         return plot_ohlc(
-            data=data, ax=ax,
+            xvalues=xvalues,
+            open_=open_, high=high, low=low, close=close,
+            ax=ax,
             width=width,
             alpha=alpha,
             colorup=colorup,
             colordn=colordn,
-            label=label
+            label=label,
         )
 
 
-def plot_ohlc(data, ax=None, width=0.8, alpha=0.5, colorup=None, colordn=None, label=None):
-    """plots open-high-low-close charts as polygons"""
+def plot_ohlc(xvalues, open_, high, low, close, ax=None, width=0.8, alpha=1.0, colorup=None, colordn=None, label=None):
+    """Plot open-high-low-close charts as polygons."""
 
     edgecolor = plt.rcParams["text.color"]
-
     colorup = colorup or edgecolor
     colordn = colordn or edgecolor
-
     ax = ax or plt.gca()
 
-    count = len(data)
+    count = len(xvalues)
 
-    xvalues = data.index
-    change = data.close.pct_change()
-
-    if count > 0:
+    if count > 1:
         avg_spacing = (xvalues[-1] - xvalues[0]) / (count - 1)
     else:
         avg_spacing = 1.0
@@ -81,7 +86,8 @@ def plot_ohlc(data, ax=None, width=0.8, alpha=0.5, colorup=None, colordn=None, l
     half_bar = avg_spacing * width / 2.0
 
     with np.errstate(invalid="ignore"):
-        edgecolor = np.where(change < 0.0, colordn, colorup)
+        change = np.diff(close, prepend=np.nan) / np.roll(close, 1)
+        edgecolors = np.where(change < 0.0, colordn, colorup)
 
     verts = [
         (
@@ -94,15 +100,11 @@ def plot_ohlc(data, ax=None, width=0.8, alpha=0.5, colorup=None, colordn=None, l
             (xv, cl),
             (xv, hi),
         )
-        for xv, op, hi, lo, cl in zip(
-            xvalues, data.open, data.high, data.low, data.close
-        )
+        for xv, op, hi, lo, cl in zip(xvalues, open_, high, low, close)
     ]
 
-    linewidths = (1.0,)
-
     poly = PolyCollection(
-        verts, edgecolors=edgecolor, linewidths=linewidths, alpha=alpha, label=label
+        verts, edgecolors=edgecolors, linewidths=(1.0,), alpha=alpha, label=label
     )
 
     ax.add_collection(poly)

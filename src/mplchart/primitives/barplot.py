@@ -2,7 +2,7 @@
 
 
 from ..model import Primitive
-from ..utils import get_label, series_data, series_xy
+from ..utils import get_label, series_data
 
 
 class BarPlot(Primitive):
@@ -61,8 +61,6 @@ class BarPlot(Primitive):
 
         series = series_data(result, self.item)
 
-        series = chart.slice(series)
-
         label = self.label or get_label(self.indicator)
 
         kwargs = dict(
@@ -71,6 +69,6 @@ class BarPlot(Primitive):
             alpha=self.alpha,
         )
 
-        xv, yv = series_xy(series)
+        xv, yv = chart.plot_xy(series)
         ax.bar(xv, yv, label=label, **kwargs)
 

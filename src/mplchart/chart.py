@@ -3,6 +3,7 @@
 import io
 import warnings
 
+import numpy as np
 import matplotlib.pyplot as plt
 
 from collections import Counter
@@ -256,6 +257,15 @@ class Chart:
         self.window = self.mapper.calc_window()
         return self.mapper.slice(data)
 
+    def plot_xy(self, data):
+        """Return (xv, yv) numpy arrays for a same-length series (pandas or polars).
+
+        Applies the current view window and maps row numbers to x-coordinates.
+        Use this instead of chart.slice() + series_xy() in primitives.
+        """
+        window = self.mapper.calc_window()
+        self.window = window
+        return self.mapper.series_xy(np.asarray(data), window)
 
     def map_date(self, date):
         """map date to value"""

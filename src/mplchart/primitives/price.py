@@ -3,7 +3,6 @@
 from matplotlib import pyplot as plt
 
 from ..model import Primitive
-from ..utils import series_xy
 from ..library import calc_price
 
 
@@ -53,8 +52,7 @@ class Price(Primitive):
             ax = chart.get_axes()
 
         series = self(prices)
-        series = chart.slice(series)
-        xv, yv = series_xy(series)
+        xv, yv = chart.plot_xy(series)
 
         textcolor = plt.rcParams["text.color"]
 
