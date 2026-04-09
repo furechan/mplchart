@@ -56,17 +56,28 @@ def dataframe_eval(df, expr):
     """evaluate an expression against a DataFrame, returning a Series.
 
     Args:
-        df: pandas or polars DataFrame
+        df: pandas or polars DataFrame or Series
         expr: a polars Expr, or a string expression (e.g. ``"rsi < 30"``)
             - pandas: evaluated via ``df.eval(expr)``
             - polars: evaluated via ``df.sql("SELECT {expr} FROM self")``
+
+    If ``df`` is a Series it is promoted to a single-column DataFrame using
+    the series name as the column name, so string expressions can reference it.
     """
     if is_expr(expr):
         return df.select(expr).to_series()
+
+    # promote Series to single-column DataFrame so eval can reference by name
     match detect_backend(df):
         case "pandas":
+            import pandas as pd
+            if isinstance(df, pd.Series):
+                df = df.to_frame()
             return df.eval(expr)
         case "polars":
+            import polars as pl
+            if isinstance(df, pl.Series):
+                df = df.to_frame()
             return df.sql(f"SELECT {expr} FROM self").to_series()
         case backend:
             raise ValueError(f"Unsupported backend {backend!r}")

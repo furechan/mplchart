@@ -66,7 +66,7 @@ def calc_zigzag(prices, threshold=5.0):
                 values.append(pv)
                 pi, pv, pdir = i, h, +1
 
-    return np.array(index), np.array(values)
+    return np.array(index, dtype=int), np.array(values, dtype=float)
 
 
 class ZigZag(Primitive):
