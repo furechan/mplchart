@@ -44,10 +44,13 @@ Lowercases all column names for both backends. Replaces the inline
 
 ```python
 def normalize_columns(df):
-    if is_polars(df):
-        return df.rename({c: c.lower() for c in df.columns})
-    else:
-        return df.rename(columns=str.lower)
+    match detect_backend(df):
+        case "polars":
+            return df.rename({c: c.lower() for c in df.columns})
+        case "pandas":
+            return df.rename(columns=str.lower)
+        case backend:
+            raise ValueError(f"Unsupported backend {backend!r}")
 ```
 
 ---
@@ -149,10 +152,13 @@ Where `extract_datetime` lives in `utils.py`:
 
 ```python
 def extract_datetime(df) -> np.ndarray:
-    if is_polars(df):
-        return df["datetime"].to_numpy()
-    else:
-        return df.index.values   # pandas DatetimeIndex
+    match detect_backend(df):
+        case "polars":
+            return df["datetime"].dt.replace_time_zone(None).to_numpy()
+        case "pandas":
+            return df.index.tz_localize(None).values
+        case backend:
+            raise ValueError(f"Unsupported backend {backend!r}")
 ```
 
 ---
