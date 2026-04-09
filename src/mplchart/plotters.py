@@ -3,7 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from .utils import get_name, get_label, get_metadata
+from .utils import get_name, get_label, get_metadata, col_to_numpy
 
 
 # TODO rename AutoPlotter.series_xy to data_xy or something like that to differentiate from utils series_xy
@@ -46,9 +46,22 @@ class AutoPlotter():
         return ()
     
 
-    def series_xy(self, item=None):   # ignore item for series !!!
+    def series_xy(self, item=None):
         """split data into x, y arrays"""
-        # ignore item if data is a series !
+        window = getattr(self.chart, "window", None)
+
+        if window is not None:
+            # polars path: use mapper rownum + col_to_numpy
+            if hasattr(self.data, "columns"):
+                # DataFrame: use item if given, else first column
+                col = item if item is not None else self.data.columns[0]
+                values = col_to_numpy(self.data, col)
+            else:
+                # Series: ignore item
+                values = np.asarray(self.data)
+            return self.chart.mapper.series_xy(values, window)
+
+        # pandas legacy path: index carries rownum
         if self.data.__class__.__name__ == "Series":
             series = self.data
         elif item is not None:

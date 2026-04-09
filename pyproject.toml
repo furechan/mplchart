@@ -20,6 +20,9 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
+[project.optional-dependencies]
+polars = ["polars"]
+
 [dependency-groups]
 dev = [
     "numpy",

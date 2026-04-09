@@ -1,15 +1,13 @@
 """Candlesticks primitive"""
 
-import warnings
-
 import numpy as np
 
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 
 from matplotlib.collections import PolyCollection
 
 from ..model import Primitive
+from ..utils import col_to_numpy
 
 
 class Candlesticks(Primitive):
@@ -53,12 +51,13 @@ class Candlesticks(Primitive):
         if ax is None:
             ax = chart.get_axes()
 
+        window = chart.mapper.calc_window()
+        xvalues = chart.mapper.rownum[window]
         prices = chart.slice(prices)
 
         label = str(self)
         width = self.width
         alpha = self.alpha
-
 
         edgecolor = plt.rcParams["text.color"]
         facecolor = plt.rcParams["axes.facecolor"]
@@ -68,13 +67,13 @@ class Candlesticks(Primitive):
         coloroff = self.colorup or facecolor
 
         if self.use_bars:
-            return plot_csbars(prices, ax=ax, width=width, alpha=alpha, colorup=colorup, colordn=colordn, coloroff=coloroff, label=label)
+            return plot_csbars(prices, xvalues, ax=ax, width=width, alpha=alpha, colorup=colorup, colordn=colordn, coloroff=coloroff, label=label)
         else:
-            return plot_cspoly(prices, ax=ax, width=width, alpha=alpha, colorup=colorup, colordn=colordn, coloroff=coloroff, label=label)
+            return plot_cspoly(prices, xvalues, ax=ax, width=width, alpha=alpha, colorup=colorup, colordn=colordn, coloroff=coloroff, label=label)
 
 
 def plot_cspoly(
-    data, *, ax=None, width=0.6, alpha=0.2, colorup: str | None = None, colordn: str | None = None, coloroff: str | None = None, label=None
+    data, xvalues, *, ax=None, width=0.6, alpha=0.2, colorup=None, colordn=None, coloroff=None, label=None
 ):
     """plots candlesticks as polygons"""
 
@@ -86,21 +85,19 @@ def plot_cspoly(
     colordn = colordn or textcolor
     coloroff = coloroff or facecolor_
 
-    count = len(data)
+    high   = col_to_numpy(data, "high")
+    low    = col_to_numpy(data, "low")
+    open_  = col_to_numpy(data, "open")
+    close  = col_to_numpy(data, "close")
 
-    xvalues = data.index.values
+    change = np.diff(close, prepend=np.nan) / close
+    bottom = np.minimum(open_, close)
+    top    = np.maximum(open_, close)
 
-    if np.issubdtype(xvalues.dtype, np.datetime64):
-        warnings.warn("plot_cspoly forced to convert dates!")
-        xvalues = mdates.date2num(xvalues)
-
-    high, low = data.high, data.low
-    change = data.close.pct_change()
-    bottom = np.minimum(data.open, data.close)
-    top = np.maximum(data.open, data.close)
+    count = len(xvalues)
 
     if count > 0:
-        spacing = np.nanmin(np.diff(xvalues))
+        spacing = np.nanmin(np.diff(xvalues)) if count > 1 else 1.0
     else:
         spacing = 1.0
 
@@ -142,7 +139,7 @@ def plot_cspoly(
 
 
 def plot_csbars(
-    data, *, ax=None, width=0.6, alpha=0.2, colorup: str | None = None, colordn: str | None = None, coloroff: str | None = None, label=None
+    data, xvalues, *, ax=None, width=0.6, alpha=0.2, colorup=None, colordn=None, coloroff=None, label=None
 ):
     """plots candlesticks as bars"""
 
@@ -154,12 +151,14 @@ def plot_csbars(
     colordn = colordn or textcolor
     coloroff = coloroff or facecolor_
 
-    xvalues = data.index.values
+    high   = col_to_numpy(data, "high")
+    low    = col_to_numpy(data, "low")
+    open_  = col_to_numpy(data, "open")
+    close  = col_to_numpy(data, "close")
 
-    high, low = data.high, data.low
-    change = data.close.pct_change()
-    upper = np.maximum(data.open, data.close)
-    lower = np.minimum(data.open, data.close)
+    change = np.diff(close, prepend=np.nan) / close
+    upper  = np.maximum(open_, close)
+    lower  = np.minimum(open_, close)
 
     with np.errstate(invalid="ignore"):
         edgecolor = np.where(change >= 0.0, colorup, colordn)

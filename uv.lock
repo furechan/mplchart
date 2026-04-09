@@ -1988,7 +1988,7 @@ wheels = [
 
 [[package]]
 name = "mplchart"
-version = "0.0.31"
+version = "0.0.32"
 source = { editable = "." }
 dependencies = [
     { name = "matplotlib" },
@@ -1996,6 +1996,11 @@ dependencies = [
     { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "pandas" },
     { name = "pyarrow" },
+]
+
+[package.optional-dependencies]
+polars = [
+    { name = "polars" },
 ]
 
 [package.dev-dependencies]
@@ -2028,8 +2033,10 @@ requires-dist = [
     { name = "matplotlib" },
     { name = "numpy" },
     { name = "pandas" },
+    { name = "polars", marker = "extra == 'polars'" },
     { name = "pyarrow" },
 ]
+provides-extras = ["polars"]
 
 [package.metadata.requires-dev]
 dev = [
