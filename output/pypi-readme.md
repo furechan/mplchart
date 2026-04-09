@@ -5,14 +5,12 @@ Create classic technical analysis stock charts in Python with minimal code.
 The library is built around [matplotlib](https://github.com/matplotlib/matplotlib)
 and [pandas](https://github.com/pandas-dev/pandas). 
 Charts can be defined using a declarative interface,
-based on a set of drawing primitives like `Candleststicks`, `Volume`
+based on a set of drawing primitives like `Candlesticks`, `Volume`
 and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
 
 
-> **Warning**
-> The interface has changed. You must pass `prices` as the first parameter of `Chart`. 
 
-> **Warning**
+> **Warning:** 
 > This project is experimental and the interface is likely to change.
 > For a related project with a mature api you may want to look into
 > [mplfinance](https://pypi.org/project/mplfinance/).
@@ -40,10 +38,10 @@ Chart(prices, title=ticker, max_bars=250).plot(
     Volume(),
     SMA(50),
     SMA(200),
-).plot(
-    RSI(), target="above"
-).plot(
-    MACD(), target="below"
+).pane("above").plot(
+    RSI()
+).pane("below").plot(
+    MACD()
 ).show()
 ```
 
@@ -72,8 +70,8 @@ Primitives are classes and must be instantiated as objects before being used wit
 from mplchart.chart import Chart
 from mplchart.primitives import Candlesticks
 
-chart = Chart(prices.title=title, max_bars=250).plot(
-    Candlesticsk()
+chart = Chart(prices, title=title, max_bars=250).plot(
+    Candlesticks()
 ).show()
 ```
 
@@ -92,7 +90,7 @@ The main drawing primitives are :
 
 ## Builtin Indicators
 
-The libary includes some standard technical analysis indicators implemented in pandas/numpy.
+The library includes some standard technical analysis indicators implemented in pandas/numpy.
 Indicators are classes and must be instantiated as objects before being used with the plot api.
 
 Some of the indicators included are:
