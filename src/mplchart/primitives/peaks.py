@@ -1,11 +1,12 @@
 """Peaks primitive"""
 
 import numpy as np
-import pandas as pd
+from numpy.lib.stride_tricks import sliding_window_view
 
 import matplotlib.pyplot as plt
 
 from ..model import Primitive
+from ..utils import col_to_numpy
 
 
 class Peaks(Primitive):
@@ -36,57 +37,61 @@ class Peaks(Primitive):
     def __ror__(self, indicator):
         if not callable(indicator):
             return NotImplemented
-
-        self.clone(indicator=indicator)
+        return self.clone(indicator=indicator)
 
     def process(self, data):
         if self.item:
-            data = getattr(data, self.item)
-        return extract_peaks(data, span=self.span)
+            arr = np.asarray(col_to_numpy(data, self.item), dtype=float)
+            return extract_peaks(arr, arr, span=self.span)
+        high = np.asarray(col_to_numpy(data, "high"), dtype=float)
+        low = np.asarray(col_to_numpy(data, "low"), dtype=float)
+        return extract_peaks(high, low, span=self.span)
 
     def plot_handler(self, prices, chart, ax=None):
         if ax is None:
             ax = chart.get_axes()
 
         data = chart.calc_result(prices, self.indicator)
-        data = self.process(data)
-        data = chart.slice(data)
+        row_indices, values = self.process(data)
 
-        # xy, yv = series_xy(data)
-        xv, yv = data.index, data
+        # apply view window
+        window = chart.mapper.calc_window()
+        chart.window = window
+        mask = (row_indices >= window.start) & (row_indices < window.stop)
+        row_indices = row_indices[mask]
+        values = values[mask]
+
+        xv = chart.mapper.rownum[row_indices]
         color = self.color or plt.rcParams["text.color"]
+        ax.scatter(xv, values, c=color, s=10 * 10, alpha=0.5, marker=".")
 
-        ax.scatter(xv, yv, c=color, s=10 * 10, alpha=0.5, marker=".")
 
-
-def extract_peaks(prices, span=1):
-    """Extract local peak and valley points from a price series or DataFrame.
+def extract_peaks(high, low, span=1):
+    """Extract local peak and valley row indices from high/low numpy arrays.
 
     Args:
-        prices (Series or DataFrame): Price data. If a DataFrame, the ``high``
-            and ``low`` columns are used; otherwise the same series is used for
-            both high and low detection.
-        span (int): Minimum number of bars required on each side of a local
-            extremum. Defaults to 1.
+        high (np.ndarray): High prices.
+        low (np.ndarray): Low prices.
+        span (int): Half-window size. A point qualifies if it is the extremum
+            within ``2 * span + 1`` bars centered on it.
 
     Returns:
-        Series: Price values at local peaks and valleys only; all other
-        positions are dropped (not NaN — the series is sparse).
+        tuple[np.ndarray, np.ndarray]: (row_indices, values) of peaks and valleys.
     """
-
     window = 2 * span + 1
 
-    if hasattr(prices, "columns"):
-        high, low = prices["high"], prices["low"]
-    else:
-        high, low = prices, prices
+    # pad edges to keep output length == n
+    padded_high = np.pad(high, span, mode="edge")
+    padded_low = np.pad(low, span, mode="edge")
 
-    peaks = pd.Series(np.nan, prices.index)
+    roll_max = sliding_window_view(padded_high, window).max(axis=1)
+    roll_min = sliding_window_view(padded_low, window).min(axis=1)
 
-    mask = high.rolling(window, center=True).max() == high
-    peaks.mask(mask, high, inplace=True)
+    peak_mask = high == roll_max
+    valley_mask = low == roll_min
+    combined = peak_mask | valley_mask
 
-    mask = low.rolling(window, center=True).min() == low
-    peaks.mask(mask, low, inplace=True)
+    row_indices = np.where(combined)[0]
+    values = np.where(peak_mask[row_indices], high[row_indices], low[row_indices])
 
-    return peaks.dropna()
+    return row_indices, values

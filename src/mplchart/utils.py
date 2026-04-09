@@ -52,6 +52,26 @@ def col_to_numpy(df, col: str) -> np.ndarray:
     return df[col].to_numpy()
 
 
+def dataframe_eval(df, expr):
+    """evaluate an expression against a DataFrame, returning a Series.
+
+    Args:
+        df: pandas or polars DataFrame
+        expr: a polars Expr, or a string expression (e.g. ``"rsi < 30"``)
+            - pandas: evaluated via ``df.eval(expr)``
+            - polars: evaluated via ``df.sql("SELECT {expr} FROM self")``
+    """
+    if is_expr(expr):
+        return df.select(expr).to_series()
+    match detect_backend(df):
+        case "pandas":
+            return df.eval(expr)
+        case "polars":
+            return df.sql(f"SELECT {expr} FROM self").to_series()
+        case backend:
+            raise ValueError(f"Unsupported backend {backend!r}")
+
+
 def get_metadata(indicator, name: str, default=None):
     """get metadata from `metadata` dict if present or attributes"""
 
