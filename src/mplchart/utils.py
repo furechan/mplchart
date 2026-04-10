@@ -125,6 +125,19 @@ def get_label(indicator):
         params = [repr(v) for v in indicator.parameters.values()]
         return name + "(" + ", ".join(params) + ")"
 
+    if is_expr(indicator):
+        try:
+            return indicator.meta.output_name()
+        except Exception:
+            pass
+
+    expr = getattr(indicator, "expr", None)
+    if is_expr(expr):
+        try:
+            return expr.meta.output_name()
+        except Exception:
+            pass
+
     return str(indicator)
 
 
