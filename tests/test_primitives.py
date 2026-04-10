@@ -7,7 +7,7 @@ from mplchart.chart import Chart
 from mplchart.samples import sample_prices
 from mplchart.primitives import (
     Candlesticks, OHLC, Price, Volume,
-    Line, Area, Bar,
+    LinePlot, AreaPlot, BarPlot,
     Peaks, ZigZag, Stripes, Markers,
 )
 from mplchart.indicators import SMA, RSI
@@ -21,9 +21,9 @@ PRIMITIVES = [
     OHLC(),
     Price(),
     Volume(),
-    SMA(20) | Line(),
-    SMA(20) | Area(),
-    SMA(20) | Bar(),
+    SMA(20) | LinePlot(),
+    SMA(20) | AreaPlot(),
+    SMA(20) | BarPlot(),
     Peaks(),
     ZigZag(),
     RSI() | Stripes(expr="close < 30"),
@@ -32,9 +32,9 @@ PRIMITIVES = [
 
 
 PANDAS_ONLY_PRIMITIVES = {
-    str(SMA(20) | Line()),
-    str(SMA(20) | Area()),
-    str(SMA(20) | Bar()),
+    str(SMA(20) | LinePlot()),
+    str(SMA(20) | AreaPlot()),
+    str(SMA(20) | BarPlot()),
     str(RSI() | Stripes(expr="close < 30")),
     str(RSI() | Markers(expr="close < 30")),
 }
