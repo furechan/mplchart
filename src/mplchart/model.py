@@ -63,6 +63,18 @@ class Primitive(ABC):
         result.__dict__.update(self.__dict__, **kwargs)
         return result
 
+    def __rmatmul__(self, other):
+        if isinstance(other, Indicator):
+            import warnings
+            warnings.warn(
+                "Use | to bind an indicator to a primitive. @ is for polars expressions.",
+                DeprecationWarning, stacklevel=2,
+            )
+            return self.clone(indicator=other)
+        if not (callable(other) or is_expr(other)):
+            return NotImplemented
+        return self.clone(indicator=other)
+
 
 class Indicator(ABC):
     """Abstract base class for technical analysis indicators.
@@ -101,6 +113,36 @@ class Indicator(ABC):
         ...
 
     def __matmul__(self, other):
+        import warnings
+        if isinstance(other, Primitive):
+            return NotImplemented
+        if callable(other):
+            warnings.warn(
+                "Composing indicators with @ is deprecated. Use | for chaining.",
+                DeprecationWarning, stacklevel=2,
+            )
+            return ComposedIndicator(self, other)
+        warnings.warn(
+            "Applying indicators with @ is deprecated. Use indicator(data) instead.",
+            DeprecationWarning, stacklevel=2,
+        )
+        return self(other)
+
+    __pandas_priority__ = 5000
+
+    def __ror__(self, other):
+        return self(other)
+
+    def apply(self, other):
+        """Apply this indicator to data or compose with another indicator.
+
+        Args:
+            other: A prices DataFrame to compute the indicator on,
+                   or another indicator to compose with (applied first).
+
+        Returns:
+            Computed result if other is data, or a ComposedIndicator.
+        """
         if callable(other):
             return ComposedIndicator(self, other)
         return self(other)
