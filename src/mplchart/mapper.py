@@ -1,7 +1,6 @@
 """date mapper"""
 
 import numpy as np
-import pandas as pd
 
 from .locators import DTArrayLocator
 from .formatters import DTArrayFormatter
@@ -29,8 +28,7 @@ class RawDateMapper:
 
         return data
 
-
-    def map_date(self, date):  # needed for plot_vline
+    def map_date(self, date):
         return date
 
     def config_axes(self, ax):
@@ -38,48 +36,83 @@ class RawDateMapper:
 
 
 class DateIndexMapper:
-    """Date Index Mapper maps dates to integers"""
+    """Date Index Mapper — maps dates to integer row positions (rownum).
 
-    def __init__(self, index, *, max_bars=None, start=None, end=None):
-        if start or end:
-            locs = index.tz_localize(None).slice_indexer(start=start, end=end)
-            index = index[locs]
+    Stores the full tz-naive numpy datetime array and computes the visible
+    window as an absolute slice via calc_window(). Indicators are computed
+    on the full dataset; only the final slice is handed to the plotter.
 
-        if max_bars and max_bars > 0:
-            index = index[-max_bars:]
+    Args:
+        datetime_array: Full datetime array from the prices DataFrame.
+        max_bars: Maximum number of bars to show (from the end).
+        start: Start datetime filter.
+        end: End datetime filter.
+    """
 
-        self.index = index
+    def __init__(self, datetime_array: np.ndarray, *, max_bars=None, start=None, end=None):
+        self.datetime_array = np.asarray(datetime_array, dtype="datetime64[ns]")
+        self.rownum = np.arange(len(self.datetime_array))
+        self.max_bars = max_bars
+        self.start = start
+        self.end = end
 
+    def calc_window(self) -> slice:
+        """Return the visible window as an absolute slice into datetime_array."""
+        dt = self.datetime_array
+        lo, hi = 0, len(dt)
+
+        if self.start is not None:
+            lo = int(np.searchsorted(dt, np.datetime64(self.start, "ns")))
+        if self.end is not None:
+            hi = int(np.searchsorted(dt, np.datetime64(self.end, "ns"), side="right"))
+        if self.max_bars and self.max_bars > 0:
+            lo = max(lo, hi - self.max_bars)
+
+        return slice(lo, hi)
+
+    def series_xy(self, values, window: slice):
+        """Return (x, y) numpy arrays for a full-length values array.
+
+        ``values`` must be the same length as the full datetime_array.
+        ``window`` is an absolute slice as returned by calc_window().
+        """
+        return self.rownum[window], np.asarray(values)[window]
 
     def slice(self, data):
-        """re-index and slice data by mapping dates to positions"""
+        """Slice data to the visible window.
 
-        xloc = pd.Series(np.arange(len(self.index)), index=self.index, name='xloc')
+        For pandas: re-indexes to rownum positions (integer x-axis).
+        For polars: returns a positional slice.
+        """
+        import pandas as pd
+
+        window = self.calc_window()
+
+        # polars: positional slice using the absolute window
+        if not hasattr(data, "index"):
+            return data[window]
+
+        # pandas: align by datetime to rownum
+        dt = self.datetime_array[window]
+        xloc = pd.Series(self.rownum[window], index=pd.DatetimeIndex(dt), name="xloc")
+
+        if hasattr(data.index, "tz") and data.index.tz is not None:
+            data = data.set_axis(data.index.tz_localize(None))
 
         xloc, data = xloc.align(data, join="inner")
-
         data = data.set_axis(xloc)
-
         return data
 
-
-    def map_date(self, date):  # nedded for plot_vline
-        """location of date in index"""
-
-        result = self.index.get_indexer([date], method="bfill")
-
-        return result[0]
-
+    def map_date(self, date) -> int:
+        """Map a single date to its rownum (for plot_vline)."""
+        return int(np.searchsorted(self.datetime_array, np.datetime64(date, "ns"), side="left"))
 
     def config_axes(self, ax):
-        """set locator and formatter"""
-
-        dtarray = self.index.tz_localize(None)
-        locator = DTArrayLocator(dtarray)
-        formatter =  DTArrayFormatter(dtarray)
+        """Set locator and formatter on the x-axis using the full datetime array."""
+        locator = DTArrayLocator(self.datetime_array)
+        formatter = DTArrayFormatter(self.datetime_array)
 
         if locator:
             ax.xaxis.set_major_locator(locator)
-
         if formatter:
             ax.xaxis.set_major_formatter(formatter)

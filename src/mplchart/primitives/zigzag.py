@@ -1,8 +1,9 @@
 """ZigZag Primitive"""
 
-import pandas as pd
+import numpy as np
+
 from ..model import Primitive
-from ..utils import series_xy
+from ..utils import col_to_numpy
 
 
 def calc_zigzag(prices, threshold=5.0):
@@ -18,51 +19,54 @@ def calc_zigzag(prices, threshold=5.0):
             reversal. Defaults to 5.0.
 
     Returns:
-        Series: Pivot prices (highs and lows) at each identified swing point,
-        indexed by the corresponding row in ``prices``.
+        tuple[np.ndarray, np.ndarray]: (row_indices, values) of pivot points.
     """
+    high = np.asarray(col_to_numpy(prices, "high"), dtype=float)
+    low = np.asarray(col_to_numpy(prices, "low"), dtype=float)
+    close = np.asarray(col_to_numpy(prices, "close"), dtype=float)
+
     pi = pv = pdir = None
     index = []
     values = []
 
-    for i, row in enumerate(prices.itertuples()):
+    for i in range(len(close)):
+        h, l, c = high[i], low[i], close[i]
+
         if pdir is None:
-            pi, pv, pdir = i, row.close, 0
+            pi, pv, pdir = i, c, 0
 
         elif pdir == 0:
-            higher = row.high / pv - 1 > threshold / 100
-            lower = row.low / pv - 1 < -threshold / 100
+            higher = h / pv - 1 > threshold / 100
+            lower = l / pv - 1 < -threshold / 100
 
             if higher and not lower:
-                pi, pv, pdir = i, row.high, +1
+                pi, pv, pdir = i, h, +1
             if lower and not higher:
-                pi, pv, pdir = i, row.low, -1
+                pi, pv, pdir = i, l, -1
 
         elif pdir > 0:
-            higher = row.high / pv - 1 > 0
-            lower = row.low / pv - 1 < -threshold / 100
+            higher = h / pv - 1 > 0
+            lower = l / pv - 1 < -threshold / 100
 
             if higher:
-                pi, pv, pdir = i, row.high, +1
+                pi, pv, pdir = i, h, +1
             elif lower:
                 index.append(pi)
                 values.append(pv)
-                pi, pv, pdir = i, row.low, -1
+                pi, pv, pdir = i, l, -1
 
         elif pdir < 0:
-            higher = row.high / pv - 1 > threshold / 100
-            lower = row.low / pv - 1 < 0
+            higher = h / pv - 1 > threshold / 100
+            lower = l / pv - 1 < 0
 
             if lower:
-                pi, pv, pdir = i, row.low, -1
+                pi, pv, pdir = i, l, -1
             elif higher:
                 index.append(pi)
                 values.append(pv)
-                pi, pv, pdir = i, row.high, +1
+                pi, pv, pdir = i, h, +1
 
-    index = prices.index[index]
-
-    return pd.Series(values, index)
+    return np.array(index, dtype=int), np.array(values, dtype=float)
 
 
 class ZigZag(Primitive):
@@ -86,10 +90,14 @@ class ZigZag(Primitive):
         if ax is None:
             ax = chart.get_axes()
 
-        series = calc_zigzag(prices, threshold=self.threshold)
-        series = chart.slice(series)
+        window = chart.mapper.calc_window()
+        chart.window = window
 
+        # run zigzag on the windowed slice; returned indices are 0-based within window
+        windowed = chart.slice(prices) if hasattr(prices, "index") else prices[window]
+        row_indices, values = calc_zigzag(windowed, threshold=self.threshold)
+
+        # map local indices to absolute rownums
+        xv = chart.mapper.rownum[window][row_indices]
         label = repr(self)
-
-        xv, yv = series_xy(series)
-        ax.plot(xv, yv, label=label, color=None)
+        ax.plot(xv, values, label=label, color=None)

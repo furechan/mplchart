@@ -3,15 +3,17 @@
 import io
 import warnings
 
+import numpy as np
 import matplotlib.pyplot as plt
 
 from collections import Counter
 from functools import cached_property
 
 from .colors import closest_color
-from .utils import same_scale, get_metadata
+from .utils import same_scale, get_metadata, detect_backend, normalize_columns, extract_datetime, is_expr
 from .layout import make_twinx, init_vplot, add_vplot
 from .mapper import RawDateMapper, DateIndexMapper
+from .model import PolarsExprIndicator
 from .plotters import AutoPlotter
 
 
@@ -134,22 +136,37 @@ class Chart:
         return plt.figure(figsize=figsize)
 
     @staticmethod
-    def prepare(prices):
-        """prepare prices dataframe"""
+    def prepare_pandas(prices):
+        """prepare pandas prices dataframe"""
 
-        if hasattr(prices, "to_pandas"):
-            prices = prices.to_pandas()
-
-        prices.rename(columns=str.lower, inplace=True)
+        prices = prices.rename(columns=str.lower)
 
         if "datetime" in prices.columns:
-            prices.set_index("datetime", inplace=True)
+            prices = prices.set_index("datetime")
         elif "date" in prices.columns:
-            prices.set_index("date", inplace=True)
+            prices = prices.set_index("date")
         else:
-            prices.rename_axis(index=str.lower, inplace=True)
+            prices = prices.rename_axis(index=str.lower)
 
         return prices
+
+    @staticmethod
+    def prepare_polars(prices):
+        """prepare polars prices dataframe"""
+
+        return normalize_columns(prices)
+
+    @staticmethod
+    def prepare(prices):
+        """prepare prices dataframe for charting"""
+
+        match detect_backend(prices):
+            case "polars":
+                return Chart.prepare_polars(prices)
+            case "pandas":
+                return Chart.prepare_pandas(prices)
+            case backend:
+                raise ValueError(f"Unsupported backend {backend!r}")
 
 
     def init_mapper(self, prices):
@@ -163,9 +180,6 @@ class Chart:
                 or a ``date``/``datetime`` column.
         """
 
-        # currently this is only called once in Chart.slice
-        # mapper is also used in plot_vline but not initialized there
-
         if self.mapper is not None:
             warnings.warn("init_mapper was already called!", stacklevel=2)
             return
@@ -176,22 +190,23 @@ class Chart:
         prices = self.prepare(prices)
 
         self.prices = prices
+        self.backend = detect_backend(prices)
+
+        datetime_array = extract_datetime(prices)
 
         if self.raw_dates:
             self.mapper = RawDateMapper(
                 index=prices.index, start=self.start, end=self.end, max_bars=self.max_bars
             )
-        elif prices is not None:
-            self.mapper = DateIndexMapper(
-                index=prices.index, start=self.start, end=self.end, max_bars=self.max_bars
-            )
         else:
-            raise ValueError("Cannot create mapper. data is None!")
+            self.mapper = DateIndexMapper(
+                datetime_array=datetime_array, start=self.start, end=self.end, max_bars=self.max_bars
+            )
 
         if self.mapper:
             ax = self.root_axes()
             self.mapper.config_axes(ax)
-        
+
         return prices
 
 
@@ -239,8 +254,19 @@ class Chart:
         if self.mapper is None:
             raise ValueError("Date mapper was not configured yet. prices not provided!")
 
+        self.window = self.mapper.calc_window()
         return self.mapper.slice(data)
 
+    def plot_xy(self, data):
+        """Return (xv, yv) for a full-length series (pandas or polars).
+
+        ``data`` must have the same number of rows as the original prices.
+        Uses the absolute window so indicators computed on full history are
+        sliced correctly.
+        """
+        window = self.mapper.calc_window()
+        self.window = window
+        return self.mapper.series_xy(np.asarray(data), window)
 
     def map_date(self, date):
         """map date to value"""
@@ -447,6 +473,12 @@ class Chart:
             raise ValueError("No prices data provided!")
 
         prices = self.prices
+
+        # wrap polars Expr / tuple of Expr in PolarsExprIndicator (no polars import)
+        if is_expr(indicator):
+            indicator = PolarsExprIndicator(indicator)
+        elif isinstance(indicator, tuple) and all(is_expr(e) for e in indicator):
+            indicator = PolarsExprIndicator(indicator)
 
         # Call the indicator's plot_handler if defined (before any calc)
         # this is the only location where plot_handler is called

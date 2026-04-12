@@ -5,7 +5,7 @@ import copy
 from types import MappingProxyType
 from abc import ABC, abstractmethod
 
-from .utils import short_repr, get_series
+from .utils import short_repr, get_series, is_expr
 
 
 
@@ -63,6 +63,18 @@ class Primitive(ABC):
         result.__dict__.update(self.__dict__, **kwargs)
         return result
 
+    def __rmatmul__(self, other):
+        if isinstance(other, Indicator):
+            import warnings
+            warnings.warn(
+                "Use | to bind an indicator to a primitive. @ is for polars expressions.",
+                DeprecationWarning, stacklevel=2,
+            )
+            return self.clone(indicator=other)
+        if not (callable(other) or is_expr(other)):
+            return NotImplemented
+        return self.clone(indicator=other)
+
 
 class Indicator(ABC):
     """Abstract base class for technical analysis indicators.
@@ -101,6 +113,36 @@ class Indicator(ABC):
         ...
 
     def __matmul__(self, other):
+        import warnings
+        if isinstance(other, Primitive):
+            return NotImplemented
+        if callable(other):
+            warnings.warn(
+                "Composing indicators with @ is deprecated. Use | for chaining.",
+                DeprecationWarning, stacklevel=2,
+            )
+            return ComposedIndicator(self, other)
+        warnings.warn(
+            "Applying indicators with @ is deprecated. Use indicator(data) instead.",
+            DeprecationWarning, stacklevel=2,
+        )
+        return self(other)
+
+    __pandas_priority__ = 5000
+
+    def __ror__(self, other):
+        return self(other)
+
+    def apply(self, other):
+        """Apply this indicator to data or compose with another indicator.
+
+        Args:
+            other: A prices DataFrame to compute the indicator on,
+                   or another indicator to compose with (applied first).
+
+        Returns:
+            Computed result if other is data, or a ComposedIndicator.
+        """
         if callable(other):
             return ComposedIndicator(self, other)
         return self(other)
@@ -142,3 +184,31 @@ class ComposedIndicator(Indicator):
         if callable(other):
             return self.__class__(*self.args, other)
         return self(other)
+
+
+class PolarsExprIndicator(Indicator):
+    """Wraps a polars Expr or tuple of Expr as an Indicator.
+
+    When called with prices, evaluates each expression against the polars
+    DataFrame and returns a same-length polars Series (single) or tuple
+    of polars Series (multi-column).
+    """
+
+    def __init__(self, expr):
+        # expr is a pl.Expr or tuple[pl.Expr, ...]
+        if is_expr(expr):
+            self.expr = expr
+        elif isinstance(expr, tuple) and all(is_expr(e) for e in expr):
+            self.expr = expr
+        else:
+            raise TypeError(f"Expected pl.Expr or tuple of pl.Expr, got {type(expr)!r}")
+
+    def __call__(self, prices):
+        if isinstance(self.expr, tuple):
+            import polars as pl
+            series = [prices.select(e).to_series() for e in self.expr]
+            return pl.DataFrame({s.name: s for s in series})
+        return prices.select(self.expr).to_series()
+
+    def __str__(self):
+        return "Expr"

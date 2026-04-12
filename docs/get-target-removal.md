@@ -1,0 +1,1 @@
+get_target is obsolete. The prior api would create new panes automatically depending on the indicator. This is no longer neede as the pane management is explicit. check get_target in code and look at removing.

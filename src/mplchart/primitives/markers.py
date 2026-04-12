@@ -1,21 +1,22 @@
-"""Marker primitives (experimental)"""
+"""Markers primitive"""
 
 import numpy as np
 
 from ..model import Primitive
+from ..utils import dataframe_eval, col_to_numpy
 
 
 class Markers(Primitive):
     """Markers primitive.
 
     Plots scatter markers on the main pane at the close price whenever a
-    condition changes. The condition is evaluated from an indicator result or a
-    pandas ``eval`` expression. Use the ``|`` operator to attach to an
-    indicator.
+    condition changes. The condition is evaluated from an indicator result or
+    an expression. Use the ``|`` operator to attach to an indicator.
 
     Args:
-        expr (str, optional): A pandas ``eval`` expression applied to the
-            indicator result to produce a boolean/numeric signal. Omit if the
+        expr (str or pl.Expr, optional): Expression applied to the indicator
+            result to produce a boolean/numeric signal. String expressions work
+            for both pandas (``df.eval``) and polars (``df.sql``). Omit if the
             indicator itself already returns the signal.
         color (str or list of str, optional): Marker color. Pass a two-element
             list ``[color_off, color_on]`` to use different colors for signal
@@ -32,9 +33,9 @@ class Markers(Primitive):
 
     def __init__(
         self,
-        expr: str | None = None,
+        expr=None,
         *,
-        color: list[str] | str | None = None,
+        color=None,
         marker: str = ".",
         alpha: float = 0.6,
     ):
@@ -46,7 +47,6 @@ class Markers(Primitive):
     def __ror__(self, indicator):
         if not callable(indicator):
             raise ValueError(f"{indicator!r} not callable!")
-
         return self.clone(indicator=indicator)
 
     def plot_handler(self, prices, chart, ax=None):
@@ -56,30 +56,43 @@ class Markers(Primitive):
         result = chart.calc_result(prices, self.indicator)
 
         if self.expr is not None:
-            result = result.eval(self.expr)
+            signal = dataframe_eval(result, self.expr)
+        else:
+            signal = result
 
-        flag = np.clip(np.sign(result), 0, 1)
+        window = chart.mapper.calc_window()
+        chart.window = window
+        rownum = chart.mapper.rownum
 
-        result = prices.assign(flag=flag)
+        flag = np.clip(np.sign(np.asarray(signal, dtype=float)), 0, 1)
+        close = np.asarray(col_to_numpy(prices, "close"), dtype=float)
 
-        result = chart.slice(result)
+        flag = flag[window]
+        close = close[window]
 
-        mask = result.flag.ffill().diff().fillna(0).ne(0)
+        # forward-fill NaNs in flag
+        nan_mask = np.isnan(flag)
+        if nan_mask.any():
+            idx = np.where(~nan_mask, np.arange(len(flag)), 0)
+            np.maximum.accumulate(idx, out=idx)
+            flag = flag[idx]
+
+        # find positions where flag changes
+        diff = np.diff(flag, prepend=np.nan)
+        mask = ~np.isnan(diff) & (diff != 0)
 
         if not mask.sum():
             return
 
-        result = result[mask]
-
-        xv = result.index
-        yv = result.close
-        flag = result.flag
+        xv = rownum[window][np.where(mask)[0]]
+        yv = close[mask]
+        flag_at = flag[mask]
 
         marker = self.marker
         color = self.color
         alpha = self.alpha
 
         if isinstance(color, list):
-            color = np.where(flag > 0, color[1], color[0])
+            color = np.where(flag_at > 0, color[1], color[0])
 
         ax.scatter(xv, yv, c=color, s=12 * 12, alpha=alpha, marker=marker)

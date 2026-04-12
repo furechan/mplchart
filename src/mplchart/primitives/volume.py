@@ -1,10 +1,10 @@
 """Volume primitive"""
 
 import numpy as np
-import pandas as pd
 
 from ..model import Primitive
 from ..colors import closest_color
+from ..utils import col_to_numpy
 
 
 class Volume(Primitive):
@@ -48,48 +48,39 @@ class Volume(Primitive):
     def __str__(self):
         return self.__class__.__name__
 
-    def process(self, prices):
-        volume = prices.volume
-        change = prices.close.pct_change()
-
-        result = dict(volume=volume, change=change)
-
-        if self.sma:
-            result["average"] = volume.rolling(self.sma).mean()
-
-        result = pd.DataFrame(result)
-
-        return result
-
     def plot_handler(self, prices, chart, ax=None):
         if ax is None:
             ax = chart.get_axes("twinx")
 
-        data = self.process(prices)
-        data = chart.slice(data)    
+        window = chart.mapper.calc_window()
+        chart.window = window
 
-        index = data.index
-        volume = data.volume
-        change = data.change
+        volume = np.asarray(col_to_numpy(prices, "volume"))[window]
+        close = np.asarray(col_to_numpy(prices, "close"))[window]
+
+        with np.errstate(invalid="ignore"):
+            change = np.diff(close, prepend=np.nan) / np.roll(close, 1)
+            change[0] = np.nan
+
+        xv = chart.mapper.rownum[window]
 
         width = self.width
         alpha = self.alpha
-        colorup = closest_color("green")
-        colordn = closest_color("red")
-        colorma = closest_color("gray")
+        colorup = closest_color(self.colorup or "green")
+        colordn = closest_color(self.colordn or "red")
+        colorma = closest_color(self.colorma or "gray")
 
         color = np.where(change > 0, colorup, colordn)
 
-        # ax.set_zorder(0)
-
-        # This should always be the case !?
         if ax._label == "twinx":
-            vmax = data.volume.max()
+            vmax = volume.max()
             ax.set_ylim(0.0, vmax * 4.0)
             ax.yaxis.set_visible(False)
 
-        ax.bar(index, volume, width=width, alpha=alpha, color=color)
+        ax.bar(xv, volume, width=width, alpha=alpha, color=color)
 
         if self.sma:
-            average = data.average
-            ax.plot(index, average, linewidth=0.7, alpha=alpha, color=colorma)
+            n = self.sma
+            valid = np.convolve(volume, np.ones(n) / n, mode="valid")
+            average = np.concatenate([np.full(n - 1, np.nan), valid])
+            ax.plot(xv, average, linewidth=0.7, alpha=alpha, color=colorma)
