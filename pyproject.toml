@@ -51,6 +51,9 @@ dev = [
 addopts = ["-p no:cacheprovider"]
 testpaths = ["tests"]
 
+[tool.ruff]
+cache-dir = "/dev/null"
+
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 "*.ipynb" = ["F401", "F811"]
