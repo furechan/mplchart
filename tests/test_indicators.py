@@ -59,7 +59,7 @@ def test_indicators(indicator, freq, max_bars=250):
 @pytest.mark.parametrize("freq", FREQS)
 @pytest.mark.parametrize("indicator", [SMA(20), EMA(20), RSI(), MACD(), BBANDS()], ids=str)
 def test_indicators_polars(indicator, freq):
-    polars = pytest.importorskip("polars")
+    pytest.importorskip("polars")
     prices = sample_prices(freq=freq, backend="polars")
     chart = Chart(prices, max_bars=100)
     chart.plot([Candlesticks(), indicator])

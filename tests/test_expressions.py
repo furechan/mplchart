@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 
 polars = pytest.importorskip("polars")
 
-from mplchart.chart import Chart
-from mplchart.samples import sample_prices
-from mplchart.primitives import Candlesticks
-from mplchart.expressions import (
+from mplchart.chart import Chart  # noqa: E402
+from mplchart.samples import sample_prices  # noqa: E402
+from mplchart.primitives import Candlesticks  # noqa: E402
+from mplchart.expressions import (  # noqa: E402
     SMA, EMA, RMA, WMA, HMA, DEMA, TEMA,
     RSI, MACD, STOCH, ROC, MOM,
     TRANGE, ATR, BBANDS, DONCHIAN, KELTNER,

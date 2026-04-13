@@ -30,37 +30,37 @@ def calc_zigzag(prices, threshold=5.0):
     values = []
 
     for i in range(len(close)):
-        h, l, c = high[i], low[i], close[i]
+        h, lo, c = high[i], low[i], close[i]
 
         if pdir is None:
             pi, pv, pdir = i, c, 0
 
         elif pdir == 0:
             higher = h / pv - 1 > threshold / 100
-            lower = l / pv - 1 < -threshold / 100
+            lower = lo / pv - 1 < -threshold / 100
 
             if higher and not lower:
                 pi, pv, pdir = i, h, +1
             if lower and not higher:
-                pi, pv, pdir = i, l, -1
+                pi, pv, pdir = i, lo, -1
 
         elif pdir > 0:
             higher = h / pv - 1 > 0
-            lower = l / pv - 1 < -threshold / 100
+            lower = lo / pv - 1 < -threshold / 100
 
             if higher:
                 pi, pv, pdir = i, h, +1
             elif lower:
                 index.append(pi)
                 values.append(pv)
-                pi, pv, pdir = i, l, -1
+                pi, pv, pdir = i, lo, -1
 
         elif pdir < 0:
             higher = h / pv - 1 > threshold / 100
-            lower = l / pv - 1 < 0
+            lower = lo / pv - 1 < 0
 
             if lower:
-                pi, pv, pdir = i, l, -1
+                pi, pv, pdir = i, lo, -1
             elif higher:
                 index.append(pi)
                 values.append(pv)
