@@ -6,8 +6,6 @@ import matplotlib.pyplot as plt
 from .utils import get_name, get_label, get_metadata, col_to_numpy
 
 
-# TODO rename AutoPlotter.series_xy to data_xy or something like that to differentiate from utils series_xy
-
 
 class AutoPlotter():
     """
