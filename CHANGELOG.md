@@ -4,6 +4,9 @@
 - Renamed `ATRP` indicator to `NATR` (Normalized Average True Range), following mintalib convention
 - Added `NATR`, `BBP`, `BBW`, `PPO`, `BOP`, `CMF`, `MFI`, `MACDV`, `DMI`, `ADX` to `mplchart.expressions`
 - Removed `ALMA` indicator and `calc_alma` from library (preserved in `playground/alma-indicator.ipynb`)
+- **Breaking:** `Chart` no longer normalizes column names silently — prices must be normalized before use
+- Added `normalize_prices()` to `mplchart.utils`: lowercases columns and promotes `date`/`datetime` to index (pandas)
+- Added `check_prices()` to `mplchart.utils`: raises `ValueError` with a helpful message if prices are not normalized
 
 ## 0.0.32
 - **Breaking:** pandas is no longer a required dependency. Install `mplchart[pandas]` to use the `mplchart.indicators` module, `mplchart[polars]` for `mplchart.expressions`, or both.
