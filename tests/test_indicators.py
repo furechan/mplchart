@@ -1,4 +1,4 @@
-"""Indicator tests — pandas backend"""
+"""Indicator tests"""
 
 import pytest
 import matplotlib.pyplot as plt

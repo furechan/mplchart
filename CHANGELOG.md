@@ -5,7 +5,7 @@
 - Added `[pandas]` optional extra in `pyproject.toml` (previously only `[polars]` was optional).
 - Moved `calc_price` from `library` to `utils` so the `Price` primitive no longer pulls pandas in.
 - Split `mapper.slice()` into `slice_pandas` / `slice_polars`; pandas is imported only on the pandas path.
-- Split test suite per backend: `test_indicators_pandas.py`, `test_primitives_pandas.py`, `test_primitives_polars.py` (in addition to the existing `test_expressions.py`).
+- Split test suite per backend where relevant: `test_primitives_pandas.py`, `test_primitives_polars.py`. Indicator/expression tests stay as `test_indicators.py` (pandas-only by definition) and `test_expressions.py` (polars-only by definition).
 - Added `[env.pandas]` and `[env.polars]` isolated tox envs to regression-test single-backend installs.
 - Removed `overbought`, `oversold`, `yticks` class attributes from `RSI`, `CCI`, `MFI`, `ADX`, `DMI`. Configure via primitives instead: `RSI() | LinePlot(overbought=70, oversold=30)` and `chart.pane("above", yticks=(30, 50, 70))` or the `Pane(...)` primitive.
 - Removed `plot_yticks`, `plot_oversold`, `plot_overbought` from `AutoPlotter` — fill-between band rendering now lives in `LinePlot`.
