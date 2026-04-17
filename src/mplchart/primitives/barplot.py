@@ -54,8 +54,7 @@ class BarPlot(Primitive):
 
     def plot_handler(self, prices, chart, ax=None):
         if ax is None:
-            target = self.target or chart.get_target(self.indicator)
-            ax = chart.get_axes(target)
+            ax = chart.get_axes(self.target)
 
         result = chart.calc_result(prices, self.indicator)
 

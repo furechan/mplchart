@@ -13,7 +13,7 @@ description = "Classic Stock Charts in Python"
 urls.homepage = "https://github.com/furechan/mplchart"
 authors = [{ name = "Furechan", email = "furechan@xsmail.com" }]
 keywords = ["finance", "charting", "matplotlib", "candlesticks"]
-dependencies = ["matplotlib", "pandas", "numpy", "pyarrow"]
+dependencies = ["matplotlib", "numpy", "pyarrow"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -21,6 +21,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
+pandas = ["pandas"]
 polars = ["polars"]
 
 [dependency-groups]
@@ -41,6 +42,7 @@ dev = [
     "numba",
     "twine",
     "ta-lib>=0.6.7",
+    "mintalib",
     "nicegui>=3.9.0",
     "streamlit>=1.55.0",
     "nbcheck>=0.0.2",
@@ -50,6 +52,12 @@ dev = [
 [tool.pytest.ini_options]
 addopts = ["-p no:cacheprovider"]
 testpaths = ["tests"]
+markers = [
+    "pandas: tests that require the pandas backend",
+    "polars: tests that require the polars backend",
+    "talib: tests that require the ta-lib library",
+    "mintalib: tests that require the mintalib library",
+]
 
 [tool.ruff]
 cache-dir = "/dev/null"

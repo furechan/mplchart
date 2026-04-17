@@ -43,6 +43,10 @@ class Peaks(Primitive):
         if self.item:
             arr = np.asarray(col_to_numpy(data, self.item), dtype=float)
             return extract_peaks(arr, arr, span=self.span)
+        if not hasattr(data, "columns"):
+            # Series input (e.g. from SLOPE() | Peaks())
+            arr = np.asarray(data.to_numpy(), dtype=float)
+            return extract_peaks(arr, arr, span=self.span)
         high = np.asarray(col_to_numpy(data, "high"), dtype=float)
         low = np.asarray(col_to_numpy(data, "low"), dtype=float)
         return extract_peaks(high, low, span=self.span)

@@ -3,7 +3,7 @@
 import numpy as np
 
 from ..model import Primitive
-from ..utils import dataframe_eval
+from ..utils import resolve_expr
 
 
 class Stripes(Primitive):
@@ -15,16 +15,18 @@ class Stripes(Primitive):
     indicator.
 
     Args:
-        expr (str or pl.Expr, optional): Expression applied to the indicator
-            result to produce a boolean/numeric signal. String expressions work
-            for both pandas (``df.eval``) and polars (``df.sql``). Omit if the
-            indicator itself already returns the signal.
+        expr (callable, pl.Expr, or str, optional): Applied to the indicator
+            result (Series or DataFrame) to produce a boolean/numeric signal.
+            Prefer a callable (``lambda s: s < 30``) when the result is a
+            Series; use a string (``"close < open"``) when the result is a
+            named-column DataFrame; use a ``pl.Expr`` for polars-native flows.
+            Omit if the indicator itself already returns the signal.
         color (str, optional): Fill color for the shaded regions.
         alpha (float, optional): Opacity of the shaded regions, between 0.0
             and 1.0.
 
     Examples:
-        RSI(14) | Stripes(expr="rsi < 30", color="green", alpha=0.15)
+        RSI(14) | Stripes(expr=lambda s: s < 30, color="green", alpha=0.15)
     """
 
     indicator = None
@@ -46,7 +48,7 @@ class Stripes(Primitive):
         result = chart.calc_result(prices, self.indicator)
 
         if self.expr is not None:
-            signal = dataframe_eval(result, self.expr)
+            signal = resolve_expr(result, self.expr)
         else:
             signal = result
 

@@ -1,5 +1,6 @@
 """LinePlot primitive"""
 
+import numpy as np
 
 from ..model import Primitive
 from ..utils import get_label, series_data
@@ -14,14 +15,17 @@ class LinePlot(Primitive):
     Args:
         item (str) :  name of the column to plot. default None
         style (str) : line style like 'solid', 'dashed', 'dotted', 'dashdot', 'marker'
-        marker (str) : marker character like '.' or 'o' 
+        marker (str) : marker character like '.' or 'o'
         width (float) : line width override
         color (str) : color name or value
         alpha (float) : opacity value between 0.0 and 1.0
         target (str) : target pane as 'same', 'above', 'below'
+        overbought (float) : level above which to shade a fill-between band
+        oversold (float) : level below which to shade a fill-between band
 
     Examples:
         SMA(50) | LinePlot(style="dashdot", color="red")
+        RSI(14) | LinePlot(overbought=70, oversold=30)
     """
 
     indicator = None
@@ -35,7 +39,9 @@ class LinePlot(Primitive):
         width: float | None = None,
         color: str | None = None,
         alpha: float | None = None,
-        target: str | None = None
+        target: str | None = None,
+        overbought: float | None = None,
+        oversold: float | None = None,
     ):
         if style == "marker":
             marker = marker or "."
@@ -48,6 +54,8 @@ class LinePlot(Primitive):
         self.width = width
         self.alpha = alpha
         self.target = target
+        self.overbought = overbought
+        self.oversold = oversold
 
 
     def __ror__(self, indicator):
@@ -59,8 +67,7 @@ class LinePlot(Primitive):
 
     def plot_handler(self, prices, chart, ax=None):
         if ax is None:
-            target = self.target or chart.get_target(self.indicator)
-            ax = chart.get_axes(target)
+            ax = chart.get_axes(self.target)
 
         result = chart.calc_result(prices, self.indicator)
 
@@ -78,4 +85,18 @@ class LinePlot(Primitive):
 
         xv, yv = chart.plot_xy(series)
         ax.plot(xv, yv, label=label, **kwargs)
+
+        with np.errstate(invalid="ignore"):
+            if self.oversold is not None:
+                ax.fill_between(
+                    xv, yv, self.oversold,
+                    where=(yv <= self.oversold),
+                    interpolate=True, alpha=0.5,
+                )
+            if self.overbought is not None:
+                ax.fill_between(
+                    xv, yv, self.overbought,
+                    where=(yv >= self.overbought),
+                    interpolate=True, alpha=0.5,
+                )
 

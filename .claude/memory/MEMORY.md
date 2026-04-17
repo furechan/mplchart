@@ -6,3 +6,5 @@
 - [pane() API replaces target= on plot()](project-pane-api.md) — new fluent method for pane selection; all notebooks migrated
 - [Polars migration plan](project-polars-migration.md) — rownum+window slice architecture; docs in migration-breakdown.md and migration-inquiry.md
 - [New indicator/expression operator API](project-operator-api.md) — `|` for indicators, `@` for expressions→primitives, `.apply()` replaces deprecated `@`; mplchart is testbed
+- [Backend architecture (pandas/polars split)](project-backend-architecture.md) — core is backend-agnostic; indicators/library/pandas are pandas-only opt-in; expressions is polars-only opt-in
+- [Commit .envrc files](feedback-envrc.md) — `.envrc` is project metadata, not secrets; commit it. Secrets live in separate gitignored files it sources.

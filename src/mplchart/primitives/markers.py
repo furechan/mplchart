@@ -3,7 +3,7 @@
 import numpy as np
 
 from ..model import Primitive
-from ..utils import dataframe_eval, col_to_numpy
+from ..utils import resolve_expr, col_to_numpy
 
 
 class Markers(Primitive):
@@ -14,10 +14,12 @@ class Markers(Primitive):
     an expression. Use the ``|`` operator to attach to an indicator.
 
     Args:
-        expr (str or pl.Expr, optional): Expression applied to the indicator
-            result to produce a boolean/numeric signal. String expressions work
-            for both pandas (``df.eval``) and polars (``df.sql``). Omit if the
-            indicator itself already returns the signal.
+        expr (callable, pl.Expr, or str, optional): Applied to the indicator
+            result (Series or DataFrame) to produce a boolean/numeric signal.
+            Prefer a callable (``lambda s: s < 30``) when the result is a
+            Series; use a string (``"close < open"``) when the result is a
+            named-column DataFrame; use a ``pl.Expr`` for polars-native flows.
+            Omit if the indicator itself already returns the signal.
         color (str or list of str, optional): Marker color. Pass a two-element
             list ``[color_off, color_on]`` to use different colors for signal
             transitions. Defaults to the matplotlib default color cycle.
@@ -26,7 +28,7 @@ class Markers(Primitive):
             Defaults to 0.6.
 
     Examples:
-        RSI(14) | Markers(expr="rsi < 30", color=["gray", "green"])
+        RSI(14) | Markers(expr=lambda s: s < 30, color=["gray", "green"])
     """
 
     indicator = None
@@ -56,7 +58,7 @@ class Markers(Primitive):
         result = chart.calc_result(prices, self.indicator)
 
         if self.expr is not None:
-            signal = dataframe_eval(result, self.expr)
+            signal = resolve_expr(result, self.expr)
         else:
             signal = result
 

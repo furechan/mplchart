@@ -3,7 +3,7 @@
 from matplotlib import pyplot as plt
 
 from ..model import Primitive
-from ..library import calc_price
+from ..utils import calc_price
 
 
 class Price(Primitive):
@@ -26,8 +26,6 @@ class Price(Primitive):
         Price()           # plot the close price
         Price("open")     # plot the open price
     """
-
-    same_scale: bool = True
 
     def __init__(
         self,

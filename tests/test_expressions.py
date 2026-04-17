@@ -4,6 +4,7 @@ import pytest
 import matplotlib.pyplot as plt
 
 polars = pytest.importorskip("polars")
+pytestmark = pytest.mark.polars
 
 from mplchart.chart import Chart  # noqa: E402
 from mplchart.samples import sample_prices  # noqa: E402

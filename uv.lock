@@ -1978,6 +1978,17 @@ wheels = [
 ]
 
 [[package]]
+name = "mintalib"
+version = "0.0.30"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "pandas" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/34/c8/a5e821b7087d3eab8ba39bbbeeb79021d341211ae09f624181cc5829271f/mintalib-0.0.30.tar.gz", hash = "sha256:ab5a338759a2be0cf098ccfd97ac81a9da25a1db05c22d1effddb1ba45183ebb", size = 826297, upload-time = "2026-04-04T03:02:25.764Z" }
+
+[[package]]
 name = "more-itertools"
 version = "10.8.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1994,11 +2005,13 @@ dependencies = [
     { name = "matplotlib" },
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "pandas" },
     { name = "pyarrow" },
 ]
 
 [package.optional-dependencies]
+pandas = [
+    { name = "pandas" },
+]
 polars = [
     { name = "polars" },
 ]
@@ -2009,6 +2022,7 @@ dev = [
     { name = "ipykernel" },
     { name = "ipywidgets" },
     { name = "jinja2" },
+    { name = "mintalib" },
     { name = "nbcheck" },
     { name = "nbmake" },
     { name = "nbmask" },
@@ -2032,11 +2046,11 @@ dev = [
 requires-dist = [
     { name = "matplotlib" },
     { name = "numpy" },
-    { name = "pandas" },
+    { name = "pandas", marker = "extra == 'pandas'" },
     { name = "polars", marker = "extra == 'polars'" },
     { name = "pyarrow" },
 ]
-provides-extras = ["polars"]
+provides-extras = ["pandas", "polars"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -2044,6 +2058,7 @@ dev = [
     { name = "ipykernel" },
     { name = "ipywidgets" },
     { name = "jinja2" },
+    { name = "mintalib" },
     { name = "nbcheck", specifier = ">=0.0.2" },
     { name = "nbmake" },
     { name = "nbmask" },

@@ -1,12 +1,15 @@
-"""Indicator tests — pandas and polars backends"""
+"""Indicator tests — pandas backend"""
 
 import pytest
 import matplotlib.pyplot as plt
 
-from mplchart.chart import Chart
-from mplchart.samples import sample_prices
-from mplchart.primitives import Candlesticks, Volume
-from mplchart.indicators import (
+pytest.importorskip("pandas")
+pytestmark = pytest.mark.pandas
+
+from mplchart.chart import Chart  # noqa: E402
+from mplchart.samples import sample_prices  # noqa: E402
+from mplchart.primitives import Candlesticks, Volume  # noqa: E402
+from mplchart.indicators import (  # noqa: E402
     SMA, EMA, WMA, HMA, TSF,
     RSI, ATR, ATRP, ADX,
     MACD, PPO, SLOPE,
@@ -52,15 +55,4 @@ def test_indicators(indicator, freq, max_bars=250):
     chart = Chart(prices, title="Test", max_bars=max_bars)
     chart.plot([Candlesticks(), indicator])
     assert chart.count_axes() > 0
-    plt.close()
-
-
-@pytest.mark.xfail(reason="pandas indicators not yet compatible with polars input")
-@pytest.mark.parametrize("freq", FREQS)
-@pytest.mark.parametrize("indicator", [SMA(20), EMA(20), RSI(), MACD(), BBANDS()], ids=str)
-def test_indicators_polars(indicator, freq):
-    pytest.importorskip("polars")
-    prices = sample_prices(freq=freq, backend="polars")
-    chart = Chart(prices, max_bars=100)
-    chart.plot([Candlesticks(), indicator])
     plt.close()

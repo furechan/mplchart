@@ -20,8 +20,7 @@ class AutoPlotter():
 
     def __init__(self, chart, indicator, data, ax=None):
         if ax is None:
-            target = chart.get_target(indicator)
-            ax = chart.get_axes(target)
+            ax = chart.get_axes()
         self.chart = chart
         self.indicator = indicator
         self.data = data
@@ -109,42 +108,6 @@ class AutoPlotter():
             xv, lv, uv, color=color, interpolate=True, alpha=0.2, label=label
         )
 
-    def plot_yticks(self):
-        yticks = get_metadata(self.indicator, "yticks", ())
-        if yticks:
-            self.ax.set_yticks(yticks)
-            self.ax.grid(axis="y", which="major", linestyle="-", linewidth=2)
-
-    def plot_oversold(self):
-        oversold = get_metadata(self.indicator, "oversold", None)
-        if oversold is not None:
-            # color = self.chart.get_color("oversold", self.ax, self.indicator, fallback="fill")
-            with np.errstate(invalid="ignore"):
-                xv, yv = self.series_xy()
-                self.ax.fill_between(
-                    xv,
-                    yv,
-                    oversold,
-                    where=(yv <= oversold),
-                    interpolate=True,
-                    alpha=0.5,
-                )
-
-    def plot_overbought(self):
-        overbought = get_metadata(self.indicator, "overbought", None)
-        if overbought is not None:
-            # color = self.chart.get_color("overbought", self.ax, self.indicator, fallback="fill")
-            with np.errstate(invalid="ignore"):
-                xv, yv = self.series_xy()
-                self.ax.fill_between(
-                    xv,
-                    yv,
-                    overbought,
-                    where=(yv >= overbought),
-                    interpolate=True,
-                    alpha=0.5,
-                )
-
     def plot_all(self):
         name = get_name(self.indicator).lower()
         label = get_label(self.indicator)
@@ -181,8 +144,4 @@ class AutoPlotter():
         if bands:
             self.plot_bands(**bands, label=label)
             counter += 1
-
-        self.plot_yticks()
-        self.plot_oversold()
-        self.plot_overbought()
 

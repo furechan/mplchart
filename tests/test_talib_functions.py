@@ -1,11 +1,13 @@
 import pytest
 import matplotlib.pyplot as plt
 
-from mplchart.chart import Chart
-from mplchart.samples import sample_prices
-from mplchart.primitives import Candlesticks
-
+pytest.importorskip("pandas")
 abstract = pytest.importorskip("talib.abstract")
+pytestmark = [pytest.mark.pandas, pytest.mark.talib]
+
+from mplchart.chart import Chart  # noqa: E402
+from mplchart.samples import sample_prices  # noqa: E402
+from mplchart.primitives import Candlesticks  # noqa: E402
 
 
 FREQS = ["daily", "hourly", "minute"]

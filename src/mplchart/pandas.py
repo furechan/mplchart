@@ -1,4 +1,4 @@
-"""pandas specific helpers for mplchart"""
+"""pandas specific helpers for mplchart — pandas pipeline only"""
 
 import pandas as pd
 

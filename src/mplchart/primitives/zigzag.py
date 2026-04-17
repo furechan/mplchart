@@ -81,8 +81,6 @@ class ZigZag(Primitive):
             new pivot. Defaults to 5.0.
     """
 
-    same_scale = True
-
     def __init__(self, threshold=5.0):
         self.threshold = threshold
 

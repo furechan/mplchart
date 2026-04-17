@@ -79,20 +79,21 @@ class DateIndexMapper:
         return self.rownum[window], np.asarray(values)[window]
 
     def slice(self, data):
-        """Slice data to the visible window.
+        """Slice data to the visible window, dispatching by backend."""
+        if hasattr(data, "index"):
+            return self.slice_pandas(data)
+        return self.slice_polars(data)
 
-        For pandas: re-indexes to rownum positions (integer x-axis).
-        For polars: returns a positional slice.
-        """
+    def slice_polars(self, data):
+        """Positional slice — assumes full-length, rownum-positional data."""
+        window = self.calc_window()
+        return data[window]
+
+    def slice_pandas(self, data):
+        """Align pandas data by datetime and re-index to rownum positions."""
         import pandas as pd
 
         window = self.calc_window()
-
-        # polars: positional slice using the absolute window
-        if not hasattr(data, "index"):
-            return data[window]
-
-        # pandas: align by datetime to rownum
         dt = self.datetime_array[window]
         xloc = pd.Series(self.rownum[window], index=pd.DatetimeIndex(dt), name="xloc")
 

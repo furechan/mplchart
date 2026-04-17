@@ -1,4 +1,4 @@
-"""technical analysis indicators"""
+"""technical analysis indicators — pandas pipeline only"""
 
 from . import library
 
@@ -15,7 +15,6 @@ class SMA(Indicator):
         period (int): Number of bars in the rolling window. Defaults to 20.
     """
 
-    same_scale: bool = True
 
     def __init__(self, period: int = 20):
         self.period = period
@@ -35,7 +34,6 @@ class EMA(Indicator):
         period (int): Span for the exponential smoothing. Defaults to 20.
     """
 
-    same_scale: bool = True
 
     def __init__(self, period: int = 20):
         self.period = period
@@ -55,7 +53,6 @@ class WMA(Indicator):
         period (int): Number of bars in the rolling window. Defaults to 20.
     """
 
-    same_scale: bool = True
 
     def __init__(self, period: int = 20):
         self.period = period
@@ -75,7 +72,6 @@ class HMA(Indicator):
         period (int): Number of bars in the rolling window. Defaults to 20.
     """
 
-    same_scale: bool = True
 
     def __init__(self, period: int = 20):
         self.period = period
@@ -99,7 +95,6 @@ class ALMA(Indicator):
             produce a smoother result. Defaults to 6.0.
     """
 
-    same_scale: bool = True
 
     def __init__(self, window: int = 9, offset: float = 0.85, sigma: float = 6.0):
         self.window = window
@@ -213,7 +208,6 @@ class TSF(Indicator):
             window. Use 0 for the current bar's fitted value. Defaults to 0.
     """
 
-    same_scale: bool = True
 
     def __init__(self, period: int = 20, offset: int = 0):
         self.period = period
@@ -236,7 +230,6 @@ class QSF(Indicator):
             window. Use 0 for the current bar's fitted value. Defaults to 0.
     """
 
-    same_scale: bool = True
 
     def __init__(self, period: int = 20, offset: int = 0):
         self.period = period
@@ -277,11 +270,6 @@ class RSI(Indicator):
         period (int): Smoothing period in bars. Defaults to 14.
     """
 
-    oversold: float = 30
-    overbought: float = 70
-    yticks: tuple = 30, 50, 70
-    default_pane: str = "above"
-
     def __init__(self, period: int = 14):
         self.period = period
 
@@ -301,10 +289,6 @@ class CCI(Indicator):
     Args:
         period (int): Lookback period in bars. Defaults to 20.
     """
-
-    oversold: float = -100
-    overbought: float = 100
-    yticks: tuple = -100, 0, 100
 
     def __init__(self, period: int = 20):
         self.period = period
@@ -361,10 +345,6 @@ class MFI(Indicator):
         period (int): Lookback period in bars. Defaults to 14.
     """
 
-    overbought: float = 80
-    oversold: float = 20
-    yticks: tuple = 20, 50, 80
-
     def __init__(self, period: int = 14):
         self.period = period
 
@@ -384,8 +364,6 @@ class ADX(Indicator):
         period (int): Smoothing period in bars. Defaults to 14.
     """
 
-    yticks: tuple = 20, 40
-
     def __init__(self, period: int = 14):
         self.period = period
 
@@ -402,8 +380,6 @@ class DMI(Indicator):
     Args:
         period (int): Smoothing period in bars. Defaults to 14.
     """
-
-    yticks: tuple = 20, 40
 
     def __init__(self, period: int = 14):
         self.period = period
@@ -518,7 +494,6 @@ class BBANDS(Indicator):
             Defaults to 2.0.
     """
 
-    same_scale: bool = True
 
     def __init__(self, period: int = 20, nbdev: float = 2.0):
         self.period = period
@@ -582,7 +557,6 @@ class KELTNER(Indicator):
         nbatr (float): ATR multiplier for the upper and lower bands. Defaults to 2.0.
     """
 
-    same_scale: bool = True
 
     def __init__(self, period: int = 20, nbatr: float = 2.0):
         self.period = period
@@ -603,7 +577,6 @@ class DONCHIAN(Indicator):
         period (int): Lookback period in bars. Defaults to 20.
     """
 
-    same_scale: bool = True
 
     def __init__(self, period: int = 20):
         self.period = period
@@ -622,7 +595,6 @@ class DEMA(Indicator):
         period (int): Span for the exponential smoothing. Defaults to 20.
     """
 
-    same_scale: bool = True
 
     def __init__(self, period: int = 20):
         self.period = period
@@ -642,7 +614,6 @@ class TEMA(Indicator):
         period (int): Span for the exponential smoothing. Defaults to 20.
     """
 
-    same_scale: bool = True
 
     def __init__(self, period: int = 20):
         self.period = period

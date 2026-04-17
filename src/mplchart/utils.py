@@ -5,6 +5,26 @@ import numpy as np
 from inspect import Signature, Parameter
 
 
+def calc_price(prices, item):
+    """Get or compute a named price item from an OHLCV frame. Backend-agnostic."""
+    if item in prices:
+        return prices[item]
+
+    if item in ("mid", "hl", "hl2"):
+        return (prices["high"] + prices["low"]) / 2
+
+    if item in ("typ", "hlc", "hlc3"):
+        return (prices["high"] + prices["low"] + prices["close"]) / 3
+
+    if item in ("wcl", "hlcc", "hlcc4"):
+        return (prices["high"] + prices["low"] + prices["close"] * 2) / 4
+
+    if item in ("avg", "ohlc", "ohlc4"):
+        return (prices["open"] + prices["high"] + prices["low"] + prices["close"]) / 4
+
+    raise ValueError(f"Invalid price item {item!r}")
+
+
 def detect_backend(df) -> str:
     """detect dataframe backend from module name"""
     return getattr(type(df), "__module__", "").partition(".")[0]
@@ -40,7 +60,17 @@ def extract_datetime(df) -> np.ndarray:
     """extract datetime as tz-naive numpy array in local time"""
     match detect_backend(df):
         case "polars":
-            return df["datetime"].dt.replace_time_zone(None).to_numpy()
+            import polars as pl
+            col = next(
+                (df[name] for name, dtype in df.schema.items()
+                 if dtype == pl.Date or dtype == pl.Datetime),
+                None,
+            )
+            if col is None:
+                raise ValueError("No Date or Datetime column found in DataFrame")
+            if col.dtype == pl.Date:
+                return col.to_numpy()
+            return col.dt.replace_time_zone(None).to_numpy()
         case "pandas":
             return df.index.tz_localize(None).values
         case backend:
@@ -52,8 +82,8 @@ def col_to_numpy(df, col: str) -> np.ndarray:
     return df[col].to_numpy()
 
 
-def dataframe_eval(df, expr):
-    """evaluate an expression against a DataFrame, returning a Series.
+def resolve_expr(df, expr):
+    """resolve an expression against a DataFrame or Series, returning a Series.
 
     Args:
         df: pandas or polars DataFrame or Series
@@ -66,6 +96,9 @@ def dataframe_eval(df, expr):
     """
     if is_expr(expr):
         return df.select(expr).to_series()
+
+    if callable(expr):
+        return expr(df)
 
     # promote Series to single-column DataFrame so eval can reference by name
     match detect_backend(df):
@@ -92,17 +125,6 @@ def get_metadata(indicator, name: str, default=None):
 
     return getattr(indicator, name, default)
 
-
-def same_scale(indicator):
-    """Whether indicator uses the same scale as inputs"""
-
-    TALIB_SAME_SCALE = "Output scale same as input"
-
-    if hasattr(indicator, "function_flags"):  # talib
-        flags = indicator.function_flags or ()
-        return TALIB_SAME_SCALE in flags
-
-    return get_metadata(indicator, "same_scale", False)
 
 
 def get_name(indicator):
@@ -218,28 +240,3 @@ def short_repr(self):
     args = ", ".join(args)
 
     return f"{cname}({args})"
-
-
-def convert_dataframe(data, backend: str = "pandas"):
-    """convert data to target format"""
-
-    pname = getattr(data, '__module__', '').partition('.')[0]
-
-    if backend == pname:
-        return data
-
-    if backend == "pandas":
-        if hasattr(data, 'to_pandas'):
-            return data.to_pandas()
-        else:
-            raise ValueError(f"Cannot convert {type(data)!r} to pandas")
-
-    if backend == "polars":
-        import polars
-
-        if pname == 'pandas':
-            return polars.from_pandas(data, include_index=True)
-        else:
-            return polars.from_dataframe(data)
-
-    raise ValueError(f"Unknown backend {backend!r}")

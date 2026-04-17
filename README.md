@@ -10,10 +10,16 @@ and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
 
 
 
-> **Warning:** 
+> **Warning:**
 > This project is experimental and the interface is likely to change.
 > For a related project with a mature api you may want to look into
 > [mplfinance](https://pypi.org/project/mplfinance/).
+
+> **Note — backend decoupling:**
+> mplchart is transitioning to a backend-agnostic core. As of version 0.0.32,
+> **pandas is no longer installed by default**. Choose the backend you want
+> via extras: `pip install mplchart[pandas]` or `pip install mplchart[polars]`
+> (or both). See the [Installation](#installation) section for details.
 
 
 ![Showcase Chart](/output/showcase.svg "Showcase")
@@ -255,21 +261,29 @@ You can find example notebooks and scripts in the `examples` folder.
 
 ## Installation
 
-You can install this package with pip
+Pick the backend you want to use — pandas and polars are both optional extras:
 
 ```console
-pip install mplchart
+pip install mplchart[pandas]    # pandas DataFrames + indicators module
+pip install mplchart[polars]    # polars DataFrames + expressions module
+pip install mplchart[pandas,polars]   # both
 ```
+
+A bare `pip install mplchart` installs only the backend-agnostic core
+(matplotlib, numpy, pyarrow). You will need at least one of the extras
+to load prices and plot indicators.
 
 ## Dependencies
 
+Required:
 - python >= 3.10
 - matplotlib
-- pandas
 - numpy
+- pyarrow
 
-Optional:
-- polars (for polars DataFrame support and expressions subpackage)
+Optional extras:
+- `[pandas]` — enables pandas DataFrame support and the `mplchart.indicators` module
+- `[polars]` — enables polars DataFrame support and the `mplchart.expressions` module
 
 
 ## Related Projects & Resources

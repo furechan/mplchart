@@ -10,7 +10,7 @@ from collections import Counter
 from functools import cached_property
 
 from .colors import closest_color
-from .utils import same_scale, get_metadata, detect_backend, normalize_columns, extract_datetime, is_expr
+from .utils import detect_backend, normalize_columns, extract_datetime, is_expr
 from .layout import make_twinx, init_vplot, add_vplot
 from .mapper import RawDateMapper, DateIndexMapper
 from .model import PolarsExprIndicator
@@ -66,7 +66,6 @@ class Chart:
     mapper = None
     prices = None
     last_result = None
-    force_target = None
 
     DEFAULT_FIGSIZE = (12, 9)
 
@@ -351,28 +350,6 @@ class Chart:
 
         return ax
 
-    def get_target(self, indicator):
-        """target axes for indicator"""
-
-        if self.force_target:
-            return self.force_target
-
-        if indicator is None:
-            return "same"
-
-        target_pane = getattr(indicator, "target_pane", None)
-        if target_pane is not None:
-            return target_pane
-
-        default_pane = get_metadata(indicator, "default_pane", None)
-        if default_pane is not None:
-            return default_pane
-
-        if same_scale(indicator) and self.count_axes() <= 1:
-            return "same"
-
-        return "below"
-
     @staticmethod
     def valid_target(target):
         """whether the target bname is valid"""
@@ -425,10 +402,20 @@ class Chart:
 
         return ax
 
-    def pane(self, target="below", *, height_ratio=None):
-        """get axes for target or None for all axes except root"""
+    def pane(self, target="below", *, height_ratio=None, yticks=None):
+        """create or select a pane and return self for chaining
 
-        self.get_axes(target, height_ratio=height_ratio)
+        Args:
+            target: one of "same", "above", "below", "twinx"
+            height_ratio: relative height of the new pane
+            yticks: tuple of y-axis tick values (also draws heavy grid lines)
+        """
+
+        ax = self.get_axes(target, height_ratio=height_ratio)
+
+        if yticks:
+            ax.set_yticks(yticks)
+            ax.grid(axis="y", which="major", linestyle="-", linewidth=2)
 
         return self
 
@@ -455,6 +442,10 @@ class Chart:
         """calculate indicator result saving last result"""
 
         if indicator is not None:
+            if is_expr(indicator):
+                indicator = PolarsExprIndicator(indicator)
+            elif isinstance(indicator, tuple) and all(is_expr(e) for e in indicator):
+                indicator = PolarsExprIndicator(indicator)
             result = indicator(prices)
             self.last_result = result
         elif self.last_result is not None:
@@ -542,9 +533,6 @@ class Chart:
 
         if target:
             self.get_axes(target)
-            self.force_target = "same"
-        else:
-            self.force_target = None
 
         for indicator in indicators:
             self.plot_indicator(indicator)
