@@ -11,9 +11,9 @@ from mplchart.samples import sample_prices  # noqa: E402
 from mplchart.primitives import Candlesticks, Volume  # noqa: E402
 from mplchart.indicators import (  # noqa: E402
     SMA, EMA, WMA, HMA, TSF,
-    RSI, ATR, ATRP, ADX,
+    RSI, ATR, NATR, ADX,
     MACD, PPO, SLOPE,
-    BBANDS, STOCH, CCI, CMF, BOP, MFI,
+    BBANDS, STOCH, CMF, BOP, MFI,
 )
 
 
@@ -28,14 +28,14 @@ INDICATORS = [
     TSF(20),
     RSI(),
     ATR(),
-    ATRP(),
+    NATR(),
     ADX(),
     MACD(),
     PPO(),
     SLOPE(),
     BBANDS(),
     STOCH(),
-    CCI(),
+
     CMF(),
     BOP(),
     MFI(),

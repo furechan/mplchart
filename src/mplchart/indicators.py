@@ -81,30 +81,6 @@ class HMA(Indicator):
         return library.calc_hma(series, self.period)
 
 
-class ALMA(Indicator):
-    """Arnaud Legoux Moving Average.
-
-    A Gaussian-weighted moving average that reduces lag while smoothing noise.
-    Plotted on the same scale as the price series.
-
-    Args:
-        window (int): Number of bars in the rolling window. Defaults to 9.
-        offset (float): Controls the trade-off between lag and smoothness,
-            between 0 (minimum lag) and 1 (maximum smoothness). Defaults to 0.85.
-        sigma (float): Controls the width of the Gaussian curve. Larger values
-            produce a smoother result. Defaults to 6.0.
-    """
-
-
-    def __init__(self, window: int = 9, offset: float = 0.85, sigma: float = 6.0):
-        self.window = window
-        self.offset = offset
-        self.sigma = sigma
-
-    def __call__(self, prices):
-        series = self.get_series(prices)
-        return library.calc_alma(series, self.window, self.offset, self.sigma)
-
 
 class ROC(Indicator):
     """Rate of Change.
@@ -142,8 +118,8 @@ class ATR(Indicator):
         return library.calc_atr(prices, self.period)
 
 
-class ATRP(Indicator):
-    """Average True Range (percent).
+class NATR(Indicator):
+    """Normalized Average True Range (percent).
 
     ATR expressed as a percentage of the closing price, making it comparable
     across instruments with different price levels.
@@ -278,23 +254,6 @@ class RSI(Indicator):
         return library.calc_rsi(series, self.period)
 
 
-
-class CCI(Indicator):
-    """Commodity Channel Index.
-
-    Oscillator that measures the deviation of price from its statistical mean.
-    Values above +100 may signal overbought conditions; values below -100 may
-    signal oversold conditions.
-
-    Args:
-        period (int): Lookback period in bars. Defaults to 20.
-    """
-
-    def __init__(self, period: int = 20):
-        self.period = period
-
-    def __call__(self, prices):
-        return library.calc_cci(prices, self.period)
 
 
 class BOP(Indicator):

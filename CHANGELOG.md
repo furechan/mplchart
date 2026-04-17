@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.0.33
+- Renamed `ATRP` indicator to `NATR` (Normalized Average True Range), following mintalib convention
+- Added `NATR`, `BBP`, `BBW`, `PPO`, `BOP`, `CMF`, `MFI`, `MACDV`, `DMI`, `ADX` to `mplchart.expressions`
+- Removed `ALMA` indicator and `calc_alma` from library (preserved in `playground/alma-indicator.ipynb`)
+
 ## 0.0.32
 - **Breaking:** pandas is no longer a required dependency. Install `mplchart[pandas]` to use the `mplchart.indicators` module, `mplchart[polars]` for `mplchart.expressions`, or both.
 - Added `[pandas]` optional extra in `pyproject.toml` (previously only `[polars]` was optional).
@@ -93,7 +98,7 @@
 
 ## 0.0.12
 - Added `DMI` indicator (`ADX` is now a single series indicator)
-- Added `ATRP` indicator (Average True Range Percentage)
+- Added `NATR` indicator (Normalized Average True Range)
 - Plotting Logic moved out of indicators
 - Experimental `color_scheme` and `Color` modifier
 

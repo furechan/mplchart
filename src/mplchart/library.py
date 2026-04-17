@@ -31,11 +31,6 @@ def calc_rma(series, period: int = 14):
     ).mean()
 
 
-def calc_mad(series, period: int = 14):
-    """Rolling Mean Absolute Deviation"""
-    diff = series - series.rolling(window=period).mean()
-    return diff.abs().rolling(window=period).mean()
-
 
 def calc_wma(series, period: int = 20):
     """Weighted Moving Average"""
@@ -63,16 +58,6 @@ def calc_hma(series, period: int = 20):
     return result
 
 
-def calc_alma(series, window: int = 9, offset: float = 0.85, sigma: float = 6.0):
-    """Arnaud Legoux Moving Average"""
-    m = offset * (window - 1)
-    s = window / sigma
-    w = np.array([np.exp(-((i - m) ** 2) / (2 * s**2)) for i in range(window)])
-    w = w / w.sum()
-    res = np.correlate(series, w, "valid")
-    res = np.insert(res, 0, [np.nan] * (window - 1))
-    return pd.Series(res, index=series.index)
-
 
 def calc_rsi(series, period: int = 14):
     """Relative Strength Index"""
@@ -85,13 +70,6 @@ def calc_rsi(series, period: int = 14):
     return result
 
 
-def calc_cci(prices, period: int = 20):
-    """Commodity Channel Index"""
-
-    prc = calc_price(prices, "hlc")
-    sma = calc_sma(prc, period)
-    div = calc_mad(prc, period) * 0.015
-    return (prc - sma) / div
 
 
 def calc_bop(prices, period: int = 14):

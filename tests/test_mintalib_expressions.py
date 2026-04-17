@@ -14,7 +14,7 @@ from mintalib.expressions import (  # noqa: E402
     SMA, EMA, WMA, HMA, DEMA, TEMA,
     RSI, MACD, STOCH, ROC,
     ATR, BBANDS, KELTNER,
-    ADX, DMI, CCI, CMF, MFI, BOP,
+    ADX, DMI, CMF, MFI, BOP,
 )
 
 
@@ -24,7 +24,7 @@ EXPRESSIONS = [
     SMA(20), EMA(20), WMA(20), HMA(20), DEMA(20), TEMA(20),
     RSI(14), MACD(), STOCH(), ROC(14),
     ATR(14), BBANDS(), KELTNER(),
-    ADX(14), DMI(14), CCI(20), CMF(20), MFI(14), BOP(14),
+    ADX(14), DMI(14), CMF(20), MFI(14), BOP(14),
 ]
 
 
