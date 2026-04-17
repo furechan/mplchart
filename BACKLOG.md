@@ -14,6 +14,10 @@ Items decided or considered but not scheduled. Add new items at the end.
 
 - Expand `resolve_expr` coverage in Stripes/Markers tests. Currently only the Series+lambda path is exercised. Missing: string column-select on a DataFrame (e.g. `MACD() | Markers(expr="macdhist")`), lambda on a DataFrame (e.g. `Stripes(expr=lambda df: df["close"] < df["open"])`), and `pl.Expr` form on polars.
 
+## Indicators
+
+- Consider removing slow/complex indicators like SLOPE and CURVE — assess whether the complexity is worth keeping in the library.
+
 ## mintalib
 
 Related — the tactical and strategic halves of the same question. Writing tests forces a catalog of what mplchart actually consumes from mintalib, which directly informs the source-of-truth decision.
