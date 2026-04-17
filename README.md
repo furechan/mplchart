@@ -33,11 +33,13 @@ and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
 import yfinance as yf
 
 from mplchart.chart import Chart
-from mplchart.primitives import Candlesticks, Volume
+from mplchart.primitives import Candlesticks, Volume, LinePlot
 from mplchart.indicators import SMA, EMA, ROC, RSI, MACD
 
+from mplchart.utils import normalize_prices
+
 ticker = 'AAPL'
-prices = yf.Ticker(ticker).history('5y')
+prices = normalize_prices(yf.Ticker(ticker).history('5y'))
 
 Chart(prices, title=ticker, max_bars=250).plot(
     Candlesticks(),
@@ -45,7 +47,7 @@ Chart(prices, title=ticker, max_bars=250).plot(
     SMA(50),
     SMA(200),
 ).pane("above").plot(
-    RSI()
+    RSI(14) | LinePlot(style="dashed")
 ).pane("below").plot(
     MACD()
 ).show()
@@ -58,10 +60,13 @@ Prices data is expected to be a pandas or polars DataFrame
 with columns `open`, `high`, `low`, `close`, `volume`
 and a datetime column named `date` or `datetime` (or a datetime index for pandas).
 
-Even though the chart object automatically converts price
-column names to lower case before calling any indicator,
-if you intend on using indicators independently from the chart object,
-you must use prices dataframes with all lower case column names!
+> **Note:** `Chart` and all indicators require lowercase column names.
+> Use `normalize_prices` from `mplchart.utils` to normalize your DataFrame before use:
+>
+> ```python
+> from mplchart.utils import normalize_prices
+> prices = normalize_prices(yf.Ticker(ticker).history('5y'))
+> ```
 
 
 
@@ -124,6 +129,36 @@ Some of the indicators included are:
 - `DEMA` Double Exponential Moving Average
 - `TEMA` Triple Exponential Moving Average
 
+Use `|` to override how an indicator is rendered, or to chain indicators:
+
+```python
+SMA(50) | LinePlot(style="dashed", color="red")   # bind indicator to primitive
+SMA(50) | ROC(1)                                   # chain indicators
+```
+
+```python
+# Customizing indicator style with LinePlot
+
+from mplchart.indicators import SMA, EMA, ROC
+from mplchart.primitives import Candlesticks, LinePlot
+
+indicators = [
+    Candlesticks(),
+    SMA(20) | LinePlot(style="dashed", color="red", alpha=0.5, width=3)
+]
+
+Chart(prices).plot(indicators)
+```
+
+If the indicator returns a DataFrame instead of a Series, specify an `item` (column name) in the primitive.
+
+Use `.apply()` to apply an indicator directly to data, or to compose indicators:
+
+```python
+SMA(50).apply(prices)          # apply indicator to data
+SMA(20).apply(EMA(10))         # compose: EMA applied first, then SMA
+```
+
 
 ## Polars Expressions
 
@@ -154,19 +189,7 @@ Chart(prices, title=ticker, max_bars=250).plot(
 Expressions are plain `polars.Expr` values — they can be composed with standard polars operators,
 passed to `df.select()`, or used anywhere polars expressions are accepted.
 
-
-## Operator API
-
-### `|` — indicator chaining and primitive binding
-
-```python
-SMA(50) | LinePlot(style="dashed", color="red")   # bind indicator to primitive
-SMA(50) | ROC(1)                                   # chain indicators
-```
-
-### `@` — expression to primitive binding
-
-For polars expressions, use `@` to bind to a primitive:
+Contrary to indicators, expressions use the `@` operator to bind to a primitive:
 
 ```python
 from mplchart.expressions import SMA, RSI
@@ -174,37 +197,6 @@ from mplchart.expressions import SMA, RSI
 SMA(50) @ LinePlot(color="red")    # expression → primitive
 RSI(14) @ AreaPlot(color="blue")   # expression → primitive
 ```
-
-The `@` operator is reserved for polars expressions. Use `|` for indicators.
-
-### `.apply()` — explicit apply or compose
-
-```python
-SMA(50).apply(prices)          # apply indicator to data
-SMA(20).apply(EMA(10))         # compose: EMA applied first, then SMA
-```
-
-
-## Override indicator rendering with plotting primitives
-
-Most indicators are drawn as line plots with default colors and settings. You can override
-the rendering by binding an indicator to a primitive with `|`:
-
-```python
-# Customizing indicator style with LinePlot
-
-from mplchart.indicators import SMA, EMA, ROC
-from mplchart.primitives import Candlesticks, LinePlot
-
-indicators = [
-    Candlesticks(),
-    SMA(20) | LinePlot(style="dashed", color="red", alpha=0.5, width=3)
-]
-
-Chart(prices).plot(indicators)
-```
-
-If the indicator returns a DataFrame instead of a Series, specify an `item` (column name) in the primitive.
 
 
 ## Talib Indicators

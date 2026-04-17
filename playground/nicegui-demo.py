@@ -9,6 +9,7 @@ from matplotlib import pyplot as plt
 from mplchart.chart import Chart
 from mplchart.primitives import Candlesticks, Volume
 from mplchart.indicators import SMA
+from mplchart.utils import normalize_prices
 
 symbol = "AAPL"
 period = "25Y"
@@ -23,7 +24,7 @@ with ui.pyplot(figsize=(9, 6), close=False) as plot:
 
 
 def update_chart():
-    prices = yf.Ticker(ticker.value).history(period=period, auto_adjust=True)
+    prices = normalize_prices(yf.Ticker(ticker.value).history(period=period, auto_adjust=True))
     indicators = [Candlesticks(), SMA(50), SMA(200), Volume()]
 
     with plot:

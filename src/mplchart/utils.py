@@ -56,6 +56,48 @@ def normalize_columns(df):
             raise ValueError(f"Unsupported backend {backend!r}")
 
 
+def normalize_prices(prices):
+    """Normalize a prices DataFrame for use with indicators and charting.
+
+    Lowercases column names and, for pandas DataFrames, promotes a ``date``
+    or ``datetime`` column to the index if present.
+    """
+    match detect_backend(prices):
+        case "polars":
+            return prices.rename({c: c.lower() for c in prices.columns})
+        case "pandas":
+            prices = prices.rename(columns=str.lower)
+            if "datetime" in prices.columns:
+                prices = prices.set_index("datetime")
+            elif "date" in prices.columns:
+                prices = prices.set_index("date")
+            else:
+                prices = prices.rename_axis(index=str.lower)
+            return prices
+        case backend:
+            raise ValueError(f"Unsupported backend {backend!r}")
+
+
+def check_prices(prices):
+    """Raise ValueError if prices columns have not been normalized.
+
+    Use :func:`normalize_prices` to prepare a prices DataFrame before
+    passing it to indicators or the chart.
+    """
+    cols = list(prices.columns)
+    if any(c != c.lower() for c in cols):
+        raise ValueError(
+            "prices columns must be lowercase — call normalize_prices(prices) first"
+        )
+    match detect_backend(prices):
+        case "pandas":
+            if "date" in cols or "datetime" in cols:
+                raise ValueError(
+                    "prices 'date'/'datetime' must be the index, not a column"
+                    " — call normalize_prices(prices) first"
+                )
+
+
 def extract_datetime(df) -> np.ndarray:
     """extract datetime as tz-naive numpy array in local time"""
     match detect_backend(df):

@@ -131,6 +131,8 @@ class Indicator(ABC):
     __pandas_priority__ = 5000
 
     def __ror__(self, other):
+        if isinstance(other, Indicator):
+            return IndicatorChain(other, self)
         return self(other)
 
     def apply(self, other):
@@ -183,6 +185,40 @@ class ComposedIndicator(Indicator):
     def __matmul__(self, other):
         if callable(other):
             return self.__class__(*self.args, other)
+        return self(other)
+
+
+class IndicatorChain(Indicator):
+    """An indicator formed by chaining two or more indicators left-to-right.
+
+    Created by the ``|`` operator between indicators. Applied left-to-right,
+    so ``ind1 | ind2`` first applies ``ind1`` and then passes the result to
+    ``ind2``.
+
+    Example:
+        EMA(10) | ROC(1)   # compute EMA(10) then compute ROC on that
+    """
+
+    def __init__(self, *args):
+        if not all(callable(arg) for arg in args):
+            raise TypeError("Arguments must be callable")
+        self.args = args
+
+    def __str__(self):
+        return repr(self)
+
+    def __repr__(self):
+        return " | ".join(repr(fn) for fn in self.args)
+
+    def __call__(self, prices):
+        result = prices
+        for fn in self.args:
+            result = fn(result)
+        return result
+
+    def __ror__(self, other):
+        if isinstance(other, Indicator):
+            return self.__class__(other, *self.args)
         return self(other)
 
 

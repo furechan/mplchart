@@ -6,9 +6,10 @@ import yfinance as yf
 from mplchart.chart import Chart
 from mplchart.primitives import Candlesticks, Volume
 from mplchart.indicators import SMA
+from mplchart.utils import normalize_prices
 
 ticker = 'AAPL'
-prices = yf.Ticker(ticker).history('5y')
+prices = normalize_prices(yf.Ticker(ticker).history('5y'))
 
 st.dataframe(prices.tail())
 

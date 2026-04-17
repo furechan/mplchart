@@ -10,7 +10,7 @@ from collections import Counter
 from functools import cached_property
 
 from .colors import closest_color
-from .utils import detect_backend, normalize_columns, extract_datetime, is_expr
+from .utils import detect_backend, check_prices, extract_datetime, is_expr
 from .layout import make_twinx, init_vplot, add_vplot
 from .mapper import RawDateMapper, DateIndexMapper
 from .model import PolarsExprIndicator
@@ -135,37 +135,10 @@ class Chart:
         return plt.figure(figsize=figsize)
 
     @staticmethod
-    def prepare_pandas(prices):
-        """prepare pandas prices dataframe"""
-
-        prices = prices.rename(columns=str.lower)
-
-        if "datetime" in prices.columns:
-            prices = prices.set_index("datetime")
-        elif "date" in prices.columns:
-            prices = prices.set_index("date")
-        else:
-            prices = prices.rename_axis(index=str.lower)
-
-        return prices
-
-    @staticmethod
-    def prepare_polars(prices):
-        """prepare polars prices dataframe"""
-
-        return normalize_columns(prices)
-
-    @staticmethod
     def prepare(prices):
-        """prepare prices dataframe for charting"""
-
-        match detect_backend(prices):
-            case "polars":
-                return Chart.prepare_polars(prices)
-            case "pandas":
-                return Chart.prepare_pandas(prices)
-            case backend:
-                raise ValueError(f"Unsupported backend {backend!r}")
+        """validate prices dataframe for charting"""
+        check_prices(prices)
+        return prices
 
 
     def init_mapper(self, prices):
