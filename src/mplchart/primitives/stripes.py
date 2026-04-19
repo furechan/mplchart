@@ -11,8 +11,8 @@ class Stripes(Primitive):
 
     Shades vertical bands across all chart panes (using the root axes) during
     periods when a condition is active. The condition is derived from an
-    indicator result or an expression. Use the ``|`` operator to attach to an
-    indicator.
+    indicator result or an expression. Use ``|`` with an indicator (pandas) or
+    ``@`` with a ``pl.Expr`` (polars) to attach.
 
     Args:
         expr (callable, pl.Expr, or str, optional): Applied to the indicator
@@ -26,7 +26,8 @@ class Stripes(Primitive):
             and 1.0.
 
     Examples:
-        RSI(14) | Stripes(expr=lambda s: s < 30, color="green", alpha=0.15)
+        RSI(14) | Stripes(expr=lambda s: s < 30, color="green", alpha=0.15)   # indicator (pandas)
+        RSI(14) @ Stripes(expr=lambda s: s < 30, color="green", alpha=0.15)   # expression (polars)
     """
 
     indicator = None

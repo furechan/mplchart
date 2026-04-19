@@ -249,7 +249,21 @@ class DEMA(Indicator):
 
 ## Examples
 
-You can find example notebooks and scripts in the `examples` folder. 
+Example notebooks live in the [`examples/`](examples/) folder.
+
+**Start here:** [`typical-usage.ipynb`](examples/typical-usage.ipynb) — minimal end-to-end example.
+
+| Topic | pandas backend | polars backend |
+|---|---|---|
+| Indicator / expression catalog | [`chart-indicators.ipynb`](examples/chart-indicators.ipynb) | [`chart-expressions.ipynb`](examples/chart-expressions.ipynb) |
+| Display primitives & styling | [`chart-primitives-pandas.ipynb`](examples/chart-primitives-pandas.ipynb) | [`chart-primitives-polars.ipynb`](examples/chart-primitives-polars.ipynb) |
+
+**How-to:**
+- [`chart-render.ipynb`](examples/chart-render.ipynb) — render charts to SVG / PNG / JPG
+- [`compare-tickers.ipynb`](examples/compare-tickers.ipynb) — overlay and rebase multiple tickers
+- [`talib-examples.ipynb`](examples/talib-examples.ipynb) — use [ta-lib](https://ta-lib.github.io/ta-lib-python/) functions as indicators
+
+
 
 ## Installation
 

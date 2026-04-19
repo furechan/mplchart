@@ -1,6 +1,11 @@
 # Change Log
 
 ## 0.0.33
+- Reorganized `examples/`: split `chart-primitives.ipynb` into per-backend notebooks (`-pandas`/`-polars`), promoted `chart-render.ipynb` from playground, renamed `rebase-series.ipynb` → `compare-tickers.ipynb`, demoted `custom-indicator.ipynb` to playground
+- Added navigation: README `## Examples` table, backend-routing section in `typical-usage.ipynb`, backend note in `chart-indicators.ipynb` / `chart-expressions.ipynb`
+- Fixed `examples/chart-expressions.ipynb` RSI cells — `pl.Expr` → primitive uses `@`, not `|` (polars owns `|` as bitwise-or)
+- `LinePlot`, `AreaPlot`, `BarPlot`, `Stripes`, `Markers` docstrings now document both `|` (pandas indicator) and `@` (polars expression) forms
+- Added `playground/mintalib-indicators.ipynb` and `playground/mintalib-expressions.ipynb` demonstrating mintalib usage with mplchart (exploratory)
 
 ## 0.0.32
 - Renamed `ATRP` indicator to `NATR` (Normalized Average True Range), following mintalib convention

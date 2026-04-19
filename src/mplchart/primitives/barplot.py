@@ -9,7 +9,7 @@ class BarPlot(Primitive):
     """
     Bar Plot Primitive
 
-    Plot any indicator as an bar plot. Use the | operator to apply to an indicator.
+    Plot any indicator or expression as a bar plot. Use `|` with an indicator (pandas) or `@` with a pl.Expr (polars).
 
     Args:
         item (str) :  name of the column to plot. default None
@@ -20,7 +20,8 @@ class BarPlot(Primitive):
         label (str) : plot label
 
     Examples:
-        SMA(50) | BarPlot(color="red", alpha=0.5)
+        SMA(50) | BarPlot(color="red", alpha=0.5)   # indicator (pandas)
+        SMA(50) @ BarPlot(color="red", alpha=0.5)   # expression (polars)
     """
 
     indicator = None

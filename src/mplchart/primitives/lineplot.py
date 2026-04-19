@@ -24,8 +24,10 @@ class LinePlot(Primitive):
         oversold (float) : level below which to shade a fill-between band
 
     Examples:
-        SMA(50) | LinePlot(style="dashdot", color="red")
-        RSI(14) | LinePlot(overbought=70, oversold=30)
+        SMA(50) | LinePlot(style="dashdot", color="red")       # indicator (pandas)
+        RSI(14) | LinePlot(overbought=70, oversold=30)         # indicator (pandas)
+        SMA(50) @ LinePlot(style="dashdot", color="red")       # expression (polars)
+        RSI(14) @ LinePlot(overbought=70, oversold=30)         # expression (polars)
     """
 
     indicator = None

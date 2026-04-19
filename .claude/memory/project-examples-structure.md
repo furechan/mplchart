@@ -4,14 +4,19 @@ description: How the examples/ folder is organized after April 2026 consolidatio
 type: project
 ---
 
-The `examples/` folder was consolidated from 29 notebooks down to 5 in April 2026.
+The `examples/` folder was consolidated from 29 notebooks down to a handful in April 2026.
 
-Current structure:
-- `typical-usage.ipynb` — intro / quick start, uses `sample_prices()`
-- `chart-primitives.ipynb` — all display primitives (Candlesticks, OHLC, Price, Volume, LinePlot, AreaPlot, BarPlot, Markers, Stripes, ZigZag)
-- `chart-indicators.ipynb` — all built-in indicators with section headers
-- `chart-render.ipynb` — rendering to SVG/PNG/JPG formats
-- `talib-examples.ipynb` — talib `Function` integration
+Current structure (8 notebooks):
+- `typical-usage.ipynb` — quickstart landing page, includes a backend-routing nav table at the bottom
+- `chart-indicators.ipynb` — indicator catalog (pandas); has a 1-line backend note linking to the polars equivalent
+- `chart-expressions.ipynb` — expression catalog (polars); has a 1-line backend note linking to the pandas equivalent
+- `chart-primitives-pandas.ipynb` — display primitives with pandas backend (indicators + `|`)
+- `chart-primitives-polars.ipynb` — display primitives with polars backend (expressions + `@`)
+- `chart-render.ipynb` — render to SVG / PNG / JPG via `chart.render()`
+- `compare-tickers.ipynb` — multi-ticker overlay via `mplchart.pandas.merge_prices` (pandas-only; polars equivalent is backlogged)
+- `talib-examples.ipynb` — ta-lib `Function` integration
+
+README has a matching `## Examples` section with a pandas/polars × catalog/primitives table.
 
 **Why:** 29 one-indicator-per-file notebooks were too many for GitHub browsing. Consolidated into thematic notebooks with markdown section headers.
 

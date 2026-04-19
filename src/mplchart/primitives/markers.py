@@ -11,7 +11,8 @@ class Markers(Primitive):
 
     Plots scatter markers on the main pane at the close price whenever a
     condition changes. The condition is evaluated from an indicator result or
-    an expression. Use the ``|`` operator to attach to an indicator.
+    an expression. Use ``|`` with an indicator (pandas) or ``@`` with a
+    ``pl.Expr`` (polars) to attach.
 
     Args:
         expr (callable, pl.Expr, or str, optional): Applied to the indicator
@@ -28,7 +29,8 @@ class Markers(Primitive):
             Defaults to 0.6.
 
     Examples:
-        RSI(14) | Markers(expr=lambda s: s < 30, color=["gray", "green"])
+        RSI(14) | Markers(expr=lambda s: s < 30, color=["gray", "green"])   # indicator (pandas)
+        RSI(14) @ Markers(expr=lambda s: s < 30, color=["gray", "green"])   # expression (polars)
     """
 
     indicator = None

@@ -9,7 +9,7 @@ class AreaPlot(Primitive):
     """
     Area Plot Primitive
 
-    Plot any indicator as an area plot. Use the | operator to apply to an indicator.
+    Plot any indicator or expression as an area plot. Use `|` with an indicator (pandas) or `@` with a pl.Expr (polars).
 
     Args:
         item (str) :  name of the column to plot. default None
@@ -19,7 +19,8 @@ class AreaPlot(Primitive):
         label (str) : plot label
 
     Examples:
-        SMA(50) | AreaPlot(color="red", alpha=0.5)
+        SMA(50) | AreaPlot(color="red", alpha=0.5)   # indicator (pandas)
+        SMA(50) @ AreaPlot(color="red", alpha=0.5)   # expression (polars)
     """
 
     indicator = None
