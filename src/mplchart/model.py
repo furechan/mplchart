@@ -222,29 +222,3 @@ class IndicatorChain(Indicator):
         return self(other)
 
 
-class PolarsExprIndicator(Indicator):
-    """Wraps a polars Expr or tuple of Expr as an Indicator.
-
-    When called with prices, evaluates each expression against the polars
-    DataFrame and returns a same-length polars Series (single) or tuple
-    of polars Series (multi-column).
-    """
-
-    def __init__(self, expr):
-        # expr is a pl.Expr or tuple[pl.Expr, ...]
-        if is_expr(expr):
-            self.expr = expr
-        elif isinstance(expr, tuple) and all(is_expr(e) for e in expr):
-            self.expr = expr
-        else:
-            raise TypeError(f"Expected pl.Expr or tuple of pl.Expr, got {type(expr)!r}")
-
-    def __call__(self, prices):
-        if isinstance(self.expr, tuple):
-            import polars as pl
-            series = [prices.select(e).to_series() for e in self.expr]
-            return pl.DataFrame({s.name: s for s in series})
-        return prices.select(self.expr).to_series()
-
-    def __str__(self):
-        return "Expr"

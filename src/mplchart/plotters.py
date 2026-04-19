@@ -3,7 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from .utils import get_name, get_label, get_metadata, col_to_numpy
+from .utils import get_label, get_metadata, col_to_numpy
 
 
 
@@ -91,8 +91,8 @@ class AutoPlotter():
 
 
     def plot_bands(self, upper, lower, middle=None, label=None):
-        name = get_name(self.indicator).lower()
-        color = self.chart.get_color(name, self.ax, self.indicator, fallback="line")
+        key = get_label(self.indicator)
+        color = self.chart.get_color(key, self.ax, self.indicator, fallback="line")
 
         if middle:
             xv, mv = self.series_xy(middle)
@@ -109,7 +109,6 @@ class AutoPlotter():
         )
 
     def plot_all(self):
-        name = get_name(self.indicator).lower()
         label = get_label(self.indicator)
         bands = dict()
         counter = 0
@@ -120,11 +119,11 @@ class AutoPlotter():
             line_style = get_metadata(self.indicator, "line_style", "solid")
 
             if line_style == "bars":
-                self.plot_bars(name, label=label)
+                self.plot_bars(label, label=label)
             elif line_style == "area":
-                self.plot_area(name, label=label)
+                self.plot_area(label, label=label)
             else:
-                self.plot_line(name, style=line_style, label=label)
+                self.plot_line(label, style=line_style, label=label)
 
         for item in columns:
             if counter > 0:

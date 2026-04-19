@@ -163,36 +163,33 @@ def extract_datetime(df) -> np.ndarray:
 
 ---
 
-**Detect `pl.Expr` in `plot()` and wrap in `PolarsExprIndicator`**
+**Accept `pl.Expr` and tuple-of-`pl.Expr` directly in `plot()`**
 
 ```python
-# in plot() / plot_indicator(), before dispatching:
-if is_expr(indicator):
-    indicator = PolarsExprIndicator(indicator)
-elif isinstance(indicator, tuple) and all(is_expr(e) for e in indicator):
-    indicator = PolarsExprIndicator(indicator)   # tuple of Expr
+# in plot_indicator(): no wrapping — apply_indicator handles expression-like inputs.
+if is_expression_like(indicator) or callable(indicator):
+    result = self.calc_result(prices, indicator)
+    result = self.slice(result)
 ```
 
----
+## [src/mplchart/utils.py](../src/mplchart/utils.py)
 
-## [src/mplchart/model.py](../src/mplchart/model.py)
+**Add `apply_indicator()` dispatcher**
 
-**Add `PolarsExprIndicator`**
-
-Wraps a single `pl.Expr` or a tuple of `pl.Expr`. When called with `prices`,
-evaluates each expression against the polars DataFrame and returns same-length
-Series (single) or a tuple of Series (multi).
+Evaluates a polars `Expr`, a tuple of `Expr`, or any callable indicator against
+`prices`. Single source of truth for the compute step.
 
 ```python
-class PolarsExprIndicator(Indicator):
-    def __init__(self, expr):
-        # expr is pl.Expr or tuple[pl.Expr, ...]
-        self.expr = expr
-
-    def __call__(self, prices):
-        if isinstance(self.expr, tuple):
-            return tuple(prices.select(e).to_series() for e in self.expr)
-        return prices.select(self.expr).to_series()
+def apply_indicator(prices, indicator):
+    if is_expr(indicator):
+        return prices.select(indicator).to_series()
+    if isinstance(indicator, tuple) and indicator and all(is_expr(e) for e in indicator):
+        import polars as pl
+        series = [prices.select(e).to_series() for e in indicator]
+        return pl.DataFrame({s.name: s for s in series})
+    if callable(indicator):
+        return indicator(prices)
+    raise TypeError(...)
 ```
 
 ---

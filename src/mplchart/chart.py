@@ -10,10 +10,9 @@ from collections import Counter
 from functools import cached_property
 
 from .colors import closest_color
-from .utils import detect_backend, check_prices, extract_datetime, is_expr
+from .utils import detect_backend, check_prices, extract_datetime, apply_indicator, is_expression_like, extract_prefix
 from .layout import make_twinx, init_vplot, add_vplot
 from .mapper import RawDateMapper, DateIndexMapper
-from .model import PolarsExprIndicator
 from .plotters import AutoPlotter
 
 
@@ -195,13 +194,20 @@ class Chart:
         return ax._get_patches_for_fill.get_next_color()
 
     def get_color(self, name, ax=None, indicator=None, *, fallback=None):
-        """Lookup color through indicator and color_scheme"""
+        """Lookup color through indicator and color_scheme.
+
+        ``name`` can be a column name, a short id, or a full label — the
+        color_scheme is tried on the raw name first, then on the extracted
+        prefix (e.g. ``"macd-12-26-9"`` → ``"macd"``).
+        """
 
         color = fallback
 
         colors = self.color_scheme
-        if colors and name in colors:
-            color = colors[name] or color
+        if colors:
+            key = name if name in colors else extract_prefix(name)
+            if key in colors:
+                color = colors[key] or color
 
         if isinstance(color, list):
             ckey = ax, name
@@ -415,17 +421,13 @@ class Chart:
         """calculate indicator result saving last result"""
 
         if indicator is not None:
-            if is_expr(indicator):
-                indicator = PolarsExprIndicator(indicator)
-            elif isinstance(indicator, tuple) and all(is_expr(e) for e in indicator):
-                indicator = PolarsExprIndicator(indicator)
-            result = indicator(prices)
+            result = apply_indicator(prices, indicator)
             self.last_result = result
         elif self.last_result is not None:
             result = self.last_result
         else:
             result = prices
-            
+
         return result
 
     def plot_indicator(self, indicator):
@@ -438,12 +440,6 @@ class Chart:
 
         prices = self.prices
 
-        # wrap polars Expr / tuple of Expr in PolarsExprIndicator (no polars import)
-        if is_expr(indicator):
-            indicator = PolarsExprIndicator(indicator)
-        elif isinstance(indicator, tuple) and all(is_expr(e) for e in indicator):
-            indicator = PolarsExprIndicator(indicator)
-
         # Call the indicator's plot_handler if defined (before any calc)
         # this is the only location where plot_handler is called
         # plot_handler is currently defined only for Primitives
@@ -452,9 +448,9 @@ class Chart:
             indicator.plot_handler(prices, chart=self)
             return
 
-        # Invoke indicator and compute result if indicator is callable
-        # Result data is mapped to the charting view
-        if callable(indicator):
+        # Compute the result. apply_indicator handles callables, polars Expr,
+        # and tuple-of-Expr bundles; it raises TypeError otherwise.
+        if is_expression_like(indicator) or callable(indicator):
             result = self.calc_result(prices, indicator)
             result = self.slice(result)
         else:

@@ -155,11 +155,13 @@ datetime/index-based x coordinates with `rownum[row_indices]`
 
 ### Phase 5 — Expression support in the plot API
 
-**5.1** Add `PolarsExprIndicator` in `model.py`: wraps a `pl.Expr` or tuple of `pl.Expr`,
-evaluates via `prices.select(expr)`, returns same-length polars Series (or tuple of Series)
+**5.1** Add `apply_indicator(prices, indicator)` in `utils.py`: dispatcher that
+evaluates a `pl.Expr`, tuple of `pl.Expr`, or any callable indicator against
+`prices`. Raises `TypeError` on unsupported types.
 
-**5.2** In `Chart.plot()`: detect `pl.Expr` / tuple-of-`pl.Expr` via `is_expr()` and
-auto-wrap in `PolarsExprIndicator` — no polars import in `chart.py`
+**5.2** In `Chart.plot()` / `plot_indicator()`: accept `pl.Expr` and tuple-of-`pl.Expr`
+directly (no wrapping). `is_expression_like()` guards the callable check; `calc_result`
+delegates to `apply_indicator`. No polars import in `chart.py`.
 
 ---
 

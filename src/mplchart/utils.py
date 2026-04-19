@@ -45,6 +45,39 @@ def is_expr(item) -> bool:
     return hasattr(item, "meta")
 
 
+def is_expression_like(item) -> bool:
+    """True if item is a polars Expr or a tuple of polars Expr."""
+    if is_expr(item):
+        return True
+    if isinstance(item, tuple) and item and all(is_expr(e) for e in item):
+        return True
+    return False
+
+
+def apply_indicator(prices, indicator):
+    """Apply an indicator, expression, or expression bundle to prices.
+
+    - Expression (``pl.Expr``): evaluates against ``prices`` and returns a Series.
+    - Expression bundle (tuple of ``pl.Expr``): evaluates each and returns a DataFrame.
+    - Indicator (any callable): returns ``indicator(prices)``.
+    """
+    if is_expr(indicator):
+        return prices.select(indicator).to_series()
+
+    if isinstance(indicator, tuple) and indicator and all(is_expr(e) for e in indicator):
+        import polars as pl
+        series = [prices.select(e).to_series() for e in indicator]
+        return pl.DataFrame({s.name: s for s in series})
+
+    if callable(indicator):
+        return indicator(prices)
+
+    raise TypeError(
+        f"Cannot apply {type(indicator).__name__!r} to prices: "
+        f"expected a polars Expr, tuple of Expr, or callable indicator."
+    )
+
+
 def normalize_columns(df):
     """lowercase column names for both backends"""
     match detect_backend(df):
@@ -169,25 +202,39 @@ def get_metadata(indicator, name: str, default=None):
 
 
 
-def get_name(indicator):
-    """indicator name"""
+def extract_prefix(text: str) -> str:
+    """Extract a normalized short prefix from an identifier-ish string.
 
-    if hasattr(indicator, "func_object"):  # talib
-        return indicator.info.get("name")
-
-    if hasattr(indicator, "__name__"):  # function
-        return indicator.name.removeprefix("calc_")
-
-    return indicator.__class__.__name__
+    Splits on the first ``(``, ``-``, or whitespace and lowercases the result.
+    Examples: ``"macd-12-26-9"`` → ``"macd"``, ``"MACD(12, 26, 9)"`` → ``"macd"``,
+    ``"sma(20)"`` → ``"sma"``.
+    """
+    import re
+    match = re.match(r"[^-(\s]+", text)
+    return match.group(0).lower() if match else text.lower()
 
 
 def get_label(indicator):
-    """indicator label"""
+    """Human-readable legend text for an indicator, expression, or bundle.
+
+    Resolution order:
+    1. explicit ``.label`` attribute (bundles, custom objects)
+    2. talib ``func_object`` → ``"name(params)"``
+    3. polars ``Expr`` → ``.meta.output_name()``
+    4. fall back to ``repr(indicator)``
+
+    The color map uses the label's prefix via :func:`extract_prefix` when no
+    direct match is found in ``color_scheme``.
+    """
+
+    label = getattr(indicator, "label", None)
+    if isinstance(label, str):
+        return label
 
     if hasattr(indicator, "func_object"):  # talib
         name = indicator.info.get("name")
         params = [repr(v) for v in indicator.parameters.values()]
-        return name + "(" + ", ".join(params) + ")"
+        return f"{name}({', '.join(params)})"
 
     if is_expr(indicator):
         try:
@@ -195,14 +242,7 @@ def get_label(indicator):
         except Exception:
             pass
 
-    expr = getattr(indicator, "expr", None)
-    if is_expr(expr):
-        try:
-            return expr.meta.output_name()
-        except Exception:
-            pass
-
-    return str(indicator)
+    return repr(indicator)
 
 
 def series_xy(data, item: str | None = None, *, dropna: bool = False):
