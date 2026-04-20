@@ -14,6 +14,7 @@ class LinePlot(Primitive):
 
     Args:
         item (str) :  name of the column to plot. default None
+        label (str) : legend label override. When None, derived from the indicator.
         style (str) : line style like 'solid', 'dashed', 'dotted', 'dashdot', 'marker'
         marker (str) : marker character like '.' or 'o'
         width (float) : line width override
@@ -27,7 +28,7 @@ class LinePlot(Primitive):
         SMA(50) | LinePlot(style="dashdot", color="red")       # indicator (pandas)
         RSI(14) | LinePlot(overbought=70, oversold=30)         # indicator (pandas)
         SMA(50) @ LinePlot(style="dashdot", color="red")       # expression (polars)
-        RSI(14) @ LinePlot(overbought=70, oversold=30)         # expression (polars)
+        RSI(14) @ LinePlot(label="rsi_14", overbought=70)      # expression (polars)
     """
 
     indicator = None
@@ -36,6 +37,7 @@ class LinePlot(Primitive):
         self,
         item: str | None = None,
         *,
+        label: str | None = None,
         style: str | None = None,
         marker: str | None = None,
         width: float | None = None,
@@ -50,6 +52,7 @@ class LinePlot(Primitive):
             style = "none"
 
         self.item = item
+        self.label = label
         self.style = style
         self.marker = marker
         self.color = color
@@ -75,7 +78,7 @@ class LinePlot(Primitive):
 
         series = series_data(result, self.item)
 
-        label = get_label(self.indicator)
+        label = self.label or get_label(self.indicator)
 
         kwargs = dict(
             linestyle=self.style,
@@ -85,7 +88,7 @@ class LinePlot(Primitive):
             alpha=self.alpha,
         )
 
-        xv, yv = chart.plot_xy(series)
+        xv, yv = chart.mapper.series_xy(series)
         ax.plot(xv, yv, label=label, **kwargs)
 
         with np.errstate(invalid="ignore"):

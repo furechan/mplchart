@@ -21,6 +21,7 @@ class Stripes(Primitive):
             Series; use a string (``"close < open"``) when the result is a
             named-column DataFrame; use a ``pl.Expr`` for polars-native flows.
             Omit if the indicator itself already returns the signal.
+        label (str, optional): Legend label. Omit to skip the legend entry.
         color (str, optional): Fill color for the shaded regions.
         alpha (float, optional): Opacity of the shaded regions, between 0.0
             and 1.0.
@@ -32,8 +33,9 @@ class Stripes(Primitive):
 
     indicator = None
 
-    def __init__(self, expr=None, *, color=None, alpha=None):
+    def __init__(self, expr=None, *, label: str | None = None, color=None, alpha=None):
         self.expr = expr
+        self.label = label
         self.color = color
         self.alpha = alpha
 
@@ -53,11 +55,7 @@ class Stripes(Primitive):
         else:
             signal = result
 
-        window = chart.mapper.calc_window()
-        chart.window = window
-        rownum = chart.mapper.rownum
-
-        values = np.asarray(signal)[window]
+        xs, values = chart.mapper.series_xy(signal)
 
         if not len(values):
             return
@@ -79,8 +77,7 @@ class Stripes(Primitive):
         color = self.color
         alpha = self.alpha
 
-        lo = window.start
+        label = self.label
         for s, e in zip(starts, ends):
-            x1 = rownum[lo + s]
-            x2 = rownum[lo + e - 1]
-            ax.axvspan(x1, x2, color=color, alpha=alpha)
+            ax.axvspan(xs[s], xs[e - 1], color=color, alpha=alpha, label=label)
+            label = None  # only label the first span so legend shows one entry

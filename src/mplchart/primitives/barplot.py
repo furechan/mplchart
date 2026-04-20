@@ -69,6 +69,6 @@ class BarPlot(Primitive):
             alpha=self.alpha,
         )
 
-        xv, yv = chart.plot_xy(series)
+        xv, yv = chart.mapper.series_xy(series)
         ax.bar(xv, yv, label=label, **kwargs)
 

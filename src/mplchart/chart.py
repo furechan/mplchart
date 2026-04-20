@@ -3,7 +3,6 @@
 import io
 import warnings
 
-import numpy as np
 import matplotlib.pyplot as plt
 
 from collections import Counter
@@ -12,8 +11,8 @@ from functools import cached_property
 from .colors import closest_color
 from .utils import detect_backend, check_prices, extract_datetime, apply_indicator, is_expression_like, extract_prefix
 from .layout import make_twinx, init_vplot, add_vplot
-from .mapper import RawDateMapper, DateIndexMapper
-from .plotters import AutoPlotter
+from .mapper import DateIndexMapper, RawDateMapper
+from .primitives.autoplot import AutoPlot
 
 
 USE_TIGHT_LAYOUT = True
@@ -52,6 +51,11 @@ class Chart:
             Defaults to ``(12, 9)``.
         holidays (list, optional): List of dates to exclude from the x-axis
             when using the integer date mapper.
+        raw_dates (bool, optional): If True, use ``RawDateMapper`` — the
+            x-axis coordinates are actual datetime values and matplotlib
+            handles date formatting natively. Defaults to False, which uses
+            ``DateIndexMapper`` (integer rownum positions with a custom
+            date formatter).
         color_scheme (dict or iterable of pairs, optional): Mapping of color
             role names to color values used to override default colors (e.g.
             ``colorup``, ``colordn``, ``bgcolor``).
@@ -90,13 +94,6 @@ class Chart:
         self.holidays = holidays
         self.raw_dates = raw_dates
         self.color_scheme = dict(color_scheme)
-
-        if raw_dates:
-            warnings.warn(
-                "raw_dates parameter is deprecated.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
 
         if bgcolor is not None:
             warnings.warn(
@@ -143,9 +140,6 @@ class Chart:
     def init_mapper(self, prices):
         """Initialize the chart date mapper with price data.
 
-        Normalizes column names to lowercase, sets the index, and
-        creates the appropriate date mapper (integer-based or raw-date).
-
         Args:
             prices (DataFrame): OHLCV prices DataFrame with a datetime index
                 or a ``date``/``datetime`` column.
@@ -165,14 +159,10 @@ class Chart:
 
         datetime_array = extract_datetime(prices)
 
-        if self.raw_dates:
-            self.mapper = RawDateMapper(
-                index=prices.index, start=self.start, end=self.end, max_bars=self.max_bars
-            )
-        else:
-            self.mapper = DateIndexMapper(
-                datetime_array=datetime_array, start=self.start, end=self.end, max_bars=self.max_bars
-            )
+        mapper_cls = RawDateMapper if self.raw_dates else DateIndexMapper
+        self.mapper = mapper_cls(
+            datetime_array=datetime_array, start=self.start, end=self.end, max_bars=self.max_bars
+        )
 
         if self.mapper:
             ax = self.root_axes()
@@ -226,25 +216,16 @@ class Chart:
         return color
 
 
-    def slice(self, data):
-        """re-index and slice data"""
+    def slice(self, data, *, xcol=None):
+        """Re-index and slice data to the visible window (backend-aware).
 
+        If ``xcol`` is given, the returned frame carries an extra column of
+        that name with the x-coordinates for each row — integer rownums for
+        the default mapper, datetime values in ``raw_dates`` mode.
+        """
         if self.mapper is None:
             raise ValueError("Date mapper was not configured yet. prices not provided!")
-
-        self.window = self.mapper.calc_window()
-        return self.mapper.slice(data)
-
-    def plot_xy(self, data):
-        """Return (xv, yv) for a full-length series (pandas or polars).
-
-        ``data`` must have the same number of rows as the original prices.
-        Uses the absolute window so indicators computed on full history are
-        sliced correctly.
-        """
-        window = self.mapper.calc_window()
-        self.window = window
-        return self.mapper.series_xy(np.asarray(data), window)
+        return self.mapper.slice(data, xcol=xcol)
 
     def map_date(self, date):
         """map date to value"""
@@ -448,16 +429,15 @@ class Chart:
             indicator.plot_handler(prices, chart=self)
             return
 
-        # Compute the result. apply_indicator handles callables, polars Expr,
-        # and tuple-of-Expr bundles; it raises TypeError otherwise.
+        # Anything else (polars Expr, tuple-of-Expr bundle, callable) is
+        # wrapped in the default AutoPlot primitive and dispatched through its
+        # plot_handler — the single auto-plot code path.
         if is_expression_like(indicator) or callable(indicator):
-            result = self.calc_result(prices, indicator)
-            result = self.slice(result)
-        else:
-            raise ValueError(f"Indicator {indicator!r} not callable")
+            autoplot = AutoPlot().clone(indicator=indicator)
+            autoplot.plot_handler(prices, chart=self)
+            return
 
-        plotter = AutoPlotter(self, indicator, result)
-        plotter.plot_all()
+        raise ValueError(f"Indicator {indicator!r} not callable")
 
 
     def add_legends(self):

@@ -10,10 +10,10 @@ from mplchart.chart import Chart  # noqa: E402
 from mplchart.samples import sample_prices  # noqa: E402
 from mplchart.primitives import (  # noqa: E402
     Candlesticks, OHLC, Price, Volume,
-    LinePlot, AreaPlot, BarPlot,
+    AutoPlot, LinePlot, AreaPlot, BarPlot,
     Peaks, ZigZag, Stripes, Markers,
 )
-from mplchart.expressions import SMA, RSI  # noqa: E402
+from mplchart.expressions import SMA, RSI, MACD  # noqa: E402
 
 
 FREQS = ["daily", "hourly", "minute"]
@@ -23,6 +23,9 @@ PRIMITIVES = [
     OHLC(),
     Price(),
     Volume(),
+    SMA(20) @ AutoPlot(),
+    SMA(20) @ AutoPlot(label="short_ma"),
+    MACD() @ AutoPlot(label="macd"),
     SMA(20) @ LinePlot(),
     SMA(20) @ AreaPlot(),
     SMA(20) @ BarPlot(),

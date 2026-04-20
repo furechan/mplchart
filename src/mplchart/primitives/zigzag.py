@@ -88,14 +88,11 @@ class ZigZag(Primitive):
         if ax is None:
             ax = chart.get_axes()
 
-        window = chart.mapper.calc_window()
-        chart.window = window
-
         # run zigzag on the windowed slice; returned indices are 0-based within window
-        windowed = chart.slice(prices) if hasattr(prices, "index") else prices[window]
+        windowed = chart.slice(prices, xcol="xloc")
         row_indices, values = calc_zigzag(windowed, threshold=self.threshold)
 
-        # map local indices to absolute rownums
-        xv = chart.mapper.rownum[window][row_indices]
+        # map local indices to sliced x-coordinates
+        xv = np.asarray(windowed["xloc"])[row_indices]
         label = repr(self)
         ax.plot(xv, values, label=label, color=None)

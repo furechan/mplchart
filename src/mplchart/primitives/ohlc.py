@@ -39,14 +39,12 @@ class OHLC(Primitive):
         if ax is None:
             ax = chart.get_axes()
 
-        window = chart.mapper.calc_window()
-        chart.window = window
-
-        xvalues = chart.mapper.rownum[window]
-        open_ = np.asarray(col_to_numpy(prices, "open"))[window]
-        high = np.asarray(col_to_numpy(prices, "high"))[window]
-        low = np.asarray(col_to_numpy(prices, "low"))[window]
-        close = np.asarray(col_to_numpy(prices, "close"))[window]
+        prices = chart.slice(prices, xcol="xloc")
+        xvalues = np.asarray(prices["xloc"])
+        open_ = np.asarray(col_to_numpy(prices, "open"))
+        high = np.asarray(col_to_numpy(prices, "high"))
+        low = np.asarray(col_to_numpy(prices, "low"))
+        close = np.asarray(col_to_numpy(prices, "close"))
 
         textcolor = plt.rcParams["text.color"]
 

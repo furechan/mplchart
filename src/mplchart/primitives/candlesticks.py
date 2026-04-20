@@ -51,9 +51,8 @@ class Candlesticks(Primitive):
         if ax is None:
             ax = chart.get_axes()
 
-        window = chart.mapper.calc_window()
-        xvalues = chart.mapper.rownum[window]
-        prices = chart.slice(prices) if hasattr(prices, "index") else prices[window]
+        prices = chart.slice(prices, xcol="xloc")
+        xvalues = np.asarray(prices["xloc"])
 
         label = str(self)
         width = self.width

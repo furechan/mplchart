@@ -17,7 +17,7 @@ class ExprBundle(tuple):
 
     Subclasses ``tuple`` so unpacking still works
     (``macd, signal, hist = MACD(12, 26, 9)``) while carrying a ``label``
-    attribute used as ``__repr__`` — e.g. ``macd-12-26-9``. AutoPlotter
+    attribute used as ``__repr__`` — e.g. ``macd-12-26-9``. ``AutoPlot``
     uses the label to identify the indicator group.
     """
 
@@ -57,7 +57,7 @@ def wrap_expression(func):
     Builds a slug label (e.g. "sma-20", "macd-12-26-9") from the call args.
     Single-expression results get ``.alias(label)`` applied. Multi-expression
     results are wrapped in an ``ExprBundle`` whose ``__repr__`` returns the
-    label, so AutoPlotter can identify the indicator group.
+    label, so ``AutoPlot`` can identify the indicator group.
     """
     sig = inspect.signature(func)
 

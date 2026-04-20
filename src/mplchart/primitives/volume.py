@@ -52,17 +52,15 @@ class Volume(Primitive):
         if ax is None:
             ax = chart.get_axes("twinx")
 
-        window = chart.mapper.calc_window()
-        chart.window = window
-
-        volume = np.asarray(col_to_numpy(prices, "volume"))[window]
-        close = np.asarray(col_to_numpy(prices, "close"))[window]
+        prices = chart.slice(prices, xcol="xloc")
+        volume = np.asarray(col_to_numpy(prices, "volume"))
+        close = np.asarray(col_to_numpy(prices, "close"))
 
         with np.errstate(invalid="ignore"):
             change = np.diff(close, prepend=np.nan) / np.roll(close, 1)
             change[0] = np.nan
 
-        xv = chart.mapper.rownum[window]
+        xv = np.asarray(prices["xloc"])
 
         width = self.width
         alpha = self.alpha

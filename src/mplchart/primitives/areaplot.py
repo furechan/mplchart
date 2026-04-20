@@ -61,7 +61,7 @@ class AreaPlot(Primitive):
             alpha=self.alpha,
         )
 
-        xv, yv = chart.plot_xy(series)
+        xv, yv = chart.mapper.series_xy(series)
         ax.fill_between(
             xv,
             yv,

@@ -21,6 +21,7 @@ class Markers(Primitive):
             Series; use a string (``"close < open"``) when the result is a
             named-column DataFrame; use a ``pl.Expr`` for polars-native flows.
             Omit if the indicator itself already returns the signal.
+        label (str, optional): Legend label. Omit to skip the legend entry.
         color (str or list of str, optional): Marker color. Pass a two-element
             list ``[color_off, color_on]`` to use different colors for signal
             transitions. Defaults to the matplotlib default color cycle.
@@ -39,11 +40,13 @@ class Markers(Primitive):
         self,
         expr=None,
         *,
+        label: str | None = None,
         color=None,
         marker: str = ".",
         alpha: float = 0.6,
     ):
         self.expr = expr
+        self.label = label
         self.color = color
         self.marker = marker
         self.alpha = alpha
@@ -64,15 +67,10 @@ class Markers(Primitive):
         else:
             signal = result
 
-        window = chart.mapper.calc_window()
-        chart.window = window
-        rownum = chart.mapper.rownum
-
         flag = np.clip(np.sign(np.asarray(signal, dtype=float)), 0, 1)
         close = np.asarray(col_to_numpy(prices, "close"), dtype=float)
 
-        flag = flag[window]
-        close = close[window]
+        xs, flag, close = chart.mapper.series_xy(flag, close)
 
         # forward-fill NaNs in flag
         nan_mask = np.isnan(flag)
@@ -88,7 +86,7 @@ class Markers(Primitive):
         if not mask.sum():
             return
 
-        xv = rownum[window][np.where(mask)[0]]
+        xv = xs[mask]
         yv = close[mask]
         flag_at = flag[mask]
 
@@ -99,4 +97,4 @@ class Markers(Primitive):
         if isinstance(color, list):
             color = np.where(flag_at > 0, color[1], color[0])
 
-        ax.scatter(xv, yv, c=color, s=12 * 12, alpha=alpha, marker=marker)
+        ax.scatter(xv, yv, c=color, s=12 * 12, alpha=alpha, marker=marker, label=self.label)

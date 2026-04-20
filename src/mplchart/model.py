@@ -5,7 +5,7 @@ import copy
 from types import MappingProxyType
 from abc import ABC, abstractmethod
 
-from .utils import short_repr, get_series, is_expr
+from .utils import short_repr, get_series, is_expression_like
 
 
 
@@ -15,7 +15,7 @@ class Wrapper(ABC):
     A ``Wrapper`` is returned by an ``Indicator.__call__`` when the indicator
     wants to take full control of how its result is rendered. The chart calls
     ``plot_result`` with the already-sliced data instead of delegating to
-    ``AutoPlotter``.
+    the default ``AutoPlot`` primitive.
     """
 
     @abstractmethod
@@ -71,7 +71,7 @@ class Primitive(ABC):
                 DeprecationWarning, stacklevel=2,
             )
             return self.clone(indicator=other)
-        if not (callable(other) or is_expr(other)):
+        if not (callable(other) or is_expression_like(other)):
             return NotImplemented
         return self.clone(indicator=other)
 

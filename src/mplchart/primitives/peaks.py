@@ -39,31 +39,31 @@ class Peaks(Primitive):
             return NotImplemented
         return self.clone(indicator=indicator)
 
-    def process(self, data):
-        if self.item:
-            arr = np.asarray(col_to_numpy(data, self.item), dtype=float)
-            return extract_peaks(arr, arr, span=self.span)
-        if not hasattr(data, "columns"):
-            # Series input (e.g. from SLOPE() | Peaks())
-            arr = np.asarray(data.to_numpy(), dtype=float)
-            return extract_peaks(arr, arr, span=self.span)
-        high = np.asarray(col_to_numpy(data, "high"), dtype=float)
-        low = np.asarray(col_to_numpy(data, "low"), dtype=float)
-        return extract_peaks(high, low, span=self.span)
-
     def plot_handler(self, prices, chart, ax=None):
         if ax is None:
             ax = chart.get_axes()
 
-        window = chart.mapper.calc_window()
-        chart.window = window
-
         data = chart.calc_result(prices, self.indicator)
-        windowed = chart.slice(data) if hasattr(data, "index") else data[window]
-        row_indices, values = self.process(windowed)
 
-        # map local indices to absolute rownums
-        xv = chart.mapper.rownum[window][row_indices]
+        # Reduce by item first, if requested — yields a Series.
+        if self.item is not None and hasattr(data, "columns"):
+            data = data[self.item]
+
+        if hasattr(data, "columns"):
+            # DataFrame — peaks on high, valleys on low.
+            windowed = chart.slice(data, xcol="xloc")
+            xv = np.asarray(windowed["xloc"])
+            hi = np.asarray(col_to_numpy(windowed, "high"), dtype=float)
+            lo = np.asarray(col_to_numpy(windowed, "low"), dtype=float)
+        else:
+            # Series — same values for peaks and valleys.
+            xv, arr = chart.mapper.series_xy(data)
+            arr = np.asarray(arr, dtype=float)
+            hi = lo = arr
+
+        row_indices, values = extract_peaks(hi, lo, span=self.span)
+        xv = xv[row_indices]
+
         color = self.color or plt.rcParams["text.color"]
         ax.scatter(xv, values, c=color, s=10 * 10, alpha=0.5, marker=".")
 
