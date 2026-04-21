@@ -16,7 +16,7 @@ Items decided or considered but not scheduled. Add new items at the end.
 
 ## Indicators
 
-- Consider removing slow/complex indicators like SLOPE and CURVE — assess whether the complexity is worth keeping in the library.
+- Replace `calc_wma` rolling `.apply()` with a vectorized implementation — current pandas rolling apply is a stopgap until the expressions/polars path is ready.
 
 ## mintalib
 

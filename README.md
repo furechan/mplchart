@@ -122,7 +122,6 @@ Some of the indicators included are:
 - `BOP` Balance of Power
 - `CMF` Chaikin Money Flow
 - `MFI` Money Flow Index
-- `SLOPE` Slope (linear regression)
 - `STOCH` Stochastic Oscillator
 - `BBANDS` Bollinger Bands
 - `KELTNER` Keltner Channel

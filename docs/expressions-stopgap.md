@@ -8,16 +8,11 @@ _Last updated: 2026-04-17_
 
 ## In indicators only (missing from expressions)
 
-| Name | Notes |
-|------|-------|
-| `SLOPE` | Rolling linear regression slope — no native Polars support |
-| `TSF` | Rolling linear regression forecast — same constraint as SLOPE |
-| `RVALUE` | Rolling R² — same constraint as SLOPE |
-| `CURVE` | Rolling quadratic regression curvature — same constraint |
-| `QSF` | Rolling quadratic forecast — same constraint |
+None — all remaining indicators have expression equivalents.
 
-All remaining gaps require either `rolling_map` (CCI) or a custom numpy rolling
-implementation via `map_batches` (regression family). `ALMA` was also removed from
+`SLOPE`, `TSF`, `RVALUE`, `CURVE`, and `QSF` (the regression family) were removed
+from indicators entirely: they require `rolling_map` / `rolling().apply()` with no
+native vectorized path in either Polars or pandas. `ALMA` was also removed from
 indicators and preserved in `playground/alma-indicator.ipynb` pending a decision
 on whether to add it as an expression.
 
