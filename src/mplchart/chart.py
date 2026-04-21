@@ -9,7 +9,7 @@ from collections import Counter
 from functools import cached_property
 
 from .colors import closest_color
-from .utils import detect_backend, check_prices, extract_datetime, apply_indicator, is_expression_like, extract_prefix
+from .utils import detect_backend, check_prices, extract_datetime, apply_indicator, is_indicator_like, extract_prefix
 from .layout import make_twinx, init_vplot, add_vplot
 from .mapper import DateIndexMapper, RawDateMapper
 from .primitives.autoplot import AutoPlot
@@ -425,14 +425,14 @@ class Chart:
         # this is the only location where plot_handler is called
         # plot_handler is currently defined only for Primitives
         # Note that data have not been mapped/sliced yet
-        if hasattr(indicator, "plot_handler"):
+        if hasattr(type(indicator), "plot_handler"):
             indicator.plot_handler(prices, chart=self)
             return
 
         # Anything else (polars Expr, tuple-of-Expr bundle, callable) is
         # wrapped in the default AutoPlot primitive and dispatched through its
         # plot_handler — the single auto-plot code path.
-        if is_expression_like(indicator) or callable(indicator):
+        if is_indicator_like(indicator):
             autoplot = AutoPlot().clone(indicator=indicator)
             autoplot.plot_handler(prices, chart=self)
             return

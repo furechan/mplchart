@@ -12,7 +12,7 @@ CLOSE  = pl.col("close")
 VOLUME = pl.col("volume")
 
 
-class ExprBundle(tuple):
+class ExprTuple(tuple):
     """Tuple of ``pl.Expr`` returned by multi-output expression factories.
 
     Subclasses ``tuple`` so unpacking still works
@@ -56,7 +56,7 @@ def wrap_expression(func):
 
     Builds a slug label (e.g. "sma-20", "macd-12-26-9") from the call args.
     Single-expression results get ``.alias(label)`` applied. Multi-expression
-    results are wrapped in an ``ExprBundle`` whose ``__repr__`` returns the
+    results are wrapped in an ``ExprTuple`` whose ``__repr__`` returns the
     label, so ``AutoPlot`` can identify the indicator group.
     """
     sig = inspect.signature(func)
@@ -76,7 +76,7 @@ def wrap_expression(func):
             return result.alias(label)
 
         if isinstance(result, tuple):
-            return ExprBundle(result, label=label)
+            return ExprTuple(result, label=label)
 
         return result
 

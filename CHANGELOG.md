@@ -1,11 +1,12 @@
 # Change Log
 
 ## 0.0.33
+- Renamed `ExprBundle` → `ExprTuple` in `expressions/prelude.py` and re-exported from `mplchart.expressions`
 - Removed `SLOPE`, `CURVE`, `TSF`, `QSF`, `RVALUE` indicators (regression family — no vectorized path)
 - Added `AutoPlot` primitive — the default plotter is now client-facing, allowing explicit overrides like `SMA(20) @ AutoPlot(label="short_ma")`. When plotting anything that is not already a primitive, the chart wraps it in `AutoPlot()` transparently (same behavior as before).
 - Removed internal `AutoPlotter` class and `plotters.py` module — logic folded into `AutoPlot.plot_handler`. Single auto-plot code path.
-- `Primitive.__rmatmul__` now accepts tuple-of-Expr bundles (`ExprBundle`), enabling `MACD() @ AutoPlot(...)`.
-- Rewrote `RawDateMapper` to implement the same public interface as `DateIndexMapper` (`calc_window`, `series_xy`, `slice`, `slice_polars`, `slice_pandas`, `map_date`, `config_axes`, `rownum`, `datetime_array`). In raw-date mode x-axis coordinates are actual datetime values and matplotlib handles date formatting natively — no custom locator/formatter. `raw_dates=True` now works across primitives (LinePlot, AutoPlot, MACD ExprBundle, …) instead of crashing.
+- `Primitive.__rmatmul__` now accepts tuple-of-Expr bundles (`ExprTuple`), enabling `MACD() @ AutoPlot(...)`.
+- Rewrote `RawDateMapper` to implement the same public interface as `DateIndexMapper` (`calc_window`, `series_xy`, `slice`, `slice_polars`, `slice_pandas`, `map_date`, `config_axes`, `rownum`, `datetime_array`). In raw-date mode x-axis coordinates are actual datetime values and matplotlib handles date formatting natively — no custom locator/formatter. `raw_dates=True` now works across primitives (LinePlot, AutoPlot, MACD ExprTuple, …) instead of crashing.
 - Removed `Chart.plot_xy` and `Chart.window` side-effect state — the mapper now owns windowing. Callers use `chart.mapper.series_xy(data)` directly; `DateIndexMapper.series_xy(values)` no longer takes a `window` argument (computes it internally).
 - `AutoPlot` now uses `chart.mapper.series_xy(series)` directly — same public API as `LinePlot` / `AreaPlot` / `BarPlot` / `Price`. No more reaching into `calc_window()` / `rownum[window]`, and no upfront `chart.slice(data)`.
 - Added `xcol=` kwarg to `Chart.slice()` / `mapper.slice()` — when set, the returned frame carries an extra column of that name with per-row x-coordinates (rownum values, or datetimes in `raw_dates` mode). `Candlesticks`, `OHLC`, `Volume`, `ZigZag` now use `chart.slice(prices, xcol="xloc")` instead of computing the window and reaching into `chart.mapper.rownum[window]`. Removes the `hasattr(prices, "index") else prices[window]` backend switch from those primitives.

@@ -5,7 +5,7 @@ import copy
 from types import MappingProxyType
 from abc import ABC, abstractmethod
 
-from .utils import short_repr, get_series, is_expression_like
+from .utils import short_repr, get_series, is_indicator_like
 
 
 
@@ -71,7 +71,7 @@ class Primitive(ABC):
                 DeprecationWarning, stacklevel=2,
             )
             return self.clone(indicator=other)
-        if not (callable(other) or is_expression_like(other)):
+        if not is_indicator_like(other):
             return NotImplemented
         return self.clone(indicator=other)
 

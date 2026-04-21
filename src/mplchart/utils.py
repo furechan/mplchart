@@ -40,41 +40,55 @@ def is_pandas(df) -> bool:
     return detect_backend(df) == "pandas"
 
 
-def is_expr(item) -> bool:
-    """check if item is a polars Expr (duck typing, no import)"""
-    return hasattr(item, "meta")
+def is_polars_expr(item) -> bool:
+    """check if item is a polars Expr"""
+    return type(item).__module__ == "polars.expr.expr"
 
 
-def is_expression_like(item) -> bool:
+def is_polars_expr_like(item) -> bool:
     """True if item is a polars Expr or a tuple of polars Expr."""
-    if is_expr(item):
+    if is_polars_expr(item):
         return True
-    if isinstance(item, tuple) and item and all(is_expr(e) for e in item):
+    if isinstance(item, tuple) and item and all(is_polars_expr(e) for e in item):
         return True
     return False
+
+
+def is_pandas_expr(item) -> bool:
+    """check if item is a pandas Expression"""
+    return type(item).__module__ == "pandas.api.typing"
+
+
+def is_indicator_like(item) -> bool:
+    """True if item is any acceptable indicator form: polars expr/bundle, pandas expr, or callable."""
+    return is_polars_expr_like(item) or is_pandas_expr(item) or callable(item)
 
 
 def apply_indicator(prices, indicator):
     """Apply an indicator, expression, or expression bundle to prices.
 
-    - Expression (``pl.Expr``): evaluates against ``prices`` and returns a Series.
-    - Expression bundle (tuple of ``pl.Expr``): evaluates each and returns a DataFrame.
-    - Indicator (any callable): returns ``indicator(prices)``.
+    - Polars Expr: evaluates against ``prices`` and returns a Series.
+    - Polars Expr bundle (tuple of ``pl.Expr``): evaluates each and returns a DataFrame.
+    - Pandas Expression: evaluates via ``_eval_expression`` and returns a Series.
+    - Callable: returns ``indicator(prices)``.
     """
-    if is_expr(indicator):
+    if is_polars_expr(indicator):
         return prices.select(indicator).to_series()
 
-    if isinstance(indicator, tuple) and indicator and all(is_expr(e) for e in indicator):
+    if isinstance(indicator, tuple) and indicator and all(is_polars_expr(e) for e in indicator):
         import polars as pl
         series = [prices.select(e).to_series() for e in indicator]
         return pl.DataFrame({s.name: s for s in series})
+
+    if is_pandas_expr(indicator):
+        return indicator._eval_expression(prices)
 
     if callable(indicator):
         return indicator(prices)
 
     raise TypeError(
         f"Cannot apply {type(indicator).__name__!r} to prices: "
-        f"expected a polars Expr, tuple of Expr, or callable indicator."
+        f"expected a polars Expr, tuple of Expr, pandas Expression, or callable indicator."
     )
 
 
@@ -169,8 +183,11 @@ def resolve_expr(df, expr):
     If ``df`` is a Series it is promoted to a single-column DataFrame using
     the series name as the column name, so string expressions can reference it.
     """
-    if is_expr(expr):
+    if is_polars_expr(expr):
         return df.select(expr).to_series()
+
+    if is_pandas_expr(expr):
+        return expr._eval_expression(df)
 
     if callable(expr):
         return expr(df)
@@ -193,6 +210,9 @@ def resolve_expr(df, expr):
 
 def get_metadata(indicator, name: str, default=None):
     """get metadata from `metadata` dict if present or attributes"""
+
+    if is_pandas_expr(indicator):
+        return default
 
     metadata = getattr(indicator, "metadata", None)
     if metadata is not None:
@@ -227,16 +247,19 @@ def get_label(indicator):
     direct match is found in ``color_scheme``.
     """
 
+    if is_pandas_expr(indicator):
+        return repr(indicator)
+
     label = getattr(indicator, "label", None)
     if isinstance(label, str):
         return label
 
-    if hasattr(indicator, "func_object"):  # talib
+    if hasattr(type(indicator), "func_object"):  # talib
         name = indicator.info.get("name")
         params = [repr(v) for v in indicator.parameters.values()]
         return f"{name}({', '.join(params)})"
 
-    if is_expr(indicator):
+    if is_polars_expr(indicator):
         try:
             return indicator.meta.output_name()
         except Exception:
@@ -267,7 +290,7 @@ def series_xy(data, item: str | None = None, *, dropna: bool = False):
 def series_data(data, item=None, *, default_item: str | None = None):
     """extract series data depending on data type and parameters"""
 
-    if is_expr(item):
+    if is_polars_expr(item):
         return data.select(item).to_series()
 
     if hasattr(data, "columns"):
