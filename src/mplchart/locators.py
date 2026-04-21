@@ -55,4 +55,4 @@ class DTArrayLocator(mticker.Locator):
         vmin, vmax = np.round([vmin, vmax]).astype(int).clip(0, size - 1)
         dates = self.dtarray[vmin:vmax+1]
 
-        return date_ticks(dates, max_ticks)
+        return vmin + date_ticks(dates, max_ticks)
