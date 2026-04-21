@@ -35,12 +35,11 @@ def calc_rma(series, period: int = 14):
 def calc_wma(series, period: int = 20):
     """Weighted Moving Average"""
     weights = np.arange(1, period + 1, dtype=float)
-    weights /= np.sum(weights)
-
-    def average(data):
-        return np.sum(data.values * weights)
-
-    return series.rolling(period).apply(average)
+    weights /= weights.sum()
+    conv = np.convolve(series.values, weights[::-1], mode="full")
+    result = np.full(len(series), np.nan)
+    result[period - 1:] = conv[period - 1:len(series)]
+    return pd.Series(result, index=series.index)
 
 
 def calc_hma(series, period: int = 20):
