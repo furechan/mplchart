@@ -15,12 +15,6 @@ and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
 > For a related project with a mature api you may want to look into
 > [mplfinance](https://pypi.org/project/mplfinance/).
 
-> **Note — backend decoupling:**
-> mplchart is transitioning to a backend-agnostic core. As of version 0.0.32,
-> **pandas is no longer installed by default**. Choose the backend you want
-> via extras: `pip install mplchart[pandas]` or `pip install mplchart[polars]`
-> (or both). See the [Installation](#installation) section for details.
-
 
 ![Showcase Chart](https://github.com/furechan/mplchart/raw/main/output/showcase.svg "Showcase")
 
@@ -33,8 +27,8 @@ and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
 import yfinance as yf
 
 from mplchart.chart import Chart
-from mplchart.primitives import Candlesticks, Volume, LinePlot
-from mplchart.indicators import SMA, EMA, ROC, RSI, MACD
+from mplchart.primitives import Candlesticks, Volume, Pane, LinePlot
+from mplchart.indicators import SMA, RSI, MACD
 
 from mplchart.utils import normalize_prices
 
@@ -42,14 +36,11 @@ ticker = 'AAPL'
 prices = normalize_prices(yf.Ticker(ticker).history('5y'))
 
 Chart(prices, title=ticker, max_bars=250).plot(
-    Candlesticks(),
-    Volume(),
-    SMA(50),
-    SMA(200),
-).pane("above").plot(
-    RSI(14) | LinePlot(style="dashed")
-).pane("below").plot(
-    MACD()
+    Candlesticks(), Volume(), SMA(50), SMA(200),
+    Pane("above", yticks=(30, 50, 70)),
+    RSI(14) | LinePlot(overbought=70, oversold=30),
+    Pane("below"),
+    MACD(),
 ).show()
 ```
 
@@ -81,7 +72,7 @@ Primitives are classes and must be instantiated as objects before being used wit
 from mplchart.chart import Chart
 from mplchart.primitives import Candlesticks
 
-chart = Chart(prices, title=title, max_bars=250).plot(
+Chart(prices, title=title, max_bars=250).plot(
     Candlesticks()
 ).show()
 ```
@@ -91,6 +82,7 @@ The main drawing primitives are :
 - `OHLC` for open, high, low, close bar plots
 - `Price` for price line plots
 - `Volume` for volume bar plots
+- `Pane` to switch to a different pane (above or below)
 - `LinePlot` draw an indicator as line plot
 - `AreaPlot` draw an indicator as area plot
 - `BarPlot` draw an indicator as bar plot
@@ -101,7 +93,7 @@ The main drawing primitives are :
 
 ## Builtin Indicators
 
-The library includes some standard technical analysis indicators implemented in pandas/numpy.
+The library includes some standard technical analysis indicators for **pandas** DataFrames.
 Indicators are classes and must be instantiated as objects before being used with the plot api.
 
 Some of the indicators included are:
@@ -118,7 +110,6 @@ Some of the indicators included are:
 - `DMI` Directional Movement Index
 - `MACD` Moving Average Convergence Divergence
 - `PPO` Price Percentage Oscillator 
-- `CCI` Commodity Channel Index
 - `BOP` Balance of Power
 - `CMF` Chaikin Money Flow
 - `MFI` Money Flow Index
@@ -128,7 +119,7 @@ Some of the indicators included are:
 - `DEMA` Double Exponential Moving Average
 - `TEMA` Triple Exponential Moving Average
 
-Use `|` to override how an indicator is rendered, or to chain indicators:
+Use `|` to bind an indicator to a rendering primitive, or to compose indicators:
 
 ```python
 SMA(50) | LinePlot(style="dashed", color="red")   # bind indicator to primitive
@@ -161,27 +152,23 @@ SMA(20).apply(EMA(10))         # compose: EMA applied first, then SMA
 
 ## Polars Expressions
 
-For polars-native workflows, the `expressions` subpackage provides polars `Expr` factories
-as a lightweight alternative to the indicator pattern.
-These can be used directly with `chart.plot()` and support all polars DataFrames.
+For **polars** DataFrames, the `expressions` subpackage provides polars `Expr` factories
+as an alternative to the indicator pattern.
+These can be used directly with `chart.plot()`.
 
 ```python
 # Candlesticks chart with polars expressions
 
-import polars as pl
 from mplchart.chart import Chart
-from mplchart.primitives import Candlesticks, Volume
+from mplchart.primitives import Candlesticks, Volume, Pane, LinePlot
 from mplchart.expressions import SMA, EMA, RSI, MACD
 
 Chart(prices, title=ticker, max_bars=250).plot(
-    Candlesticks(),
-    Volume(),
-    SMA(50),
-    SMA(200),
-).pane("above").plot(
-    RSI()
-).pane("below").plot(
-    MACD()
+    Candlesticks(), Volume(), SMA(50), SMA(200),
+    Pane("above", yticks=(30, 50, 70)),
+    RSI() @ LinePlot(overbought=70, oversold=30),
+    Pane("below"),
+    MACD(),
 ).show()
 ```
 
@@ -191,6 +178,7 @@ passed to `df.select()`, or used anywhere polars expressions are accepted.
 Contrary to indicators, expressions use the `@` operator to bind to a primitive:
 
 ```python
+from mplchart.primitives import LinePlot, AreaPlot
 from mplchart.expressions import SMA, RSI
 
 SMA(50) @ LinePlot(color="red")    # expression → primitive
@@ -217,38 +205,11 @@ indicators = [
 Chart(prices).plot(indicators).show()
 ```
 
-## Custom Indicators
-
-Any callable that accepts a prices dataframe and returns a series or dataframe can be used as an indicator.
-You can also implement a custom indicator as a subclass of `Indicator`.
-
-```python
-# Custom Indicator Example
-
-from mplchart.model import Indicator
-from mplchart.library import calc_ema
-
-class DEMA(Indicator):
-    """Double Exponential Moving Average"""
-
-    same_scale: bool = True
-    # boolean, whether the indicator can be drawn
-    # on the same axes as the prices
-
-    def __init__(self, period: int = 20):
-        self.period = period
-
-    def __call__(self, prices):
-        series = self.get_series(prices)
-        ema1 = calc_ema(series, self.period)
-        ema2 = calc_ema(ema1, self.period)
-        return 2 * ema1 - ema2
-```
-
-
 ## Examples
 
-You can find example notebooks and scripts in the `examples` folder. 
+Example notebooks live in the [`examples/`](examples/) folder — see the [examples README](examples/README.md) for the full list.
+
+
 
 ## Installation
 
@@ -257,7 +218,7 @@ Pick the backend you want to use — pandas and polars are both optional extras:
 ```console
 pip install mplchart[pandas]    # pandas DataFrames + indicators module
 pip install mplchart[polars]    # polars DataFrames + expressions module
-pip install mplchart[pandas,polars]   # both
+pip install mplchart[all]       # both
 ```
 
 A bare `pip install mplchart` installs only the backend-agnostic core
@@ -275,6 +236,7 @@ Required:
 Optional extras:
 - `[pandas]` — enables pandas DataFrame support and the `mplchart.indicators` module
 - `[polars]` — enables polars DataFrame support and the `mplchart.expressions` module
+- `[all]` — installs both pandas and polars
 
 
 ## Related Projects & Resources
