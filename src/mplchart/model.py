@@ -2,7 +2,6 @@
 
 import copy
 
-from types import MappingProxyType
 from abc import ABC, abstractmethod
 
 from .utils import short_repr, get_series, is_indicator_like
@@ -94,11 +93,6 @@ class Indicator(ABC):
 
     __repr__ = short_repr
 
-    def __init_subclass__(cls, **kwargs):
-        """Save indicator extra kwargs as info dictionary"""
-        if kwargs:
-            cls.info = MappingProxyType(kwargs)
-
     @abstractmethod
     def __call__(self, prices):
         """Compute the indicator value.
@@ -133,20 +127,6 @@ class Indicator(ABC):
     def __ror__(self, other):
         if isinstance(other, Indicator):
             return IndicatorChain(other, self)
-        return self(other)
-
-    def apply(self, other):
-        """Apply this indicator to data or compose with another indicator.
-
-        Args:
-            other: A prices DataFrame to compute the indicator on,
-                   or another indicator to compose with (applied first).
-
-        Returns:
-            Computed result if other is data, or a ComposedIndicator.
-        """
-        if callable(other):
-            return ComposedIndicator(self, other)
         return self(other)
 
     def get_series(self, data):

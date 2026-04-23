@@ -209,14 +209,10 @@ def resolve_expr(df, expr):
 
 
 def get_metadata(indicator, name: str, default=None):
-    """get metadata from `metadata` dict if present or attributes"""
+    """get named attribute from indicator, with a default"""
 
     if is_pandas_expr(indicator):
         return default
-
-    metadata = getattr(indicator, "metadata", None)
-    if metadata is not None:
-        return metadata.get(name, default)
 
     return getattr(indicator, name, default)
 
