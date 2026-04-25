@@ -11,3 +11,4 @@
 - [VS Code interpreter path warning](feedback-vscode-interpreter-path.md) — if `.venv` exists but VS Code warns on `.venv/bin/python`, set `python.defaultInterpreterPath` to `${workspaceFolder}/.venv/bin/python` in workspace settings.
 - [Changelog style](feedback-changelog-style.md) — keep entries terse; no inline rationale
 - [Pandas expressions gotchas](project-pandas-expressions-gotchas.md) — `__getattr__` trap, `callable` trap, private `_eval_expression` hook; detection via `type(item).__dict__`
+- [Silence pyright with type: ignore, not casts](feedback-silence-pyright.md) — use `# type: ignore[...]` for false positives; don't wrap in runtime casts
