@@ -490,20 +490,36 @@ class Chart:
 
         return self
 
-    def plot_vline(self, date):
-        """Plot a vertical dashed line across all panes at the given date.
+    def vline(self, date, *, color=None, linestyle=None):
+        """Draw a vertical line across all panes at the given date.
 
         Args:
-            date (datetime or str): The date at which to draw the vertical line.
+            date: date or date string for the vertical line position
+            color: line color (default: matplotlib grid.color)
+            linestyle: line style (default: matplotlib grid.linestyle)
         """
+        from .primitives.vline import VLine
 
-        if not self.figure.axes:
-            raise RuntimeError("axes not initialized!")
+        VLine(date, color=color, linestyle=linestyle).plot_handler(None, chart=self)
+        return self
 
-        ax = self.root_axes()
-        xv = self.map_date(date)
+    def plot_vline(self, date):
+        """Deprecated. Use vline() instead."""
+        warnings.warn("plot_vline() is deprecated, use vline() instead", DeprecationWarning, stacklevel=2)
+        return self.vline(date)
 
-        ax.axvline(xv, linestyle="dashed")
+    def hline(self, value, *, color=None, linestyle=None):
+        """Draw a horizontal line on the current pane at the given value.
+
+        Args:
+            value: y-axis value for the horizontal line position
+            color: line color (default: matplotlib grid.color)
+            linestyle: line style (default: matplotlib grid.linestyle)
+        """
+        from .primitives.hline import HLine
+
+        HLine(value, color=color, linestyle=linestyle).plot_handler(None, chart=self)
+        return self
 
     def show(self):
         """show chart"""

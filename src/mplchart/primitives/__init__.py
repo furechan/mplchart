@@ -13,3 +13,5 @@ from .areaplot import AreaPlot
 from .barplot import BarPlot
 from .zigzag import ZigZag
 from .pane import Pane
+from .vline import VLine
+from .hline import HLine
