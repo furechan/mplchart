@@ -120,3 +120,4 @@ def bump(ctx):
         pattern, f'version = "{version}"\n', buffer, flags=re.VERBOSE | re.MULTILINE
     )
     pyproject.write_text(output)
+    ctx.run("uv sync")
