@@ -142,11 +142,10 @@ Chart(prices).plot(indicators)
 
 If the indicator returns a DataFrame instead of a Series, specify an `item` (column name) in the primitive.
 
-Use `.apply()` to apply an indicator directly to data, or to compose indicators:
+Use `prices | indicator` to apply an indicator directly to data:
 
 ```python
-SMA(50).apply(prices)          # apply indicator to data
-SMA(20).apply(EMA(10))         # compose: EMA applied first, then SMA
+prices | SMA(50)               # apply indicator to data
 ```
 
 
@@ -186,12 +185,12 @@ RSI(14) @ AreaPlot(color="blue")   # expression → primitive
 ```
 
 
-## Talib Indicators
+## Talib Functions
 
-If you have `ta-lib` installed you can use its abstract functions as indicators. The indicators are created by calling `Function` with the name of the indicator and its parameters.
+If you have `ta-lib` installed you can use its abstract functions as indicators. They are created by calling `Function` with the name of the function and its parameters. Ta-lib functions work with both pandas and polars backends.
 
 ```python
-# Candlesticks chart with talib indicators
+# Candlesticks chart with talib functions
 
 from mplchart.primitives import Candlesticks
 from talib.abstract import Function
@@ -213,17 +212,20 @@ Example notebooks live in the [`examples/`](examples/) folder — see the [examp
 
 ## Installation
 
-Pick the backend you want to use — pandas and polars are both optional extras:
-
 ```console
-pip install mplchart[pandas]    # pandas DataFrames + indicators module
-pip install mplchart[polars]    # polars DataFrames + expressions module
-pip install mplchart[all]       # both
+pip install mplchart
 ```
 
-A bare `pip install mplchart` installs only the backend-agnostic core
-(matplotlib, numpy, pyarrow). You will need at least one of the extras
-to load prices and plot indicators.
+The indicators module requires pandas; the expressions module requires polars.
+If either is already in your environment, mplchart will use it automatically.
+The `[pandas]`, `[polars]`, and `[all]` extras are just a convenience — they
+install pandas or polars alongside mplchart, nothing more:
+
+```console
+pip install mplchart[pandas]
+pip install mplchart[polars]
+pip install mplchart[all]
+```
 
 ## Dependencies
 
@@ -234,9 +236,9 @@ Required:
 - pyarrow
 
 Optional extras:
-- `[pandas]` — enables pandas DataFrame support and the `mplchart.indicators` module
-- `[polars]` — enables polars DataFrame support and the `mplchart.expressions` module
-- `[all]` — installs both pandas and polars
+- `[pandas]` — pandas
+- `[polars]` — polars
+- `[all]` — pandas and polars
 
 
 ## Related Projects & Resources
