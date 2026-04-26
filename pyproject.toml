@@ -46,7 +46,6 @@ dev = [
     "ta-lib>=0.6.7",
     "mintalib",
     "nicegui>=3.9.0",
-    "streamlit>=1.55.0",
     "nbcheck>=0.0.2",
     "ty>=0.0.26",
     "tomli>=2.4.1",
