@@ -88,6 +88,8 @@ The main drawing primitives are :
 - `BarPlot` draw an indicator as bar plot
 - `ZigZag` lines between pivot points
 - `Peaks` to mark peaks and valleys
+- `HLine` to draw a horizontal reference line on the current pane
+- `VLine` to draw a vertical line across all panes at a given date
 
 
 
