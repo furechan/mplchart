@@ -309,6 +309,19 @@ def get_series(prices, item=None):
     return series_data(prices, item, default_item="close")
 
 
+def _is_default(v, default):
+    """Safe equality check for short_repr — avoids non-bool returns from e.g. polars Expr."""
+    if v is default:
+        return True
+    if default is None or not isinstance(default, (int, float, str, bool)):
+        return False
+    try:
+        result = v == default
+        return bool(result) if isinstance(result, bool) else False
+    except Exception:
+        return False
+
+
 def short_repr(self):
     """short repr based on __init__ signature"""
 
@@ -327,8 +340,7 @@ def short_repr(self):
         elif isinstance(p.default, (type(None), str, bool)):
             keyword_only = True
 
-        if v == p.default:
-            # skip argument if not equal to default
+        if _is_default(v, p.default):
             if keyword_only or not isinstance(v, (int, float)):
                 keyword_only = True
                 continue

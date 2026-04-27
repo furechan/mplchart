@@ -2,25 +2,21 @@
 
 import numpy as np
 
-from ..model import Primitive
-from ..utils import resolve_expr, col_to_numpy
+from ..model import BindingPrimitive
+from ..utils import col_to_numpy
 
 
-class Markers(Primitive):
+class Markers(BindingPrimitive):
     """Markers primitive.
 
     Plots scatter markers on the main pane at the close price whenever a
-    condition changes. The condition is evaluated from an indicator result or
-    an expression. Use ``|`` with an indicator (pandas) or ``@`` with a
-    ``pl.Expr`` (polars) to attach.
+    condition changes. Bind a condition indicator via ``@`` or as the first
+    positional argument. Compose the condition externally before binding.
 
     Args:
-        expr (callable, pl.Expr, or str, optional): Applied to the indicator
-            result (Series or DataFrame) to produce a boolean/numeric signal.
-            Prefer a callable (``lambda s: s < 30``) when the result is a
-            Series; use a string (``"close < open"``) when the result is a
-            named-column DataFrame; use a ``pl.Expr`` for polars-native flows.
-            Omit if the indicator itself already returns the signal.
+        indicator: indicator or expression returning a boolean/numeric signal.
+            Markers appear at transition points (off→on, on→off).
+            Can also be bound via ``@``.
         label (str, optional): Legend label. Omit to skip the legend entry.
         color (str or list of str, optional): Marker color. Pass a two-element
             list ``[color_off, color_on]`` to use different colors for signal
@@ -30,44 +26,30 @@ class Markers(Primitive):
             Defaults to 0.6.
 
     Examples:
-        RSI(14) | Markers(expr=lambda s: s < 30, color=["gray", "green"])   # indicator (pandas)
-        RSI(14) @ Markers(expr=lambda s: s < 30, color=["gray", "green"])   # expression (polars)
+        (RSI(14) | (lambda s: s < 30)) @ Markers(color=["gray", "green"])
+        Markers(RSI(14) | (lambda s: s < 30), color=["gray", "green"])
     """
-
-    indicator = None
 
     def __init__(
         self,
-        expr=None,
+        indicator=None,
         *,
         label: str | None = None,
         color=None,
         marker: str = ".",
         alpha: float = 0.6,
     ):
-        self.expr = expr
+        super().__init__(indicator)
         self.label = label
         self.color = color
         self.marker = marker
         self.alpha = alpha
 
-    def __ror__(self, indicator):
-        if not callable(indicator):
-            raise ValueError(f"{indicator!r} not callable!")
-        import warnings
-        warnings.warn("Use @ to bind an indicator to a primitive.", DeprecationWarning, stacklevel=2)
-        return self.clone(indicator=indicator)
-
     def plot_handler(self, prices, chart, ax=None):
         if ax is None:
             ax = chart.main_axes()
 
-        result = chart.calc_result(prices, self.indicator)
-
-        if self.expr is not None:
-            signal = resolve_expr(result, self.expr)
-        else:
-            signal = result
+        signal = chart.calc_result(prices, self.indicator)
 
         flag = np.clip(np.sign(np.asarray(signal, dtype=float)), 0, 1)
         close = np.asarray(col_to_numpy(prices, "close"), dtype=float)

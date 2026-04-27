@@ -1,6 +1,7 @@
 """primitive base class"""
 
 import copy
+import warnings
 
 from abc import ABC, abstractmethod
 
@@ -63,6 +64,25 @@ class Primitive(ABC):
         return self.clone(indicator=other)
 
 
+class BindingPrimitive(Primitive):
+    """Base class for primitives that bind to an indicator or expression via ``@``.
+
+    Provides the ``indicator`` attribute, a positional ``indicator`` argument,
+    and the deprecated ``|`` operator (use ``@`` instead).
+    """
+
+    indicator = None
+
+    def __init__(self, indicator=None):
+        self.indicator = indicator
+
+    def __ror__(self, indicator):
+        if not callable(indicator):
+            return NotImplemented
+        warnings.warn("Use @ to bind an indicator to a primitive.", DeprecationWarning, stacklevel=2)
+        return self.clone(indicator=indicator)
+
+
 class Indicator(ABC):
     """Abstract base class for technical analysis indicators.
 
@@ -93,6 +113,11 @@ class Indicator(ABC):
         ...
 
     __pandas_priority__ = 5000
+
+    def __or__(self, other):
+        if callable(other):
+            return IndicatorChain(self, other)
+        return NotImplemented
 
     def __ror__(self, other):
         if isinstance(other, Indicator):

@@ -2,49 +2,35 @@
 
 import numpy as np
 
-from ..model import Primitive
-from ..utils import resolve_expr
+from ..model import BindingPrimitive
 
 
-class Stripes(Primitive):
+class Stripes(BindingPrimitive):
     """Stripes primitive.
 
-    Shades vertical bands across all chart panes (using the root axes) during
-    periods when a condition is active. The condition is derived from an
-    indicator result or an expression. Use ``|`` with an indicator (pandas) or
-    ``@`` with a ``pl.Expr`` (polars) to attach.
+    Shades vertical bands across all chart panes during periods when a
+    condition is active. Bind a condition indicator via ``@`` or as the
+    first positional argument.
 
     Args:
-        expr (callable, pl.Expr, or str, optional): Applied to the indicator
-            result (Series or DataFrame) to produce a boolean/numeric signal.
-            Prefer a callable (``lambda s: s < 30``) when the result is a
-            Series; use a string (``"close < open"``) when the result is a
-            named-column DataFrame; use a ``pl.Expr`` for polars-native flows.
-            Omit if the indicator itself already returns the signal.
+        indicator: indicator or expression returning a boolean/numeric signal.
+            Positive values shade the band; zero or negative do not.
+            Can also be bound via ``@``.
         label (str, optional): Legend label. Omit to skip the legend entry.
         color (str, optional): Fill color for the shaded regions.
         alpha (float, optional): Opacity of the shaded regions, between 0.0
             and 1.0.
 
     Examples:
-        RSI(14) | Stripes(expr=lambda s: s < 30, color="green", alpha=0.15)   # indicator (pandas)
-        RSI(14) @ Stripes(expr=lambda s: s < 30, color="green", alpha=0.15)   # expression (polars)
+        (RSI(14) | (lambda s: s < 30)) @ Stripes(color="green", alpha=0.15)
+        Stripes(RSI(14) | (lambda s: s < 30), color="green", alpha=0.15)
     """
 
-    indicator = None
-
-    def __init__(self, expr=None, *, label: str | None = None, color=None, alpha=None):
-        self.expr = expr
+    def __init__(self, indicator=None, *, label: str | None = None, color=None, alpha=None):
+        super().__init__(indicator)
         self.label = label
         self.color = color
         self.alpha = alpha
-
-    def __ror__(self, indicator):
-        if not callable(indicator):
-            raise ValueError(f"{indicator!r} not callable!")
-        import warnings
-        warnings.warn("Use @ to bind an indicator to a primitive.", DeprecationWarning, stacklevel=2)
-        return self.clone(indicator=indicator)
 
     def plot_handler(self, prices, chart, ax=None):
         if ax is None:
@@ -52,12 +38,7 @@ class Stripes(Primitive):
 
         result = chart.calc_result(prices, self.indicator)
 
-        if self.expr is not None:
-            signal = resolve_expr(result, self.expr)
-        else:
-            signal = result
-
-        xs, values = chart.mapper.series_xy(signal)
+        xs, values = chart.mapper.series_xy(result)
 
         if not len(values):
             return

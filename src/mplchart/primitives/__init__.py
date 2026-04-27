@@ -1,5 +1,6 @@
 """mplchart drawing primitives"""
 
+from ..model import BindingPrimitive
 from .candlesticks import Candlesticks
 from .price import Price
 from .volume import Volume

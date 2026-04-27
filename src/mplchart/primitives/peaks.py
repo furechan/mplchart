@@ -5,11 +5,11 @@ from numpy.lib.stride_tricks import sliding_window_view
 
 import matplotlib.pyplot as plt
 
-from ..model import Primitive
+from ..model import BindingPrimitive
 from ..utils import col_to_numpy
 
 
-class Peaks(Primitive):
+class Peaks(BindingPrimitive):
     """Peaks primitive.
 
     Plots local peak (high) and valley (low) points as scatter markers on the
@@ -27,19 +27,11 @@ class Peaks(Primitive):
             ``text.color`` matplotlib parameter.
     """
 
-    indicator = None
-
     def __init__(self, span=1, *, item: str | None = None, color: str | None = None):
+        super().__init__(None)
         self.span = span
         self.color = color
         self.item = item
-
-    def __ror__(self, indicator):
-        if not callable(indicator):
-            return NotImplemented
-        import warnings
-        warnings.warn("Use @ to bind an indicator to a primitive.", DeprecationWarning, stacklevel=2)
-        return self.clone(indicator=indicator)
 
     def plot_handler(self, prices, chart, ax=None):
         if ax is None:

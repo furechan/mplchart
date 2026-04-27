@@ -29,8 +29,8 @@ PRIMITIVES = [
     SMA(20) @ BarPlot(),
     Peaks(),
     ZigZag(),
-    RSI() @ Stripes(expr=lambda s: s < 30),
-    RSI() @ Markers(expr=lambda s: s < 30),
+    (RSI() | (lambda s: s < 30)) @ Stripes(),
+    (RSI() | (lambda s: s < 30)) @ Markers(),
     HLine(25),
     HLine(25, color="red", linestyle="dashed"),
 ]

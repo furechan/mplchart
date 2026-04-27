@@ -2,17 +2,18 @@
 
 import numpy as np
 
-from ..model import Primitive
+from ..model import BindingPrimitive
 from ..utils import get_label, series_data
 
 
-class LinePlot(Primitive):
+class LinePlot(BindingPrimitive):
     """
     Line Plot Primitive
 
     Plot any indicator or expression as a line plot. Use ``@`` to bind.
 
     Args:
+        indicator: indicator or expression to plot. Can also be bound via ``@``.
         item (str) :  name of the column to plot. default None
         label (str) : legend label override. When None, derived from the indicator.
         style (str) : line style like 'solid', 'dashed', 'dotted', 'dashdot', 'marker'
@@ -26,16 +27,15 @@ class LinePlot(Primitive):
 
     Examples:
         SMA(50) @ LinePlot(style="dashdot", color="red")
+        LinePlot(SMA(50), style="dashdot", color="red")
         RSI(14) @ LinePlot(overbought=70, oversold=30)
-        RSI(14) @ LinePlot(label="rsi_14", overbought=70)      # expression (polars)
     """
-
-    indicator = None
 
     def __init__(
         self,
-        item: str | None = None,
+        indicator=None,
         *,
+        item: str | None = None,
         label: str | None = None,
         style: str | None = None,
         marker: str | None = None,
@@ -46,10 +46,15 @@ class LinePlot(Primitive):
         overbought: float | None = None,
         oversold: float | None = None,
     ):
+        if isinstance(indicator, str):
+            item = item or indicator
+            indicator = None
+
         if style == "marker":
             marker = marker or "."
             style = "none"
 
+        super().__init__(indicator)
         self.item = item
         self.label = label
         self.style = style
@@ -60,15 +65,6 @@ class LinePlot(Primitive):
         self.target = target
         self.overbought = overbought
         self.oversold = oversold
-
-
-    def __ror__(self, indicator):
-        if not callable(indicator):
-            return NotImplemented
-        import warnings
-        warnings.warn("Use @ to bind an indicator to a primitive.", DeprecationWarning, stacklevel=2)
-        return self.clone(indicator=indicator)
-
 
     def plot_handler(self, prices, chart, ax=None):
         if ax is None:
@@ -104,4 +100,3 @@ class LinePlot(Primitive):
                     where=(yv >= self.overbought),
                     interpolate=True, alpha=0.5,
                 )
-
