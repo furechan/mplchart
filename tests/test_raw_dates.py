@@ -135,7 +135,7 @@ def test_chart_raw_dates_pandas():
     prices = sample_prices(freq="daily", backend="pandas")
     chart = Chart(prices, max_bars=100, raw_dates=True)
     assert isinstance(chart.mapper, RawDateMapper)
-    chart.plot(Candlesticks(), SMA(20) | LinePlot())
+    chart.plot(Candlesticks(), SMA(20) @ LinePlot())
     assert chart.count_axes() > 0
     plt.close()
 

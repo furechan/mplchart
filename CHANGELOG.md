@@ -5,6 +5,10 @@
 - Added `calc_mom`, `calc_trange`, `calc_midprice`, `calc_typprice`, `calc_wclprice` to `library.py`
 - `expressions.RSI` and `expressions.ATR` now use `RMA` internally instead of inlining `ewm_mean(alpha=1/period)`
 - Deleted obsolete migration docs (`docs/migration-proposal.md`, `docs/migration-breakdown.md`, `docs/migration-primitives.md`, `docs/expressions-stopgap.md`)
+- `@` is now the unified binding operator for both indicators and expressions; `|` for binding is deprecated
+- Legend location defaults to `upper left` unless the user has explicitly set `legend.loc` via rcParams
+- Added `docs/architecture.md`; removed architecture content from `CLAUDE.md`
+- Removed dead code: `ComposedIndicator`, `Indicator.__matmul__`, `Primitive.clone_legacy`
 
 ## 0.0.33
 - Renamed `ExprBundle` → `ExprTuple` in `expressions/prelude.py` and re-exported from `mplchart.expressions`

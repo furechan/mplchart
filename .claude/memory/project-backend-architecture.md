@@ -6,7 +6,7 @@ type: project
 
 The package is architected as a backend-agnostic core with backend-specific opt-in modules. Core deps have neither pandas nor polars.
 
-**Backend-agnostic core (no pandas/polars at import):** `chart`, `mapper`, `plotters`, `primitives`, `samples`, `utils` — pandas/polars are imported lazily only on the matching code path.
+**Backend-agnostic core (no pandas/polars at import):** `chart`, `mapper`, `primitives`, `samples`, `utils` — pandas/polars are imported lazily only on the matching code path. (`plotters.py` was removed in 0.0.33; logic moved into `AutoPlot.plot_handler`.)
 
 **Pandas-only modules (opt-in via `[pandas]` extra):** `indicators`, `library`, `pandas` — top-level `import pandas`, meant to be used only if pandas is installed.
 

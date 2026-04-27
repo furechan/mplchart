@@ -36,12 +36,15 @@ For each item passed to `chart.plot()`:
 
 ## Operator conventions
 
-| Operator | Context | Meaning |
-|---|---|---|
-| `SMA(50) \| LinePlot(...)` | pandas indicator → primitive | bind indicator to a rendering primitive |
-| `SMA(50) \| EMA(10)` | indicator → indicator | chain: apply left then right |
-| `RSI() @ LinePlot(...)` | polars expression → primitive | bind expression to a primitive |
-| `prices \| SMA(50)` | data → indicator | apply indicator to data directly |
+`@` is the binding operator for both indicators and expressions:
+
+| Operator | Meaning |
+|---|---|
+| `SMA(50) @ LinePlot(...)` | bind indicator or expression to a primitive |
+| `SMA(50) \| EMA(10)` | chain indicators left-to-right |
+| `prices \| SMA(50)` | apply indicator to data directly |
+
+`indicator \| Primitive` still works but is deprecated — use `@` instead.
 
 ## Primitives
 

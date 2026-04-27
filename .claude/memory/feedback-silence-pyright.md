@@ -1,11 +1,11 @@
 ---
-name: Silence pyright with type: ignore, not runtime casts
-description: Don't wrap values in runtime casts (e.g. pd.DatetimeIndex()) just to satisfy pyright — use type: ignore instead
+name: Silence type checker with type: ignore, not runtime casts
+description: Use # type: ignore[...] for false positives from ty/pyright; don't wrap in runtime casts
 type: feedback
 ---
 
-Use `typing.cast(T, x)` to silence pyright false positives when the correct type is known. Prefer it over `# type: ignore` and over runtime casts like `pd.DatetimeIndex(x)`.
+Use `# type: ignore[error-code]` to silence false positives from the type checker. Do not wrap values in runtime casts (e.g. `pd.DatetimeIndex(x)`) just to satisfy the type checker.
 
-**Why:** `typing.cast` is a zero-cost pure type hint (no-op at runtime), cleaner than ignore comments, and avoids unnecessary runtime overhead.
+**Why:** Runtime casts add overhead and change behavior. `# type: ignore` is zero-cost and honest about what's happening.
 
-**How to apply:** `cast(pd.DatetimeIndex, prices.index).tz_localize(None)` — wrap the expression in `cast(TargetType, value)` then access the method.
+**How to apply:** Add `# type: ignore[reportAttributeAccessIssue]` (or the relevant code) on the offending line. Use the specific error code when known rather than a bare `# type: ignore`.

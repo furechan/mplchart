@@ -28,9 +28,10 @@ class Primitive(ABC):
     the indicator calculation pipeline. They implement ``plot_handler`` which is
     invoked before any indicator calculation takes place.
 
-    Primitives support the ``|`` operator to compose them with an indicator::
+    Primitives support the ``@`` operator to bind an indicator or expression::
 
-        SMA(50) | LinePlot(style="dashed", color="blue")
+        SMA(50) @ LinePlot(style="dashed", color="blue")   # indicator
+        RSI()   @ LinePlot(overbought=70)                  # polars expression
     """
 
     __repr__ = short_repr
@@ -57,13 +58,6 @@ class Primitive(ABC):
         return result
 
     def __rmatmul__(self, other):
-        if isinstance(other, Indicator):
-            import warnings
-            warnings.warn(
-                "Use | to bind an indicator to a primitive. @ is for polars expressions.",
-                DeprecationWarning, stacklevel=2,
-            )
-            return self.clone(indicator=other)
         if not is_indicator_like(other):
             return NotImplemented
         return self.clone(indicator=other)
@@ -75,12 +69,12 @@ class Indicator(ABC):
     Subclasses implement ``__call__(prices)`` to compute indicator values from
     a prices DataFrame and return a Series or DataFrame.
 
-    Indicators support the ``|`` operator to chain with another indicator or
-    bind to a rendering primitive::
+    Use ``@`` to bind an indicator to a rendering primitive, and ``|`` to
+    chain indicators or apply to data::
 
+        RSI(14) @ LinePlot(overbought=70)  # bind to a primitive
         SMA(50) | EMA(20)                  # chain: apply SMA then EMA
-        RSI(14) | LinePlot(overbought=70)  # bind to a primitive
-        prices | SMA(50)                   # apply indicator to data
+        prices  | SMA(50)                  # apply indicator to data
     """
 
     __repr__ = short_repr

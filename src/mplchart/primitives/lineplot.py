@@ -10,7 +10,7 @@ class LinePlot(Primitive):
     """
     Line Plot Primitive
 
-    Plot any indicator as a line plot. Use the | operator to apply to an indicator.
+    Plot any indicator or expression as a line plot. Use ``@`` to bind.
 
     Args:
         item (str) :  name of the column to plot. default None
@@ -25,9 +25,8 @@ class LinePlot(Primitive):
         oversold (float) : level below which to shade a fill-between band
 
     Examples:
-        SMA(50) | LinePlot(style="dashdot", color="red")       # indicator (pandas)
-        RSI(14) | LinePlot(overbought=70, oversold=30)         # indicator (pandas)
-        SMA(50) @ LinePlot(style="dashdot", color="red")       # expression (polars)
+        SMA(50) @ LinePlot(style="dashdot", color="red")
+        RSI(14) @ LinePlot(overbought=70, oversold=30)
         RSI(14) @ LinePlot(label="rsi_14", overbought=70)      # expression (polars)
     """
 
@@ -66,7 +65,8 @@ class LinePlot(Primitive):
     def __ror__(self, indicator):
         if not callable(indicator):
             return NotImplemented
-
+        import warnings
+        warnings.warn("Use @ to bind an indicator to a primitive.", DeprecationWarning, stacklevel=2)
         return self.clone(indicator=indicator)
 
 

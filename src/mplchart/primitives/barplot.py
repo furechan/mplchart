@@ -50,7 +50,8 @@ class BarPlot(Primitive):
     def __ror__(self, indicator):
         if not callable(indicator):
             return NotImplemented
-
+        import warnings
+        warnings.warn("Use @ to bind an indicator to a primitive.", DeprecationWarning, stacklevel=2)
         return self.clone(indicator=indicator)
 
     def plot_handler(self, prices, chart, ax=None):

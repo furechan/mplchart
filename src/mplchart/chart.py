@@ -3,6 +3,7 @@
 import io
 import warnings
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 from collections import Counter
@@ -445,7 +446,11 @@ class Chart:
         for ax in self.figure.axes:
             handles, labels = ax.get_legend_handles_labels()
             if handles:
-                ax.legend(loc="upper left")
+                # default to upper left unless the user has explicitly set legend.loc
+                loc = mpl.rcParams["legend.loc"]
+                if loc == mpl.rcParamsDefault["legend.loc"]:
+                    loc = "upper left"
+                ax.legend(loc=loc)
 
     def plot(self, *args, target: str | None = "same"):
         """Plot one or more indicators onto the chart.
