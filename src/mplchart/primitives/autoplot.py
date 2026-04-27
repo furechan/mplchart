@@ -1,10 +1,10 @@
 """AutoPlot primitive — default auto-plotting with small overrides"""
 
-from ..model import Primitive
+from ..model import BindingPrimitive
 from ..utils import get_label, get_metadata
 
 
-class AutoPlot(Primitive):
+class AutoPlot(BindingPrimitive):
     """Default plotter primitive.
 
     Auto-plots an expression or indicator with default styling. Used implicitly

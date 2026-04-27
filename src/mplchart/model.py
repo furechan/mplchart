@@ -9,18 +9,6 @@ from .utils import short_repr, get_series, is_indicator_like
 
 
 
-class Wrapper(ABC):
-    """Abstract base class for indicator plotting wrappers.
-
-    A ``Wrapper`` is returned by an ``Indicator.__call__`` when the indicator
-    wants to take full control of how its result is rendered. The chart calls
-    ``plot_result`` with the already-sliced data instead of delegating to
-    the default ``AutoPlot`` primitive.
-    """
-
-    @abstractmethod
-    def plot_result(self, data, chart, ax=None): ...
-
 
 class Primitive(ABC):
     """Abstract base class for chart primitives.
@@ -58,23 +46,22 @@ class Primitive(ABC):
         result.__dict__.update(self.__dict__, **kwargs)
         return result
 
-    def __rmatmul__(self, other):
-        if not is_indicator_like(other):
-            return NotImplemented
-        return self.clone(indicator=other)
-
-
 class BindingPrimitive(Primitive):
     """Base class for primitives that bind to an indicator or expression via ``@``.
 
     Provides the ``indicator`` attribute, a positional ``indicator`` argument,
-    and the deprecated ``|`` operator (use ``@`` instead).
+    the ``@`` binding operator, and the deprecated ``|`` operator.
     """
 
     indicator = None
 
     def __init__(self, indicator=None):
         self.indicator = indicator
+
+    def __rmatmul__(self, other):
+        if not is_indicator_like(other):
+            return NotImplemented
+        return self.clone(indicator=other)
 
     def __ror__(self, indicator):
         if not callable(indicator):
