@@ -3,7 +3,7 @@
 import polars as pl
 
 from .prelude import wrap_expression, HIGH, LOW, CLOSE
-from .trend import EMA
+from .trend import EMA, RMA
 
 
 @wrap_expression
@@ -19,7 +19,7 @@ def TRANGE(*, high: pl.Expr = HIGH, low: pl.Expr = LOW, close: pl.Expr = CLOSE) 
 def ATR(period: int = 14, *, high: pl.Expr = HIGH, low: pl.Expr = LOW, close: pl.Expr = CLOSE) -> pl.Expr:
     """Average True Range"""
     tr = TRANGE(high=high, low=low, close=close)
-    return tr.ewm_mean(alpha=1 / period, min_samples=period, adjust=True)
+    return RMA(period, src=tr)
 
 
 @wrap_expression

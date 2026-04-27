@@ -82,6 +82,25 @@ class HMA(Indicator):
 
 
 
+class RMA(Indicator):
+    """Rolling Moving Average (Wilder's).
+
+    Exponential moving average using a smoothing factor of ``1 / period``
+    (slower decay than EMA). Used internally by RSI and ATR.
+    Plotted on the same scale as the price series.
+
+    Args:
+        period (int): Smoothing period in bars. Defaults to 14.
+    """
+
+    def __init__(self, period: int = 14):
+        self.period = period
+
+    def __call__(self, prices):
+        series = self.get_series(prices)
+        return library.calc_rma(series, self.period)
+
+
 class ROC(Indicator):
     """Rate of Change.
 
@@ -98,6 +117,24 @@ class ROC(Indicator):
     def __call__(self, prices):
         series = self.get_series(prices)
         return library.calc_roc(series, self.period)
+
+
+class MOM(Indicator):
+    """Momentum.
+
+    Raw price change over a given number of bars: ``close - close[period]``.
+    Positive values indicate upward momentum; negative values indicate downward momentum.
+
+    Args:
+        period (int): Lookback period in bars. Defaults to 1.
+    """
+
+    def __init__(self, period: int = 1):
+        self.period = period
+
+    def __call__(self, prices):
+        series = self.get_series(prices)
+        return library.calc_mom(series, self.period)
 
 
 class ATR(Indicator):
@@ -481,6 +518,47 @@ class TEMA(Indicator):
     def __call__(self, prices):
         series = self.get_series(prices)
         return library.calc_tema(series, self.period)
+
+
+class TRANGE(Indicator):
+    """True Range.
+
+    The greatest of: current high minus low, absolute high minus previous close,
+    absolute low minus previous close. Building block for ATR.
+    """
+
+    def __call__(self, prices):
+        return library.calc_trange(prices)
+
+
+class MIDPRICE(Indicator):
+    """Midpoint Price.
+
+    The arithmetic mean of the high and low: ``(high + low) / 2``.
+    """
+
+    def __call__(self, prices):
+        return library.calc_midprice(prices)
+
+
+class TYPPRICE(Indicator):
+    """Typical Price.
+
+    The average of high, low, and close: ``(high + low + close) / 3``.
+    """
+
+    def __call__(self, prices):
+        return library.calc_typprice(prices)
+
+
+class WCLPRICE(Indicator):
+    """Weighted Close Price.
+
+    Close-weighted average: ``(high + low + close * 2) / 4``.
+    """
+
+    def __call__(self, prices):
+        return library.calc_wclprice(prices)
 
 
 __all__ = [k for k in dir() if k.isupper()]

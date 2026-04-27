@@ -7,6 +7,11 @@ import pandas as pd
 from .utils import calc_price
 
 
+def calc_mom(series, period: int = 1):
+    """Momentum"""
+    return series - series.shift(period)
+
+
 def calc_roc(series, period: int = 1):
     """Rate of Change"""
     return series.pct_change(period)
@@ -100,6 +105,27 @@ def calc_mfi(prices, period: int = 14):
     result = 100 - 100 / (1 + ratio)
 
     return result
+
+
+def calc_trange(prices):
+    """True Range"""
+    hlc = prices.filter(["high", "low"]).join(prices["close"].shift(1))
+    return hlc.max(axis=1) - hlc.min(axis=1)
+
+
+def calc_midprice(prices):
+    """Midpoint Price"""
+    return (prices["high"] + prices["low"]) / 2
+
+
+def calc_typprice(prices):
+    """Typical Price"""
+    return (prices["high"] + prices["low"] + prices["close"]) / 3
+
+
+def calc_wclprice(prices):
+    """Weighted Close Price"""
+    return (prices["high"] + prices["low"] + prices["close"] * 2) / 4
 
 
 def calc_atr(prices, period: int = 14, *, percent: bool = False):

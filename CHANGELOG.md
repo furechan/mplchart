@@ -1,6 +1,12 @@
 # Change Log
 
 ## 0.0.33
+- Added `RMA`, `MOM`, `TRANGE`, `MIDPRICE`, `TYPPRICE`, `WCLPRICE` indicators — full parity with `mplchart.expressions`
+- Added `calc_mom`, `calc_trange`, `calc_midprice`, `calc_typprice`, `calc_wclprice` to `library.py`
+- `expressions.RSI` and `expressions.ATR` now use `RMA` internally instead of inlining `ewm_mean(alpha=1/period)`
+- Deleted obsolete migration docs (`docs/migration-proposal.md`, `docs/migration-breakdown.md`, `docs/migration-primitives.md`, `docs/expressions-stopgap.md`)
+
+## 0.0.33
 - Renamed `ExprBundle` → `ExprTuple` in `expressions/prelude.py` and re-exported from `mplchart.expressions`
 - Removed `SLOPE`, `CURVE`, `TSF`, `QSF`, `RVALUE` indicators (regression family — no vectorized path)
 - Added `AutoPlot` primitive — the default plotter is now client-facing, allowing explicit overrides like `SMA(20) @ AutoPlot(label="short_ma")`. When plotting anything that is not already a primitive, the chart wraps it in `AutoPlot()` transparently (same behavior as before).

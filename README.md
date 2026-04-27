@@ -104,22 +104,31 @@ Some of the indicators included are:
 - `EMA` Exponential Moving Average
 - `WMA` Weighted Moving Average
 - `HMA` Hull Moving Average
+- `RMA` Rolling Moving Average (Wilder's)
+- `DEMA` Double Exponential Moving Average
+- `TEMA` Triple Exponential Moving Average
+- `MOM` Momentum
 - `ROC` Rate of Change
 - `RSI` Relative Strength Index
-- `ATR` Average True Range
-- `NATR` Normalized Average True Range
 - `ADX` Average Directional Index
 - `DMI` Directional Movement Index
 - `MACD` Moving Average Convergence Divergence
-- `PPO` Price Percentage Oscillator 
+- `PPO` Price Percentage Oscillator
 - `BOP` Balance of Power
 - `CMF` Chaikin Money Flow
 - `MFI` Money Flow Index
 - `STOCH` Stochastic Oscillator
+- `TRANGE` True Range
+- `ATR` Average True Range
+- `NATR` Normalized Average True Range
 - `BBANDS` Bollinger Bands
+- `BBP` Bollinger Bands Percent
+- `BBW` Bollinger Bands Width
 - `KELTNER` Keltner Channel
-- `DEMA` Double Exponential Moving Average
-- `TEMA` Triple Exponential Moving Average
+- `DONCHIAN` Donchian Channel
+- `MIDPRICE` Midpoint Price
+- `TYPPRICE` Typical Price
+- `WCLPRICE` Weighted Close Price
 
 Use `|` to bind an indicator to a rendering primitive, or to compose indicators:
 

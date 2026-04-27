@@ -3,7 +3,7 @@
 import polars as pl
 
 from .prelude import wrap_expression, OPEN, HIGH, LOW, CLOSE, VOLUME
-from .trend import EMA, SMA
+from .trend import EMA, SMA, RMA
 from .volatility import ATR
 
 
@@ -23,8 +23,8 @@ def MOM(period: int = 1, *, src: pl.Expr = CLOSE) -> pl.Expr:
 def RSI(period: int = 14, *, src: pl.Expr = CLOSE) -> pl.Expr:
     """Relative Strength Index"""
     diff  = src.diff()
-    ups   = diff.clip(lower_bound=0).ewm_mean(alpha=1 / period, min_samples=period, adjust=True)
-    downs = (-diff).clip(lower_bound=0).ewm_mean(alpha=1 / period, min_samples=period, adjust=True)
+    ups   = RMA(period, src=diff.clip(lower_bound=0))
+    downs = RMA(period, src=(-diff).clip(lower_bound=0))
     return 100.0 - (100.0 / (1.0 + ups / downs))
 
 
