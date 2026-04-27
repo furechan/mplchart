@@ -6,6 +6,10 @@ Python project managed with [uv](https://docs.astral.sh/uv/).
 
 Use local memory @.claude/memory/MEMORY.md instead of global memory.
 
+## Architecture
+
+See [docs/architecture.md](docs/architecture.md).
+
 ## Setup
 
 ```bash

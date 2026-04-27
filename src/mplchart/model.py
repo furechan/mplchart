@@ -51,12 +51,6 @@ class Primitive(ABC):
         """
         ...
 
-    def clone_legacy(self, **kwargs):
-        cls = self.__class__
-        result = cls.__new__(cls)
-        result.__dict__.update(self.__dict__, **kwargs)
-        return result
-
     def clone(self, **kwargs):
         result = copy.copy(self)
         result.__dict__.update(self.__dict__, **kwargs)
@@ -81,14 +75,12 @@ class Indicator(ABC):
     Subclasses implement ``__call__(prices)`` to compute indicator values from
     a prices DataFrame and return a Series or DataFrame.
 
-    Indicators support the ``@`` operator for composition and for applying an
-    indicator to data directly::
+    Indicators support the ``|`` operator to chain with another indicator or
+    bind to a rendering primitive::
 
-        # Compose two indicators (applied right-to-left):
-        SMA(20) @ EMA(10)   # applies EMA first, then SMA
-
-        # Apply an indicator to prices directly:
-        SMA(20) @ prices    # equivalent to SMA(20)(prices)
+        SMA(50) | EMA(20)                  # chain: apply SMA then EMA
+        RSI(14) | LinePlot(overbought=70)  # bind to a primitive
+        prices | SMA(50)                   # apply indicator to data
     """
 
     __repr__ = short_repr
@@ -106,22 +98,6 @@ class Indicator(ABC):
         """
         ...
 
-    def __matmul__(self, other):
-        import warnings
-        if isinstance(other, Primitive):
-            return NotImplemented
-        if callable(other):
-            warnings.warn(
-                "Composing indicators with @ is deprecated. Use | for chaining.",
-                DeprecationWarning, stacklevel=2,
-            )
-            return ComposedIndicator(self, other)
-        warnings.warn(
-            "Applying indicators with @ is deprecated. Use indicator(data) instead.",
-            DeprecationWarning, stacklevel=2,
-        )
-        return self(other)
-
     __pandas_priority__ = 5000
 
     def __ror__(self, other):
@@ -133,39 +109,6 @@ class Indicator(ABC):
         item = getattr(self, "item", None)
         return get_series(data, item=item)
 
-
-class ComposedIndicator(Indicator):
-    """An indicator formed by composing two or more indicators in sequence.
-
-    Created by the ``@`` operator. Indicators are applied right-to-left, so
-    ``ind1 @ ind2`` first applies ``ind2`` and then passes the result to
-    ``ind1``.
-
-    Example:
-        SMA(20) @ EMA(10)   # compute EMA(10) then smooth with SMA(20)
-    """
-
-    def __init__(self, *args):
-        if not all(callable(arg) for arg in args):
-            raise TypeError("Arguments must be callable")
-        self.args = args
-
-    def __str__(self):
-        return repr(self)
-
-    def __repr__(self):
-        return " @ ".join(repr(fn) for fn in self.args)
-
-    def __call__(self, prices):
-        result = prices
-        for fn in reversed(self.args):
-            result = fn(result)
-        return result
-
-    def __matmul__(self, other):
-        if callable(other):
-            return self.__class__(*self.args, other)
-        return self(other)
 
 
 class IndicatorChain(Indicator):
