@@ -9,6 +9,11 @@
 - Legend location defaults to `upper left` unless the user has explicitly set `legend.loc` via rcParams
 - Added `docs/architecture.md`; removed architecture content from `CLAUDE.md`
 - Removed dead code: `ComposedIndicator`, `Indicator.__matmul__`, `Primitive.clone_legacy`
+- Added `BindingPrimitive` base class in `model.py` — owns `indicator`, `__rmatmul__` (`@`), `__ror__` (`|` deprecated); `AutoPlot`, `LinePlot`, `AreaPlot`, `BarPlot`, `Stripes`, `Markers`, `Peaks` all inherit it
+- `indicator` is now the first positional arg on all `BindingPrimitive` subclasses: `LinePlot(SMA(50), color="red")` equivalent to `SMA(50) @ LinePlot(color="red")`
+- `Stripes` and `Markers` drop `expr` — condition is composed externally before binding
+- `Indicator.__or__` added — enables chaining with lambdas: `RSI() | (lambda s: s < 30)`
+- Fixed `short_repr` to safely handle non-bool equality results (e.g. polars `Expr == None`)
 
 ## 0.0.33
 - Renamed `ExprBundle` → `ExprTuple` in `expressions/prelude.py` and re-exported from `mplchart.expressions`
