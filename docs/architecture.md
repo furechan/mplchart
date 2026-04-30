@@ -44,8 +44,6 @@ For each item passed to `chart.plot()`:
 | `SMA(50) \| EMA(10)` | chain indicators left-to-right |
 | `prices \| SMA(50)` | apply indicator to data directly |
 
-`indicator \| Primitive` still works but is deprecated — use `@` instead.
-
 ## Primitives
 
 Regular primitives (`LinePlot`, `AreaPlot`, `BarPlot`, `AutoPlot`, `Price`) use `chart.mapper.series_xy(data)` for x/y extraction. Irregular primitives (`ZigZag`, `Peaks`, `Stripes`, `Markers`) compute their own sparse row indices and index into `mapper.rownum` directly.

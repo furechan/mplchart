@@ -5,7 +5,9 @@ type: project
 ---
 
 `@` is the single binding operator for both pandas indicators and polars expressions.
-`|` for binding is deprecated (warns) but still works for backward compat.
+`|` for binding to primitives is deprecated (warns) but still works for backward compat.
+
+**Open design question (cross-project):** `|` for indicator chaining (`DEMA(20) | ROC(1)`) has a semantic mismatch — it operates at the concrete/data level (apply left, feed result into right), while polars `pipe` operates at the abstract/expression level. This inconsistency is a known issue. Decision deferred to mintalib, where the same indicator + expression duality exists — any API change must be consistent across both libraries. Current status: `|` chaining is considered legacy/acceptable-as-is until mintalib direction is decided.
 
 | Expression | Meaning |
 |---|---|

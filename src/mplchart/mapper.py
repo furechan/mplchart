@@ -101,6 +101,8 @@ class DateIndexMapper:
 
     def map_date(self, date) -> int:
         """Map a single date to its x-coordinate (rownum position)."""
+        if hasattr(date, "tzinfo") and date.tzinfo is not None:
+            date = date.replace(tzinfo=None)
         return int(np.searchsorted(self.datetime_array, np.datetime64(date, "ns"), side="left"))
 
     def config_axes(self, ax):

@@ -38,7 +38,7 @@ prices = normalize_prices(yf.Ticker(ticker).history('5y'))
 Chart(prices, title=ticker, max_bars=250).plot(
     Candlesticks(), Volume(), SMA(50), SMA(200),
     Pane("above", yticks=(30, 50, 70)),
-    RSI(14) | LinePlot(overbought=70, oversold=30),
+    RSI(14) @ LinePlot(overbought=70, oversold=30),
     Pane("below"),
     MACD(),
 ).show()
@@ -88,6 +88,8 @@ The main drawing primitives are :
 - `BarPlot` draw an indicator as bar plot
 - `ZigZag` lines between pivot points
 - `Peaks` to mark peaks and valleys
+- `HLine` to draw a horizontal reference line on the current pane
+- `VLine` to draw a vertical line across all panes at a given date
 
 
 
@@ -102,27 +104,36 @@ Some of the indicators included are:
 - `EMA` Exponential Moving Average
 - `WMA` Weighted Moving Average
 - `HMA` Hull Moving Average
+- `RMA` Rolling Moving Average (Wilder's)
+- `DEMA` Double Exponential Moving Average
+- `TEMA` Triple Exponential Moving Average
+- `MOM` Momentum
 - `ROC` Rate of Change
 - `RSI` Relative Strength Index
-- `ATR` Average True Range
-- `NATR` Normalized Average True Range
 - `ADX` Average Directional Index
 - `DMI` Directional Movement Index
 - `MACD` Moving Average Convergence Divergence
-- `PPO` Price Percentage Oscillator 
+- `PPO` Price Percentage Oscillator
 - `BOP` Balance of Power
 - `CMF` Chaikin Money Flow
 - `MFI` Money Flow Index
 - `STOCH` Stochastic Oscillator
+- `TRANGE` True Range
+- `ATR` Average True Range
+- `NATR` Normalized Average True Range
 - `BBANDS` Bollinger Bands
+- `BBP` Bollinger Bands Percent
+- `BBW` Bollinger Bands Width
 - `KELTNER` Keltner Channel
-- `DEMA` Double Exponential Moving Average
-- `TEMA` Triple Exponential Moving Average
+- `DONCHIAN` Donchian Channel
+- `MIDPRICE` Midpoint Price
+- `TYPPRICE` Typical Price
+- `WCLPRICE` Weighted Close Price
 
-Use `|` to bind an indicator to a rendering primitive, or to compose indicators:
+Use `@` to bind an indicator to a rendering primitive, and `|` to chain indicators:
 
 ```python
-SMA(50) | LinePlot(style="dashed", color="red")   # bind indicator to primitive
+SMA(50) @ LinePlot(style="dashed", color="red")   # bind indicator to primitive
 SMA(50) | ROC(1)                                   # chain indicators
 ```
 
@@ -134,7 +145,7 @@ from mplchart.primitives import Candlesticks, LinePlot
 
 indicators = [
     Candlesticks(),
-    SMA(20) | LinePlot(style="dashed", color="red", alpha=0.5, width=3)
+    SMA(20) @ LinePlot(style="dashed", color="red", alpha=0.5, width=3)
 ]
 
 Chart(prices).plot(indicators)
@@ -174,7 +185,7 @@ Chart(prices, title=ticker, max_bars=250).plot(
 Expressions are plain `polars.Expr` values — they can be composed with standard polars operators,
 passed to `df.select()`, or used anywhere polars expressions are accepted.
 
-Contrary to indicators, expressions use the `@` operator to bind to a primitive:
+Use `@` to bind an expression to a rendering primitive:
 
 ```python
 from mplchart.primitives import LinePlot, AreaPlot

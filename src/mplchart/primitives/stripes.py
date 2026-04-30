@@ -22,8 +22,8 @@ class Stripes(BindingPrimitive):
             and 1.0.
 
     Examples:
-        (RSI(14) | (lambda s: s < 30)) @ Stripes(color="green", alpha=0.15)
         Stripes(RSI(14) | (lambda s: s < 30), color="green", alpha=0.15)
+        (RSI(14) < 30) @ Stripes(color="green", alpha=0.15)
     """
 
     def __init__(self, indicator=None, *, label: str | None = None, color=None, alpha=None):

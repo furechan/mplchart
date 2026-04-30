@@ -50,7 +50,7 @@ class BindingPrimitive(Primitive):
     """Base class for primitives that bind to an indicator or expression via ``@``.
 
     Provides the ``indicator`` attribute, a positional ``indicator`` argument,
-    the ``@`` binding operator, and the deprecated ``|`` operator.
+    and the ``@`` binding operator.
     """
 
     indicator = None
