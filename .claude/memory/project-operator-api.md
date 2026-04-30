@@ -11,6 +11,7 @@ type: project
 
 | Expression | Meaning |
 |---|---|
+<<<<<<< Updated upstream
 | `prices \| SMA(50)` | apply indicator to data |
 | `SMA(50) \| EMA(20)` | chain indicators left-to-right |
 | `SMA(50) \| (lambda s: s < 30)` | chain indicator with lambda (via `Indicator.__or__`) |
@@ -26,6 +27,20 @@ type: project
 - `Indicator.__ror__` — chains with another Indicator or applies to data
 - `BindingPrimitive.__rmatmul__` — accepts any indicator-like (pl.Expr, callable); clones with indicator bound
 - `BindingPrimitive.__ror__` — deprecated binding via `|`; emits DeprecationWarning
+=======
+| `prices \| SMA(50)` | apply indicator to data (left-to-right) |
+| `SMA(50) \| ROC(1)` | chain indicators left-to-right |
+| `SMA(50) @ LinePlot()` | bind indicator to a primitive |
+| `pl_expr @ LinePlot()` | bind expression to a primitive (polars only) |
+
+**Why:** `pl.Expr` owns `|`, `>>`, and arithmetic operators. `@` (`__matmul__`) is the only operator polars does not define — so `pl_expr @ Primitive` falls through to `Primitive.__rmatmul__` cleanly. Indicator-binding uses `@` too for uniformity.
+
+**Implementation in model.py:**
+- `Indicator.__pandas_priority__ = 5000` — preempts `DataFrame.__or__`, enables `prices | SMA(50)`
+- `Indicator.__or__` / `__ror__` — chains with another Indicator or applies to data
+- `BindingPrimitive.__rmatmul__` — accepts any `is_indicator_like` (Indicator, pl.Expr, pd.Expression, callable); clones with indicator bound. Concrete primitives (LinePlot, AreaPlot, AutoPlot, etc.) inherit from `BindingPrimitive`.
+- `BindingPrimitive.__ror__` — **deprecated alias**: `indicator | primitive` still works but emits `DeprecationWarning` directing to `@`.
+>>>>>>> Stashed changes
 
 **BindingPrimitive base class** (in `model.py`):
 - All indicator-bindable primitives inherit from it: `LinePlot`, `AreaPlot`, `BarPlot`, `Stripes`, `Markers`, `Peaks`, `AutoPlot`
