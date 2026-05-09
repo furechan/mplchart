@@ -5,7 +5,7 @@ from numpy.lib.stride_tricks import sliding_window_view
 
 import matplotlib.pyplot as plt
 
-from ..model import BindingPrimitive
+from ..model.primitive import BindingPrimitive
 from ..utils import col_to_numpy
 
 

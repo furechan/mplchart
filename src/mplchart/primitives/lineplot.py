@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from ..model import BindingPrimitive
+from ..model.primitive import BindingPrimitive
 from ..utils import get_label, series_data
 
 

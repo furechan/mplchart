@@ -2,7 +2,7 @@
 
 import matplotlib as mpl
 
-from ..model import Primitive
+from ..model.primitive import Primitive
 
 
 class VLine(Primitive):

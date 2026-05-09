@@ -1,6 +1,6 @@
 """Pane primitive"""
 
-from ..model import Primitive
+from ..model.primitive import Primitive
 
 
 class Pane(Primitive):

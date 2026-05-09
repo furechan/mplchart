@@ -2,7 +2,7 @@
 
 from matplotlib import pyplot as plt
 
-from ..model import Primitive
+from ..model.primitive import Primitive
 from ..utils import calc_price
 
 

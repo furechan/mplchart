@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from matplotlib.collections import PolyCollection
 
-from ..model import Primitive
+from ..model.primitive import Primitive
 from ..utils import col_to_numpy
 
 

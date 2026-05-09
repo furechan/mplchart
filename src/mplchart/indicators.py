@@ -2,7 +2,7 @@
 
 from . import library
 
-from .model import Indicator
+from .model.indicator import Indicator
 
 
 class SMA(Indicator):

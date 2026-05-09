@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from ..model import BindingPrimitive
+from ..model.primitive import BindingPrimitive
 from ..utils import col_to_numpy
 
 

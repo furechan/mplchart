@@ -54,3 +54,26 @@ def test_indicators(indicator, freq, max_bars=250):
     chart.plot([Candlesticks(), indicator])
     assert chart.count_axes() > 0
     plt.close()
+
+
+def test_indicator_chain_indicator_to_indicator():
+    chained = SMA(20) | EMA(5)
+    prices = sample_prices()
+    result = chained(prices)
+    assert len(result) == len(prices)
+
+
+def test_indicator_or_rejects_lambda():
+    with pytest.raises(TypeError):
+        SMA(20) | (lambda s: s.rolling(3).mean())
+
+
+def test_indicator_apply_via_ror():
+    prices = sample_prices()
+    result = prices | SMA(20)
+    assert len(result) == len(prices)
+
+
+def test_indicator_ror_rejects_non_data():
+    with pytest.raises(TypeError, match="pandas DataFrame or Series"):
+        "not data" | SMA(20)

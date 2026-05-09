@@ -1,6 +1,6 @@
 """AutoPlot primitive — default auto-plotting with small overrides"""
 
-from ..model import BindingPrimitive
+from ..model.primitive import BindingPrimitive
 from ..utils import get_label, get_metadata
 
 

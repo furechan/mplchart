@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from ..model import Primitive
+from ..model.primitive import Primitive
 from ..colors import closest_color
 from ..utils import col_to_numpy
 
