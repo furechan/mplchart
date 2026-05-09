@@ -278,6 +278,8 @@ class DMI(Indicator):
         period (int): Smoothing period in bars. Defaults to 14.
     """
 
+    output_names = ("adx", "pdi", "ndi")
+
     def __init__(self, period: int = 14):
         self.period = period
 
@@ -297,6 +299,8 @@ class PPO(Indicator):
         n2 (int): Period of the slower EMA. Defaults to 26.
         n3 (int): Period of the signal line EMA. Defaults to 9.
     """
+
+    output_names = ("ppo", "pposignal", "ppohist")
 
     def __init__(self, n1: int = 12, n2: int = 26, n3: int = 9):
         self.n1 = n1
@@ -322,6 +326,8 @@ class MACD(Indicator):
         n3 (int): Period of the signal line EMA. Defaults to 9.
     """
 
+    output_names = ("macd", "macdsignal", "macdhist")
+
     def __init__(self, n1: int = 12, n2: int = 26, n3: int = 9):
         self.n1 = n1
         self.n2 = n2
@@ -344,6 +350,8 @@ class MACDV(Indicator):
         n2 (int): Period of the slower EMA. Defaults to 26.
         n3 (int): Period of the signal line EMA. Defaults to 9.
     """
+
+    output_names = ("macd", "macdsignal", "macdhist")
 
     def __init__(self, n1: int = 12, n2: int = 26, n3: int = 9):
         self.n1 = n1
@@ -368,6 +376,8 @@ class STOCH(Indicator):
         slown (int): Smoothing period for the slow %D signal line. Defaults to 3.
     """
 
+    output_names = ("slowk", "slowd")
+
     def __init__(self, period: int = 14, fastn: int = 3, slown: int = 3):
         self.period = period
         self.fastn = fastn
@@ -391,6 +401,8 @@ class BBANDS(Indicator):
             Defaults to 2.0.
     """
 
+
+    output_names = ("upperband", "middleband", "lowerband")
 
     def __init__(self, period: int = 20, nbdev: float = 2.0):
         self.period = period
@@ -455,6 +467,8 @@ class KELTNER(Indicator):
     """
 
 
+    output_names = ("upperband", "middleband", "lowerband")
+
     def __init__(self, period: int = 20, nbatr: float = 2.0):
         self.period = period
         self.nbatr = nbatr
@@ -474,6 +488,8 @@ class DONCHIAN(Indicator):
         period (int): Lookback period in bars. Defaults to 20.
     """
 
+
+    output_names = ("upperband", "middleband", "lowerband")
 
     def __init__(self, period: int = 20):
         self.period = period

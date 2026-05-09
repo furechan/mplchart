@@ -6,6 +6,12 @@ import matplotlib.pyplot as plt
 pytest.importorskip("pandas")
 pytestmark = pytest.mark.pandas
 
+try:
+    from pandas.api.typing import Expression  # noqa: F401
+    pd_has_expressions = True
+except ImportError:
+    pd_has_expressions = False
+
 from mplchart.chart import Chart  # noqa: E402
 from mplchart.samples import sample_prices  # noqa: E402
 from mplchart.primitives import (  # noqa: E402
@@ -29,11 +35,15 @@ PRIMITIVES = [
     SMA(20) @ BarPlot(),
     Peaks(),
     ZigZag(),
-    (RSI() | (lambda s: s < 30)) @ Stripes(),
-    (RSI() | (lambda s: s < 30)) @ Markers(),
     HLine(25),
     HLine(25, color="red", linestyle="dashed"),
 ]
+
+if pd_has_expressions:
+    PRIMITIVES += [
+        Stripes(RSI().as_expr() < 30),
+        Markers(RSI().as_expr() < 30),
+    ]
 
 
 @pytest.mark.parametrize("freq", FREQS)

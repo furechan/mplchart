@@ -74,7 +74,9 @@ class Indicator(ABC):
     """Abstract base class for technical analysis indicators.
 
     Subclasses implement ``__call__(prices)`` to compute indicator values from
-    a prices DataFrame and return a Series or DataFrame.
+    a prices DataFrame and return a Series or DataFrame. Subclasses that return
+    a multi-column DataFrame should set ``output_names`` to the tuple of column
+    names so that single-output APIs (e.g. ``as_expr``) can reject them.
 
     Use ``@`` to bind an indicator to a rendering primitive, and ``|`` to
     chain indicators or apply to data::
@@ -85,6 +87,8 @@ class Indicator(ABC):
     """
 
     __repr__ = short_repr
+
+    output_names: tuple[str, ...] | None = None
 
     @abstractmethod
     def __call__(self, prices):
@@ -114,6 +118,46 @@ class Indicator(ABC):
     def get_series(self, data):
         item = getattr(self, "item", None)
         return get_series(data, item=item)
+
+    def as_expr(self, item: str | None = None):
+        """Wrap this indicator as a pandas ``Expression``.
+
+        Enables boolean composition with pandas columns, e.g.
+        ``RSI(14).as_expr() > 30``. For multi-output indicators, pass ``item``
+        to select one column: ``MACD().as_expr("macdhist") > 0``.
+
+        Requires pandas >= 3.0.
+        """
+        if self.output_names:
+            if item is None:
+                names = ", ".join(self.output_names)
+                raise TypeError(
+                    f"as_expr() on multi-output {self!r} requires an item; "
+                    f"available: {names}."
+                )
+            if item not in self.output_names:
+                names = ", ".join(self.output_names)
+                raise ValueError(
+                    f"{item!r} is not an output of {self!r}; available: {names}."
+                )
+        elif item is not None:
+            raise TypeError(
+                f"as_expr(item=...) only applies to multi-output indicators; "
+                f"{self!r} is single-output."
+            )
+
+        try:
+            from pandas.api.typing import Expression
+        except ImportError as exc:
+            import pandas as pd
+            raise RuntimeError(
+                f"as_expr() requires pandas >= 3.0 (got {pd.__version__}); "
+                "the Expression API was introduced in pandas 3.0."
+            ) from exc
+
+        if item is None:
+            return Expression(self, repr(self))
+        return Expression(lambda prices: self(prices)[item], f"{self!r}.{item}")
 
 
 

@@ -26,8 +26,7 @@ class Markers(BindingPrimitive):
             Defaults to 0.6.
 
     Examples:
-        Markers(RSI(14) | (lambda s: s < 30), color=["gray", "green"])
-        (RSI(14) < 30) @ Markers(color=["gray", "green"])
+        Markers(MACD().as_expr("macdhist") > 0, color=["red", "green"])
     """
 
     def __init__(

@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.0.36
+- Added `Indicator.as_expr(item=None)` — wraps an indicator as a `pandas.api.typing.Expression` for use with comparison/boolean operators (requires pandas >= 3.0)
+- Added `output_names` attribute to multi-output indicators (`DMI`, `PPO`, `MACD`, `MACDV`, `STOCH`, `BBANDS`, `KELTNER`, `DONCHIAN`); required by `as_expr(item=...)` to select a single column
+- Updated `Stripes` / `Markers` docstrings and notebook examples to use `as_expr()` instead of lambdas
+
 ## 0.0.33
 - Added `RMA`, `MOM`, `TRANGE`, `MIDPRICE`, `TYPPRICE`, `WCLPRICE` indicators — full parity with `mplchart.expressions`
 - Added `calc_mom`, `calc_trange`, `calc_midprice`, `calc_typprice`, `calc_wclprice` to `library.py`
