@@ -4,7 +4,8 @@
 - Added `Indicator.as_expr(item=None)` — wraps an indicator as a `pandas.api.typing.Expression` for use with comparison/boolean operators (requires pandas >= 3.0)
 - Added `output_names` attribute to multi-output indicators (`DMI`, `PPO`, `MACD`, `MACDV`, `STOCH`, `BBANDS`, `KELTNER`, `DONCHIAN`); required by `as_expr(item=...)` to select a single column
 - Updated `Stripes` / `Markers` docstrings and notebook examples to use `as_expr()` instead of lambdas
-- Tightened `Indicator.__or__` to require an `Indicator` on the right; `Indicator.__ror__` to require a pandas DataFrame/Series on the left
+- Tightened `Indicator.__or__` to require an `Indicator` on the right
+- Removed `Indicator.__ror__` and `__pandas_priority__` — apply an indicator with `indicator(prices)` or `prices.pipe(indicator)`
 - `IndicatorChain` constructor flattens nested chains
 - Split `model.py` into a namespace package: `model/primitive.py` (backend-agnostic) and `model/indicator.py` (pandas-only)
 

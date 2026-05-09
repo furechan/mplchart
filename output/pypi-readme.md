@@ -153,10 +153,17 @@ Chart(prices).plot(indicators)
 
 If the indicator returns a DataFrame instead of a Series, specify an `item` (column name) in the primitive.
 
-Use `prices | indicator` to apply an indicator directly to data:
+Indicators are callables — apply one directly with `indicator(prices)` or `prices.pipe(indicator)`.
+
+For boolean / arithmetic composition, wrap an indicator with `as_expr()` to obtain a
+pandas `Expression` (requires pandas ≥ 3.0). Multi-output indicators take an `item`
+argument to select one column:
 
 ```python
-prices | SMA(50)               # apply indicator to data
+RSI(14).as_expr() < 30                     # pandas Expression
+MACD().as_expr("macdhist") > 0             # select histogram column
+
+Stripes(MACD().as_expr("macdhist") > 0)    # use as a binding condition
 ```
 
 

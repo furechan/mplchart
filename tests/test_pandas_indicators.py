@@ -68,12 +68,7 @@ def test_indicator_or_rejects_lambda():
         SMA(20) | (lambda s: s.rolling(3).mean())
 
 
-def test_indicator_apply_via_ror():
+def test_indicator_apply_via_pipe():
     prices = sample_prices()
-    result = prices | SMA(20)
+    result = prices.pipe(SMA(20))
     assert len(result) == len(prices)
-
-
-def test_indicator_ror_rejects_non_data():
-    with pytest.raises(TypeError, match="pandas DataFrame or Series"):
-        "not data" | SMA(20)

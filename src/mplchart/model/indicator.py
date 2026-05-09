@@ -18,11 +18,12 @@ class Indicator(ABC):
     names so that single-output APIs (e.g. ``as_expr``) can reject them.
 
     Use ``@`` to bind an indicator to a rendering primitive, and ``|`` to
-    chain indicators or apply to data::
+    chain indicators. Apply an indicator to data with ``indicator(prices)``
+    or ``prices.pipe(indicator)``::
 
         RSI(14) @ LinePlot(overbought=70)  # bind to a primitive
         SMA(50) | EMA(20)                  # chain: apply SMA then EMA
-        prices  | SMA(50)                  # apply indicator to data
+        prices.pipe(SMA(50))               # apply indicator to data
     """
 
     __repr__ = short_repr
@@ -42,22 +43,13 @@ class Indicator(ABC):
         """
         ...
 
-    __pandas_priority__ = 5000
-
-    # __or__ handles composition only: ``indicator | indicator`` → IndicatorChain.
+    # composition only: ``indicator | indicator`` → IndicatorChain.
+    # No ``__ror__`` — to apply an indicator to data use ``indicator(data)``
+    # or ``data.pipe(indicator)``.
     def __or__(self, other):
         if isinstance(other, Indicator):
             return IndicatorChain(self, other)
         return NotImplemented
-
-    # __ror__ handles application only: ``data | indicator`` → indicator(data).
-    def __ror__(self, other):
-        if isinstance(other, (pd.DataFrame, pd.Series)):
-            return self(other)
-        raise TypeError(
-            f"| applies an indicator to a pandas DataFrame or Series; "
-            f"got {type(other).__name__} on the left."
-        )
 
     def get_series(self, data):
         item = getattr(self, "item", None)
