@@ -171,43 +171,6 @@ def col_to_numpy(df, col: str) -> np.ndarray:
     return df[col].to_numpy()
 
 
-def resolve_expr(df, expr):
-    """resolve an expression against a DataFrame or Series, returning a Series.
-
-    Args:
-        df: pandas or polars DataFrame or Series
-        expr: a polars Expr, or a string expression (e.g. ``"rsi < 30"``)
-            - pandas: evaluated via ``df.eval(expr)``
-            - polars: evaluated via ``df.sql("SELECT {expr} FROM self")``
-
-    If ``df`` is a Series it is promoted to a single-column DataFrame using
-    the series name as the column name, so string expressions can reference it.
-    """
-    if is_polars_expr(expr):
-        return df.select(expr).to_series()
-
-    if is_pandas_expr(expr):
-        return expr._eval_expression(df)
-
-    if callable(expr):
-        return expr(df)
-
-    # promote Series to single-column DataFrame so eval can reference by name
-    match detect_backend(df):
-        case "pandas":
-            import pandas as pd
-            if isinstance(df, pd.Series):
-                df = df.to_frame()
-            return df.eval(expr)
-        case "polars":
-            import polars as pl
-            if isinstance(df, pl.Series):
-                df = df.to_frame()
-            return df.sql(f"SELECT {expr} FROM self").to_series()
-        case backend:
-            raise ValueError(f"Unsupported backend {backend!r}")
-
-
 def get_metadata(indicator, name: str, default=None):
     """get named attribute from indicator, with a default"""
 
