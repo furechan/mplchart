@@ -65,15 +65,23 @@ def is_indicator_like(item) -> bool:
 
 
 def apply_indicator(prices, indicator):
-    """Apply an indicator, expression, or expression bundle to prices.
+    """Apply an indicator or expression to prices.
 
-    - Polars Expr: evaluates against ``prices`` and returns a Series.
-    - Polars Expr bundle (tuple of ``pl.Expr``): evaluates each and returns a DataFrame.
+    - Polars Expr: evaluates against ``prices`` and returns a Series. If the
+      Series is Struct-typed (e.g. ``pl.struct(MACD())``), it is unnested
+      into a multi-column DataFrame.
+    - Polars Expr bundle (tuple of ``pl.Expr``): evaluates each and returns
+      a DataFrame. Accepted for interop with libraries that emit tuple-of-Expr;
+      mplchart's own multi-output expressions return a struct Expr instead.
     - Pandas Expression: evaluates via ``_eval_expression`` and returns a Series.
     - Callable: returns ``indicator(prices)``.
     """
     if is_polars_expr(indicator):
-        return prices.select(indicator).to_series()
+        import polars as pl
+        series = prices.select(indicator).to_series()
+        if isinstance(series.dtype, pl.Struct):
+            return series.struct.unnest()
+        return series
 
     if isinstance(indicator, tuple) and indicator and all(is_polars_expr(e) for e in indicator):
         import polars as pl

@@ -6,9 +6,12 @@ import matplotlib.pyplot as plt
 polars = pytest.importorskip("polars")
 pytestmark = pytest.mark.polars
 
+import polars as pl  # noqa: E402
+
 from mplchart.chart import Chart  # noqa: E402
 from mplchart.samples import sample_prices  # noqa: E402
 from mplchart.primitives import Candlesticks  # noqa: E402
+from mplchart.utils import apply_indicator, get_label  # noqa: E402
 from mplchart.expressions import (  # noqa: E402
     SMA, EMA, RMA, WMA, HMA, DEMA, TEMA,
     RSI, MACD, STOCH, ROC, MOM,
@@ -67,3 +70,26 @@ def test_expressions(expr, freq):
     chart.plot([Candlesticks(), expr])
     assert chart.count_axes() > 0
     plt.close()
+
+
+def test_apply_indicator_struct_expr():
+    prices = sample_prices(backend="polars")
+    expr = MACD()
+    assert isinstance(expr, pl.Expr)  # multi-output expressions are now struct Exprs
+    result = apply_indicator(prices, expr)
+    assert isinstance(result, pl.DataFrame)
+    assert list(result.columns) == ["macd", "macdsignal", "macdhist"]
+    assert len(result) == len(prices)
+
+
+def test_struct_expr_alias_as_label():
+    expr = MACD(12, 26, 9)
+    assert get_label(expr) == "macd-12-26-9"
+
+    # custom alias overrides the default
+    custom = expr.alias("my-macd")
+    assert get_label(custom) == "my-macd"
+
+    prices = sample_prices(backend="polars")
+    result = apply_indicator(prices, custom)
+    assert list(result.columns) == ["macd", "macdsignal", "macdhist"]

@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.0.37
+- Migrated multi-output polars expressions (`PPO`, `MACD`, `MACDV`, `STOCH`, `DMI`, `BBANDS`, `DONCHIAN`, `KELTNER`) to return a single `pl.struct(...)` Expr instead of a tuple of Exprs
+- `apply_indicator` now unnests Struct-typed Series into a multi-column DataFrame; tuple-of-Expr branch retained for interop with external libraries (e.g. mintalib)
+- Removed `ExprTuple` from `mplchart.expressions` — no longer needed with struct-Expr returns
+- Removed unused `resolve_expr` from `mplchart.utils`
+
 ## 0.0.36
 - Added `Indicator.as_expr(item=None)` — wraps an indicator as a `pandas.api.typing.Expression` for use with comparison/boolean operators (requires pandas >= 3.0)
 - Added `output_names` attribute to multi-output indicators (`DMI`, `PPO`, `MACD`, `MACDV`, `STOCH`, `BBANDS`, `KELTNER`, `DONCHIAN`); required by `as_expr(item=...)` to select a single column

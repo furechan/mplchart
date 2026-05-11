@@ -49,8 +49,8 @@ def NATR(period: int = 14, *, high: pl.Expr = HIGH, low: pl.Expr = LOW, close: p
 
 
 @wrap_expression
-def DMI(period: int = 14, *, high: pl.Expr = HIGH, low: pl.Expr = LOW, close: pl.Expr = CLOSE) -> tuple[pl.Expr, pl.Expr, pl.Expr]:
-    """Directional Movement Index — returns (adx, pdi, ndi)"""
+def DMI(period: int = 14, *, high: pl.Expr = HIGH, low: pl.Expr = LOW, close: pl.Expr = CLOSE) -> pl.Expr:
+    """Directional Movement Index — struct of (adx, pdi, ndi)"""
     atr = ATR(period, high=high, low=low, close=close)
     hm  = high.diff()
     lm  = -low.diff()
@@ -60,42 +60,41 @@ def DMI(period: int = 14, *, high: pl.Expr = HIGH, low: pl.Expr = LOW, close: pl
     ndi = 100 * ndm.ewm_mean(alpha=1/period, min_samples=period, adjust=True) / atr
     dx  = 100 * (pdi - ndi).abs() / (pdi + ndi)
     adx = dx.ewm_mean(alpha=1/period, min_samples=period, adjust=True)
-    return adx.alias("adx"), pdi.alias("pdi"), ndi.alias("ndi")
+    return pl.struct(adx.alias("adx"), pdi.alias("pdi"), ndi.alias("ndi"))
 
 
 @wrap_expression
 def ADX(period: int = 14, *, high: pl.Expr = HIGH, low: pl.Expr = LOW, close: pl.Expr = CLOSE) -> pl.Expr:
     """Average Directional Index"""
-    adx, _, _ = DMI(period, high=high, low=low, close=close)
-    return adx
+    return DMI(period, high=high, low=low, close=close).struct.field("adx")
 
 
 @wrap_expression
-def BBANDS(period: int = 20, nbdev: float = 2.0, *, src: pl.Expr = CLOSE) -> tuple[pl.Expr, pl.Expr, pl.Expr]:
-    """Bollinger Bands — returns (upper, middle, lower)"""
+def BBANDS(period: int = 20, nbdev: float = 2.0, *, src: pl.Expr = CLOSE) -> pl.Expr:
+    """Bollinger Bands — struct of (upperband, middleband, lowerband)"""
     middle = src.rolling_mean(period, min_samples=period)
     std    = src.rolling_std(period, min_samples=period, ddof=0)
     upper  = middle + nbdev * std
     lower  = middle - nbdev * std
-    return upper.alias("upperband"), middle.alias("middleband"), lower.alias("lowerband")
+    return pl.struct(upper.alias("upperband"), middle.alias("middleband"), lower.alias("lowerband"))
 
 
 @wrap_expression
-def DONCHIAN(period: int = 20, *, high: pl.Expr = HIGH, low: pl.Expr = LOW) -> tuple[pl.Expr, pl.Expr, pl.Expr]:
-    """Donchian Channel — returns (upper, middle, lower)"""
+def DONCHIAN(period: int = 20, *, high: pl.Expr = HIGH, low: pl.Expr = LOW) -> pl.Expr:
+    """Donchian Channel — struct of (upperband, middleband, lowerband)"""
     upper  = high.rolling_max(period)
     lower  = low.rolling_min(period)
     middle = (upper + lower) / 2
-    return upper.alias("upperband"), middle.alias("middleband"), lower.alias("lowerband")
+    return pl.struct(upper.alias("upperband"), middle.alias("middleband"), lower.alias("lowerband"))
 
 
 @wrap_expression
 def KELTNER(period: int = 20, nbatr: float = 2.0,
-            *, high: pl.Expr = HIGH, low: pl.Expr = LOW, close: pl.Expr = CLOSE) -> tuple[pl.Expr, pl.Expr, pl.Expr]:
-    """Keltner Channel — returns (upper, middle, lower)"""
+            *, high: pl.Expr = HIGH, low: pl.Expr = LOW, close: pl.Expr = CLOSE) -> pl.Expr:
+    """Keltner Channel — struct of (upperband, middleband, lowerband)"""
     midprc = (high + low + close) / 3
     atr    = ATR(period, high=high, low=low, close=close)
     middle = EMA(period, src=midprc)
     upper  = middle + nbatr * atr
     lower  = middle - nbatr * atr
-    return upper.alias("upperband"), middle.alias("middleband"), lower.alias("lowerband")
+    return pl.struct(upper.alias("upperband"), middle.alias("middleband"), lower.alias("lowerband"))
