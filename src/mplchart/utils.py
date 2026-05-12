@@ -60,7 +60,7 @@ def is_pandas_expr(item) -> bool:
 
 
 def is_indicator_like(item) -> bool:
-    """True if item is any acceptable indicator form: polars expr/bundle, pandas expr, or callable."""
+    """True if item is any acceptable indicator form: polars expr, tuple-of-Expr, pandas expr, or callable."""
     return is_polars_expr_like(item) or is_pandas_expr(item) or callable(item)
 
 
@@ -70,8 +70,8 @@ def apply_indicator(prices, indicator):
     - Polars Expr: evaluates against ``prices`` and returns a Series. If the
       Series is Struct-typed (e.g. ``pl.struct(MACD())``), it is unnested
       into a multi-column DataFrame.
-    - Polars Expr bundle (tuple of ``pl.Expr``): evaluates each and returns
-      a DataFrame. Accepted for interop with libraries that emit tuple-of-Expr;
+    - Tuple of ``pl.Expr``: evaluates each and returns a DataFrame. Accepted
+      for interop with libraries that emit tuple-of-Expr (e.g. mintalib);
       mplchart's own multi-output expressions return a struct Expr instead.
     - Pandas Expression: evaluates via ``_eval_expression`` and returns a Series.
     - Callable: returns ``indicator(prices)``.
@@ -202,10 +202,10 @@ def extract_prefix(text: str) -> str:
 
 
 def get_label(indicator):
-    """Human-readable legend text for an indicator, expression, or bundle.
+    """Human-readable legend text for an indicator or expression.
 
     Resolution order:
-    1. explicit ``.label`` attribute (bundles, custom objects)
+    1. explicit ``.label`` attribute (set by custom wrappers)
     2. talib ``func_object`` → ``"name(params)"``
     3. polars ``Expr`` → ``.meta.output_name()``
     4. fall back to ``repr(indicator)``

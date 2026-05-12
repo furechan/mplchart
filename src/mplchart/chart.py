@@ -430,8 +430,8 @@ class Chart:
             indicator.plot_handler(prices, chart=self)
             return
 
-        # Anything else (polars Expr, tuple-of-Expr bundle, callable) is
-        # wrapped in the default AutoPlot primitive and dispatched through its
+        # Anything else (polars Expr, pandas Expression, tuple-of-Expr, callable)
+        # is wrapped in the default AutoPlot primitive and dispatched through its
         # plot_handler — the single auto-plot code path.
         if is_indicator_like(indicator):
             autoplot = AutoPlot().clone(indicator=indicator)

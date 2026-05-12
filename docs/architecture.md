@@ -5,12 +5,13 @@
 | Module | Role |
 |---|---|
 | `chart.py` | `Chart` — main entry point; owns the figure, mapper, and plotting pipeline |
-| `model.py` | Base classes: `Primitive`, `Indicator`, `Wrapper`, `IndicatorChain` |
+| `model/primitive.py` | `Primitive` and `BindingPrimitive` — backend-agnostic base classes |
+| `model/indicator.py` | `Indicator` and `IndicatorChain` — pandas-only base classes |
 | `mapper.py` | `DateIndexMapper` (integer rownum x-axis) and `RawDateMapper` (datetime x-axis) |
 | `primitives/` | Drawing primitives — operate directly on the prices DataFrame |
 | `indicators.py` | Pandas-only indicator classes (subclass `Indicator`) |
 | `library.py` | Pandas-only calc functions called by indicators |
-| `expressions/` | Polars-only expression factories returning `pl.Expr` |
+| `expressions/` | Polars-only expression factories returning `pl.Expr` (multi-output expressions return a `pl.struct(...)` Expr) |
 | `utils.py` | Backend detection, `apply_indicator`, `col_to_numpy`, `normalize_prices`, etc. |
 | `layout.py` | Matplotlib figure/axes layout helpers |
 
@@ -24,11 +25,9 @@ The core (`chart.py`, `mapper.py`, `primitives/`) is backend-agnostic. Backend-s
 
 For each item passed to `chart.plot()`:
 1. If it has `plot_handler` (a `Primitive`) → call it directly on unsliced prices
-2. Otherwise compute: call `apply_indicator(prices, item)` → full-length result
+2. Otherwise compute: call `apply_indicator(prices, item)` → full-length result. If the item is a polars Expr that evaluates to a Struct Series, it is unnested into a multi-column DataFrame so downstream code can iterate `.columns`
 3. Slice: `chart.slice(result)` → restricts to the visible window via the mapper
-4. Select/create axes
-5. If result is a `Wrapper` → call `wrapper.plot_result(data, chart, ax)`
-6. Otherwise hand to `AutoPlot` for default line rendering
+4. Hand to `AutoPlot` for default rendering: single Series → one line; DataFrame → one trace per column (with `upperband` / `middleband` / `lowerband` and `*hist` columns getting specialized handling)
 
 ## Mapper
 
@@ -42,7 +41,7 @@ For each item passed to `chart.plot()`:
 |---|---|
 | `SMA(50) @ LinePlot(...)` | bind indicator or expression to a primitive |
 | `SMA(50) \| EMA(10)` | chain indicators left-to-right |
-| `prices \| SMA(50)` | apply indicator to data directly |
+| `prices.pipe(SMA(50))` | apply indicator to data directly (use pandas `.pipe` or call the indicator) |
 
 ## Primitives
 
