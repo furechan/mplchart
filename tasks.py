@@ -86,25 +86,3 @@ def publish(ctx, testpypi=False):
 def bump(ctx):
     """Bump patch version in pyproject.toml (re-locks and syncs)"""
     ctx.run("uv version --bump patch")
-
-
-@task
-def depcheck(ctx):
-    """Fetch dependabot alerts, upgrade flagged packages
-
-    After running, review changes and commit uv.lock:
-        git add uv.lock && git commit -m "Update dependencies to address security alerts"
-    """
-    result = ctx.run(
-        "gh api repos/Furechan/mplchart/dependabot/alerts?state=open"
-        " --jq '[.[].dependency.package.name] | unique[]'",
-        hide=True,
-    )
-    packages = result.stdout.split()
-    if not packages:
-        print("No open Dependabot alerts.")
-        return       
-    print("Upgrading", *packages, "...")
-    flags = " ".join(f"--upgrade-package {p}" for p in packages)
-    ctx.run(f"uv sync {flags}")
-
