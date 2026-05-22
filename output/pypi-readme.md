@@ -3,7 +3,8 @@
 
 Create classic technical analysis stock charts in Python with minimal code.
 The library is built around [matplotlib](https://github.com/matplotlib/matplotlib)
-and supports both [pandas](https://github.com/pandas-dev/pandas) and [polars](https://github.com/pola-rs/polars) DataFrames.
+and supports both [pandas](https://github.com/pandas-dev/pandas)
+and [polars](https://github.com/pola-rs/polars) DataFrames.
 Charts can be defined using a declarative interface,
 based on a set of drawing primitives like `Candlesticks`, `Volume`
 and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
@@ -12,8 +13,7 @@ and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
 
 > **Warning:**
 > This project is experimental and the interface is likely to change.
-> For a related project with a mature api you may want to look into
-> [mplfinance](https://pypi.org/project/mplfinance/).
+> For a related project with a mature api you may want to look into [mplfinance](https://pypi.org/project/mplfinance/).
 
 
 ![Showcase Chart](https://github.com/furechan/mplchart/raw/main/output/showcase.svg "Showcase")
@@ -30,12 +30,11 @@ from mplchart.chart import Chart
 from mplchart.primitives import Candlesticks, Volume, Pane, LinePlot
 from mplchart.indicators import SMA, RSI, MACD
 
-from mplchart.utils import normalize_prices
 
 ticker = 'AAPL'
-prices = normalize_prices(yf.Ticker(ticker).history('5y'))
+prices = yf.Ticker(ticker).history('5y')
 
-Chart(prices, title=ticker, max_bars=250).plot(
+Chart(prices, title=ticker, max_bars=250, normalize=True).plot(
     Candlesticks(), Volume(), SMA(50), SMA(200),
     Pane("above", yticks=(30, 50, 70)),
     RSI(14) @ LinePlot(overbought=70, oversold=30),
@@ -47,14 +46,12 @@ Chart(prices, title=ticker, max_bars=250).plot(
 
 ## Conventions
 
-Prices data is expected to be a pandas or polars DataFrame
-with columns `open`, `high`, `low`, `close`, `volume`
-and a datetime column named `date` or `datetime` (or a datetime index for pandas).
+Prices data is expected to be a dataframe with columns `open`, `high`, `low`, `close`, `volume` in **lower case** and a datetime column named `date` or `datetime` (or a datetime index for pandas).
 
-> **Note:** `Chart` and all indicators require lowercase column names.
-> Use `normalize_prices` from `mplchart.utils` to normalize your DataFrame before use:
+> **Note:** The `Chart`, indicators and primitives strictly require lower case column names. Use `Chart(..., normalize=True)` or call `normalize_prices` from `mplchart.utils` when using prices with a different naming convention, like prices from `yfinance` which are capitalized by default.
 >
 > ```python
+> import yfinance as yf
 > from mplchart.utils import normalize_prices
 > prices = normalize_prices(yf.Ticker(ticker).history('5y'))
 > ```
