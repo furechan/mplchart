@@ -1,7 +1,6 @@
 # noinspection PyUnresolvedReferences
 
 import os
-import re
 import json
 import subprocess
 
@@ -77,47 +76,35 @@ def publish(ctx, testpypi=False):
     Publishing order: check → build → publish → bump
     Note: bump runs *after* publishing, not before.
     """
-    flags = "--repository testpypi" if testpypi else ""
+    flags = "--skip-existing"
+    if testpypi:
+        flags += " --repository testpypi"
     ctx.run(f"twine upload {flags} dist/*.whl")
 
 
 @task
+def bump(ctx):
+    """Bump patch version in pyproject.toml (re-locks and syncs)"""
+    ctx.run("uv version --bump patch")
+
+
+@task
 def depcheck(ctx):
-    """Fetch dependabot alerts, upgrade flagged packages in uv.lock, and sync
+    """Fetch dependabot alerts, upgrade flagged packages
 
     After running, review changes and commit uv.lock:
         git add uv.lock && git commit -m "Update dependencies to address security alerts"
     """
-    result = subprocess.run(
-        ["gh", "api", "repos/Furechan/mplchart/dependabot/alerts",
-         "--jq", "[.[] | select(.state==\"open\") | .dependency.package.name]"],
-        capture_output=True, text=True, check=True
+    result = ctx.run(
+        "gh api repos/Furechan/mplchart/dependabot/alerts?state=open"
+        " --jq '[.[].dependency.package.name] | unique[]'",
+        hide=True,
     )
-    packages = list(dict.fromkeys(json.loads(result.stdout)))
+    packages = result.stdout.split()
     if not packages:
         print("No open Dependabot alerts.")
-        return
-    print(f"Upgrading: {', '.join(packages)}")
-    upgrade_flags = " ".join(f"--upgrade-package {p}" for p in packages)
-    ctx.run(f"uv lock {upgrade_flags}")
-    ctx.run("uv sync")
+        return       
+    print("Upgrading", *packages, "...")
+    flags = " ".join(f"--upgrade-package {p}" for p in packages)
+    ctx.run(f"uv sync {flags}")
 
-
-@task
-def bump(ctx):
-    """Bump patch version in pyproject.toml"""
-    pyproject = Path(__file__).joinpath("../pyproject.toml").resolve(strict=True)
-    buffer = pyproject.read_text()
-    pattern = r"^version \s* = \s* \"(.+)\" \s*"
-    match = re.search(pattern, buffer, flags=re.VERBOSE | re.MULTILINE)
-    if not match:
-        raise ValueError("Could not find version setting")
-    version = tuple(int(i) for i in match.group(1).split("."))
-    version = version[:-1] + (version[-1] + 1,)
-    version = ".".join(str(v) for v in version)
-    print(f"Updating version to {version} ...")
-    output = re.sub(
-        pattern, f'version = "{version}"\n', buffer, flags=re.VERBOSE | re.MULTILINE
-    )
-    pyproject.write_text(output)
-    ctx.run("uv sync")
