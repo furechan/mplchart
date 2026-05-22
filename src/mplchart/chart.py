@@ -10,7 +10,8 @@ from collections import Counter
 from functools import cached_property
 
 from .colors import closest_color
-from .utils import detect_backend, check_prices, extract_datetime, apply_indicator, is_indicator_like, extract_prefix
+from .utils import detect_backend, apply_indicator, is_indicator_like, extract_prefix
+from .utils import normalize_prices, check_prices, extract_datetime
 from .layout import make_twinx, init_vplot, add_vplot
 from .mapper import DateIndexMapper, RawDateMapper
 from .primitives.autoplot import AutoPlot
@@ -85,6 +86,7 @@ class Chart:
         figsize=None,
         bgcolor=None,
         holidays=None,
+        normalize=False,
         raw_dates=False,
         color_scheme=(),
     ):
@@ -110,7 +112,7 @@ class Chart:
         self.init_axes()
 
         if prices is not None:
-            self.init_mapper(prices)
+            self.init_prices(prices, normalize=normalize)
         else:
             raise ValueError("Prices data must be provided at initialization!")
 
@@ -131,14 +133,8 @@ class Chart:
         # return plt.figure(figsize=figsize, facecolor=bgcolor, edgecolor=bgcolor)
         return plt.figure(figsize=figsize)
 
-    @staticmethod
-    def prepare(prices):
-        """validate prices dataframe for charting"""
-        check_prices(prices)
-        return prices
 
-
-    def init_mapper(self, prices):
+    def init_prices(self, prices, normalize: bool = False):
         """Initialize the chart date mapper with price data.
 
         Args:
@@ -147,13 +143,16 @@ class Chart:
         """
 
         if self.mapper is not None:
-            warnings.warn("init_mapper was already called!", stacklevel=2)
+            warnings.warn("init_prices was already called!", stacklevel=2)
             return
 
         if self.prices is not None:
-            warnings.warn("init_mapper was already called with different data!", stacklevel=2)
+            warnings.warn("init_prices was already called with different data!", stacklevel=2)
 
-        prices = self.prepare(prices)
+        if normalize:
+            prices = normalize_prices(prices)
+
+        check_prices(prices)
 
         self.prices = prices
         self.backend = detect_backend(prices)

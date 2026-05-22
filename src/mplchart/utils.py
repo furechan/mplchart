@@ -100,16 +100,6 @@ def apply_indicator(prices, indicator):
     )
 
 
-def normalize_columns(df):
-    """lowercase column names for both backends"""
-    match detect_backend(df):
-        case "polars":
-            return df.rename({c: c.lower() for c in df.columns})
-        case "pandas":
-            return df.rename(columns=str.lower)
-        case backend:
-            raise ValueError(f"Unsupported backend {backend!r}")
-
 
 def normalize_prices(prices):
     """Normalize a prices DataFrame for use with indicators and charting.
@@ -140,16 +130,17 @@ def check_prices(prices):
     passing it to indicators or the chart.
     """
     cols = list(prices.columns)
+
     if any(c != c.lower() for c in cols):
         raise ValueError(
-            "prices columns must be lowercase — call normalize_prices(prices) first"
+            "prices columns must be lowercase — pass normalize=True or call normalize_prices(prices)"
         )
+
     match detect_backend(prices):
         case "pandas":
             if "date" in cols or "datetime" in cols:
                 raise ValueError(
                     "prices 'date'/'datetime' must be the index, not a column"
-                    " — call normalize_prices(prices) first"
                 )
 
 
