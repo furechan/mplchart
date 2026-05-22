@@ -52,8 +52,7 @@ def check(ctx):
 @task
 def make(ctx):
     """Regenerate README from scripts/process-readme.py"""
-    with ctx.cd("scripts"):
-        ctx.run("python process-readme.py")
+    ctx.run("python scripts/process-readme.py")
 
 
 @task(clean, make)
