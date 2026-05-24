@@ -256,9 +256,9 @@ Optional extras:
 - `[all]` — pandas and polars
 
 
-## Related Projects & Resources
-- [stockcharts.com](https://stockcharts.com/) - Classic stock charts and technical analysis reference
+## Related Projects
 - [mplfinance](https://pypi.org/project/mplfinance/) - Matplotlib utilities for the visualization, and visual analysis, of financial data
+- [cufflinks](https://github.com/santosjorge/cufflinks) - Productivity Tools for Plotly + Pandas
 - [matplotlib](https://github.com/matplotlib/matplotlib) - Matplotlib: plotting with Python
 - [pandas](https://github.com/pandas-dev/pandas) - Flexible and powerful data analysis / manipulation library for Python
 - [polars](https://github.com/pola-rs/polars) - Fast DataFrame library for Python
