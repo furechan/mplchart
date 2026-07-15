@@ -30,7 +30,6 @@ from mplchart.chart import Chart
 from mplchart.primitives import Candlesticks, Volume, Pane, LinePlot
 from mplchart.indicators import SMA, RSI, MACD
 
-
 ticker = 'AAPL'
 prices = yf.Ticker(ticker).history('5y')
 
@@ -48,13 +47,16 @@ Chart(prices, title=ticker, max_bars=250, normalize=True).plot(
 
 Prices data is expected to be a dataframe with columns `open`, `high`, `low`, `close`, `volume` in **lower case** and a datetime column named `date` or `datetime` (or a datetime index for pandas).
 
-> **Note:** The `Chart`, indicators and primitives strictly require lower case column names. Use `Chart(..., normalize=True)` or call `normalize_prices` from `mplchart.utils` when using prices with a different naming convention, like prices from `yfinance` which are capitalized by default.
->
-> ```python
-> import yfinance as yf
-> from mplchart.utils import normalize_prices
-> prices = normalize_prices(yf.Ticker(ticker).history('5y'))
-> ```
+> **Note:** The `Chart`, indicators and primitives strictly require lower case column names. Use `Chart(..., normalize=True)` or call `normalize_prices` from `mplchart.utils` when using prices with a different naming convention, like data from `yfinance` which is capitalized by default.
+
+```python
+# Normalize prices to lower case column names
+
+import yfinance as yf
+from mplchart.utils import normalize_prices
+
+prices = normalize_prices(yf.Ticker(ticker).history('5y'))
+```
 
 
 
@@ -94,6 +96,7 @@ The main drawing primitives are :
 
 The library includes some standard technical analysis indicators for **pandas** DataFrames.
 Indicators are classes and must be instantiated as objects before being used with the plot api.
+Instanciated they are callables, you can apply them like calling a funcion `SMA(50)(prices)`.
 
 Some of the indicators included are:
 
@@ -129,9 +132,6 @@ Some of the indicators included are:
 
 Use `@` to bind an indicator to a rendering primitive:
 
-```python
-SMA(50) @ LinePlot(style="dashed", color="red")   # bind indicator to primitive
-```
 
 ```python
 # Customizing indicator style with LinePlot
@@ -146,10 +146,6 @@ indicators = [
 
 Chart(prices).plot(indicators)
 ```
-
-If the indicator returns a DataFrame instead of a Series, specify an `item` (column name) in the primitive.
-
-Indicators are callables — apply one directly with `indicator(prices)` or `prices.pipe(indicator)`.
 
 
 ## Polars Expressions
@@ -187,6 +183,25 @@ SMA(50) @ LinePlot(color="red")    # expression → primitive
 RSI(14) @ AreaPlot(color="blue")   # expression → primitive
 ```
 
+
+## Talib Functions
+
+If you have ta-lib installed you can use its abstract functions as indicators. They are created by calling the `Function` factory with the name of the function and its parameters. Ta-lib functions work with both pandas and polars backends.
+
+```python
+# Candlesticks chart with talib functions
+
+from mplchart.primitives import Candlesticks
+from talib.abstract import Function
+
+indicators = [
+    Candlesticks(),
+    Function('SMA', 50),
+    Function('SMA', 200),
+]
+
+Chart(prices).plot(indicators).show()
+```
 
 ## Examples
 
