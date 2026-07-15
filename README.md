@@ -45,9 +45,8 @@ Chart(prices, title=ticker, max_bars=250, normalize=True).plot(
 
 ## Conventions
 
-Prices data is expected to be a dataframe with columns `open`, `high`, `low`, `close`, `volume` in **lower case** and a datetime column named `date` or `datetime` (or a datetime index for pandas).
-
-> **Note:** The `Chart`, indicators and primitives strictly require lower case column names. Use `Chart(..., normalize=True)` or call `normalize_prices` from `mplchart.utils` when using prices with a different naming convention, like data from `yfinance` which is capitalized by default.
+Prices data is expected to be a dataframe with columns `open`, `high`, `low`, `close`, `volume` in **lower case** and a datetime column named `date` or `datetime` (or a datetime index for pandas). 
+If your data has column names in different capitalization (like data from yfinance) use the `normalize` option `Chart(..., normalize=True)` or call `normalize_prices` explicitely to normalize the dataframe.
 
 ```python
 # Normalize prices to lower case column names

@@ -1,4 +1,4 @@
-""" sample script to display a chart """
+""" example to create a chart within a script"""
 
 import yfinance as yf
 
