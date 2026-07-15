@@ -127,11 +127,10 @@ Some of the indicators included are:
 - `TYPPRICE` Typical Price
 - `WCLPRICE` Weighted Close Price
 
-Use `@` to bind an indicator to a rendering primitive, and `|` to chain indicators:
+Use `@` to bind an indicator to a rendering primitive:
 
 ```python
 SMA(50) @ LinePlot(style="dashed", color="red")   # bind indicator to primitive
-SMA(50) | ROC(1)                                   # chain indicators
 ```
 
 ```python
@@ -151,17 +150,6 @@ Chart(prices).plot(indicators)
 If the indicator returns a DataFrame instead of a Series, specify an `item` (column name) in the primitive.
 
 Indicators are callables — apply one directly with `indicator(prices)` or `prices.pipe(indicator)`.
-
-For boolean / arithmetic composition, wrap an indicator with `as_expr()` to obtain a
-pandas `Expression` (requires pandas ≥ 3.0). Multi-output indicators take an `item`
-argument to select one column:
-
-```python
-RSI(14).as_expr() < 30                     # pandas Expression
-MACD().as_expr("macdhist") > 0             # select histogram column
-
-Stripes(MACD().as_expr("macdhist") > 0)    # use as a binding condition
-```
 
 
 ## Polars Expressions
@@ -199,25 +187,6 @@ SMA(50) @ LinePlot(color="red")    # expression → primitive
 RSI(14) @ AreaPlot(color="blue")   # expression → primitive
 ```
 
-
-## Talib Functions
-
-If you have `ta-lib` installed you can use its abstract functions as indicators. They are created by calling `Function` with the name of the function and its parameters. Ta-lib functions work with both pandas and polars backends.
-
-```python
-# Candlesticks chart with talib functions
-
-from mplchart.primitives import Candlesticks
-from talib.abstract import Function
-
-indicators = [
-    Candlesticks(),
-    Function('SMA', 50),
-    Function('SMA', 200),
-]
-
-Chart(prices).plot(indicators).show()
-```
 
 ## Examples
 

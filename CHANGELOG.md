@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.38
+- Replaced `tox.toml` with `noxfile.py` (nox + uv venv backend); same sessions plus a `full` tag for the Python 3.10-3.14 matrix
+
 ## 0.0.37
 - Migrated multi-output polars expressions (`PPO`, `MACD`, `MACDV`, `STOCH`, `DMI`, `BBANDS`, `DONCHIAN`, `KELTNER`) to return a single `pl.struct(...)` Expr instead of a tuple of Exprs
 - `apply_indicator` now unnests Struct-typed Series into a multi-column DataFrame; tuple-of-Expr branch retained for interop with external libraries (e.g. mintalib)
