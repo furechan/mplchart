@@ -24,7 +24,7 @@ class Pane(Primitive):
         self.height_ratio = height_ratio
         self.yticks = yticks
 
-    def plot_handler(self, prices, chart, ax=None):
+    def apply_to_chart(self, chart):
         ax = chart.get_axes(self.target, height_ratio=self.height_ratio)
 
         if self.yticks:

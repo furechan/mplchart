@@ -24,7 +24,7 @@ The core (`chart.py`, `mapper.py`, `primitives/`) is backend-agnostic. Backend-s
 ## Plotting pipeline
 
 For each item passed to `chart.plot()`:
-1. If it has `plot_handler` (a `Primitive`) → call it directly on unsliced prices
+1. If it has `apply_to_chart` (a `Primitive`) → call it with the chart; prices are available unsliced as `chart.prices`
 2. Otherwise compute: call `apply_indicator(prices, item)` → full-length result. If the item is a polars Expr that evaluates to a Struct Series, it is unnested into a multi-column DataFrame so downstream code can iterate `.columns`
 3. Slice: `chart.slice(result)` → restricts to the visible window via the mapper
 4. Hand to `AutoPlot` for default rendering: single Series → one line; DataFrame → one trace per column (with `upperband` / `middleband` / `lowerband` and `*hist` columns getting specialized handling)

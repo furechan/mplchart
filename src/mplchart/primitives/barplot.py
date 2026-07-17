@@ -50,11 +50,10 @@ class BarPlot(BindingPrimitive):
         self.target = target
         self.label = label
 
-    def plot_handler(self, prices, chart, ax=None):
-        if ax is None:
-            ax = chart.get_axes(self.target)
+    def apply_to_chart(self, chart):
+        ax = chart.get_axes(self.target)
 
-        result = chart.calc_result(prices, self.indicator)
+        result = chart.calc_result(self.indicator)
 
         series = series_data(result, self.item)
 

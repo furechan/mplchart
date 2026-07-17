@@ -44,14 +44,13 @@ class Markers(BindingPrimitive):
         self.marker = marker
         self.alpha = alpha
 
-    def plot_handler(self, prices, chart, ax=None):
-        if ax is None:
-            ax = chart.main_axes()
+    def apply_to_chart(self, chart):
+        ax = chart.main_axes()
 
-        signal = chart.calc_result(prices, self.indicator)
+        signal = chart.calc_result(self.indicator)
 
         flag = np.clip(np.sign(np.asarray(signal, dtype=float)), 0, 1)
-        close = np.asarray(col_to_numpy(prices, "close"), dtype=float)
+        close = np.asarray(col_to_numpy(chart.prices, "close"), dtype=float)
 
         xs, flag, close = chart.mapper.series_xy(flag, close)
 

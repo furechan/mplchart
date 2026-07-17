@@ -45,11 +45,10 @@ class Price(Primitive):
         return calc_price(prices, self.item)
 
 
-    def plot_handler(self, prices, chart, ax=None):
-        if ax is None:
-            ax = chart.get_axes()
+    def apply_to_chart(self, chart):
+        ax = chart.get_axes()
 
-        series = self(prices)
+        series = self(chart.prices)
         xv, yv = chart.mapper.series_xy(series)
 
         textcolor = plt.rcParams["text.color"]

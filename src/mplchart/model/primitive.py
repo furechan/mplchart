@@ -13,9 +13,9 @@ from ..utils import short_repr, is_indicator_like
 class Primitive(ABC):
     """Abstract base class for chart primitives.
 
-    Primitives draw directly from the raw prices DataFrame without going through
-    the indicator calculation pipeline. They implement ``plot_handler`` which is
-    invoked before any indicator calculation takes place.
+    Primitives act directly on the chart without going through the indicator
+    calculation pipeline. They implement ``apply_to_chart`` which is invoked
+    before any indicator calculation takes place.
 
     Primitives support the ``@`` operator to bind an indicator or expression::
 
@@ -26,24 +26,22 @@ class Primitive(ABC):
     __repr__ = short_repr
 
     @abstractmethod
-    def plot_handler(self, prices, chart, ax=None):
-        """Draw the primitive onto the chart.
+    def apply_to_chart(self, chart) -> None:
+        """Act on the chart — draw, create a pane, or otherwise modify it.
 
-        Called before any indicator calculation. The prices DataFrame has not
-        been sliced yet; use ``chart.slice(data)`` to restrict the data to the
-        current view window.
+        Called before any indicator calculation. Prices are available as
+        ``chart.prices`` (full, unsliced); use ``chart.slice(data)`` to
+        restrict data to the current view window and ``chart.get_axes()``
+        to obtain or create the target pane.
 
         Args:
-            prices (DataFrame): Full (unsliced) OHLCV prices DataFrame.
             chart (Chart): The parent chart instance.
-            ax (Axes, optional): Target axes. If ``None``, the primitive should
-                call ``chart.get_axes()`` to obtain or create the target pane.
         """
         ...
 
     def clone(self, **kwargs):
         result = copy.copy(self)
-        result.__dict__.update(self.__dict__, **kwargs)
+        vars(result).update(kwargs)
         return result
 
 

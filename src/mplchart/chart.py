@@ -21,7 +21,7 @@ USE_TIGHT_LAYOUT = True
 
 """
 How primitives/indicators are plotted
-1) try plot_handler. No processing or no reindexing yet
+1) try apply_to_chart. No processing or no reindexing yet
 2) call indicator / process data
 3) call slice / map index and slice data to charting view
 3) replace indicator with wrapper if applicable
@@ -398,43 +398,39 @@ class Chart:
             count += 1
         return count
 
-    def calc_result(self, prices, indicator):
+    def calc_result(self, indicator):
         """calculate indicator result saving last result"""
 
         if indicator is not None:
-            result = apply_indicator(prices, indicator)
+            result = apply_indicator(self.prices, indicator)
             self.last_result = result
         elif self.last_result is not None:
             result = self.last_result
         else:
-            result = prices
+            result = self.prices
 
         return result
 
     def plot_indicator(self, indicator):
         """calculate and plot an indicator"""
 
-        prices = self.prices
-
         if self.prices is None:
             raise ValueError("No prices data provided!")
 
-        prices = self.prices
-
-        # Call the indicator's plot_handler if defined (before any calc)
-        # this is the only location where plot_handler is called
-        # plot_handler is currently defined only for Primitives
+        # Call the primitive's apply_to_chart if defined (before any calc)
+        # this is the only location where apply_to_chart is called
+        # apply_to_chart is currently defined only for Primitives
         # Note that data have not been mapped/sliced yet
-        if hasattr(type(indicator), "plot_handler"):
-            indicator.plot_handler(prices, chart=self)
+        if hasattr(type(indicator), "apply_to_chart"):
+            indicator.apply_to_chart(self)
             return
 
         # Anything else (polars Expr, pandas Expression, tuple-of-Expr, callable)
         # is wrapped in the default AutoPlot primitive and dispatched through its
-        # plot_handler — the single auto-plot code path.
+        # apply_to_chart — the single auto-plot code path.
         if is_indicator_like(indicator):
             autoplot = AutoPlot().clone(indicator=indicator)
-            autoplot.plot_handler(prices, chart=self)
+            autoplot.apply_to_chart(self)
             return
 
         raise ValueError(f"Indicator {indicator!r} not callable")
@@ -504,7 +500,7 @@ class Chart:
         """
         from .primitives.vline import VLine
 
-        VLine(date, color=color, linestyle=linestyle).plot_handler(None, chart=self)
+        VLine(date, color=color, linestyle=linestyle).apply_to_chart(self)
         return self
 
     def plot_vline(self, date):
@@ -522,7 +518,7 @@ class Chart:
         """
         from .primitives.hline import HLine
 
-        HLine(value, color=color, linestyle=linestyle).plot_handler(None, chart=self)
+        HLine(value, color=color, linestyle=linestyle).apply_to_chart(self)
         return self
 
     def show(self):

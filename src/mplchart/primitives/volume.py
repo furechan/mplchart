@@ -48,11 +48,10 @@ class Volume(Primitive):
     def __str__(self):
         return self.__class__.__name__
 
-    def plot_handler(self, prices, chart, ax=None):
-        if ax is None:
-            ax = chart.get_axes("twinx")
+    def apply_to_chart(self, chart):
+        ax = chart.get_axes("twinx")
 
-        prices = chart.slice(prices, xcol="xloc")
+        prices = chart.slice(chart.prices, xcol="xloc")
         volume = np.asarray(col_to_numpy(prices, "volume"))
         close = np.asarray(col_to_numpy(prices, "close"))
 

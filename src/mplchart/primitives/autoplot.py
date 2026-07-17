@@ -26,11 +26,10 @@ class AutoPlot(BindingPrimitive):
     def __init__(self, *, label: str | None = None):
         self.label = label
 
-    def plot_handler(self, prices, chart, ax=None):
-        if ax is None:
-            ax = chart.get_axes()
+    def apply_to_chart(self, chart):
+        ax = chart.get_axes()
 
-        data = chart.calc_result(prices, self.indicator)
+        data = chart.calc_result(self.indicator)
 
         group_label = self.label if self.label is not None else get_label(self.indicator)
         columns = list(data.columns) if hasattr(data, "columns") else []

@@ -23,9 +23,8 @@ class VLine(Primitive):
         self.color = color
         self.linestyle = linestyle
 
-    def plot_handler(self, prices, chart, ax=None):
-        if ax is None:
-            ax = chart.root_axes()
+    def apply_to_chart(self, chart):
+        ax = chart.root_axes()
 
         color = self.color or mpl.rcParams["grid.color"]
         linestyle = self.linestyle or mpl.rcParams["grid.linestyle"]

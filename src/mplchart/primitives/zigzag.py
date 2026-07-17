@@ -84,12 +84,11 @@ class ZigZag(Primitive):
     def __init__(self, threshold=5.0):
         self.threshold = threshold
 
-    def plot_handler(self, prices, chart, ax=None):
-        if ax is None:
-            ax = chart.get_axes()
+    def apply_to_chart(self, chart):
+        ax = chart.get_axes()
 
         # run zigzag on the windowed slice; returned indices are 0-based within window
-        windowed = chart.slice(prices, xcol="xloc")
+        windowed = chart.slice(chart.prices, xcol="xloc")
         row_indices, values = calc_zigzag(windowed, threshold=self.threshold)
 
         # map local indices to sliced x-coordinates

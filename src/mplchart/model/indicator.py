@@ -7,8 +7,6 @@ from abc import ABC, abstractmethod
 from ..utils import short_repr, get_series
 
 
-
-
 class Indicator(ABC):
     """Abstract base class for technical analysis indicators.
 
@@ -31,7 +29,7 @@ class Indicator(ABC):
     output_names: tuple[str, ...] | None = None
 
     @abstractmethod
-    def __call__(self, prices):
+    def __call__(self, prices) -> pd.Series | pd.DataFrame:
         """Compute the indicator value.
 
         Args:
@@ -83,7 +81,7 @@ class Indicator(ABC):
             )
 
         try:
-            from pandas.api.typing import Expression
+            from pandas.api.typing import Expression  # pyright: ignore[reportAttributeAccessIssue]
         except ImportError as exc:
             raise RuntimeError(
                 f"as_expr() requires pandas >= 3.0 (got {pd.__version__}); "

@@ -33,11 +33,10 @@ class Peaks(BindingPrimitive):
         self.color = color
         self.item = item
 
-    def plot_handler(self, prices, chart, ax=None):
-        if ax is None:
-            ax = chart.get_axes()
+    def apply_to_chart(self, chart):
+        ax = chart.get_axes()
 
-        data = chart.calc_result(prices, self.indicator)
+        data = chart.calc_result(self.indicator)
 
         # Reduce by item first, if requested — yields a Series.
         if self.item is not None and hasattr(data, "columns"):

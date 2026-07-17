@@ -35,11 +35,10 @@ class OHLC(Primitive):
     def __str__(self):
         return self.__class__.__name__
 
-    def plot_handler(self, prices, chart, ax=None):
-        if ax is None:
-            ax = chart.get_axes()
+    def apply_to_chart(self, chart):
+        ax = chart.get_axes()
 
-        prices = chart.slice(prices, xcol="xloc")
+        prices = chart.slice(chart.prices, xcol="xloc")
         xvalues = np.asarray(prices["xloc"])
         open_ = np.asarray(col_to_numpy(prices, "open"))
         high = np.asarray(col_to_numpy(prices, "high"))

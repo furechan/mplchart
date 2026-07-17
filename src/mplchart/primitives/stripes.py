@@ -31,11 +31,10 @@ class Stripes(BindingPrimitive):
         self.color = color
         self.alpha = alpha
 
-    def plot_handler(self, prices, chart, ax=None):
-        if ax is None:
-            ax = chart.root_axes()
+    def apply_to_chart(self, chart):
+        ax = chart.root_axes()
 
-        result = chart.calc_result(prices, self.indicator)
+        result = chart.calc_result(self.indicator)
 
         xs, values = chart.mapper.series_xy(result)
 
