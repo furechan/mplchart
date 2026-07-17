@@ -196,15 +196,20 @@ def get_label(indicator):
     """Human-readable legend text for an indicator or expression.
 
     Resolution order:
-    1. explicit ``.label`` attribute (set by custom wrappers)
-    2. talib ``func_object`` → ``"name(params)"``
-    3. polars ``Expr`` → ``.meta.output_name()``
-    4. fall back to ``repr(indicator)``
+    1. pandas ``Expression`` → ``repr(indicator)`` (must come first, see below)
+    2. explicit ``.label`` attribute (set by custom wrappers)
+    3. talib ``func_object`` → ``"name(params)"``
+    4. polars ``Expr`` → ``.meta.output_name()``
+    5. fall back to ``repr(indicator)``
 
     The color map uses the label's prefix via :func:`extract_prefix` when no
     direct match is found in ``color_scheme``.
     """
 
+    # This check MUST stay first: Expression.__getattr__ hijacks any attribute
+    # access (hasattr is always True, getattr never falls back), so the
+    # instance-level getattr/hasattr checks below are only safe once
+    # expressions have returned early.
     if is_pandas_expr(indicator):
         return repr(indicator)
 
@@ -212,7 +217,8 @@ def get_label(indicator):
     if isinstance(label, str):
         return label
 
-    if hasattr(type(indicator), "func_object"):  # talib
+    # func_object is an instance attribute — check the instance, not the type
+    if hasattr(indicator, "func_object"):  # talib
         name = indicator.info.get("name")
         params = [repr(v) for v in indicator.parameters.values()]
         return f"{name}({', '.join(params)})"

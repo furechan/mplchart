@@ -17,6 +17,8 @@ This broke three places in mplchart before being caught:
 
 **Rule:** for capability checks use `hasattr(type(indicator), "method")`, never the instance. For data attributes (`label`, etc.), guard with `is_pandas_expr(indicator)` first.
 
+**Counter-trap:** the type-level check misses *instance* attributes — talib's `Function.func_object` lives in the instance dict, so `hasattr(type(f), "func_object")` is False and the talib branch in `get_label` silently died (giant dict-repr legends, tight-layout warnings; fixed 2026-07). Resolution: guard-first — return early on `is_pandas_expr(x)` at the top of the function, after which plain instance `hasattr`/`getattr` checks are safe again (`get_label` uses this pattern). Note the fragility: any new code path reaching such checks must repeat the guard.
+
 ## The `callable` trap
 
 `callable(expr)` returns `True`, but calling `expr(df)` does NOT evaluate the expression — it returns a string representation applied to the DataFrame. The real evaluation hook is `expr._eval_expression(df)`, which returns a `pd.Series`.
@@ -26,6 +28,10 @@ This broke three places in mplchart before being caught:
 `_eval_expression` is underscore-prefixed — not a public API. It could change or get a public replacement as the expressions API matures (it is explicitly experimental in pandas 3.0).
 
 **How to apply:** monitor pandas release notes for a stable public evaluation API to replace `_eval_expression`. When found, update `apply_indicator` and `resolve_expr` in `utils.py`.
+
+## The `@` binding trap (open issue as of 2026-07)
+
+`pandas_expr @ Primitive()` does NOT bind to the primitive: `Expression.__matmul__` captures the operator first and returns a new deferred Expression (eventually evaluating `Series.dot(primitive)` → `IndexError`), so `Primitive.__rmatmul__` is never consulted. Polars Exprs return `NotImplemented` and bind fine. Tests only cover the polars path (`test_polars_primitives.py`); pandas `as_expr()` results currently cannot be bound with `@`.
 
 ## Detection
 

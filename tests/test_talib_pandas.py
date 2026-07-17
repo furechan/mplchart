@@ -10,6 +10,7 @@ pytestmark = [pytest.mark.pandas, pytest.mark.talib]
 from mplchart.chart import Chart  # noqa: E402
 from mplchart.samples import sample_prices  # noqa: E402
 from mplchart.primitives import Candlesticks  # noqa: E402
+from mplchart.utils import get_label  # noqa: E402
 
 
 FREQS = ["daily", "hourly", "minute"]
@@ -35,3 +36,8 @@ def test_talib(freq, max_bars=250):
     assert chart.count_axes() > 0
 
     plt.close()
+
+
+def test_talib_label():
+    assert get_label(abstract.Function("SMA", 50)) == "SMA(50)"
+    assert get_label(abstract.Function("MACD")) == "MACD(12, 26, 9)"

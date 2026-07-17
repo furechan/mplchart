@@ -1,6 +1,9 @@
 # Change Log
 
 ## 0.0.38
+- Fixed talib `Function` legend labels showing the full info-dict repr; `get_label` filters pandas Expressions first, so the talib `func_object` check works on the instance again
+- Renamed `Primitive.plot_handler(prices, chart, ax=None)` to `apply_to_chart(chart)` — prices are read from `chart.prices`; the `prices` and `ax` parameters are removed (breaking for custom primitives)
+- `Chart.calc_result(indicator)` no longer takes a `prices` argument
 - Replaced `tox.toml` with `noxfile.py` (nox + uv venv backend); same sessions plus a `full` tag for the Python 3.10-3.14 matrix
 - noxfile now sets `UV_PYTHON_INSTALL_BIN=0` so nox's interpreter provisioning (`uv python install`) no longer symlinks `python3.X` executables into `~/.local/bin`; uv-managed pythons stay in uv's store, off PATH
 
