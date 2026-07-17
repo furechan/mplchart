@@ -2,6 +2,7 @@
 
 ## 0.0.38
 - Replaced `tox.toml` with `noxfile.py` (nox + uv venv backend); same sessions plus a `full` tag for the Python 3.10-3.14 matrix
+- noxfile now sets `UV_PYTHON_INSTALL_BIN=0` so nox's interpreter provisioning (`uv python install`) no longer symlinks `python3.X` executables into `~/.local/bin`; uv-managed pythons stay in uv's store, off PATH
 
 ## 0.0.37
 - Migrated multi-output polars expressions (`PPO`, `MACD`, `MACDV`, `STOCH`, `DMI`, `BBANDS`, `DONCHIAN`, `KELTNER`) to return a single `pl.struct(...)` Expr instead of a tuple of Exprs
