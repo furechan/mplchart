@@ -2,6 +2,8 @@
 
 Design notes: [axes-stickiness.md](axes-stickiness.md) — pane vs axes vocabulary and current-pane semantics.
 
+Discussion (not decided): [polars-proposal.md](polars-proposal.md) — exploring a polars-only future.
+
 ## Module layout
 
 | Module | Role |
