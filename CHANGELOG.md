@@ -1,6 +1,8 @@
 # Change Log
 
 ## 0.0.38
+- Reverted nox back to tox (tox-uv): declarative config fits this repo; same everyday set plus `tox -m full` for the 3.10-3.14 matrix; no PATH shims (tox-uv provisions via the uv store)
+- Fixed `closest_color` returning RGB tuples with matplotlib >= 3.11 — result is normalized to hex
 - Fixed `RawDateMapper.map_date` not stripping tzinfo — tz-aware dates (e.g. `vline`) landed at the UTC-converted x in `raw_dates` mode
 - Removed `lru_cache` from `sample_prices` — callers now get a fresh DataFrame instead of a shared cached instance
 - Rewrote polars `WMA` using `rolling_mean(weights=...)` (bearta-style) — now matches talib exactly, yields null for the first `period-1` rows instead of partial sums, and drops a bogus `set_sorted` flag

@@ -17,4 +17,6 @@ def closest_color(color, color_cycle=None):
 
     dist = [distance(color, c) for c in color_cycle]
     argmin = min(range(len(dist)), key=lambda i: dist[i])
-    return color_cycle[argmin]
+    # normalize to hex — cycle entries may be RGB tuples (matplotlib >= 3.11)
+    # and callers use the result as a scalar (e.g. np.where)
+    return mcolors.to_hex(color_cycle[argmin])

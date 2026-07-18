@@ -1,0 +1,38 @@
+# tox configuration
+# https://tox.wiki/en/latest/config.html
+#
+# Usage:
+#   tox            # everyday set: tests + pandas + polars + ruff
+#   tox -m full    # full pre-publish matrix (Python 3.10-3.14)
+#   tox list       # list environments
+
+work_dir = ".venv/tox"
+env_list = ["tests", "pandas", "polars", "ruff"]
+
+[labels]
+full = ["tests", "3.10", "3.11", "3.12", "3.13", "3.14", "pandas", "polars", "ruff"]
+
+[env_run_base]
+deps = ["pytest"]
+extras = ["pandas", "polars"]
+commands = [["python", "-m", "pytest"]]
+set_env = { PYTHONDONTWRITEBYTECODE = "1" }
+
+# test suite on the default interpreter with both backends
+[env.tests]
+
+[env.ruff]
+deps = ["ruff"]
+commands = [["python", "-m", "ruff", "check"]]
+set_env = { RUFF_CACHE_DIR = ".venv/ruff_cache" }
+skip_install = true
+
+# pandas-only install — polars tests skip via importorskip
+[env.pandas]
+deps = ["pytest"]
+extras = ["pandas"]
+
+# polars-only install — pandas tests skip via importorskip
+[env.polars]
+deps = ["pytest"]
+extras = ["polars"]
