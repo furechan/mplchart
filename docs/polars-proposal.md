@@ -55,6 +55,12 @@ The shape of the output decides what belongs in the package:
 - **Structure-shaped studies** (trendlines, zigzag, support/resistance zones, PNF columns — output is geometry: segments, pivots, boxes, levels) are mplchart's actual product. Their calculation is inseparable from chart context (visible window, pane, visual judgment) and cannot honestly be returned as a series. The rich-indicator paradigm (calculation + plotting fused in one object) survives here, in the primitive layer, where it is irreplaceable — with polars frames and numba kernels replacing raw numpy for the calculation half (geometry as a small frame of `(x0, y0, x1, y1)` rows).
 - **The chart frame** — one polars DataFrame with an x column — mediates between the two.
 
+## Transition mechanism
+
+Follow-up analysis (see [primitive-contract.md](primitive-contract.md)) established that the primitive ↔ Chart interface is small enough to hold invariant across the core swap: five data-plane methods (`prices`, `calc_result`, `slice`, `series_xy`, `map_date`) and four figure-plane methods. All five data-plane methods have direct implementations on a polars frame carrying an x column; `series_xy` has been hoisted onto `Chart` and no primitive touches `chart.mapper` anymore. Existing primitives therefore run unchanged on a new core from day one; the mapper dissolves (projection → x column, windowing → filter, ticks → formatter over the `(x, date)` columns) rather than being ported. The intact interface is the transition mechanism, not the destination — primitives can then migrate to IntoExpr signatures incrementally.
+
+Two deliberate contract narrowings: `calc_result` drops the pandas-expression branch and pandas-only callables (returns collapse to polars Series/DataFrame); `slice` becomes strictly positional everywhere, dropping the pandas path's datetime inner-join tolerance.
+
 ## Open questions
 
 - Numeric parity check (EMA seeding, RMA warmup, NaN-vs-null edges) between pandas indicators and polars expressions before the pandas stack is deleted — the expressions must be the reference implementation, not an approximation.

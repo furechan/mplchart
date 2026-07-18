@@ -73,7 +73,6 @@ class Chart:
 
     mapper = None
     prices = None
-    last_result = None
 
     DEFAULT_FIGSIZE = (12, 9)
 
@@ -185,8 +184,8 @@ class Chart:
         """Next cycled color for fill"""
         return ax._get_patches_for_fill.get_next_color()
 
-    def get_color(self, name, ax=None, indicator=None, *, fallback=None):
-        """Lookup color through indicator and color_scheme.
+    def get_color(self, name, ax=None, *, fallback=None):
+        """Lookup color through the color_scheme.
 
         ``name`` can be a column name, a short id, or a full label — the
         color_scheme is tried on the raw name first, then on the extracted
@@ -228,6 +227,17 @@ class Chart:
         if self.mapper is None:
             raise ValueError("Date mapper was not configured yet. prices not provided!")
         return self.mapper.slice(data, xcol=xcol)
+
+    def series_xy(self, *values):
+        """Return (x, *windowed_values) numpy arrays for plotting.
+
+        Each positional argument must be a full-length series/array aligned
+        with the prices; each is sliced to the visible window. x carries the
+        window's x-coordinates.
+        """
+        if self.mapper is None:
+            raise ValueError("Date mapper was not configured yet. prices not provided!")
+        return self.mapper.series_xy(*values)
 
     def map_date(self, date):
         """map date to value"""
@@ -402,17 +412,11 @@ class Chart:
         return count
 
     def calc_result(self, indicator):
-        """calculate indicator result saving last result"""
+        """Evaluate an indicator against the prices; ``None`` yields the prices."""
 
-        if indicator is not None:
-            result = apply_indicator(self.prices, indicator)
-            self.last_result = result
-        elif self.last_result is not None:
-            result = self.last_result
-        else:
-            result = self.prices
-
-        return result
+        if indicator is None:
+            return self.prices
+        return apply_indicator(self.prices, indicator)
 
     def plot_indicator(self, indicator):
         """calculate and plot an indicator"""
@@ -470,8 +474,6 @@ class Chart:
 
         if not indicators:
             raise ValueError("No indicators provided!")
-
-        self.last_result = None
 
         # ensure a main pane exists — root-drawing primitives (e.g. Stripes)
         # never create one themselves

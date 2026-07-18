@@ -47,12 +47,12 @@ class Markers(BindingPrimitive):
     def apply_to_chart(self, chart):
         ax = chart.main_axes()
 
-        signal = chart.calc_result(self.indicator)
+        signal = chart.calc_result(self.required_indicator())
 
         flag = np.clip(np.sign(np.asarray(signal, dtype=float)), 0, 1)
         close = np.asarray(col_to_numpy(chart.prices, "close"), dtype=float)
 
-        xs, flag, close = chart.mapper.series_xy(flag, close)
+        xs, flag, close = chart.series_xy(flag, close)
 
         # forward-fill NaNs in flag
         nan_mask = np.isnan(flag)

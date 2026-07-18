@@ -1,6 +1,12 @@
 # Change Log
 
 ## 0.0.38
+- Added `Chart.series_xy` delegating to the mapper; primitives no longer access `chart.mapper` directly
+- `Peaks` refactored to two explicit modes decided by the constructor: `indicator=None` → peaks/valleys on prices high/low; bound indicator → peaks and valleys on its series. `item=` removed; `indicator` is now the first positional argument (`Peaks(5)` → `Peaks(span=5)`); multi-output results raise `ValueError`
+- Removed `last_result` adjacency chaining — a bare primitive no longer picks up the previous indicator's result; bind explicitly (`Peaks(SMA(50))` or `SMA(50) @ Peaks()`). `calc_result` is now a pure function
+- `LinePlot`/`BarPlot`/`AreaPlot`/`Stripes`/`Markers`/`AutoPlot` now require an indicator (`ValueError` otherwise) via `BindingPrimitive.required_indicator`
+- `chart.slice` is now only ever called on `chart.prices`
+- Removed unused `indicator` parameter from `Chart.get_color`
 - Reverted nox back to tox (tox-uv): declarative config fits this repo; same everyday set plus `tox -m full` for the 3.10-3.14 matrix; no PATH shims (tox-uv provisions via the uv store)
 - Fixed `closest_color` returning RGB tuples with matplotlib >= 3.11 — result is normalized to hex
 - Fixed `RawDateMapper.map_date` not stripping tzinfo — tz-aware dates (e.g. `vline`) landed at the UTC-converted x in `raw_dates` mode

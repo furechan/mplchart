@@ -49,7 +49,7 @@ class Price(Primitive):
         ax = chart.get_axes()
 
         series = self(chart.prices)
-        xv, yv = chart.mapper.series_xy(series)
+        xv, yv = chart.series_xy(series)
 
         textcolor = plt.rcParams["text.color"]
 

@@ -44,7 +44,7 @@ class AreaPlot(BindingPrimitive):
     def apply_to_chart(self, chart):
         ax = chart.get_axes()
 
-        result = chart.calc_result(self.indicator)
+        result = chart.calc_result(self.required_indicator())
 
         series = series_data(result, self.item)
 
@@ -55,7 +55,7 @@ class AreaPlot(BindingPrimitive):
             alpha=self.alpha,
         )
 
-        xv, yv = chart.mapper.series_xy(series)
+        xv, yv = chart.series_xy(series)
         ax.fill_between(
             xv,
             yv,

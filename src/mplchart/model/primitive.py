@@ -31,8 +31,8 @@ class Primitive(ABC):
         """Act on the chart — draw, create a pane, or otherwise modify it.
 
         Called before any indicator calculation. Prices are available as
-        ``chart.prices`` (full, unsliced); use ``chart.slice(data)`` to
-        restrict data to the current view window and ``chart.get_axes()``
+        ``chart.prices`` (full, unsliced); use ``chart.slice(chart.prices)``
+        to restrict prices to the current view window and ``chart.get_axes()``
         to obtain or create the target pane.
 
         Args:
@@ -57,6 +57,12 @@ class BindingPrimitive(Primitive):
 
     def __init__(self, indicator=None):
         self.indicator = indicator
+
+    def required_indicator(self):
+        """Return the bound indicator, raising if none was provided."""
+        if self.indicator is None:
+            raise ValueError(f"{type(self).__name__} requires an indicator")
+        return self.indicator
 
     def __rmatmul__(self, other):
         if not is_indicator_like(other):

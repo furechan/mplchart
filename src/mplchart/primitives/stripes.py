@@ -34,9 +34,9 @@ class Stripes(BindingPrimitive):
     def apply_to_chart(self, chart):
         ax = chart.root_axes()
 
-        result = chart.calc_result(self.indicator)
+        result = chart.calc_result(self.required_indicator())
 
-        xs, values = chart.mapper.series_xy(result)
+        xs, values = chart.series_xy(result)
 
         if not len(values):
             return

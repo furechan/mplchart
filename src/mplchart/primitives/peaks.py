@@ -17,45 +17,47 @@ class Peaks(BindingPrimitive):
     high (or lowest low) within a window of ``2 * span + 1`` bars centered on
     that bar.
 
-    Operates on the result of the last plotted indicator if one precedes it in
-    the same ``plot()`` call (e.g. ``[SMA(50), Peaks()]`` finds peaks of the
-    SMA); otherwise uses the ``high``/``low`` columns of the prices DataFrame.
-    An indicator can also be bound explicitly with ``@``.
+    Two explicit modes, decided by the bound indicator:
+
+    - **OHLC mode** — no indicator: peaks on the ``high`` column and valleys
+      on the ``low`` column of the prices DataFrame.
+    - **Series mode** — an indicator is bound (``Peaks(SMA(50))`` or via
+      ``@``): peaks and valleys both on the indicator's series. The indicator
+      must yield a single series — compose a single-output expression to
+      target one column of a multi-output result.
 
     Args:
+        indicator: single-output indicator or expression to find peaks on.
+            ``None`` (default) selects OHLC mode.
         span (int): Minimum number of bars required on each side of a local
             extremum for it to qualify as a peak or valley. Defaults to 1.
-        item (str, optional): Column name to use as the price series for peak
-            detection. If ``None``, uses the ``high``/``low`` columns of the
-            prices DataFrame.
         color (str, optional): Marker color. Defaults to the current
             ``text.color`` matplotlib parameter.
     """
 
-    def __init__(self, span=1, *, item: str | None = None, color: str | None = None):
-        super().__init__(None)
+    def __init__(self, indicator=None, span=1, *, color: str | None = None):
+        super().__init__(indicator)
         self.span = span
         self.color = color
-        self.item = item
 
     def apply_to_chart(self, chart):
         ax = chart.get_axes()
 
-        data = chart.calc_result(self.indicator)
-
-        # Reduce by item first, if requested — yields a Series.
-        if self.item is not None and hasattr(data, "columns"):
-            data = data[self.item]
-
-        if hasattr(data, "columns"):
-            # DataFrame — peaks on high, valleys on low.
-            windowed = chart.slice(data, xcol="xloc")
+        if self.indicator is None:
+            # OHLC mode — peaks on high, valleys on low of the prices frame.
+            windowed = chart.slice(chart.prices, xcol="xloc")
             xv = np.asarray(windowed["xloc"])
             hi = np.asarray(col_to_numpy(windowed, "high"), dtype=float)
             lo = np.asarray(col_to_numpy(windowed, "low"), dtype=float)
         else:
-            # Series — same values for peaks and valleys.
-            xv, arr = chart.mapper.series_xy(data)
+            # Series mode — peaks and valleys on the same values.
+            result = chart.calc_result(self.indicator)
+            if hasattr(result, "columns"):
+                raise ValueError(
+                    "Peaks expects a single series; compose a single-output "
+                    "expression to select one column of a multi-output result."
+                )
+            xv, arr = chart.series_xy(result)
             arr = np.asarray(arr, dtype=float)
             hi = lo = arr
 
