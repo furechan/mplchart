@@ -1,6 +1,31 @@
 # Change Log
 
 ## 0.0.38
+- Fixed `RawDateMapper.map_date` not stripping tzinfo — tz-aware dates (e.g. `vline`) landed at the UTC-converted x in `raw_dates` mode
+- Removed `lru_cache` from `sample_prices` — callers now get a fresh DataFrame instead of a shared cached instance
+- Rewrote polars `WMA` using `rolling_mean(weights=...)` (bearta-style) — now matches talib exactly, yields null for the first `period-1` rows instead of partial sums, and drops a bogus `set_sorted` flag
+- `closest_color` now returns the matched color value instead of a `"CN"` reference resolved against the default cycle
+- Pandas `calc_bbands`/`calc_bbp`/`calc_bbw` now use close instead of typical price — matches talib and the polars backend
+- Polars `EMA` now uses `adjust=False, ignore_nulls=True` — matches the pandas backend (also affects DEMA/TEMA/MACD/PPO/KELTNER)
+- Pandas `calc_hma` half-period now `period // 2` — matches the polars backend and bearta
+- `ROC` indicator default period changed from 20 to 1 — matches the polars expression; docstring now says fractional (not percentage) change
+- Added `tests/test_backend_parity.py` — numeric pandas/polars parity tests for 18 indicator pairs
+- Removed legacy logic from `datetimes.py`: shadowed `FREQ_VALUES` dict, dead `step` parse in `date_ticks`, self-mapping `formats` dict in `date_labels`
+- Removed unused `calc_pdi`/`calc_ndi` from `library.py`
+- Removed always-true guards in `Chart.init_prices` and `DateIndexMapper.config_axes`
+- `sample_prices` now validates `freq` against `SAMPLE_FREQUENCIES` with a clear error
+- `plot_cspoly`/`plot_csbars` parameters are now required keywords — removed unreachable ax/color re-defaulting (resolution lives in `Candlesticks.apply_to_chart`)
+- Deduplicated smoothing internals: `calc_rsi`/`calc_atr`/`calc_dmi` now reuse `calc_rma`/`calc_trange`; polars `DMI` reuses `RMA`
+- Docstring fixes: `Chart` prices are documented as required (with `normalize` param); multi-output indicators name their actual columns (`macdsignal`, `slowk`, `upperband`, ...); `BBP` documented as 0-100; `Candlesticks` colors by previous close; `Peaks` documents last-result behavior; assorted typos
+- Removed unreachable prices checks in `Chart.plot`/`plot_indicator` (prices are enforced at init)
+- Removed `target=` parameter from `Chart.plot` and from `LinePlot`/`AreaPlot`/`BarPlot` — pane selection goes through `pane()` / the `Pane` primitive (see docs/axes-stickiness.md)
+- Docs now promote the constructor form `LinePlot(SMA(50), ...)` over the `@` binding operator (README, notebooks, docstrings); `@` remains supported as the operator form
+- `AutoPlot` now accepts an indicator as first argument, like the other binding primitives
+- Extracted `BaseDateMapper` ABC — `DateIndexMapper`/`RawDateMapper` now share `__init__`, windowing, `series_xy`, `slice`/`slice_polars`, and the tz-strip helper; subclasses keep `rownum`, `slice_pandas`, `map_date`, `config_axes`
+- Fixed `STOCH` indicator ignoring its `fastn`/`slown` parameters
+- Removed duplicate `slowk`/`slowd` computation in `calc_stoch`
+- Fixed minute frequency constant in `datetimes.py` (`1/1400` → `1/1440`)
+- Fixed `calc_ppo`/`calc_macd`/`calc_macdv` default `n1` from 20 to the standard 12
 - Fixed talib `Function` legend labels showing the full info-dict repr; `get_label` filters pandas Expressions first, so the talib `func_object` check works on the instance again
 - Renamed `Primitive.plot_handler(prices, chart, ax=None)` to `apply_to_chart(chart)` — prices are read from `chart.prices`; the `prices` and `ax` parameters are removed (breaking for custom primitives)
 - `Chart.calc_result(indicator)` no longer takes a `prices` argument

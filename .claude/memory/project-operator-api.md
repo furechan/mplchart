@@ -1,55 +1,29 @@
 ---
 name: Indicator/expression operator API
-description: Unified operator design — @ is the binding operator for both indicators and expressions
+description: Constructor form is the primary binding style; @ is the operator alternative; | chains indicators
 type: project
 ---
 
-`@` is the single binding operator for both pandas indicators and polars expressions.
-`|` for binding to primitives is deprecated (warns) but still works for backward compat.
-
-**Open design question (cross-project):** `|` for indicator chaining (`DEMA(20) | ROC(1)`) has a semantic mismatch — it operates at the concrete/data level (apply left, feed result into right), while polars `pipe` operates at the abstract/expression level. This inconsistency is a known issue. Decision deferred to mintalib, where the same indicator + expression duality exists — any API change must be consistent across both libraries. Current status: `|` chaining is considered legacy/acceptable-as-is until mintalib direction is decided.
+Binding an indicator/expression to a primitive has two equivalent forms. Since 2026-07 the **constructor form is the primary documented style** (README, notebooks, docstrings); `@` remains fully supported as the operator form:
 
 | Expression | Meaning |
 |---|---|
-<<<<<<< Updated upstream
-| `prices \| SMA(50)` | apply indicator to data |
-| `SMA(50) \| EMA(20)` | chain indicators left-to-right |
-| `SMA(50) \| (lambda s: s < 30)` | chain indicator with lambda (via `Indicator.__or__`) |
-| `SMA(50) @ LinePlot(color="red")` | bind indicator to a primitive |
-| `LinePlot(SMA(50), color="red")` | same — indicator as first positional arg |
-| `RSI() @ Stripes()` | bind polars Expr or indicator to a primitive |
+| `LinePlot(SMA(50), color="red")` | bind indicator to a primitive (primary form) |
+| `SMA(50) @ LinePlot(color="red")` | same — operator form |
+| `pl_expr @ Stripes()` | bind polars Expr to a primitive (works — pl.Expr has no `__matmul__`) |
+| `pd_expr @ Stripes()` | **broken** — pandas Expression swallows `@` silently; use `Stripes(pd_expr)` (see [[project-pandas-expressions-gotchas]]) |
+| `SMA(50) | EMA(20)` | chain indicators left-to-right (`IndicatorChain`) |
+| `indicator | primitive` | deprecated binding — warns, directs to constructor/`@` |
+| `prices.pipe(SMA(50))` or `SMA(50)(prices)` | apply indicator to data (`prices | indicator` was removed in 0.0.36 along with `__pandas_priority__`) |
 
-**Why `@`:** `pl.Expr` owns `|` — `@` (`__matmul__`) is the only operator polars does not define, so `expr @ Primitive` falls through to `Primitive.__rmatmul__` cleanly. Unifying on `@` removes the pandas-vs-polars syntax split.
+**Why constructor-first:** immune to the pandas-Expression `@` trap, no precedence parens (`(expr < 30) @ Stripes()` vs `Stripes(expr < 30)`), discoverable via signature help, and finchart has no binding operator at all (constructor-only).
 
-**Implementation in model.py:**
-- `Indicator.__pandas_priority__ = 5000` — preempts `DataFrame.__or__`, enables `prices | SMA(50)`
-- `Indicator.__or__` — chains with any callable (including lambdas) via `IndicatorChain`
-- `Indicator.__ror__` — chains with another Indicator or applies to data
-- `BindingPrimitive.__rmatmul__` — accepts any indicator-like (pl.Expr, callable); clones with indicator bound
-- `BindingPrimitive.__ror__` — deprecated binding via `|`; emits DeprecationWarning
-=======
-| `prices \| SMA(50)` | apply indicator to data (left-to-right) |
-| `SMA(50) \| ROC(1)` | chain indicators left-to-right |
-| `SMA(50) @ LinePlot()` | bind indicator to a primitive |
-| `pl_expr @ LinePlot()` | bind expression to a primitive (polars only) |
+**Why `@` for the operator:** `pl.Expr` owns `|` and arithmetic; `@` is the operator polars does not define, so `pl_expr @ Primitive` falls through to `Primitive.__rmatmul__` cleanly.
 
-**Why:** `pl.Expr` owns `|`, `>>`, and arithmetic operators. `@` (`__matmul__`) is the only operator polars does not define — so `pl_expr @ Primitive` falls through to `Primitive.__rmatmul__` cleanly. Indicator-binding uses `@` too for uniformity.
+**Implementation in `model/primitive.py`:**
+- `BindingPrimitive` — base for `LinePlot`, `AreaPlot`, `BarPlot`, `Stripes`, `Markers`, `Peaks`; holds `indicator` as first positional arg, `__rmatmul__` (accepts any `is_indicator_like`; clones with indicator bound), and deprecated `__ror__`.
+- `AutoPlot` is the exception: its constructor takes only `label`, so `@` (or `clone(indicator=...)`) is the only binding path there.
 
-**Implementation in model.py:**
-- `Indicator.__pandas_priority__ = 5000` — preempts `DataFrame.__or__`, enables `prices | SMA(50)`
-- `Indicator.__or__` / `__ror__` — chains with another Indicator or applies to data
-- `BindingPrimitive.__rmatmul__` — accepts any `is_indicator_like` (Indicator, pl.Expr, pd.Expression, callable); clones with indicator bound. Concrete primitives (LinePlot, AreaPlot, AutoPlot, etc.) inherit from `BindingPrimitive`.
-- `BindingPrimitive.__ror__` — **deprecated alias**: `indicator | primitive` still works but emits `DeprecationWarning` directing to `@`.
->>>>>>> Stashed changes
+**`Stripes`/`Markers` pattern:** compose the condition first — `Stripes(RSI().as_expr() < 30)` (pandas) or `Stripes(RSI() < 30)` (polars expressions).
 
-**BindingPrimitive base class** (in `model.py`):
-- All indicator-bindable primitives inherit from it: `LinePlot`, `AreaPlot`, `BarPlot`, `Stripes`, `Markers`, `Peaks`, `AutoPlot`
-- Holds `indicator = None`, `__init__(self, indicator=None)`, `__rmatmul__`, `__ror__`
-- `indicator` is first positional arg — `LinePlot(SMA(50), color="red")` works
-- `Stripes` and `Markers` have no `expr` param — compose the condition before binding
-
-**`Stripes` / `Markers` pattern:**
-```python
-(RSI() | (lambda s: s < 30)) @ Stripes(color="green")   # pandas
-(RSI() < 30) @ Stripes(color="green")                    # polars
-```
+**Open design question (cross-project):** `|` for indicator chaining (`DEMA(20) | ROC(1)`) operates at the concrete/data level, while polars pipes compose at the expression level — a known semantic mismatch. Decision deferred to mintalib, where the same indicator/expression duality exists; any change must be consistent across both libraries. Status: `|` chaining is acceptable-as-is until the mintalib direction is decided.
