@@ -16,7 +16,7 @@ class Pane(Primitive):
         yticks (tuple): y-axis tick values (also draws heavy grid lines)
 
     Examples:
-        chart.plot(Pane("below", yticks=(30, 50, 70)), RSI(14) @ LinePlot())
+        chart.plot(Pane("below", yticks=(30, 50, 70)), LinePlot(RSI(14)))
     """
 
     def __init__(self, target="below", *, height_ratio=None, yticks=None):

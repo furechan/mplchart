@@ -1,5 +1,7 @@
 # Architecture
 
+Design notes: [axes-stickiness.md](axes-stickiness.md) — pane vs axes vocabulary and current-pane semantics.
+
 ## Module layout
 
 | Module | Role |

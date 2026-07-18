@@ -17,10 +17,11 @@ class Primitive(ABC):
     calculation pipeline. They implement ``apply_to_chart`` which is invoked
     before any indicator calculation takes place.
 
-    Primitives support the ``@`` operator to bind an indicator or expression::
+    Binding primitives take an indicator or expression as first argument;
+    the ``@`` operator is an equivalent alternative::
 
-        SMA(50) @ LinePlot(style="dashed", color="blue")   # indicator
-        RSI()   @ LinePlot(overbought=70)                  # polars expression
+        LinePlot(SMA(50), style="dashed", color="blue")    # constructor form
+        SMA(50) @ LinePlot(style="dashed", color="blue")   # operator form
     """
 
     __repr__ = short_repr
@@ -65,5 +66,9 @@ class BindingPrimitive(Primitive):
     def __ror__(self, indicator):
         if not callable(indicator):
             return NotImplemented
-        warnings.warn("Use @ to bind an indicator to a primitive.", DeprecationWarning, stacklevel=2)
+        warnings.warn(
+            "Pass the indicator to the primitive constructor (or bind with @).",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self.clone(indicator=indicator)

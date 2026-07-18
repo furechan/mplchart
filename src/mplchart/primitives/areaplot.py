@@ -15,12 +15,11 @@ class AreaPlot(BindingPrimitive):
         item (str) :  name of the column to plot. default None
         color (str) : color name or value
         alpha (float) : opacity value between 0.0 and 1.0
-        target (str) : target pane as like 'same', 'above', 'below'
         label (str) : plot label
 
     Examples:
-        SMA(50) @ AreaPlot(color="red", alpha=0.5)
         AreaPlot(SMA(50), color="red", alpha=0.5)
+        SMA(50) @ AreaPlot(color="red", alpha=0.5)
     """
 
     def __init__(
@@ -30,7 +29,6 @@ class AreaPlot(BindingPrimitive):
         item: str | None = None,
         color: str | None = None,
         alpha: float | None = None,
-        target: str | None = None,
         label: str | None = None,
     ):
         if isinstance(indicator, str):
@@ -41,11 +39,10 @@ class AreaPlot(BindingPrimitive):
         self.item = item
         self.color = color
         self.alpha = alpha
-        self.target = target
         self.label = label
 
     def apply_to_chart(self, chart):
-        ax = chart.get_axes(self.target)
+        ax = chart.get_axes()
 
         result = chart.calc_result(self.indicator)
 

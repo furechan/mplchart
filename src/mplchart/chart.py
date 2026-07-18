@@ -35,13 +35,13 @@ How primitives/indicators are plotted
 class Chart:
     """Main charting class for creating financial charts with technical indicators.
 
-    Creates a matplotlib figure with one or more panes. The first call to
-    ``plot()`` initializes the date mapper from the prices DataFrame. Subsequent
-    calls add indicators to existing or new panes.
+    Creates a matplotlib figure with one or more panes. Prices are required at
+    initialization and set up the date mapper; calls to ``plot()`` add
+    indicators to existing or new panes.
 
     Args:
-        prices (DataFrame, optional): OHLCV prices DataFrame used to initialize
-            the date mapper immediately. Can also be passed to ``plot()`` later.
+        prices (DataFrame): OHLCV prices DataFrame (pandas or polars), used to
+            initialize the date mapper. Required.
         title (str, optional): Chart title displayed above the main pane.
         max_bars (int, optional): Maximum number of bars to display. When set,
             only the most recent ``max_bars`` bars are shown.
@@ -53,6 +53,9 @@ class Chart:
             Defaults to ``(12, 9)``.
         holidays (list, optional): List of dates to exclude from the x-axis
             when using the integer date mapper.
+        normalize (bool): If True, normalize the prices DataFrame first
+            (lowercase columns, promote a date/datetime column to the index).
+            Defaults to False.
         raw_dates (bool, optional): If True, use ``RawDateMapper`` — the
             x-axis coordinates are actual datetime values and matplotlib
             handles date formatting natively. Defaults to False, which uses
@@ -63,8 +66,8 @@ class Chart:
             ``colorup``, ``colordn``, ``bgcolor``).
 
     Examples:
-        chart = Chart(title="AAPL", max_bars=252)
-        chart.plot(prices, [Candlesticks(), SMA(50), Volume()])
+        chart = Chart(prices, title="AAPL", max_bars=252)
+        chart.plot([Candlesticks(), SMA(50), Volume()])
         chart.show()
     """
 
@@ -164,9 +167,8 @@ class Chart:
             datetime_array=datetime_array, start=self.start, end=self.end, max_bars=self.max_bars
         )
 
-        if self.mapper:
-            ax = self.root_axes()
-            self.mapper.config_axes(ax)
+        ax = self.root_axes()
+        self.mapper.config_axes(ax)
 
         return prices
 
@@ -312,7 +314,7 @@ class Chart:
 
     @staticmethod
     def valid_target(target):
-        """whether the target bname is valid"""
+        """whether the target name is valid"""
         return target in ("main", "same", "samex", "twinx", "above", "below")
 
     def get_axes(self, target=None, *, height_ratio=None):
@@ -320,7 +322,8 @@ class Chart:
         select existing axes or creates new axes depending on target
 
         Args:
-            target: one of "main", "same", twinx", "above", "below"
+            target: one of "main", "same" ("samex" is an alias), "twinx",
+                "above", "below"
         """
 
         if target is None:
@@ -414,9 +417,6 @@ class Chart:
     def plot_indicator(self, indicator):
         """calculate and plot an indicator"""
 
-        if self.prices is None:
-            raise ValueError("No prices data provided!")
-
         # Call the primitive's apply_to_chart if defined (before any calc)
         # this is the only location where apply_to_chart is called
         # apply_to_chart is currently defined only for Primitives
@@ -429,8 +429,7 @@ class Chart:
         # is wrapped in the default AutoPlot primitive and dispatched through its
         # apply_to_chart — the single auto-plot code path.
         if is_indicator_like(indicator):
-            autoplot = AutoPlot().clone(indicator=indicator)
-            autoplot.apply_to_chart(self)
+            AutoPlot(indicator).apply_to_chart(self)
             return
 
         raise ValueError(f"Indicator {indicator!r} not callable")
@@ -447,27 +446,24 @@ class Chart:
                     loc = "upper left"
                 ax.legend(loc=loc)
 
-    def plot(self, *args, target: str | None = "same"):
+    def plot(self, *args):
         """Plot one or more indicators onto the chart.
 
         Args:
             *args: Any number of indicators or lists of indicators. Indicators may be
                 ``Indicator`` instances, ``Primitive`` instances, or any callable
-                that accepts a prices DataFrame.
-            target (str or None): Target pane for the first indicator in this
-                call. One of ``"same"``, ``"main"``, ``"above"``, ``"below"``,
-                ``"twinx"``. Use ``None`` to let each indicator choose its own
-                pane. Defaults to ``"same"``.
+                that accepts a prices DataFrame. Use ``pane()`` or the ``Pane``
+                primitive to select or create the target pane.
 
         Returns:
             Chart: ``self``, for method chaining.
 
         Examples:
             chart.plot(Candlesticks(), Volume())
-            chart.plot(RSI(14), target="above)
-            chart.plot(MACD(), target="below")
+            chart.pane("above").plot(RSI(14))
+            chart.plot(Pane("below"), MACD())
         """
-        
+
         indicators = [
             y for arg in args for y in (arg if isinstance(arg, list) else (arg,))
         ]
@@ -475,13 +471,11 @@ class Chart:
         if not indicators:
             raise ValueError("No indicators provided!")
 
-        if self.prices is None:
-            raise ValueError("Np prices data provided!")
-    
         self.last_result = None
 
-        if target:
-            self.get_axes(target)
+        # ensure a main pane exists — root-drawing primitives (e.g. Stripes)
+        # never create one themselves
+        self.get_axes()
 
         for indicator in indicators:
             self.plot_indicator(indicator)

@@ -21,14 +21,13 @@ class LinePlot(BindingPrimitive):
         width (float) : line width override
         color (str) : color name or value
         alpha (float) : opacity value between 0.0 and 1.0
-        target (str) : target pane as 'same', 'above', 'below'
         overbought (float) : level above which to shade a fill-between band
         oversold (float) : level below which to shade a fill-between band
 
     Examples:
-        SMA(50) @ LinePlot(style="dashdot", color="red")
         LinePlot(SMA(50), style="dashdot", color="red")
-        RSI(14) @ LinePlot(overbought=70, oversold=30)
+        LinePlot(RSI(14), overbought=70, oversold=30)
+        SMA(50) @ LinePlot(style="dashdot", color="red")
     """
 
     def __init__(
@@ -42,7 +41,6 @@ class LinePlot(BindingPrimitive):
         width: float | None = None,
         color: str | None = None,
         alpha: float | None = None,
-        target: str | None = None,
         overbought: float | None = None,
         oversold: float | None = None,
     ):
@@ -62,12 +60,11 @@ class LinePlot(BindingPrimitive):
         self.color = color
         self.width = width
         self.alpha = alpha
-        self.target = target
         self.overbought = overbought
         self.oversold = oversold
 
     def apply_to_chart(self, chart):
-        ax = chart.get_axes(self.target)
+        ax = chart.get_axes()
 
         result = chart.calc_result(self.indicator)
 

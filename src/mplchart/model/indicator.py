@@ -15,11 +15,12 @@ class Indicator(ABC):
     a multi-column DataFrame should set ``output_names`` to the tuple of column
     names so that single-output APIs (e.g. ``as_expr``) can reject them.
 
-    Use ``@`` to bind an indicator to a rendering primitive, and ``|`` to
+    Pass an indicator to a rendering primitive to customize display (the
+    ``@`` binding operator is an equivalent alternative), and use ``|`` to
     chain indicators. Apply an indicator to data with ``indicator(prices)``
     or ``prices.pipe(indicator)``::
 
-        RSI(14) @ LinePlot(overbought=70)  # bind to a primitive
+        LinePlot(RSI(14), overbought=70)   # bind to a primitive
         SMA(50) | EMA(20)                  # chain: apply SMA then EMA
         prices.pipe(SMA(50))               # apply indicator to data
     """

@@ -9,21 +9,21 @@ class AutoPlot(BindingPrimitive):
 
     Auto-plots an expression or indicator with default styling. Used implicitly
     when plotting anything that is not already a ``Primitive``; can also be
-    applied explicitly via ``@`` to override the legend label.
+    applied explicitly to override the legend label.
 
     Args:
+        indicator: indicator or expression to plot. Can also be bound via ``@``.
         label (str): override the legend label. When ``None``, the label is
             derived from the expression/indicator via ``get_label``.
 
     Examples:
         chart.plot(SMA(20))                                # implicit AutoPlot
-        chart.plot(SMA(20) @ AutoPlot(label="short_ma"))   # explicit override
-        chart.plot(MACD() @ AutoPlot(label="macd"))
+        chart.plot(AutoPlot(SMA(20), label="short_ma"))    # explicit override
+        chart.plot(MACD() @ AutoPlot(label="macd"))        # operator form
     """
 
-    indicator = None
-
-    def __init__(self, *, label: str | None = None):
+    def __init__(self, indicator=None, *, label: str | None = None):
+        super().__init__(indicator)
         self.label = label
 
     def apply_to_chart(self, chart):

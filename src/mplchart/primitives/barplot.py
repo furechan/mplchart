@@ -16,12 +16,11 @@ class BarPlot(BindingPrimitive):
         color (str) : color name or value
         alpha (float) : opacity value between 0.0 and 1.0
         width (float) : bar width setting
-        target (str) : target pane as 'same', 'above', 'below'
         label (str) : plot label
 
     Examples:
-        SMA(50) @ BarPlot(color="red", alpha=0.5)
         BarPlot(SMA(50), color="red", alpha=0.5)
+        SMA(50) @ BarPlot(color="red", alpha=0.5)
     """
 
     def __init__(
@@ -32,7 +31,6 @@ class BarPlot(BindingPrimitive):
         color: str | None = None,
         alpha: float | None = None,
         width: float | None = None,
-        target: str | None = None,
         label: str | None = None,
     ):
         if isinstance(indicator, str):
@@ -47,11 +45,10 @@ class BarPlot(BindingPrimitive):
         self.color = color
         self.alpha = alpha
         self.width = width
-        self.target = target
         self.label = label
 
     def apply_to_chart(self, chart):
-        ax = chart.get_axes(self.target)
+        ax = chart.get_axes()
 
         result = chart.calc_result(self.indicator)
 
