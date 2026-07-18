@@ -31,29 +31,7 @@ Numpy Date and Time Units
 
 
 FREQ_VALUES = {
-    '1m': 1 / 1400,
-    '2m': 2 / 1440,
-    '5m': 5 / 1440,
-    '10m': 10 / 1440,
-    '20m': 20 / 1440,
-    '30m': 30 / 1440,
-    '1h': 1 / 24,
-    '2h': 2 / 24,
-    '1D': 1,
-    '2D': 2,
-    '1W': 7,
-    '2W': 14,
-    '1M': 30,
-    '3M': 90,
-    '1Y': 360,
-    '2Y': 720,
-    '5Y': 1800,
-    '10Y': 3600
-}
-
-
-FREQ_VALUES = {
-    'm': 1 / 1400,
+    'm': 1 / 1440,
     'h': 1 / 24,
     'D': 1,
     'W': 7,
@@ -102,13 +80,11 @@ def date_ticks(dates, count=10):
     interval = (dates[-1] - dates[0]) / count
     freq = interval_freq(interval)
 
-    if match := re.fullmatch(r'(\d+)([a-zA-Z]+)', freq):
-        step = int(match.group(1))
-        freq = match.group(2)
-    else:
-        step = 1
+    # strip any step prefix from the seconds fallback (e.g. "5400s" -> "s")
+    if match := re.fullmatch(r'\d+([a-zA-Z]+)', freq):
+        freq = match.group(1)
 
-    logger.debug("dates_ticks %r, %r, %r", interval, freq, step)
+    logger.debug("dates_ticks %r, %r", interval, freq)
 
     values = dates.astype(f"datetime64[{freq}]").astype(int)
     values = np.cumsum(np.r_[0, values[1:] != values[:-1]])
@@ -137,12 +113,7 @@ def date_labels(dates):
     if count <= 1:
         return [d.strftime("%Y-%b-%d") for d in dates]
     
-    formats = {
-        "%Y": "%Y",
-        "%b-%d": "%b-%d",
-        "%H:%M": "%H:%M",
-        "%S": "%S",
-    }
+    formats = ("%Y", "%b-%d", "%H:%M", "%S")
 
     labels = []
     pdate = dates[0] - (dates[1] - dates[0])
@@ -152,8 +123,6 @@ def date_labels(dates):
             label = date.strftime(fmt)
             prev = pdate.strftime(fmt)
             if label != prev:
-                fmt = formats[fmt]
-                label = date.strftime(fmt)
                 break
 
         labels.append(label)

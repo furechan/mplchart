@@ -247,10 +247,6 @@ def series_xy(data, item: str | None = None, *, dropna: bool = False):
     return x, y
 
 
-# QUESTION Do we need both get_series and series_data methods
-# They are the same except for the default_item paramater
-
-
 def series_data(data, item=None, *, default_item: str | None = None):
     """extract series data depending on data type and parameters"""
 

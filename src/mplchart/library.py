@@ -53,7 +53,7 @@ def calc_hma(series, period: int = 20):
     if period <= 0:
         raise ValueError("period must be greater than zero")
 
-    m1 = calc_wma(series, round(period / 2))
+    m1 = calc_wma(series, period // 2)
     m2 = calc_wma(series, period)
     m3 = (2 * m1) - m2
 
@@ -65,11 +65,9 @@ def calc_hma(series, period: int = 20):
 
 def calc_rsi(series, period: int = 14):
     """Relative Strength Index"""
-    ewm = dict(alpha=1.0 / period, min_periods=period, adjust=True, ignore_na=True)
-
     diff = series.diff()
-    ups = diff.clip(lower=0).ewm(**ewm).mean()
-    downs = diff.clip(upper=0).abs().ewm(**ewm).mean()
+    ups = calc_rma(diff.clip(lower=0), period)
+    downs = calc_rma(diff.clip(upper=0).abs(), period)
     result = 100.0 - (100.0 / (1.0 + ups / downs))
     return result
 
@@ -84,7 +82,7 @@ def calc_bop(prices, period: int = 14):
 
 
 def calc_cmf(prices, period: int = 20):
-    """Chaiking Money Flow"""
+    """Chaikin Money Flow"""
 
     mult = (2 * prices.close - prices.high - prices.low) / (prices.high - prices.low) * prices.volume
     num = mult.rolling(window=period).sum()
@@ -131,12 +129,10 @@ def calc_wclprice(prices):
 def calc_atr(prices, period: int = 14, *, percent: bool = False):
     """Average True Range"""
 
-    hlc = prices.filter(["high", "low"]).join(prices["close"].shift(1))
-    trange = hlc.max(axis=1) - hlc.min(axis=1)
+    trange = calc_trange(prices)
 
     if period > 0:
-        ewm = dict(alpha=1 / period, min_periods=period, adjust=True, ignore_na=True)
-        result = trange.ewm(**ewm).mean()
+        result = calc_rma(trange, period)
     else:
         result = trange
 
@@ -147,7 +143,7 @@ def calc_atr(prices, period: int = 14, *, percent: bool = False):
 
 
 
-def calc_ppo(series, n1: int = 20, n2: int = 26, n3: int = 9):
+def calc_ppo(series, n1: int = 12, n2: int = 26, n3: int = 9):
     """Price Percentage Oscillator"""
     ema1 = calc_ema(series, n1)
     ema2 = calc_ema(series, n2)
@@ -159,7 +155,7 @@ def calc_ppo(series, n1: int = 20, n2: int = 26, n3: int = 9):
     return pd.DataFrame(result)
 
 
-def calc_macd(series, n1: int = 20, n2: int = 26, n3: int = 9):
+def calc_macd(series, n1: int = 12, n2: int = 26, n3: int = 9):
     """Moving Average Convergence Divergence"""
     ema1 = calc_ema(series, n1)
     ema2 = calc_ema(series, n2)
@@ -171,7 +167,7 @@ def calc_macd(series, n1: int = 20, n2: int = 26, n3: int = 9):
     return pd.DataFrame(result)
 
 
-def calc_macdv(prices, n1: int = 20, n2: int = 26, n3: int = 9):
+def calc_macdv(prices, n1: int = 12, n2: int = 26, n3: int = 9):
     """Moving Average Convergence Divergence - Volatility Normalized"""
     ema1 = calc_ema(prices.close, n1)
     ema2 = calc_ema(prices.close, n2)
@@ -188,8 +184,6 @@ def calc_macdv(prices, n1: int = 20, n2: int = 26, n3: int = 9):
 def calc_dmi(prices, period: int = 14):
     """Directional Movement Index"""
 
-    ewm = dict(alpha=1 / period, min_periods=period, adjust=True, ignore_na=True)
-
     atr = calc_atr(prices, period)
 
     hm = prices.high.diff(1)
@@ -198,11 +192,11 @@ def calc_dmi(prices, period: int = 14):
     pdm = hm.where((hm > lm) & (hm > 0), 0)
     ndm = lm.where((lm > hm) & (lm > 0), 0)
 
-    pdi = 100 * pdm.ewm(**ewm).mean() / atr
-    ndi = 100 * ndm.ewm(**ewm).mean() / atr
+    pdi = 100 * calc_rma(pdm, period) / atr
+    ndi = 100 * calc_rma(ndm, period) / atr
 
     dx = 100 * np.abs(pdi - ndi) / (pdi + ndi)
-    adx = dx.ewm(**ewm).mean()
+    adx = calc_rma(dx, period)
 
     result = dict(adx=adx, pdi=pdi, ndi=ndi)
     return pd.DataFrame(result)
@@ -213,17 +207,6 @@ def calc_adx(prices, period: int = 14):
 
     return calc_dmi(prices, period).adx
 
-
-def calc_pdi(prices, period: int = 14):
-    """Positive Directional Indicator"""
-
-    return calc_dmi(prices, period).pdi
-
-
-def calc_ndi(prices, period: int = 14):
-    """Negative Directional Indicator"""
-
-    return calc_dmi(prices, period).ndi
 
 
 def calc_stoch(prices, period: int = 14, fastn: int = 3, slown: int = 3):
@@ -237,15 +220,12 @@ def calc_stoch(prices, period: int = 14, fastn: int = 3, slown: int = 3):
     slowk = calc_sma(fastk, fastn)
     slowd = calc_sma(slowk, slown)
 
-    slowk = fastk.rolling(window=fastn).mean()
-    slowd = slowk.rolling(window=slown).mean()
-
     return pd.DataFrame(dict(slowk=slowk, slowd=slowd))
 
 
 def calc_bbands(prices, period: int = 20, nbdev: float = 2.0):
     """Bollinger Bands"""
-    prc = (prices["high"] + prices["low"] + prices["close"]) / 3.0
+    prc = prices["close"]
     std = prc.rolling(period).std(ddof=0)
     middle = prc.rolling(period).mean()
     upper = middle + nbdev * std
@@ -257,7 +237,7 @@ def calc_bbands(prices, period: int = 20, nbdev: float = 2.0):
 
 def calc_bbp(prices, period: int = 20, nbdev: float = 2.0):
     """Bollinger Bands Percent (%B)"""
-    prc = (prices["high"] + prices["low"] + prices["close"]) / 3.0
+    prc = prices["close"]
     std = prc.rolling(period).std(ddof=0)
     middle = prc.rolling(period).mean()
     upper = middle + nbdev * std
@@ -269,7 +249,7 @@ def calc_bbp(prices, period: int = 20, nbdev: float = 2.0):
 
 def calc_bbw(prices, period: int = 20, nbdev: float = 2.0):
     """Bollinger Bands Width"""
-    prc = (prices["high"] + prices["low"] + prices["close"]) / 3.0
+    prc = prices["close"]
     std = prc.rolling(period).std(ddof=0)
     middle = prc.rolling(period).mean()
     upper = middle + nbdev * std

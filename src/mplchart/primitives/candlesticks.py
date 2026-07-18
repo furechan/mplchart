@@ -13,8 +13,9 @@ from ..utils import col_to_numpy
 class Candlesticks(Primitive):
     """Candlesticks primitive.
 
-    Plots OHLC prices as candlestick chart. Up-bars (close ≥ open) are drawn
-    hollow (fill matches the background); down-bars (close < open) are filled.
+    Plots OHLC prices as candlestick chart. Up-bars (close ≥ previous close)
+    are drawn hollow (fill matches the background); down-bars (close < previous
+    close) are filled.
 
     Args:
         width (float): Width of each candlestick body as a fraction of bar
@@ -71,17 +72,9 @@ class Candlesticks(Primitive):
 
 
 def plot_cspoly(
-    data, xvalues, *, ax=None, width=0.6, alpha=0.2, colorup=None, colordn=None, coloroff=None, label=None
+    data, xvalues, *, ax, width, alpha, colorup, colordn, coloroff, label=None
 ):
     """plots candlesticks as polygons"""
-
-    ax = ax or plt.gca()
-
-    textcolor = plt.rcParams["text.color"]
-    facecolor_ = plt.rcParams["axes.facecolor"]
-    colorup = colorup or textcolor
-    colordn = colordn or textcolor
-    coloroff = coloroff or facecolor_
 
     high   = col_to_numpy(data, "high")
     low    = col_to_numpy(data, "low")
@@ -137,17 +130,9 @@ def plot_cspoly(
 
 
 def plot_csbars(
-    data, xvalues, *, ax=None, width=0.6, alpha=0.2, colorup=None, colordn=None, coloroff=None, label=None
+    data, xvalues, *, ax, width, alpha, colorup, colordn, coloroff, label=None
 ):
     """plots candlesticks as bars"""
-
-    ax = ax or plt.gca()
-
-    textcolor = plt.rcParams["text.color"]
-    facecolor_ = plt.rcParams["axes.facecolor"]
-    colorup = colorup or textcolor
-    colordn = colordn or textcolor
-    coloroff = coloroff or facecolor_
 
     high   = col_to_numpy(data, "high")
     low    = col_to_numpy(data, "low")

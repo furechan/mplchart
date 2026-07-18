@@ -14,7 +14,7 @@ def SMA(period: int = 20, *, src: pl.Expr = CLOSE) -> pl.Expr:
 @wrap_expression
 def EMA(period: int = 20, *, src: pl.Expr = CLOSE) -> pl.Expr:
     """Exponential Moving Average"""
-    return src.ewm_mean(span=period, min_samples=period)
+    return src.ewm_mean(span=period, min_samples=period, adjust=False, ignore_nulls=True)
 
 
 @wrap_expression
@@ -26,11 +26,10 @@ def RMA(period: int = 14, *, src: pl.Expr = CLOSE) -> pl.Expr:
 @wrap_expression
 def WMA(period: int = 20, *, src: pl.Expr = CLOSE) -> pl.Expr:
     """Weighted Moving Average"""
-    weights = [w / (period * (period + 1) / 2) for w in range(1, period + 1)]
-    # rolling_sum with weights panics on null values; sum weighted shifts instead
-    return pl.sum_horizontal(
-        src.shift(period - 1 - i) * w for i, w in enumerate(weights)
-    ).set_sorted(descending=False)
+    weights = [float(w) for w in range(1, period + 1)]
+    # rolling_mean with weights does not support nulls so we replace them with nans
+    src = src.fill_null(float("nan"))
+    return src.rolling_mean(period, weights=weights).fill_nan(None)
 
 
 @wrap_expression

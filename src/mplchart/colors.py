@@ -17,4 +17,4 @@ def closest_color(color, color_cycle=None):
 
     dist = [distance(color, c) for c in color_cycle]
     argmin = min(range(len(dist)), key=lambda i: dist[i])
-    return f"C{argmin}"
+    return color_cycle[argmin]

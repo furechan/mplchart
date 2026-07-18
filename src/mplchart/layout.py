@@ -7,7 +7,7 @@ from matplotlib.gridspec import GridSpec
 def make_twinx(ax, label="twinx"):
     """
     Creates a twin x axes and configures y axes to the left
-    This is contrast to what Axes.tinwx does by default
+    This is in contrast to what Axes.twinx does by default
     """
 
     ax2 = ax._make_twin_axes(sharex=ax)
@@ -37,7 +37,7 @@ def init_vplot(figure, *, label="root"):
 
 def add_vplot(figure, *, label=None, height_ratio=1.0, append=True):
     """
-    Return or create new plots vertically respecting height rations
+    Return or create new plots vertically respecting height ratios
     This version uses add_subplot api
     Requires tight_layout=True!
     """

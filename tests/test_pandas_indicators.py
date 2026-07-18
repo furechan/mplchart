@@ -46,6 +46,11 @@ def test_prices(freq):
     assert len(prices) > 0
 
 
+def test_prices_invalid_freq():
+    with pytest.raises(ValueError, match="weekly"):
+        sample_prices(freq="weekly")
+
+
 @pytest.mark.parametrize("freq", FREQS)
 @pytest.mark.parametrize("indicator", INDICATORS, ids=str)
 def test_indicators(indicator, freq, max_bars=250):
@@ -54,6 +59,12 @@ def test_indicators(indicator, freq, max_bars=250):
     chart.plot([Candlesticks(), indicator])
     assert chart.count_axes() > 0
     plt.close()
+
+
+def test_stoch_params():
+    """STOCH must honor fastn/slown (regression: they were silently ignored)"""
+    prices = sample_prices()
+    assert not STOCH(14, 3, 3)(prices).equals(STOCH(14, 5, 5)(prices))
 
 
 def test_indicator_chain_indicator_to_indicator():

@@ -56,10 +56,10 @@ def DMI(period: int = 14, *, high: pl.Expr = HIGH, low: pl.Expr = LOW, close: pl
     lm  = -low.diff()
     pdm = pl.when((hm > lm) & (hm > 0)).then(hm).otherwise(0)
     ndm = pl.when((lm > hm) & (lm > 0)).then(lm).otherwise(0)
-    pdi = 100 * pdm.ewm_mean(alpha=1/period, min_samples=period, adjust=True) / atr
-    ndi = 100 * ndm.ewm_mean(alpha=1/period, min_samples=period, adjust=True) / atr
+    pdi = 100 * RMA(period, src=pdm) / atr
+    ndi = 100 * RMA(period, src=ndm) / atr
     dx  = 100 * (pdi - ndi).abs() / (pdi + ndi)
-    adx = dx.ewm_mean(alpha=1/period, min_samples=period, adjust=True)
+    adx = RMA(period, src=dx)
     return pl.struct(adx.alias("adx"), pdi.alias("pdi"), ndi.alias("ndi"))
 
 

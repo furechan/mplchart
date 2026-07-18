@@ -1,6 +1,5 @@
 """Sample prices data"""
 
-from functools import lru_cache
 from importlib import resources
 
 
@@ -8,11 +7,8 @@ TIMEZONE = "America/New_York"
 SAMPLE_FREQUENCIES = "daily", "hourly", "minute"
 
 
-@lru_cache
 def sample_prices(freq: str = "daily", *, max_bars: int = 0, backend: str = "pandas"):
     """Load bundled sample OHLCV prices for testing and examples.
-
-    Results are cached after the first call (per unique combination of arguments).
 
     Args:
         freq (str): Data frequency. One of ``"daily"``, ``"hourly"``, or
@@ -27,6 +23,9 @@ def sample_prices(freq: str = "daily", *, max_bars: int = 0, backend: str = "pan
         DataFrame: OHLCV prices with a datetime index (pandas) or datetime
         column (polars).
     """
+
+    if freq not in SAMPLE_FREQUENCIES:
+        raise ValueError(f"Unknown freq {freq!r}, expected one of {SAMPLE_FREQUENCIES}")
 
     fname = f"{freq}-prices.csv"
     path = resources.files(__name__).joinpath(fname)

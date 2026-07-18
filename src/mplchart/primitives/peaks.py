@@ -17,6 +17,11 @@ class Peaks(BindingPrimitive):
     high (or lowest low) within a window of ``2 * span + 1`` bars centered on
     that bar.
 
+    Operates on the result of the last plotted indicator if one precedes it in
+    the same ``plot()`` call (e.g. ``[SMA(50), Peaks()]`` finds peaks of the
+    SMA); otherwise uses the ``high``/``low`` columns of the prices DataFrame.
+    An indicator can also be bound explicitly with ``@``.
+
     Args:
         span (int): Minimum number of bars required on each side of a local
             extremum for it to qualify as a peak or valley. Defaults to 1.

@@ -2,6 +2,8 @@
 
 import numpy as np
 
+from abc import ABC, abstractmethod
+
 from .locators import DTArrayLocator
 from .formatters import DTArrayFormatter
 
@@ -18,15 +20,15 @@ def _resolve_window(datetime_array, start, end, max_bars) -> slice:
     return slice(lo, hi)
 
 
-class DateIndexMapper:
-    """Date Index Mapper — maps dates to integer row positions (rownum).
+class BaseDateMapper(ABC):
+    """Shared date mapper machinery.
 
     Stores the full tz-naive numpy datetime array; the visible window is
-    resolved internally from ``start`` / ``end`` / ``max_bars``. Indicators
-    are computed on the full dataset; only the final slice is handed to
-    the plotter.
-    X-axis coordinates are integer rownums; ``DTArrayLocator`` /
-    ``DTArrayFormatter`` map those ticks back to date labels.
+    resolved internally from ``start`` / ``end`` / ``max_bars``.
+
+    Subclasses define ``rownum`` — the full-length array of x-coordinates —
+    plus ``slice_pandas`` and ``map_date``. ``config_axes`` defaults to a
+    no-op.
 
     Args:
         datetime_array: Full datetime array from the prices DataFrame.
@@ -35,9 +37,10 @@ class DateIndexMapper:
         end: End datetime filter.
     """
 
+    rownum: np.ndarray
+
     def __init__(self, datetime_array: np.ndarray, *, max_bars=None, start=None, end=None):
         self.datetime_array = np.asarray(datetime_array, dtype="datetime64[ns]")
-        self.rownum = np.arange(len(self.datetime_array))
         self.max_bars = max_bars
         self.start = start
         self.end = end
@@ -45,6 +48,13 @@ class DateIndexMapper:
     def _calc_window(self) -> slice:
         """Return the visible window as an absolute slice into datetime_array."""
         return _resolve_window(self.datetime_array, self.start, self.end, self.max_bars)
+
+    @staticmethod
+    def _to_datetime64(date) -> np.datetime64:
+        """Convert a date to tz-naive datetime64[ns] (wall time)."""
+        if hasattr(date, "tzinfo") and date.tzinfo is not None:
+            date = date.replace(tzinfo=None)
+        return np.datetime64(date, "ns")
 
     def series_xy(self, *values):
         """Return (x, *sliced_values) numpy arrays.
@@ -55,7 +65,7 @@ class DateIndexMapper:
             xs, y = mapper.series_xy(y)
             xs, flag, close = mapper.series_xy(flag, close)
 
-        x is ``rownum[window]`` — integer row positions.
+        x is ``rownum[window]`` — the subclass-defined x-coordinates.
         """
         window = self._calc_window()
         xs = self.rownum[window]
@@ -65,14 +75,14 @@ class DateIndexMapper:
         """Slice data to the visible window, dispatching by backend.
 
         If ``xcol`` is given, adds a column of that name to the result
-        carrying the x-coordinates (rownum values) for the window.
+        carrying the x-coordinates for the window.
         """
         if hasattr(data, "index"):
             return self.slice_pandas(data, xcol=xcol)
         return self.slice_polars(data, xcol=xcol)
 
     def slice_polars(self, data, *, xcol=None):
-        """Positional slice — assumes full-length, rownum-positional data."""
+        """Positional slice — assumes full-length polars data."""
         import polars as pl
 
         window = self._calc_window()
@@ -80,6 +90,33 @@ class DateIndexMapper:
         if xcol is not None:
             sliced = sliced.with_columns(pl.Series(xcol, self.rownum[window]))
         return sliced
+
+    @abstractmethod
+    def slice_pandas(self, data, *, xcol=None):
+        """Slice pandas data to the visible window."""
+        ...
+
+    @abstractmethod
+    def map_date(self, date) -> int | np.datetime64:
+        """Map a single date to its x-coordinate."""
+        ...
+
+    def config_axes(self, ax):
+        """Configure the x-axis — default no-op."""
+
+
+class DateIndexMapper(BaseDateMapper):
+    """Date Index Mapper — maps dates to integer row positions (rownum).
+
+    Indicators are computed on the full dataset; only the final slice is
+    handed to the plotter.
+    X-axis coordinates are integer rownums; ``DTArrayLocator`` /
+    ``DTArrayFormatter`` map those ticks back to date labels.
+    """
+
+    def __init__(self, datetime_array: np.ndarray, *, max_bars=None, start=None, end=None):
+        super().__init__(datetime_array, max_bars=max_bars, start=start, end=end)
+        self.rownum = np.arange(len(self.datetime_array))
 
     def slice_pandas(self, data, *, xcol=None):
         """Align pandas data by datetime and re-index to rownum positions."""
@@ -101,22 +138,15 @@ class DateIndexMapper:
 
     def map_date(self, date) -> int:
         """Map a single date to its x-coordinate (rownum position)."""
-        if hasattr(date, "tzinfo") and date.tzinfo is not None:
-            date = date.replace(tzinfo=None)
-        return int(np.searchsorted(self.datetime_array, np.datetime64(date, "ns"), side="left"))
+        return int(np.searchsorted(self.datetime_array, self._to_datetime64(date), side="left"))
 
     def config_axes(self, ax):
         """Set locator and formatter on the x-axis using the full datetime array."""
-        locator = DTArrayLocator(self.datetime_array)
-        formatter = DTArrayFormatter(self.datetime_array)
-
-        if locator:
-            ax.xaxis.set_major_locator(locator)
-        if formatter:
-            ax.xaxis.set_major_formatter(formatter)
+        ax.xaxis.set_major_locator(DTArrayLocator(self.datetime_array))
+        ax.xaxis.set_major_formatter(DTArrayFormatter(self.datetime_array))
 
 
-class RawDateMapper:
+class RawDateMapper(BaseDateMapper):
     """Raw Date Mapper — uses datetime values as x-axis coordinates.
 
     Alternative to ``DateIndexMapper`` that skips the integer rownum
@@ -128,57 +158,13 @@ class RawDateMapper:
     primitive code is agnostic to the mapper choice. The only semantic
     difference is that ``rownum`` / ``series_xy``'s x values are datetimes
     rather than integer positions.
-
-    Args:
-        datetime_array: Full datetime array from the prices DataFrame.
-        max_bars: Maximum number of bars to show (from the end).
-        start: Start datetime filter.
-        end: End datetime filter.
     """
 
     def __init__(self, datetime_array: np.ndarray, *, max_bars=None, start=None, end=None):
-        self.datetime_array = np.asarray(datetime_array, dtype="datetime64[ns]")
+        super().__init__(datetime_array, max_bars=max_bars, start=start, end=end)
         # `rownum` on RawDateMapper returns the datetime array itself, so
         # primitives using `chart.mapper.rownum[window]` get date-valued xs.
         self.rownum = self.datetime_array
-        self.max_bars = max_bars
-        self.start = start
-        self.end = end
-
-    def _calc_window(self) -> slice:
-        """Return the visible window as an absolute slice into datetime_array."""
-        return _resolve_window(self.datetime_array, self.start, self.end, self.max_bars)
-
-    def series_xy(self, *values):
-        """Return (x, *sliced_values) numpy arrays.
-
-        Each positional argument must be a full-length array the same
-        length as ``datetime_array``; each is sliced to the same window.
-        x is ``datetime_array[window]`` — actual datetime values.
-        """
-        window = self._calc_window()
-        xs = self.datetime_array[window]
-        return (xs, *(np.asarray(v)[window] for v in values))
-
-    def slice(self, data, *, xcol=None):
-        """Slice data to the visible window, dispatching by backend.
-
-        If ``xcol`` is given, adds a column of that name carrying the
-        x-coordinates (datetime values) for the window.
-        """
-        if hasattr(data, "index"):
-            return self.slice_pandas(data, xcol=xcol)
-        return self.slice_polars(data, xcol=xcol)
-
-    def slice_polars(self, data, *, xcol=None):
-        """Positional slice — assumes full-length polars data."""
-        import polars as pl
-
-        window = self._calc_window()
-        sliced = data[window]
-        if xcol is not None:
-            sliced = sliced.with_columns(pl.Series(xcol, self.datetime_array[window]))
-        return sliced
 
     def slice_pandas(self, data, *, xcol=None):
         """Slice pandas data by date range; preserves the datetime index."""
@@ -195,10 +181,6 @@ class RawDateMapper:
             sliced[xcol] = sliced.index.values
         return sliced
 
-    def map_date(self, date):
+    def map_date(self, date) -> np.datetime64:
         """Map a single date to its x-coordinate (the date itself)."""
-        return np.datetime64(date, "ns")
-
-    def config_axes(self, ax):
-        """No-op — matplotlib handles datetime axes natively."""
-        pass
+        return self._to_datetime64(date)

@@ -104,14 +104,15 @@ class RMA(Indicator):
 class ROC(Indicator):
     """Rate of Change.
 
-    Measures the percentage change in price over a given number of bars.
-    Positive values indicate upward momentum; negative values indicate downward momentum.
+    Measures the fractional change in price over a given number of bars
+    (e.g. 0.05 for a 5% move). Positive values indicate upward momentum;
+    negative values indicate downward momentum.
 
     Args:
-        period (int): Lookback period in bars. Defaults to 20.
+        period (int): Lookback period in bars. Defaults to 1.
     """
 
-    def __init__(self, period: int = 20):
+    def __init__(self, period: int = 1):
         self.period = period
 
     def __call__(self, prices):
@@ -291,8 +292,8 @@ class PPO(Indicator):
     """Price Percentage Oscillator.
 
     Measures the percentage difference between two EMAs of price. Returns a
-    DataFrame with columns ``ppo`` (the oscillator line), ``signal`` (EMA of
-    PPO), and ``histogram`` (PPO minus signal).
+    DataFrame with columns ``ppo`` (the oscillator line), ``pposignal`` (EMA of
+    PPO), and ``ppohist`` (PPO minus signal).
 
     Args:
         n1 (int): Period of the faster EMA. Defaults to 12.
@@ -317,8 +318,8 @@ class MACD(Indicator):
 
     Trend-following momentum indicator showing the relationship between two
     EMAs of price. Returns a DataFrame with columns ``macd`` (the difference
-    between the fast and slow EMAs), ``signal`` (EMA of MACD), and
-    ``histogram`` (MACD minus signal).
+    between the fast and slow EMAs), ``macdsignal`` (EMA of MACD), and
+    ``macdhist`` (MACD minus signal).
 
     Args:
         n1 (int): Period of the faster EMA. Defaults to 12.
@@ -343,7 +344,7 @@ class MACDV(Indicator):
 
     MACD variant where the histogram is normalized by the ATR, making it
     comparable across instruments with different volatility levels. Returns a
-    DataFrame with columns ``macd``, ``signal``, and ``histogram``.
+    DataFrame with columns ``macd``, ``macdsignal``, and ``macdhist``.
 
     Args:
         n1 (int): Period of the faster EMA. Defaults to 12.
@@ -366,9 +367,9 @@ class STOCH(Indicator):
     """Stochastic Oscillator.
 
     Momentum indicator comparing the closing price to its price range over a
-    lookback period. Returns a DataFrame with columns ``k`` (the fast %K line)
-    and ``d`` (the slow %D signal line, a smoothed version of %K). Values range
-    from 0 to 100.
+    lookback period. Returns a DataFrame with columns ``slowk`` (the smoothed
+    %K line) and ``slowd`` (the %D signal line, a smoothed version of %K).
+    Values range from 0 to 100.
 
     Args:
         period (int): Lookback period for the %K calculation. Defaults to 14.
@@ -384,15 +385,15 @@ class STOCH(Indicator):
         self.slown = slown
 
     def __call__(self, prices):
-        return library.calc_stoch(prices, self.period)
+        return library.calc_stoch(prices, self.period, self.fastn, self.slown)
 
 
 class BBANDS(Indicator):
     """Bollinger Bands.
 
     Volatility bands placed above and below a simple moving average. Returns a
-    DataFrame with columns ``upper``, ``middle`` (the SMA), and ``lower``.
-    Plotted on the same scale as the price series.
+    DataFrame with columns ``upperband``, ``middleband`` (the SMA), and
+    ``lowerband``. Plotted on the same scale as the price series.
 
     Args:
         period (int): Period for the middle SMA and standard deviation calculation.
@@ -415,9 +416,9 @@ class BBANDS(Indicator):
 class BBP(Indicator):
     """Bollinger Bands Percent (%B).
 
-    Measures where price sits within the Bollinger Bands, expressed as a
-    fraction. A value of 1.0 means price is at the upper band; 0.0 means price
-    is at the lower band; 0.5 means price is at the middle band.
+    Measures where price sits within the Bollinger Bands, on a 0-100 scale.
+    A value of 100 means price is at the upper band; 0 means price is at the
+    lower band; 50 means price is at the middle band.
 
     Args:
         period (int): Period for the SMA and standard deviation. Defaults to 20.
@@ -457,8 +458,8 @@ class KELTNER(Indicator):
     """Keltner Channel.
 
     Volatility-based envelope using an EMA as the middle band and ATR multiples
-    as the upper and lower bands. Returns a DataFrame with columns ``upper``,
-    ``middle``, and ``lower``. Plotted on the same scale as the price series.
+    as the upper and lower bands. Returns a DataFrame with columns ``upperband``,
+    ``middleband``, and ``lowerband``. Plotted on the same scale as the price series.
 
     Args:
         period (int): Period for the EMA middle band and ATR calculation.
@@ -481,8 +482,8 @@ class DONCHIAN(Indicator):
     """Donchian Channel.
 
     Price envelope based on the highest high and lowest low over a rolling
-    window. Returns a DataFrame with columns ``upper``, ``middle``, and
-    ``lower``. Plotted on the same scale as the price series.
+    window. Returns a DataFrame with columns ``upperband``, ``middleband``, and
+    ``lowerband``. Plotted on the same scale as the price series.
 
     Args:
         period (int): Lookback period in bars. Defaults to 20.
