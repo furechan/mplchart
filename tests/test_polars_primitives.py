@@ -11,7 +11,7 @@ from mplchart.samples import sample_prices  # noqa: E402
 from mplchart.primitives import (  # noqa: E402
     Candlesticks, OHLC, Volume,
     AutoPlot, LinePlot, AreaPlot, BarPlot,
-    Peaks, ZigZag, Stripes, Markers,
+    Swings, ZigZag, Stripes, Markers,
     HLine, VLine,
 )
 from mplchart.expressions import SMA, RSI, MACD  # noqa: E402
@@ -30,7 +30,7 @@ PRIMITIVES = [
     SMA(20) @ LinePlot(),
     SMA(20) @ AreaPlot(),
     SMA(20) @ BarPlot(),
-    Peaks(),
+    Swings(),
     ZigZag(),
     (RSI() < 0.30) @ Stripes(),
     (RSI() < 0.30) @ Markers(),

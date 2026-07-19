@@ -5,26 +5,6 @@ import numpy as np
 from inspect import Signature, Parameter
 
 
-def calc_price(prices, item):
-    """Get or compute a named price item from an OHLCV frame. Backend-agnostic."""
-    if item in prices:
-        return prices[item]
-
-    if item in ("mid", "hl", "hl2"):
-        return (prices["high"] + prices["low"]) / 2
-
-    if item in ("typ", "hlc", "hlc3"):
-        return (prices["high"] + prices["low"] + prices["close"]) / 3
-
-    if item in ("wcl", "hlcc", "hlcc4"):
-        return (prices["high"] + prices["low"] + prices["close"] * 2) / 4
-
-    if item in ("avg", "ohlc", "ohlc4"):
-        return (prices["open"] + prices["high"] + prices["low"] + prices["close"]) / 4
-
-    raise ValueError(f"Invalid price item {item!r}")
-
-
 def detect_backend(df) -> str:
     """detect dataframe backend from module name"""
     return getattr(type(df), "__module__", "").partition(".")[0]
@@ -219,46 +199,6 @@ def get_label(indicator):
 
     return repr(indicator)
 
-
-def series_xy(data, item: str | None = None, *, dropna: bool = False):
-    """split data into x, y arrays"""
-
-    if item is not None:
-        data = data[item]
-
-    if dropna:
-        data = data.dropna()
-
-    x = data.index.values
-    y = data.values
-
-    return x, y
-
-
-def series_data(data, item=None, *, default_item: str | None = None):
-    """extract series data depending on data type and parameters"""
-
-    if is_polars_expr(item):
-        return data.select(item).to_series()
-
-    if hasattr(data, "columns"):
-        if item is not None:
-            return data[item]
-        elif default_item is not None:
-            return data[default_item]
-        else:
-            raise ValueError("Item is required for a DataFrame")
-
-    if item is not None:
-        raise ValueError("Cannot specify item for non-DataFrame data.")
-    else:
-        return data
-
-
-def get_series(prices, item=None):
-    """extract column by name if applicable"""
-
-    return series_data(prices, item, default_item="close")
 
 
 def _is_default(v, default):

@@ -4,7 +4,7 @@ from ..model.primitive import BindingPrimitive
 from .candlesticks import Candlesticks
 from .volume import Volume
 from .ohlc import OHLC
-from .peaks import Peaks
+from .swings import Swings
 from .stripes import Stripes
 from .markers import Markers
 from .autoplot import AutoPlot

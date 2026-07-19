@@ -31,7 +31,7 @@ The projection from rows to x-coordinates becomes data instead of coordinate mac
 Consequences:
 
 - Slicing becomes a `filter` on the x range.
-- Irregular primitives (ZigZag, Peaks, Markers) stop indexing `mapper.rownum` by hand; sparse data with its own x travels naturally in a frame.
+- Irregular primitives (ZigZag, Swings, Markers) stop indexing `mapper.rownum` by hand; sparse data with its own x travels naturally in a frame.
 - Alignment is positional by construction — the index-alignment bug class disappears.
 - The mapper's surviving job is the **inverse** mapping: tick locating and labeling. `DTArrayLocator`/`DTArrayFormatter` get demoted to a formatter backed by an `(x, label)` pair of columns doing nearest-row lookup. The existing numpy-level tick logic remains available as the fallback where polars offers no higher-level abstraction.
 

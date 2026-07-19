@@ -4,7 +4,26 @@ import math
 import numpy as np
 import pandas as pd
 
-from .utils import calc_price
+
+
+def calc_price(prices, item):
+    """Get or compute a named price item from an OHLCV frame. Backend-agnostic."""
+    if item in prices:
+        return prices[item]
+
+    if item in ("mid", "hl", "hl2"):
+        return (prices["high"] + prices["low"]) / 2
+
+    if item in ("typ", "hlc", "hlc3"):
+        return (prices["high"] + prices["low"] + prices["close"]) / 3
+
+    if item in ("wcl", "hlcc", "hlcc4"):
+        return (prices["high"] + prices["low"] + prices["close"] * 2) / 4
+
+    if item in ("avg", "ohlc", "ohlc4"):
+        return (prices["open"] + prices["high"] + prices["low"] + prices["close"]) / 4
+
+    raise ValueError(f"Invalid price item {item!r}")
 
 
 def calc_mom(series, period: int = 1):

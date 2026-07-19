@@ -56,7 +56,7 @@ Raw prices windowed first with x materialized as the `xloc` column; values read 
 - **Candlesticks, OHLC, Volume**: `slice(chart.prices, xcol="xloc")` → read `xloc` + price columns → draw.
 - **ZigZag**: same, then runs its kernel *on the windowed frame*; sparse indices map into `xloc`.
 
-### 4. Dual-mode study (Peaks)
+### 4. Dual-mode study (Swings)
 
 A pattern of its own: two explicit modes decided by the constructor (`self.indicator is None`), each falling back to one of the base sequences — pattern 4's for prices, pattern 1's for a computed series:
 
@@ -78,9 +78,9 @@ Contrast with AutoPlot: there, multi-output means "draw more traces"; here the m
 The patterns differ in *when* computation happens relative to windowing, and the difference is semantic, not stylistic:
 
 - **Analytics compute full-length, then window** (the `calc_result` of patterns 1, 2 and 4): indicators need the full history for warmup (an EMA's value inside the window depends on data before it). Windowing first would change the numbers.
-- **Geometry computes on the window** (the kernels of patterns 3 and 4: ZigZag, Peaks): structure studies are relative to what is visible — a pivot near the window edge depends on the window itself. Full-length computation then windowing would show dangling or missing segments.
+- **Geometry computes on the window** (the kernels of patterns 3 and 4: ZigZag, Swings): structure studies are relative to what is visible — a pivot near the window edge depends on the window itself. Full-length computation then windowing would show dangling or missing segments.
 
-Pattern 4 (Peaks, series mode) composes both rules in one primitive: full-length analytics feeding an in-window geometry kernel.
+Pattern 4 (Swings, series mode) composes both rules in one primitive: full-length analytics feeding an in-window geometry kernel.
 
 Any future core must preserve both orderings: window-at-extraction for expressions, window-before-kernel for structure primitives.
 
@@ -100,13 +100,13 @@ Matplotlib-side surface — unaffected by any data-core swap.
 Empirical remarks from the audits — properties the call sites exhibit that the signatures don't require. Each is a simplification opportunity or an invariant worth defending.
 
 - **`slice` has no free parameters in practice.** All 5 runtime calls are character-for-character `chart.slice(chart.prices, xcol="xloc")` — `data` is always prices, `xcol` always `"xloc"`. A no-argument windowed-prices accessor (e.g. `chart.window()`) would express what every caller means; `slice`'s signature is vestigial.
-- **`calc_result` always flows into `series_xy`, and nothing in between changes row count or order.** The only in-between steps are column selection (per-column `_series` in AutoPlot) and pointwise transforms (Markers' `clip(sign(...))`) — never a filter, sort, dropna, or resample. This row-preservation is what makes positional `series_xy` safe; the length half is now enforced at the boundary (`ValueError` on mismatch), while row *order* remains upheld by convention. Side note: `item=` has been dropped from LinePlot/BarPlot/AreaPlot too (2026-07-19) — selection is by composition (`.struct.field(...)` / `as_expr(item=...)`), same message as Peaks. A plain string is now a first-class indicator form meaning **column reference only**: `apply_indicator` resolves it as native column access (`prices[name]` — `pl.col` semantics, no derived-price aliases; typical price is `TYPPRICE()`), `is_indicator_like` accepts it, and `get_label` returns it verbatim — so `LinePlot("close")`, `chart.plot("close")`, and `"close" @ LinePlot()` all work. This is the IntoExpr contract at the evaluation layer, where it belongs.
+- **`calc_result` always flows into `series_xy`, and nothing in between changes row count or order.** The only in-between steps are column selection (per-column `_series` in AutoPlot) and pointwise transforms (Markers' `clip(sign(...))`) — never a filter, sort, dropna, or resample. This row-preservation is what makes positional `series_xy` safe; the length half is now enforced at the boundary (`ValueError` on mismatch), while row *order* remains upheld by convention. Side note: `item=` has been dropped from LinePlot/BarPlot/AreaPlot too (2026-07-19) — selection is by composition (`.struct.field(...)` / `as_expr(item=...)`), same message as Swings. A plain string is now a first-class indicator form meaning **column reference only**: `apply_indicator` resolves it as native column access (`prices[name]` — `pl.col` semantics, no derived-price aliases; typical price is `TYPPRICE()`), `is_indicator_like` accepts it, and `get_label` returns it verbatim — so `LinePlot("close")`, `chart.plot("close")`, and `"close" @ LinePlot()` all work. This is the IntoExpr contract at the evaluation layer, where it belongs.
 - **Computed results never re-enter a frame.** Results live as Series/arrays outside prices from `calc_result` to `series_xy`. The one primitive needing a computed value *alongside* a prices column (Markers) is exactly why the variadic `series_xy` exists — in a frame model (`with_columns`) that need, and the variadic form, disappear.
 - **`series_xy` is single-series at 12 of 13 sites.** Markers is the only variadic caller (two sources, no common frame — see above).
-- **Two disjoint data idioms, split by data shape.** Frame-shaped primitives use `slice` + column reads; series-shaped primitives use `calc_result` + `series_xy`. No primitive mixes idioms except Peaks, which dispatches between them by constructor mode.
+- **Two disjoint data idioms, split by data shape.** Frame-shaped primitives use `slice` + column reads; series-shaped primitives use `calc_result` + `series_xy`. No primitive mixes idioms except Swings, which dispatches between them by constructor mode.
 - **`get_color` is AutoPlot-only.** Explicit primitives resolve colors themselves (`self.color or rcParams`); the color_scheme applies only to auto-plotted traces. Whether that asymmetry is intended is worth an explicit decision.
 - **`map_date` has exactly one consumer** (VLine). The inverse date→x mapping is nearly unused surface.
-- **`indicator=None` is meaningful only for Peaks** (OHLC mode); every other binding primitive requires an indicator. The None-case is per-primitive semantics, not a data-plane concept.
+- **`indicator=None` is meaningful only for Swings** (OHLC mode); every other binding primitive requires an indicator. The None-case is per-primitive semantics, not a data-plane concept.
 - **The `Price` primitive is retired (2026-07-19).** Its accessor role is played by the bare column string (`LinePlot("close")`), its derived prices by named indicators (`MEDPRICE`/`TYPPRICE`/`WCLPRICE`/`AVGPRICE`, talib naming). The last primitive-moonlighting-as-indicator dual role is gone.
 - **The contract has survived one core swap already.** The backend-native mapper refactor (2026-07-19) replaced the entire windowing implementation with zero primitive changes — empirical validation of the contract as the transition mechanism for the polars migration.
 

@@ -1,4 +1,4 @@
-"""Peaks primitive"""
+"""Swings primitive"""
 
 import numpy as np
 from numpy.lib.stride_tricks import sliding_window_view
@@ -9,8 +9,8 @@ from ..model.primitive import BindingPrimitive
 from ..utils import col_to_numpy
 
 
-class Peaks(BindingPrimitive):
-    """Peaks primitive.
+class Swings(BindingPrimitive):
+    """Swings primitive.
 
     Plots local peak (high) and valley (low) points as scatter markers on the
     chart. A point is considered a local peak or valley if it is the highest
@@ -21,7 +21,7 @@ class Peaks(BindingPrimitive):
 
     - **OHLC mode** — no indicator: peaks on the ``high`` column and valleys
       on the ``low`` column of the prices DataFrame.
-    - **Series mode** — an indicator is bound (``Peaks(SMA(50))`` or via
+    - **Series mode** — an indicator is bound (``Swings(SMA(50))`` or via
       ``@``): peaks and valleys both on the indicator's series. The indicator
       must yield a single series — compose a single-output expression to
       target one column of a multi-output result.
@@ -54,7 +54,7 @@ class Peaks(BindingPrimitive):
             result = chart.calc_result(self.indicator)
             if hasattr(result, "columns"):
                 raise ValueError(
-                    "Peaks expects a single series; compose a single-output "
+                    "Swings expects a single series; compose a single-output "
                     "expression to select one column of a multi-output result."
                 )
             xv, arr = chart.series_xy(result)

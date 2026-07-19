@@ -49,4 +49,4 @@ For each item passed to `chart.plot()`:
 
 ## Primitives
 
-Regular primitives (`LinePlot`, `AreaPlot`, `BarPlot`, `AutoPlot`, `Price`) use `chart.series_xy(data)` for x/y extraction. Irregular primitives (`ZigZag`, `Peaks`, `Stripes`, `Markers`) compute their own sparse row indices and map them through `chart.slice(..., xcol=...)` or `chart.series_xy`. Primitives never touch `chart.mapper` directly — the mapper is an implementation detail behind the `Chart` data-plane methods (`slice`, `series_xy`, `map_date`).
+Regular primitives (`LinePlot`, `AreaPlot`, `BarPlot`, `AutoPlot`) use `chart.series_xy(data)` for x/y extraction. Irregular primitives (`ZigZag`, `Swings`, `Stripes`, `Markers`) compute their own sparse row indices and map them through `chart.slice(..., xcol=...)` or `chart.series_xy`. Primitives never touch `chart.mapper` directly — the mapper is an implementation detail behind the `Chart` data-plane methods (`slice`, `series_xy`, `map_date`).

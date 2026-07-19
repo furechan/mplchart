@@ -4,7 +4,7 @@ import pandas as pd
 
 from abc import ABC, abstractmethod
 
-from ..utils import short_repr, get_series
+from ..utils import short_repr
 
 
 class Indicator(ABC):
@@ -51,8 +51,13 @@ class Indicator(ABC):
         return NotImplemented
 
     def get_series(self, data):
+        """Source series: named column (default close) from a frame, or a series passed through."""
         item = getattr(self, "item", None)
-        return get_series(data, item=item)
+        if hasattr(data, "columns"):
+            return data[item or "close"]
+        if item is not None:
+            raise ValueError("Cannot specify item for non-DataFrame data.")
+        return data
 
     def as_expr(self, item: str | None = None):
         """Wrap this indicator as a pandas ``Expression``.
