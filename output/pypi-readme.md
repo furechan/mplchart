@@ -11,7 +11,7 @@ and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
 
 
 
-> **Warning:**
+> [!WARNING]
 > This project is experimental and the interface is likely to change.
 > For a related project with a mature api you may want to look into [mplfinance](https://pypi.org/project/mplfinance/).
 
@@ -36,7 +36,7 @@ prices = yf.Ticker(ticker).history('5y')
 Chart(prices, title=ticker, max_bars=250, normalize=True).plot(
     Candlesticks(), Volume(), SMA(50), SMA(200),
     Pane("above", yticks=(30, 50, 70)),
-    RSI(14) @ LinePlot(overbought=70, oversold=30),
+    LinePlot(RSI(14), overbought=70, oversold=30),
     Pane("below"),
     MACD(),
 ).show()
@@ -45,9 +45,8 @@ Chart(prices, title=ticker, max_bars=250, normalize=True).plot(
 
 ## Conventions
 
-Prices data is expected to be a dataframe with columns `open`, `high`, `low`, `close`, `volume` in **lower case** and a datetime column named `date` or `datetime` (or a datetime index for pandas).
-
-> **Note:** The `Chart`, indicators and primitives strictly require lower case column names. Use `Chart(..., normalize=True)` or call `normalize_prices` from `mplchart.utils` when using prices with a different naming convention, like data from `yfinance` which is capitalized by default.
+Prices data is expected to be a dataframe with columns `open`, `high`, `low`, `close`, `volume` in **lower case** and a datetime column named `date` or `datetime` (or a datetime index for pandas). 
+If your data has column names in different capitalization (like data from yfinance) use the `normalize` option `Chart(..., normalize=True)` or call `normalize_prices` explicitely to normalize the dataframe.
 
 ```python
 # Normalize prices to lower case column names
@@ -141,7 +140,7 @@ from mplchart.primitives import Candlesticks, LinePlot
 
 indicators = [
     Candlesticks(),
-    SMA(20) @ LinePlot(style="dashed", color="red", alpha=0.5, width=3)
+    LinePlot(SMA(20), style="dashed", color="red", alpha=0.5, width=3)
 ]
 
 Chart(prices).plot(indicators)
@@ -164,7 +163,7 @@ from mplchart.expressions import SMA, EMA, RSI, MACD
 Chart(prices, title=ticker, max_bars=250).plot(
     Candlesticks(), Volume(), SMA(50), SMA(200),
     Pane("above", yticks=(30, 50, 70)),
-    RSI() @ LinePlot(overbought=70, oversold=30),
+    LinePlot(RSI(), overbought=70, oversold=30),
     Pane("below"),
     MACD(),
 ).show()
@@ -173,14 +172,15 @@ Chart(prices, title=ticker, max_bars=250).plot(
 Expressions are plain `polars.Expr` values — they can be composed with standard polars operators,
 passed to `df.select()`, or used anywhere polars expressions are accepted.
 
-Use `@` to bind an expression to a rendering primitive:
+Pass an expression to a rendering primitive to customize display — the `@` binding operator is an equivalent alternative:
 
 ```python
 from mplchart.primitives import LinePlot, AreaPlot
 from mplchart.expressions import SMA, RSI
 
-SMA(50) @ LinePlot(color="red")    # expression → primitive
-RSI(14) @ AreaPlot(color="blue")   # expression → primitive
+LinePlot(SMA(50), color="red")     # expression → primitive
+AreaPlot(RSI(14), color="blue")    # expression → primitive
+SMA(50) @ LinePlot(color="red")    # operator form
 ```
 
 
