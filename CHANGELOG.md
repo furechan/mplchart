@@ -5,6 +5,7 @@
 - Removed deprecated `Chart(bgcolor=...)` parameter (deprecated since 2024) — use matplotlib styles
 - Removed `Chart(holidays=...)` parameter — accepted but never implemented; the rownum date mapper eliminates gaps by construction
 - Documented `VLine` / `chart.vline()` in the primitives example notebooks; `plot_vline()` retained as a legacy alias
+- README: refreshed primitives and indicators lists — dropped removed `Price`, renamed `Peaks` → `Swings` and `MIDPRICE` → `MEDPRICE`, added `Stripes`, `Markers`, `AVGPRICE`
 
 ## 0.0.39
 - Vectorized `Candlesticks`/`OHLC` vertex construction — verts passed as an `(n, k, 2)` array, hitting `PolyCollection.set_verts` fast path
