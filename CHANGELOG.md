@@ -1,6 +1,7 @@
 # Change Log
 
 ## 0.0.38
+- Renamed example notebooks — dropped the redundant `chart-` prefix (`primitives-pandas`, `primitives-polars`, `expressions-polars`, `indicators-pandas`); renamed `compare-tickers` → `multiple-tickers`; restored the missing `examples/README.md` index that the main README links to
 - Renamed `Peaks` → `Swings` — cross-platform swing high/low vocabulary (TradeStation `SwingHigh`/`SwingLow`, NinjaTrader `Swing`); dual-mode behavior unchanged; a dedicated series-study primitive (name TBD) may later take over the bound-indicator mode
 - Retired `utils.series_data` and the legacy `utils.series_xy` helper (dead code); `Indicator.get_series` inlines the simplified source selection (named column, default close, series passthrough); `calc_price` moved from `utils` into `library.py` — pandas-stack plumbing now lives entirely in pandas-only modules
 - Renamed `MIDPRICE` → `MEDPRICE` (HL/2) in both stacks — adopts talib naming; frees `MIDPRICE` for a possible talib-style rolling midpoint. Added `AVGPRICE` (OHLC/4) to both stacks
