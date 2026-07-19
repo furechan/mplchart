@@ -207,8 +207,7 @@ Chart(prices).plot(indicators).show()
 
 ## Examples
 
-Example notebooks live in the [`examples/`](examples/) folder — see the [examples README](examples/README.md) for the full list.
-
+Example notebooks live in the [`examples/`](examples/) folder.
 
 
 ## Installation
