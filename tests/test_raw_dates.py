@@ -1,105 +1,108 @@
-"""Tests for raw_dates mode and RawDateMapper / DateIndexMapper interface parity."""
+"""Tests for the backend-native date mappers and raw_dates mode."""
 
 import pytest
 import numpy as np
 import matplotlib.pyplot as plt
 
-from mplchart.mapper import DateIndexMapper, RawDateMapper
+from mplchart.mapper import get_mapper, PandasDateMapper, PolarsDateMapper
 
 
-MAPPER_CLASSES = [DateIndexMapper, RawDateMapper]
+BACKENDS = ["pandas", "polars"]
+MODES = [False, True]
 
-PUBLIC_METHODS = (
-    "series_xy", "slice",
-    "slice_polars", "slice_pandas", "map_date", "config_axes",
-)
-PUBLIC_ATTRS = ("datetime_array", "rownum", "max_bars", "start", "end")
+PUBLIC_METHODS = ("slice", "series_xy", "map_date", "config_axes")
+PUBLIC_ATTRS = ("dates", "xloc", "raw_dates", "start", "end", "max_bars")
 
 
-def _datetime_array(n=50, start="2024-01-01"):
-    return (np.datetime64(start) + np.arange(n)).astype("datetime64[ns]")
+def make_prices(backend, n=50, start="2024-01-01"):
+    """Synthetic daily prices frame for the given backend."""
+    dates = (np.datetime64(start) + np.arange(n)).astype("datetime64[us]")
+    close = np.arange(n, dtype=float)
+    if backend == "polars":
+        pl = pytest.importorskip("polars")
+        return pl.DataFrame({"date": dates, "close": close})
+    pd = pytest.importorskip("pandas")
+    return pd.DataFrame({"close": close}, index=pd.DatetimeIndex(dates, name="date"))
 
 
-# --- interface parity ---
+def make_mapper(backend, raw_dates=False, n=50, **window):
+    return get_mapper(make_prices(backend, n=n), raw_dates=raw_dates, **window)
 
-@pytest.mark.parametrize("cls", MAPPER_CLASSES, ids=lambda c: c.__name__)
-def test_mapper_has_public_methods(cls):
-    mapper = cls(datetime_array=_datetime_array(), max_bars=20)
+
+# --- factory routing and public interface ---
+
+def test_get_mapper_routes_by_backend():
+    pytest.importorskip("pandas")
+    pytest.importorskip("polars")
+    assert isinstance(get_mapper(make_prices("pandas")), PandasDateMapper)
+    assert isinstance(get_mapper(make_prices("polars")), PolarsDateMapper)
+
+
+def test_get_mapper_rejects_unsupported():
+    with pytest.raises(ValueError, match="backend"):
+        get_mapper({"close": [1, 2, 3]})
+
+
+@pytest.mark.parametrize("backend", BACKENDS)
+def test_mapper_public_interface(backend):
+    mapper = make_mapper(backend, max_bars=20)
     for name in PUBLIC_METHODS:
-        assert callable(getattr(mapper, name)), f"{cls.__name__} missing method {name!r}"
-
-
-@pytest.mark.parametrize("cls", MAPPER_CLASSES, ids=lambda c: c.__name__)
-def test_mapper_has_public_attrs(cls):
-    mapper = cls(datetime_array=_datetime_array(), max_bars=20)
+        assert callable(getattr(mapper, name)), f"missing method {name!r}"
     for name in PUBLIC_ATTRS:
-        assert hasattr(mapper, name), f"{cls.__name__} missing attribute {name!r}"
+        assert hasattr(mapper, name), f"missing attribute {name!r}"
 
 
-# --- window resolution behaves identically (tests the private helper) ---
+# --- window resolution (via public outputs) ---
 
-@pytest.mark.parametrize("cls", MAPPER_CLASSES, ids=lambda c: c.__name__)
-def test_calc_window_max_bars(cls):
-    mapper = cls(datetime_array=_datetime_array(100), max_bars=20)
-    w = mapper._calc_window()
-    assert w.stop - w.start == 20
-
-
-@pytest.mark.parametrize("cls", MAPPER_CLASSES, ids=lambda c: c.__name__)
-def test_calc_window_start_end(cls):
-    dt = _datetime_array(100)
-    mapper = cls(datetime_array=dt, start=dt[10], end=dt[30])
-    w = mapper._calc_window()
-    assert w.start == 10
-    assert w.stop == 31  # end side="right"
+@pytest.mark.parametrize("backend", BACKENDS)
+def test_window_max_bars(backend):
+    mapper = make_mapper(backend, n=100, max_bars=20)
+    xs, ys = mapper.series_xy(np.arange(100))
+    assert len(xs) == len(ys) == 20
+    np.testing.assert_array_equal(ys, np.arange(80, 100))
 
 
-def test_both_mappers_agree_on_window():
-    dt = _datetime_array(100)
-    kwargs = dict(datetime_array=dt, start=dt[5], end=dt[80], max_bars=30)
-    assert DateIndexMapper(**kwargs)._calc_window() == RawDateMapper(**kwargs)._calc_window()
+@pytest.mark.parametrize("backend", BACKENDS)
+def test_window_start_end_inclusive(backend):
+    dates = (np.datetime64("2024-01-01") + np.arange(100)).astype("datetime64[us]")
+    mapper = make_mapper(backend, n=100, start=dates[10].item(), end=dates[30].item())
+    xs, ys = mapper.series_xy(np.arange(100))
+    assert len(xs) == 21  # end is inclusive (side="right")
+    assert ys[0] == 10
+    assert ys[-1] == 30
 
 
-def test_calc_window_is_not_public():
-    """Regression: calc_window should not leak into the public API."""
-    m = DateIndexMapper(datetime_array=_datetime_array())
-    assert not hasattr(m, "calc_window"), "calc_window is private (_calc_window)"
+def test_backends_agree_on_window():
+    pytest.importorskip("pandas")
+    pytest.importorskip("polars")
+    window = dict(start="2024-01-06", end="2024-03-01", max_bars=30)
+    xs_pd, ys_pd = make_mapper("pandas", n=100, **window).series_xy(np.arange(100))
+    xs_pl, ys_pl = make_mapper("polars", n=100, **window).series_xy(np.arange(100))
+    np.testing.assert_array_equal(xs_pd, xs_pl)
+    np.testing.assert_array_equal(ys_pd, ys_pl)
 
 
-# --- semantic differences: x-coordinate types ---
+# --- x-coordinate semantics per mode ---
 
-def test_date_index_rownum_is_integer():
-    m = DateIndexMapper(datetime_array=_datetime_array(50))
-    assert m.rownum.dtype.kind == "i"
-    assert m.rownum[0] == 0
-    assert m.rownum[-1] == 49
-
-
-def test_raw_date_rownum_is_datetime():
-    m = RawDateMapper(datetime_array=_datetime_array(50))
-    assert m.rownum.dtype == np.dtype("datetime64[ns]")
-    np.testing.assert_array_equal(m.rownum, m.datetime_array)
+@pytest.mark.parametrize("backend", BACKENDS)
+def test_series_xy_rownum_mode_integer_xs(backend):
+    xs, ys = make_mapper(backend, max_bars=10).series_xy(np.arange(50))
+    assert xs.dtype.kind == "i"
+    assert len(xs) == len(ys) == 10
 
 
-def test_series_xy_date_index_returns_integer_xs():
-    dt = _datetime_array(50)
-    x, y = DateIndexMapper(datetime_array=dt, max_bars=10).series_xy(np.arange(50))
-    assert x.dtype.kind == "i"
-    assert len(x) == len(y) == 10
+@pytest.mark.parametrize("backend", BACKENDS)
+def test_series_xy_raw_mode_datetime_xs(backend):
+    xs, ys = make_mapper(backend, raw_dates=True, max_bars=10).series_xy(np.arange(50))
+    assert xs.dtype.kind == "M"
+    assert len(xs) == len(ys) == 10
 
 
-def test_series_xy_raw_date_returns_datetime_xs():
-    dt = _datetime_array(50)
-    x, y = RawDateMapper(datetime_array=dt, max_bars=10).series_xy(np.arange(50))
-    assert x.dtype == np.dtype("datetime64[ns]")
-    assert len(x) == len(y) == 10
-
-
-@pytest.mark.parametrize("cls", MAPPER_CLASSES, ids=lambda c: c.__name__)
-def test_series_xy_variadic(cls):
-    """Multiple value arrays can be sliced in one call."""
-    dt = _datetime_array(50)
-    mapper = cls(datetime_array=dt, max_bars=10)
+@pytest.mark.parametrize("raw_dates", MODES)
+@pytest.mark.parametrize("backend", BACKENDS)
+def test_series_xy_variadic(backend, raw_dates):
+    """Multiple value arrays are cut by the same window in one call."""
+    mapper = make_mapper(backend, raw_dates=raw_dates, max_bars=10)
     y1 = np.arange(50, dtype=float)
     y2 = np.arange(50, 100, dtype=float)
     xs, s1, s2 = mapper.series_xy(y1, y2)
@@ -108,18 +111,46 @@ def test_series_xy_variadic(cls):
     np.testing.assert_array_equal(s2, y2[-10:])
 
 
-def test_map_date_date_index_returns_int():
-    dt = _datetime_array(50)
-    out = DateIndexMapper(datetime_array=dt).map_date(dt[10])
+@pytest.mark.parametrize("backend", BACKENDS)
+def test_series_xy_accepts_native_series(backend):
+    """Native Series inputs are windowed positionally, same as arrays."""
+    prices = make_prices(backend)
+    mapper = get_mapper(prices, max_bars=10)
+    xs, ys = mapper.series_xy(prices["close"])
+    np.testing.assert_array_equal(ys, np.arange(40, 50, dtype=float))
+
+
+@pytest.mark.parametrize("backend", BACKENDS)
+def test_map_date_rownum_mode_returns_int(backend):
+    mapper = make_mapper(backend)
+    out = mapper.map_date("2024-01-11")
     assert isinstance(out, int)
     assert out == 10
 
 
-def test_map_date_raw_date_returns_datetime():
-    dt = _datetime_array(50)
-    out = RawDateMapper(datetime_array=dt).map_date(dt[10])
+@pytest.mark.parametrize("backend", BACKENDS)
+def test_map_date_raw_mode_returns_datetime(backend):
+    mapper = make_mapper(backend, raw_dates=True)
+    out = mapper.map_date("2024-01-11")
     assert isinstance(out, np.datetime64)
-    assert out == dt[10]
+    assert out == np.datetime64("2024-01-11")
+
+
+# --- slice ---
+
+@pytest.mark.parametrize("raw_dates", MODES)
+@pytest.mark.parametrize("backend", BACKENDS)
+def test_slice_prices_with_xcol(backend, raw_dates):
+    prices = make_prices(backend, n=50)
+    mapper = get_mapper(prices, raw_dates=raw_dates, max_bars=10)
+    sliced = mapper.slice(prices, xcol="xloc")
+    assert len(sliced) == 10
+    assert "xloc" in sliced.columns
+    xloc = sliced["xloc"].to_numpy()
+    if raw_dates:
+        assert xloc.dtype.kind == "M"
+    else:
+        np.testing.assert_array_equal(xloc, np.arange(40, 50))
 
 
 # --- Chart smoke tests with raw_dates=True ---
@@ -134,7 +165,7 @@ def test_chart_raw_dates_pandas():
 
     prices = sample_prices(freq="daily", backend="pandas")
     chart = Chart(prices, max_bars=100, raw_dates=True)
-    assert isinstance(chart.mapper, RawDateMapper)
+    assert chart.mapper.raw_dates is True
     chart.plot(Candlesticks(), SMA(20) @ LinePlot())
     assert chart.count_axes() > 0
     plt.close()
@@ -150,7 +181,7 @@ def test_chart_raw_dates_polars_autoplot():
 
     prices = sample_prices(freq="daily", backend="polars")
     chart = Chart(prices, max_bars=100, raw_dates=True)
-    assert isinstance(chart.mapper, RawDateMapper)
+    assert chart.mapper.raw_dates is True
     chart.plot(SMA(20))                                  # implicit AutoPlot
     chart.plot(SMA(50) @ AutoPlot(label="trend"))        # AutoPlot override
     assert chart.count_axes() > 0
@@ -171,12 +202,12 @@ def test_chart_raw_dates_polars_multi_output():
     plt.close()
 
 
-def test_chart_default_mode_uses_date_index_mapper():
+def test_chart_default_mode_uses_rownum():
     pytest.importorskip("polars")
     from mplchart.chart import Chart
     from mplchart.samples import sample_prices
 
     prices = sample_prices(freq="daily", backend="polars")
     chart = Chart(prices, max_bars=100)
-    assert isinstance(chart.mapper, DateIndexMapper)
+    assert chart.mapper.raw_dates is False
     plt.close()

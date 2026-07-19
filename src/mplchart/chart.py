@@ -11,9 +11,9 @@ from functools import cached_property
 
 from .colors import closest_color
 from .utils import detect_backend, apply_indicator, is_indicator_like, extract_prefix
-from .utils import normalize_prices, check_prices, extract_datetime
+from .utils import normalize_prices, check_prices
 from .layout import make_twinx, init_vplot, add_vplot
-from .mapper import DateIndexMapper, RawDateMapper
+from .mapper import get_mapper
 from .primitives.autoplot import AutoPlot
 
 
@@ -56,11 +56,11 @@ class Chart:
         normalize (bool): If True, normalize the prices DataFrame first
             (lowercase columns, promote a date/datetime column to the index).
             Defaults to False.
-        raw_dates (bool, optional): If True, use ``RawDateMapper`` — the
+        raw_dates (bool, optional): If True, use raw-dates mode — the
             x-axis coordinates are actual datetime values and matplotlib
-            handles date formatting natively. Defaults to False, which uses
-            ``DateIndexMapper`` (integer rownum positions with a custom
-            date formatter).
+            handles date formatting natively. Defaults to False, which maps
+            dates to integer rownum positions with a custom date formatter
+            (eliminating weekend/holiday gaps).
         color_scheme (dict or iterable of pairs, optional): Mapping of color
             role names to color values used to override default colors (e.g.
             ``colorup``, ``colordn``, ``bgcolor``).
@@ -159,11 +159,8 @@ class Chart:
         self.prices = prices
         self.backend = detect_backend(prices)
 
-        datetime_array = extract_datetime(prices)
-
-        mapper_cls = RawDateMapper if self.raw_dates else DateIndexMapper
-        self.mapper = mapper_cls(
-            datetime_array=datetime_array, start=self.start, end=self.end, max_bars=self.max_bars
+        self.mapper = get_mapper(
+            prices, raw_dates=self.raw_dates, start=self.start, end=self.end, max_bars=self.max_bars
         )
 
         ax = self.root_axes()

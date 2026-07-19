@@ -1,6 +1,7 @@
 # Change Log
 
 ## 0.0.38
+- Backend-native mappers: `DateMapper` pure contract, `PandasDateMapper` (join-on-xloc-series) and `PolarsDateMapper` (positional), created from the prices frame via `get_mapper(prices, raw_dates=)`; `raw_dates` is a mode flag, not a class. Legacy `DateIndexMapper`/`RawDateMapper` removed after parity verification (both backends × both modes × window configs); `utils.extract_datetime` removed (date extraction is native per mapper)
 - Added `Chart.series_xy` delegating to the mapper; primitives no longer access `chart.mapper` directly
 - `Peaks` refactored to two explicit modes decided by the constructor: `indicator=None` → peaks/valleys on prices high/low; bound indicator → peaks and valleys on its series. `item=` removed; `indicator` is now the first positional argument (`Peaks(5)` → `Peaks(span=5)`); multi-output results raise `ValueError`
 - Removed `last_result` adjacency chaining — a bare primitive no longer picks up the previous indicator's result; bind explicitly (`Peaks(SMA(50))` or `SMA(50) @ Peaks()`). `calc_result` is now a pure function

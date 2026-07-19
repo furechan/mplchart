@@ -144,27 +144,6 @@ def check_prices(prices):
                 )
 
 
-def extract_datetime(df) -> np.ndarray:
-    """extract datetime as tz-naive numpy array in local time"""
-    match detect_backend(df):
-        case "polars":
-            import polars as pl
-            col = next(
-                (df[name] for name, dtype in df.schema.items()
-                 if dtype == pl.Date or dtype == pl.Datetime),
-                None,
-            )
-            if col is None:
-                raise ValueError("No Date or Datetime column found in DataFrame")
-            if col.dtype == pl.Date:
-                return col.to_numpy()
-            return col.dt.replace_time_zone(None).to_numpy()
-        case "pandas":
-            return df.index.tz_localize(None).values
-        case backend:
-            raise ValueError(f"Unsupported backend {backend!r}")
-
-
 def col_to_numpy(df, col: str) -> np.ndarray:
     """extract a named column as numpy array for both backends"""
     return df[col].to_numpy()
