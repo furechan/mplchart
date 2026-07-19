@@ -108,6 +108,7 @@ Empirical remarks from the audits — properties the call sites exhibit that the
 - **`map_date` has exactly one consumer** (VLine). The inverse date→x mapping is nearly unused surface.
 - **`indicator=None` is meaningful only for Swings** (OHLC mode); every other binding primitive requires an indicator. The None-case is per-primitive semantics, not a data-plane concept.
 - **The `Price` primitive is retired (2026-07-19).** Its accessor role is played by the bare column string (`LinePlot("close")`), its derived prices by named indicators (`MEDPRICE`/`TYPPRICE`/`WCLPRICE`/`AVGPRICE`, talib naming). The last primitive-moonlighting-as-indicator dual role is gone.
+- **`chart.prices` is one refactor away from leaving the surface.** Six runtime accesses: five are the uniform `chart.slice(chart.prices, xcol="xloc")` idiom (a no-arg windowed-prices accessor would absorb them), and one is Markers reading the close column directly — replaceable by `calc_result("close")` now that strings are indicators. Both done, the data plane shrinks to four members (`window`, `calc_result`, `series_xy`, `map_date`) and primitives never see the raw frame — freeing the future core to restructure it (x/width columns, projections) without any primitive depending on its shape.
 - **The contract has survived one core swap already.** The backend-native mapper refactor (2026-07-19) replaced the entire windowing implementation with zero primitive changes — empirical validation of the contract as the transition mechanism for the polars migration.
 
 ## How to re-audit
