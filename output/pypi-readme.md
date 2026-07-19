@@ -78,14 +78,15 @@ Chart(prices, title=title, max_bars=250).plot(
 The main drawing primitives are :
 - `Candlesticks` for candlestick plots
 - `OHLC` for open, high, low, close bar plots
-- `Price` for price line plots
 - `Volume` for volume bar plots
 - `Pane` to switch to a different pane (above or below)
 - `LinePlot` draw an indicator as line plot
 - `AreaPlot` draw an indicator as area plot
 - `BarPlot` draw an indicator as bar plot
+- `Stripes` to shade background areas where a condition is active
+- `Markers` to mark signal crossings with symbols
 - `ZigZag` lines between pivot points
-- `Peaks` to mark peaks and valleys
+- `Swings` to mark local peaks and valleys (swing highs/lows)
 - `HLine` to draw a horizontal reference line on the current pane
 - `VLine` to draw a vertical line across all panes at a given date
 
@@ -95,7 +96,7 @@ The main drawing primitives are :
 
 The library includes some standard technical analysis indicators for **pandas** DataFrames.
 Indicators are classes and must be instantiated as objects before being used with the plot api.
-Instanciated they are callables, you can apply them like calling a funcion `SMA(50)(prices)`.
+Instantiated they are callables, you can apply them like calling a function `SMA(50)(prices)`.
 
 Some of the indicators included are:
 
@@ -125,11 +126,12 @@ Some of the indicators included are:
 - `BBW` Bollinger Bands Width
 - `KELTNER` Keltner Channel
 - `DONCHIAN` Donchian Channel
-- `MIDPRICE` Midpoint Price
+- `MEDPRICE` Median Price
 - `TYPPRICE` Typical Price
 - `WCLPRICE` Weighted Close Price
+- `AVGPRICE` Average Price
 
-Use `@` to bind an indicator to a rendering primitive:
+Pass an indicator to a rendering primitive to customize display — the `@` binding operator is an equivalent alternative:
 
 
 ```python
