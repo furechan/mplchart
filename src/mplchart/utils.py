@@ -60,13 +60,15 @@ def is_pandas_expr(item) -> bool:
 
 
 def is_indicator_like(item) -> bool:
-    """True if item is any acceptable indicator form: polars expr, tuple-of-Expr, pandas expr, or callable."""
-    return is_polars_expr_like(item) or is_pandas_expr(item) or callable(item)
+    """True if item is any acceptable indicator form: column name, polars expr, tuple-of-Expr, pandas expr, or callable."""
+    return isinstance(item, str) or is_polars_expr_like(item) or is_pandas_expr(item) or callable(item)
 
 
 def apply_indicator(prices, indicator):
     """Apply an indicator or expression to prices.
 
+    - str: column name — plain native column access (``prices[name]``);
+      derived prices are indicators (e.g. ``TYPPRICE()``), not string aliases.
     - Polars Expr: evaluates against ``prices`` and returns a Series. If the
       Series is Struct-typed (e.g. ``pl.struct(MACD())``), it is unnested
       into a multi-column DataFrame.
@@ -76,6 +78,9 @@ def apply_indicator(prices, indicator):
     - Pandas Expression: evaluates via ``_eval_expression`` and returns a Series.
     - Callable: returns ``indicator(prices)``.
     """
+    if isinstance(indicator, str):
+        return prices[indicator]
+
     if is_polars_expr(indicator):
         import polars as pl
         series = prices.select(indicator).to_series()
@@ -96,7 +101,7 @@ def apply_indicator(prices, indicator):
 
     raise TypeError(
         f"Cannot apply {type(indicator).__name__!r} to prices: "
-        f"expected a polars Expr, tuple of Expr, pandas Expression, or callable indicator."
+        f"expected a column name, polars Expr, tuple of Expr, pandas Expression, or callable indicator."
     )
 
 
@@ -185,7 +190,11 @@ def get_label(indicator):
     direct match is found in ``color_scheme``.
     """
 
-    # This check MUST stay first: Expression.__getattr__ hijacks any attribute
+    if isinstance(indicator, str):
+        return indicator
+
+    # This check MUST stay first among attribute-based checks:
+    # Expression.__getattr__ hijacks any attribute
     # access (hasattr is always True, getattr never falls back), so the
     # instance-level getattr/hasattr checks below are only safe once
     # expressions have returned early.

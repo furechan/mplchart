@@ -111,9 +111,14 @@ def calc_trange(prices):
     return hlc.max(axis=1) - hlc.min(axis=1)
 
 
-def calc_midprice(prices):
-    """Midpoint Price"""
+def calc_medprice(prices):
+    """Median Price"""
     return (prices["high"] + prices["low"]) / 2
+
+
+def calc_avgprice(prices):
+    """Average Price"""
+    return (prices["open"] + prices["high"] + prices["low"] + prices["close"]) / 4
 
 
 def calc_typprice(prices):

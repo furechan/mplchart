@@ -225,8 +225,8 @@ class Chart:
             raise ValueError("Date mapper was not configured yet. prices not provided!")
         return self.mapper.slice(data, xcol=xcol)
 
-    def series_xy(self, *values):
-        """Return (x, *windowed_values) numpy arrays for plotting.
+    def series_xy(self, *series):
+        """Return (x, *windowed_series) numpy arrays for plotting.
 
         Each positional argument must be a full-length series/array aligned
         with the prices; each is sliced to the visible window. x carries the
@@ -234,7 +234,7 @@ class Chart:
         """
         if self.mapper is None:
             raise ValueError("Date mapper was not configured yet. prices not provided!")
-        return self.mapper.series_xy(*values)
+        return self.mapper.series_xy(*series)
 
     def map_date(self, date):
         """map date to value"""

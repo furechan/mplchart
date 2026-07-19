@@ -2,7 +2,6 @@
 
 from ..model.primitive import BindingPrimitive
 from .candlesticks import Candlesticks
-from .price import Price
 from .volume import Volume
 from .ohlc import OHLC
 from .peaks import Peaks

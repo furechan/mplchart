@@ -1,7 +1,7 @@
 """BarPlot primitive"""
 
 from ..model.primitive import BindingPrimitive
-from ..utils import get_label, series_data
+from ..utils import get_label
 
 
 class BarPlot(BindingPrimitive):
@@ -12,7 +12,6 @@ class BarPlot(BindingPrimitive):
 
     Args:
         indicator: indicator or expression to plot. Can also be bound via ``@``.
-        item (str) :  name of the column to plot. default None
         color (str) : color name or value
         alpha (float) : opacity value between 0.0 and 1.0
         width (float) : bar width setting
@@ -27,21 +26,16 @@ class BarPlot(BindingPrimitive):
         self,
         indicator=None,
         *,
-        item: str | None = None,
         color: str | None = None,
         alpha: float | None = None,
         width: float | None = None,
         label: str | None = None,
     ):
-        if isinstance(indicator, str):
-            item = item or indicator
-            indicator = None
 
         if width is None:
             width = 1.0
 
         super().__init__(indicator)
-        self.item = item
         self.color = color
         self.alpha = alpha
         self.width = width
@@ -52,7 +46,12 @@ class BarPlot(BindingPrimitive):
 
         result = chart.calc_result(self.required_indicator())
 
-        series = series_data(result, self.item)
+        if hasattr(result, "columns"):
+            raise ValueError(
+                "BarPlot expects a single series; compose a single-output "
+                "expression to select one column of a multi-output result."
+            )
+        series = result
 
         label = self.label or get_label(self.indicator)
 

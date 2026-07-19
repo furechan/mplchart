@@ -211,3 +211,11 @@ def test_chart_default_mode_uses_rownum():
     chart = Chart(prices, max_bars=100)
     assert chart.mapper.raw_dates is False
     plt.close()
+
+
+@pytest.mark.parametrize("backend", BACKENDS)
+def test_series_xy_rejects_wrong_length(backend):
+    """The full-length assumption is enforced, not silently clamped."""
+    mapper = make_mapper(backend, n=50, max_bars=10)
+    with pytest.raises(ValueError, match="full-length"):
+        mapper.series_xy(np.arange(30))

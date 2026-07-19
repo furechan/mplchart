@@ -9,7 +9,7 @@ pytestmark = pytest.mark.polars
 from mplchart.chart import Chart  # noqa: E402
 from mplchart.samples import sample_prices  # noqa: E402
 from mplchart.primitives import (  # noqa: E402
-    Candlesticks, OHLC, Price, Volume,
+    Candlesticks, OHLC, Volume,
     AutoPlot, LinePlot, AreaPlot, BarPlot,
     Peaks, ZigZag, Stripes, Markers,
     HLine, VLine,
@@ -22,7 +22,7 @@ FREQS = ["daily", "hourly", "minute"]
 PRIMITIVES = [
     Candlesticks(),
     OHLC(),
-    Price(),
+    LinePlot("close"),
     Volume(),
     SMA(20) @ AutoPlot(),
     SMA(20) @ AutoPlot(label="short_ma"),

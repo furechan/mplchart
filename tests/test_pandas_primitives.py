@@ -15,7 +15,7 @@ except ImportError:
 from mplchart.chart import Chart  # noqa: E402
 from mplchart.samples import sample_prices  # noqa: E402
 from mplchart.primitives import (  # noqa: E402
-    Candlesticks, OHLC, Price, Volume,
+    Candlesticks, OHLC, Volume,
     LinePlot, AreaPlot, BarPlot,
     Peaks, ZigZag, Stripes, Markers,
     HLine, VLine,
@@ -28,7 +28,7 @@ FREQS = ["daily", "hourly", "minute"]
 PRIMITIVES = [
     Candlesticks(),
     OHLC(),
-    Price(),
+    LinePlot("close"),
     Volume(),
     SMA(20) @ LinePlot(),
     SMA(20) @ AreaPlot(),

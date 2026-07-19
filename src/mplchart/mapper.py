@@ -9,6 +9,7 @@ backend. ``raw_dates`` is a mode flag: it changes what ``xloc`` holds
 import numpy as np
 
 from abc import ABC, abstractmethod
+from datetime import datetime
 
 from .locators import DTArrayLocator
 from .formatters import DTArrayFormatter
@@ -34,11 +35,11 @@ class DateMapper(ABC):
         ...
 
     @abstractmethod
-    def series_xy(self, *values):
-        """Return (x, *windowed_values) numpy arrays.
+    def series_xy(self, *series):
+        """Return (x, *windowed_series) numpy arrays.
 
-        Positional contract: each value must be full-length in prices row
-        order; all values are cut by the same window against one shared x.
+        Positional contract: each series must be full-length in prices row
+        order; all series are cut by the same window against one shared x.
         """
         ...
 
@@ -48,7 +49,7 @@ class DateMapper(ABC):
         ...
 
     @abstractmethod
-    def _dates_array(self) -> np.ndarray:
+    def _dt_array(self) -> np.ndarray:
         """Full datetime array as numpy — for the axis locator/formatter."""
         ...
 
@@ -56,7 +57,7 @@ class DateMapper(ABC):
         """Configure the x-axis; rownum mode installs the date locator/formatter."""
         if self.raw_dates:
             return
-        arr = self._dates_array()
+        arr = self._dt_array()
         ax.xaxis.set_major_locator(DTArrayLocator(arr))
         ax.xaxis.set_major_formatter(DTArrayFormatter(arr))
 
@@ -86,7 +87,8 @@ class PandasDateMapper(DateMapper):
         self.xloc = pd.Series(values, index=self.dates, name="xloc")
 
     @staticmethod
-    def _to_timestamp(value):
+    def _to_datetime(value):
+        """Coerce a date-like value to a tz-naive Timestamp (a datetime subclass)."""
         import pandas as pd
 
         ts = pd.Timestamp(value)
@@ -98,9 +100,9 @@ class PandasDateMapper(DateMapper):
         """Visible window as an absolute row slice; end is inclusive."""
         lo, hi = 0, len(self.dates)
         if self.start is not None:
-            lo = int(self.dates.searchsorted(self._to_timestamp(self.start)))
+            lo = int(self.dates.searchsorted(self._to_datetime(self.start)))
         if self.end is not None:
-            hi = int(self.dates.searchsorted(self._to_timestamp(self.end), side="right"))
+            hi = int(self.dates.searchsorted(self._to_datetime(self.end), side="right"))
         if self.max_bars and self.max_bars > 0:
             lo = max(lo, hi - self.max_bars)
         return slice(lo, hi)
@@ -119,18 +121,26 @@ class PandasDateMapper(DateMapper):
             data[xcol] = data.index.values
         return data
 
-    def series_xy(self, *values):
+    def series_xy(self, *series):
         w = self._window()
         xs = self.xloc.to_numpy()[w]
-        return (xs, *(np.asarray(v)[w] for v in values))
+        return (xs, *(np.asarray(self._check_length(s))[w] for s in series))
+
+    def _check_length(self, value):
+        if len(value) != len(self.dates):
+            raise ValueError(
+                f"series_xy expects full-length values aligned with prices "
+                f"({len(self.dates)} rows), got {len(value)}"
+            )
+        return value
 
     def map_date(self, date):
-        ts = self._to_timestamp(date)
+        ts = self._to_datetime(date)
         if self.raw_dates:
             return ts.to_datetime64()
         return int(self.dates.searchsorted(ts))
 
-    def _dates_array(self) -> np.ndarray:
+    def _dt_array(self) -> np.ndarray:
         return self.dates.to_numpy()
 
 
@@ -168,10 +178,11 @@ class PolarsDateMapper(DateMapper):
             self.xloc = pl.int_range(len(self.dates), eager=True).alias("xloc")
 
     @staticmethod
-    def _to_datetime(value):
+    def _to_datetime(value) -> datetime:
+        """Coerce a date-like value to a tz-naive python datetime."""
         if hasattr(value, "tzinfo") and value.tzinfo is not None:
             value = value.replace(tzinfo=None)
-        return np.datetime64(value, "us").item()
+        return np.datetime64(value, "us").item()  # type: ignore  # numpy stubs type .item() as a union
 
     def _window(self) -> slice:
         """Visible window as an absolute row slice; end is inclusive."""
@@ -191,15 +202,24 @@ class PolarsDateMapper(DateMapper):
             sliced = sliced.with_columns(self.xloc[w].alias(xcol))
         return sliced
 
-    def series_xy(self, *values):
+    def series_xy(self, *series):
         import polars as pl
 
         w = self._window()
         xs = self.xloc[w].to_numpy()
         return (xs, *(
-            v[w].to_numpy() if isinstance(v, pl.Series) else np.asarray(v)[w]
-            for v in values
+            s[w].to_numpy() if isinstance(self._check_length(s), pl.Series)
+            else np.asarray(s)[w]
+            for s in series
         ))
+
+    def _check_length(self, value):
+        if len(value) != len(self.dates):
+            raise ValueError(
+                f"series_xy expects full-length values aligned with prices "
+                f"({len(self.dates)} rows), got {len(value)}"
+            )
+        return value
 
     def map_date(self, date):
         dt = self._to_datetime(date)
@@ -207,7 +227,7 @@ class PolarsDateMapper(DateMapper):
             return np.datetime64(dt)
         return int(self.dates.search_sorted(dt))
 
-    def _dates_array(self) -> np.ndarray:
+    def _dt_array(self) -> np.ndarray:
         return self.dates.to_numpy()
 
 

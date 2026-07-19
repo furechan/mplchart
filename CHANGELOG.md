@@ -1,6 +1,11 @@
 # Change Log
 
 ## 0.0.38
+- Renamed `MIDPRICE` → `MEDPRICE` (HL/2) in both stacks — adopts talib naming; frees `MIDPRICE` for a possible talib-style rolling midpoint. Added `AVGPRICE` (OHLC/4) to both stacks
+- Removed the `Price` primitive — use the string column form (`LinePlot("close")`, `chart.plot("close")`) or the named price indicators (`MEDPRICE`/`TYPPRICE`/`WCLPRICE`/`AVGPRICE`)
+- Dropped `item=` from `LinePlot`/`BarPlot`/`AreaPlot` — select a column by composing a single-output expression (`.struct.field(...)` on polars, `as_expr(item=...)` on pandas); multi-output results raise `ValueError`
+- A plain string is now a first-class indicator form meaning column reference only — resolved in `apply_indicator` as native column access (`prices[name]`, `pl.col` semantics); `LinePlot("close")`, `chart.plot("close")`, and `"close" @ LinePlot()` all work. Derived prices are indicators (`TYPPRICE()` etc.), not string aliases
+- `series_xy` now enforces the full-length contract — a length-mismatched value raises `ValueError` instead of being silently clamped by numpy slicing
 - Backend-native mappers: `DateMapper` pure contract, `PandasDateMapper` (join-on-xloc-series) and `PolarsDateMapper` (positional), created from the prices frame via `get_mapper(prices, raw_dates=)`; `raw_dates` is a mode flag, not a class. Legacy `DateIndexMapper`/`RawDateMapper` removed after parity verification (both backends × both modes × window configs); `utils.extract_datetime` removed (date extraction is native per mapper)
 - Added `Chart.series_xy` delegating to the mapper; primitives no longer access `chart.mapper` directly
 - `Peaks` refactored to two explicit modes decided by the constructor: `indicator=None` → peaks/valleys on prices high/low; bound indicator → peaks and valleys on its series. `item=` removed; `indicator` is now the first positional argument (`Peaks(5)` → `Peaks(span=5)`); multi-output results raise `ValueError`

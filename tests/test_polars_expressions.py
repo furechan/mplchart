@@ -16,7 +16,7 @@ from mplchart.expressions import (  # noqa: E402
     SMA, EMA, RMA, WMA, HMA, DEMA, TEMA,
     RSI, MACD, STOCH, ROC, MOM,
     TRANGE, ATR, BBANDS, DONCHIAN, KELTNER,
-    MIDPRICE, TYPPRICE, WCLPRICE,
+    AVGPRICE, MEDPRICE, TYPPRICE, WCLPRICE,
 )
 
 
@@ -40,7 +40,8 @@ EXPRESSIONS = [
     BBANDS(20),
     DONCHIAN(20),
     KELTNER(20),
-    MIDPRICE(),
+    MEDPRICE(),
+    AVGPRICE(),
     TYPPRICE(),
     WCLPRICE(),
 ]

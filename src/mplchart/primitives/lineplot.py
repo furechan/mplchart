@@ -3,7 +3,7 @@
 import numpy as np
 
 from ..model.primitive import BindingPrimitive
-from ..utils import get_label, series_data
+from ..utils import get_label
 
 
 class LinePlot(BindingPrimitive):
@@ -14,7 +14,6 @@ class LinePlot(BindingPrimitive):
 
     Args:
         indicator: indicator or expression to plot. Can also be bound via ``@``.
-        item (str) :  name of the column to plot. default None
         label (str) : legend label override. When None, derived from the indicator.
         style (str) : line style like 'solid', 'dashed', 'dotted', 'dashdot', 'marker'
         marker (str) : marker character like '.' or 'o'
@@ -34,7 +33,6 @@ class LinePlot(BindingPrimitive):
         self,
         indicator=None,
         *,
-        item: str | None = None,
         label: str | None = None,
         style: str | None = None,
         marker: str | None = None,
@@ -44,16 +42,12 @@ class LinePlot(BindingPrimitive):
         overbought: float | None = None,
         oversold: float | None = None,
     ):
-        if isinstance(indicator, str):
-            item = item or indicator
-            indicator = None
 
         if style == "marker":
             marker = marker or "."
             style = "none"
 
         super().__init__(indicator)
-        self.item = item
         self.label = label
         self.style = style
         self.marker = marker
@@ -68,7 +62,12 @@ class LinePlot(BindingPrimitive):
 
         result = chart.calc_result(self.required_indicator())
 
-        series = series_data(result, self.item)
+        if hasattr(result, "columns"):
+            raise ValueError(
+                "LinePlot expects a single series; compose a single-output "
+                "expression to select one column of a multi-output result."
+            )
+        series = result
 
         label = self.label or get_label(self.indicator)
 

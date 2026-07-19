@@ -548,14 +548,24 @@ class TRANGE(Indicator):
         return library.calc_trange(prices)
 
 
-class MIDPRICE(Indicator):
-    """Midpoint Price.
+class MEDPRICE(Indicator):
+    """Median Price.
 
     The arithmetic mean of the high and low: ``(high + low) / 2``.
     """
 
     def __call__(self, prices):
-        return library.calc_midprice(prices)
+        return library.calc_medprice(prices)
+
+
+class AVGPRICE(Indicator):
+    """Average Price.
+
+    The arithmetic mean of open, high, low and close: ``(O + H + L + C) / 4``.
+    """
+
+    def __call__(self, prices):
+        return library.calc_avgprice(prices)
 
 
 class TYPPRICE(Indicator):

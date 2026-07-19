@@ -8,7 +8,7 @@ from .momentum import ROC, MOM, RSI, PPO, MACD, MACDV, BOP, CMF, MFI, STOCH
 
 from .volatility import TRANGE, ATR, BBP, BBW, NATR, BBANDS, DONCHIAN, KELTNER, DMI, ADX
 
-from .prices import MIDPRICE, TYPPRICE, WCLPRICE
+from .prices import AVGPRICE, MEDPRICE, TYPPRICE, WCLPRICE
 
 __all__ = [
     "wrap_expression",
@@ -16,5 +16,5 @@ __all__ = [
     "SMA", "EMA", "RMA", "WMA", "HMA", "DEMA", "TEMA",
     "ROC", "MOM", "RSI", "PPO", "MACD", "MACDV", "BOP", "CMF", "MFI", "STOCH",
     "TRANGE", "ATR", "BBP", "BBW", "NATR", "BBANDS", "DONCHIAN", "KELTNER", "DMI", "ADX",
-    "MIDPRICE", "TYPPRICE", "WCLPRICE",
+    "AVGPRICE", "MEDPRICE", "TYPPRICE", "WCLPRICE",
 ]
