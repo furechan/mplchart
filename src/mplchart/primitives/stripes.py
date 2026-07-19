@@ -2,7 +2,10 @@
 
 import numpy as np
 
+from matplotlib.collections import PolyCollection
+
 from ..model.primitive import BindingPrimitive
+from ..utils import xvalues_to_float
 
 
 class Stripes(BindingPrimitive):
@@ -55,10 +58,24 @@ class Stripes(BindingPrimitive):
         starts = np.where(diff > 0)[0]
         ends = np.where(diff < 0)[0]
 
-        color = self.color
-        alpha = self.alpha
+        if not len(starts):
+            return
 
-        label = self.label
-        for s, e in zip(starts, ends):
-            ax.axvspan(xs[s], xs[e - 1], color=color, alpha=alpha, label=label)
-            label = None  # only label the first span so legend shows one entry
+        xs = xvalues_to_float(xs)
+        x0 = xs[starts]
+        x1 = xs[ends - 1]
+
+        # one PolyCollection of full-height bands — x in data coords, y in axes
+        # fraction via the same blended transform axvspan uses
+        kx = np.stack([x0, x0, x1, x1], axis=1)
+        ky = np.broadcast_to([0.0, 1.0, 1.0, 0.0], kx.shape)
+        verts = np.stack([kx, ky], axis=2)
+
+        poly = PolyCollection(
+            verts,  # ty: ignore[invalid-argument-type]  # pyright: ignore[reportArgumentType]  # stubs say Sequence[ArrayLike]; 3-D ndarray is supported
+            facecolors=self.color, edgecolors="none", alpha=self.alpha,
+            label=self.label, transform=ax.get_xaxis_transform(which="grid"),
+        )
+        ax.add_collection(poly, autolim=False)
+        ax.update_datalim([(x0.min(), 0), (x1.max(), 0)], updatey=False)
+        ax.autoscale_view()

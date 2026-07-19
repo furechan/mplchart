@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection
 
 from ..model.primitive import Primitive
-from ..utils import col_to_numpy
+from ..utils import col_to_numpy, xvalues_to_float
 
 
 class Candlesticks(Primitive):
@@ -85,6 +85,9 @@ def plot_cspoly(
     bottom = np.minimum(open_, close)
     top    = np.maximum(open_, close)
 
+    # floats up front (datetime64 → date numbers) so spacing and verts share one scale
+    xvalues = xvalues_to_float(xvalues)
+
     count = len(xvalues)
 
     if count > 0:
@@ -98,26 +101,17 @@ def plot_cspoly(
         edgecolor = np.where(change >= 0.0, colorup, colordn)
         facecolor = np.where(change >= 0.0, coloroff, colordn)
 
-    verts = [
-        (
-            (xv - half_bar, bt),
-            (xv - half_bar, tp),
-            (xv, tp),
-            (xv, hi),
-            (xv, tp),
-            (xv + half_bar, tp),
-            (xv + half_bar, bt),
-            (xv, bt),
-            (xv, lo),
-            (xv, bt),
-        )
-        for xv, bt, tp, lo, hi in zip(xvalues, bottom, top, low, high)
-    ]
+    # (n, 10, 2) vertex array — a 3-D ndarray hits PolyCollection's set_verts fast path
+    xv = xvalues
+    xl, xr = xv - half_bar, xv + half_bar
+    kx = np.stack([xl, xl, xv, xv, xv, xr, xr, xv, xv, xv], axis=1)
+    ky = np.stack([bottom, top, top, high, top, top, bottom, bottom, low, bottom], axis=1)
+    verts = np.stack([kx, ky], axis=2)
 
     linewidths = (0.7,)
 
     poly = PolyCollection(
-        verts,
+        verts,  # ty: ignore[invalid-argument-type]  # pyright: ignore[reportArgumentType]  # stubs say Sequence[ArrayLike]; 3-D ndarray is supported
         alpha=alpha,
         facecolors=facecolor,
         edgecolors=edgecolor,

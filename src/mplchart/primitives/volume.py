@@ -4,7 +4,7 @@ import numpy as np
 
 from ..model.primitive import Primitive
 from ..colors import closest_color
-from ..utils import col_to_numpy
+from ..utils import col_to_numpy, plot_vbars
 
 
 class Volume(Primitive):
@@ -74,7 +74,7 @@ class Volume(Primitive):
             ax.set_ylim(0.0, vmax * 4.0)
             ax.yaxis.set_visible(False)
 
-        ax.bar(xv, volume, width=width, alpha=alpha, color=color)
+        plot_vbars(ax, xv, volume, width=width, alpha=alpha, color=color)
 
         if self.sma:
             n = self.sma

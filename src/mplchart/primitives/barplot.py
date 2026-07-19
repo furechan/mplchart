@@ -1,7 +1,7 @@
 """BarPlot primitive"""
 
 from ..model.primitive import BindingPrimitive
-from ..utils import get_label
+from ..utils import get_label, plot_vbars
 
 
 class BarPlot(BindingPrimitive):
@@ -55,11 +55,8 @@ class BarPlot(BindingPrimitive):
 
         label = self.label or get_label(self.indicator)
 
-        kwargs = dict(
-            width=self.width,
-            color=self.color,
-            alpha=self.alpha,
-        )
-
         xv, yv = chart.series_xy(series)
-        ax.bar(xv, yv, label=label, **kwargs)
+        plot_vbars(
+            ax, xv, yv,
+            width=self.width, color=self.color, alpha=self.alpha, label=label,
+        )

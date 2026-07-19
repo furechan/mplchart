@@ -1,7 +1,7 @@
 """AutoPlot primitive — default auto-plotting with small overrides"""
 
 from ..model.primitive import BindingPrimitive
-from ..utils import get_label, get_metadata
+from ..utils import get_label, get_metadata, plot_vbars
 
 
 class AutoPlot(BindingPrimitive):
@@ -88,7 +88,7 @@ class AutoPlot(BindingPrimitive):
     def _plot_bars(self, chart, data, ax, item, *, label=None):
         color = chart.get_color(item, ax, fallback="fill")
         xv, yv = chart.series_xy(self._series(data, item))
-        ax.bar(xv, yv, color=color, alpha=0.5, width=0.8, label=label)
+        plot_vbars(ax, xv, yv, color=color, alpha=0.5, width=0.8, label=label)
 
     def _plot_area(self, chart, data, ax, item, *, label=None):
         color = chart.get_color(item, ax, fallback="fill")

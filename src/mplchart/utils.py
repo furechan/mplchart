@@ -134,6 +134,53 @@ def col_to_numpy(df, col: str) -> np.ndarray:
     return df[col].to_numpy()
 
 
+def xvalues_to_float(xvalues) -> np.ndarray:
+    """x-coordinates as a float array; datetime64 converts to matplotlib date numbers"""
+    arr = np.asarray(xvalues)
+    if np.issubdtype(arr.dtype, np.datetime64):
+        import matplotlib.dates as mdates
+
+        return mdates.date2num(arr)
+    return arr.astype(float)
+
+
+def plot_vbars(ax, xvalues, heights, *, width=0.8, color=None, alpha=None, label=None):
+    """Vertical bars as a single PolyCollection — one artist instead of one Rectangle per bar.
+
+    Same data-unit ``width`` semantics as ``ax.bar``; ``color`` may be a single
+    color or an array of per-bar colors.
+    """
+    from matplotlib.collections import PolyCollection
+
+    xv = xvalues_to_float(xvalues)
+    top = np.asarray(heights, dtype=float)
+
+    if color is None:
+        color = ax._get_patches_for_fill.get_next_color()
+
+    valid = np.isfinite(xv) & np.isfinite(top)
+    if not valid.all():
+        xv, top = xv[valid], top[valid]
+        if isinstance(color, np.ndarray) and len(color) == len(valid):
+            color = color[valid]
+
+    bottom = np.zeros_like(top)
+
+    half = width / 2.0
+    xl, xr = xv - half, xv + half
+    kx = np.stack([xl, xl, xr, xr], axis=1)
+    ky = np.stack([bottom, top, top, bottom], axis=1)
+    verts = np.stack([kx, ky], axis=2)
+
+    poly = PolyCollection(
+        verts,  # ty: ignore[invalid-argument-type]  # pyright: ignore[reportArgumentType]  # stubs say Sequence[ArrayLike]; 3-D ndarray is supported
+        facecolors=color, edgecolors="none", alpha=alpha, label=label,
+    )
+    ax.add_collection(poly)
+    ax.autoscale_view()
+    return poly
+
+
 def get_metadata(indicator, name: str, default=None):
     """get named attribute from indicator, with a default"""
 

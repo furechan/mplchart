@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.0.39
+- Vectorized `Candlesticks`/`OHLC` vertex construction — verts passed as an `(n, k, 2)` array, hitting `PolyCollection.set_verts` fast path
+- Fixed `raw_dates` mode candles/bars misalignment — datetime x-coordinates now convert to matplotlib date numbers via `utils.xvalues_to_float` (previously baked in as microseconds-since-epoch, off-scale vs line plots)
+- New `utils.plot_vbars` — vertical bars as a single `PolyCollection`; `Volume`, `BarPlot`, and `AutoPlot` histogram bars now use it instead of per-bar `ax.bar` Rectangles (~17× faster full-chart render at 5000 bars)
+- `Stripes` renders all bands as a single `PolyCollection` instead of one `axvspan` patch per region
+
 ## 0.0.38
 - Renamed example notebooks — dropped the redundant `chart-` prefix (`primitives-pandas`, `primitives-polars`, `expressions-polars`, `indicators-pandas`); renamed `compare-tickers` → `multiple-tickers`; restored the missing `examples/README.md` index that the main README links to
 - Renamed `Peaks` → `Swings` — cross-platform swing high/low vocabulary (TradeStation `SwingHigh`/`SwingLow`, NinjaTrader `Swing`); dual-mode behavior unchanged; a dedicated series-study primitive (name TBD) may later take over the bound-indicator mode

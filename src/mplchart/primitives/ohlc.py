@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection
 
 from ..model.primitive import Primitive
-from ..utils import col_to_numpy
+from ..utils import col_to_numpy, xvalues_to_float
 
 
 class OHLC(Primitive):
@@ -73,6 +73,9 @@ def plot_ohlc(xvalues, open_, high, low, close, ax=None, width=0.8, alpha=1.0, c
     colordn = colordn or edgecolor
     ax = ax or plt.gca()
 
+    # floats up front (datetime64 → date numbers) so spacing and verts share one scale
+    xvalues = xvalues_to_float(xvalues)
+
     count = len(xvalues)
 
     if count > 1:
@@ -86,22 +89,15 @@ def plot_ohlc(xvalues, open_, high, low, close, ax=None, width=0.8, alpha=1.0, c
         change = np.diff(close, prepend=np.nan) / np.roll(close, 1)
         edgecolors = np.where(change < 0.0, colordn, colorup)
 
-    verts = [
-        (
-            (xv, lo),
-            (xv, op),
-            (xv - half_bar, op),
-            (xv, op),
-            (xv, cl),
-            (xv + half_bar, cl),
-            (xv, cl),
-            (xv, hi),
-        )
-        for xv, op, hi, lo, cl in zip(xvalues, open_, high, low, close)
-    ]
+    # (n, 8, 2) vertex array — a 3-D ndarray hits PolyCollection's set_verts fast path
+    xv = xvalues
+    kx = np.stack([xv, xv, xv - half_bar, xv, xv, xv + half_bar, xv, xv], axis=1)
+    ky = np.stack([low, open_, open_, open_, close, close, close, high], axis=1)
+    verts = np.stack([kx, ky], axis=2)
 
     poly = PolyCollection(
-        verts, edgecolors=edgecolors, linewidths=(1.0,), alpha=alpha, label=label
+        verts,  # ty: ignore[invalid-argument-type]  # pyright: ignore[reportArgumentType]  # stubs say Sequence[ArrayLike]; 3-D ndarray is supported
+        edgecolors=edgecolors, linewidths=(1.0,), alpha=alpha, label=label
     )
 
     ax.add_collection(poly)
