@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.0.40
+- Deprecated `Candlesticks(use_bars=True)` — legacy bar-based renderer; emits `DeprecationWarning`, slated for removal
+- Removed deprecated `Chart(bgcolor=...)` parameter (deprecated since 2024) — use matplotlib styles
+- Removed `Chart(holidays=...)` parameter — accepted but never implemented; the rownum date mapper eliminates gaps by construction
+- Documented `VLine` / `chart.vline()` in the primitives example notebooks; `plot_vline()` retained as a legacy alias
+
 ## 0.0.39
 - Vectorized `Candlesticks`/`OHLC` vertex construction — verts passed as an `(n, k, 2)` array, hitting `PolyCollection.set_verts` fast path
 - Fixed `raw_dates` mode candles/bars misalignment — datetime x-coordinates now convert to matplotlib date numbers via `utils.xvalues_to_float` (previously baked in as microseconds-since-epoch, off-scale vs line plots)

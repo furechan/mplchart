@@ -51,8 +51,6 @@ class Chart:
             The figure is cleared before use.
         figsize (tuple, optional): Figure size as ``(width, height)`` in inches.
             Defaults to ``(12, 9)``.
-        holidays (list, optional): List of dates to exclude from the x-axis
-            when using the integer date mapper.
         normalize (bool): If True, normalize the prices DataFrame first
             (lowercase columns, promote a date/datetime column to the index).
             Defaults to False.
@@ -63,7 +61,7 @@ class Chart:
             (eliminating weekend/holiday gaps).
         color_scheme (dict or iterable of pairs, optional): Mapping of color
             role names to color values used to override default colors (e.g.
-            ``colorup``, ``colordn``, ``bgcolor``).
+            ``colorup``, ``colordn``).
 
     Examples:
         chart = Chart(prices, title="AAPL", max_bars=252)
@@ -86,8 +84,6 @@ class Chart:
         end=None,
         figure=None,
         figsize=None,
-        bgcolor=None,
-        holidays=None,
         normalize=False,
         raw_dates=False,
         color_scheme=(),
@@ -96,16 +92,8 @@ class Chart:
         self.end = end
         self.figsize = figsize
         self.max_bars = max_bars
-        self.holidays = holidays
         self.raw_dates = raw_dates
         self.color_scheme = dict(color_scheme)
-
-        if bgcolor is not None:
-            warnings.warn(
-                "bgcolor parameter is deprecated. Use matplotlib styles instead!",
-                DeprecationWarning,
-                stacklevel=2,
-            )
 
         if figure is not None:
             figure.clf()
@@ -131,8 +119,6 @@ class Chart:
     @cached_property
     def figure(self):
         figsize = self.figsize or self.DEFAULT_FIGSIZE
-        # bgcolor = self.get_color("bgcolor")
-        # return plt.figure(figsize=figsize, facecolor=bgcolor, edgecolor=bgcolor)
         return plt.figure(figsize=figsize)
 
 
@@ -497,8 +483,12 @@ class Chart:
         return self
 
     def plot_vline(self, date):
-        """Deprecated. Use vline() instead."""
-        warnings.warn("plot_vline() is deprecated, use vline() instead", DeprecationWarning, stacklevel=2)
+        """Legacy alias for vline(), kept for compatibility. Use vline() instead."""
+        warnings.warn(
+            "plot_vline() is a legacy alias, use vline() instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self.vline(date)
 
     def hline(self, value, *, color=None, linestyle=None):

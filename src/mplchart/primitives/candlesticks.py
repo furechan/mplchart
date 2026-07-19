@@ -1,5 +1,7 @@
 """Candlesticks primitive"""
 
+import warnings
+
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -26,8 +28,8 @@ class Candlesticks(Primitive):
             ``text.color`` matplotlib parameter.
         colordn (str, optional): Color for down-bars. Defaults to the current
             ``text.color`` matplotlib parameter.
-        use_bars (bool): If ``True``, render using bar charts instead of
-            polygons. Defaults to ``False``.
+        use_bars (bool): Deprecated legacy renderer — draws bar charts instead
+            of polygons; much slower and slated for removal. Defaults to ``False``.
     """
 
     def __init__(
@@ -39,6 +41,14 @@ class Candlesticks(Primitive):
         colordn: str | None = None,
         use_bars: bool = False,
     ):
+        if use_bars:
+            warnings.warn(
+                "use_bars is a deprecated legacy renderer and will be removed "
+                "in a future release",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+
         self.width = width
         self.alpha = alpha
         self.colorup = colorup
