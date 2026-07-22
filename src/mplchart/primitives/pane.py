@@ -25,7 +25,7 @@ class Pane(Primitive):
         self.yticks = yticks
 
     def apply_to_chart(self, chart):
-        ax = chart.get_axes(self.target, height_ratio=self.height_ratio)
+        ax = chart.canvas.get_axes(self.target, height_ratio=self.height_ratio)
 
         if self.yticks:
             ax.set_yticks(self.yticks)

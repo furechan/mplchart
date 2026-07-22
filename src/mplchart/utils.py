@@ -1,5 +1,7 @@
 """mplchart utils"""
 
+import warnings
+
 import numpy as np
 
 from inspect import Signature, Parameter
@@ -47,6 +49,10 @@ def is_indicator_like(item) -> bool:
 def apply_indicator(prices, indicator):
     """Apply an indicator or expression to prices.
 
+    Deprecated: evaluation lives on the data view — use ``view.eval(item)``
+    (see ``mplchart.dataview``). Kept self-contained for compatibility since
+    it accepts any frame, not just chartable prices.
+
     - str: column name — plain native column access (``prices[name]``);
       derived prices are indicators (e.g. ``TYPPRICE()``), not string aliases.
     - Polars Expr: evaluates against ``prices`` and returns a Series. If the
@@ -58,6 +64,11 @@ def apply_indicator(prices, indicator):
     - Pandas Expression: evaluates via ``_eval_expression`` and returns a Series.
     - Callable: returns ``indicator(prices)``.
     """
+    warnings.warn(
+        "apply_indicator() is deprecated, use view.eval() instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     if isinstance(indicator, str):
         return prices[indicator]
 

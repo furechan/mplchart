@@ -36,9 +36,9 @@ class AreaPlot(BindingPrimitive):
         self.label = label
 
     def apply_to_chart(self, chart):
-        ax = chart.get_axes()
+        ax = chart.canvas.get_axes()
 
-        result = chart.calc_result(self.required_indicator())
+        result = chart.view.eval(self.required_indicator())
 
         if hasattr(result, "columns"):
             raise ValueError(
@@ -54,7 +54,7 @@ class AreaPlot(BindingPrimitive):
             alpha=self.alpha,
         )
 
-        xv, yv = chart.series_xy(series)
+        xv, yv = chart.view.series_xy(series)
         ax.fill_between(
             xv,
             yv,

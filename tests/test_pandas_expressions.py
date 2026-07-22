@@ -10,7 +10,8 @@ from mplchart.chart import Chart  # noqa: E402
 from mplchart.samples import sample_prices  # noqa: E402
 from mplchart.primitives import Candlesticks, Volume  # noqa: E402
 from mplchart.indicators import RSI, SMA, MACD, BBANDS  # noqa: E402
-from mplchart.utils import is_pandas_expr, apply_indicator  # noqa: E402
+from mplchart.utils import is_pandas_expr  # noqa: E402
+from mplchart.dataview import get_view  # noqa: E402
 
 
 def prices():
@@ -35,7 +36,7 @@ def test_is_pandas_expr():
 def test_plot_expression(expr):
     chart = Chart(prices(), max_bars=100)
     chart.plot(Candlesticks(), expr)
-    assert chart.count_axes() > 0
+    assert chart.canvas.count_axes() > 0
     plt.close()
 
 
@@ -43,7 +44,7 @@ def test_plot_expression_pane():
     body = (pd.col("close") - pd.col("open")).abs()
     chart = Chart(prices(), max_bars=100)
     chart.plot(Candlesticks(), Volume()).pane("below").plot(body)
-    assert chart.count_axes() > 0
+    assert chart.canvas.count_axes() > 0
     plt.close()
 
 
@@ -55,7 +56,7 @@ def test_indicator_as_expr_single_output():
     composed = RSI(14).as_expr() < 30
     assert is_pandas_expr(composed)
 
-    result = apply_indicator(prices(), composed)
+    result = get_view(prices()).eval(composed)
     assert result.dtype == bool
 
 
@@ -76,7 +77,7 @@ def test_indicator_as_expr_with_item():
     assert repr(expr).endswith(".macdhist")
 
     composed = MACD().as_expr("macdhist") > 0
-    result = apply_indicator(prices(), composed)
+    result = get_view(prices()).eval(composed)
     assert result.dtype == bool
 
 

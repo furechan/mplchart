@@ -36,7 +36,7 @@ def wrap_expression(func):
 
     Builds a slug label (e.g. "sma-20", "macd-12-26-9") from the call args
     and aliases the resulting ``pl.Expr`` with it. Multi-output factories
-    return a single ``pl.struct(...)`` Expr; ``apply_indicator`` unnests
+    return a single ``pl.struct(...)`` Expr; the view's ``eval`` unnests
     it into a DataFrame at evaluation time.
     """
     sig = inspect.signature(func)

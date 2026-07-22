@@ -24,7 +24,7 @@ class HLine(Primitive):
         self.linestyle = linestyle
 
     def apply_to_chart(self, chart):
-        ax = chart.get_axes("same")
+        ax = chart.canvas.get_axes("same")
 
         color = self.color or mpl.rcParams["grid.color"]
         linestyle = self.linestyle or mpl.rcParams["grid.linestyle"]

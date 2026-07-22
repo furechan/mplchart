@@ -11,7 +11,8 @@ import polars as pl  # noqa: E402
 from mplchart.chart import Chart  # noqa: E402
 from mplchart.samples import sample_prices  # noqa: E402
 from mplchart.primitives import Candlesticks  # noqa: E402
-from mplchart.utils import apply_indicator, get_label  # noqa: E402
+from mplchart.utils import get_label  # noqa: E402
+from mplchart.dataview import get_view  # noqa: E402
 from mplchart.expressions import (  # noqa: E402
     SMA, EMA, RMA, WMA, HMA, DEMA, TEMA,
     RSI, MACD, STOCH, ROC, MOM,
@@ -58,7 +59,8 @@ def test_prices(freq):
 def test_chart_init(freq):
     prices = sample_prices(freq=freq, backend="polars")
     chart = Chart(prices, max_bars=100)
-    assert chart.prices is not None
+    assert chart.view is not None
+    assert chart.view.prices is not None
     assert chart.backend == "polars"
     plt.close()
 
@@ -69,15 +71,15 @@ def test_expressions(expr, freq):
     prices = sample_prices(freq=freq, backend="polars")
     chart = Chart(prices, max_bars=100)
     chart.plot([Candlesticks(), expr])
-    assert chart.count_axes() > 0
+    assert chart.canvas.count_axes() > 0
     plt.close()
 
 
-def test_apply_indicator_struct_expr():
+def test_eval_struct_expr():
     prices = sample_prices(backend="polars")
     expr = MACD()
     assert isinstance(expr, pl.Expr)  # multi-output expressions are now struct Exprs
-    result = apply_indicator(prices, expr)
+    result = get_view(prices).eval(expr)
     assert isinstance(result, pl.DataFrame)
     assert list(result.columns) == ["macd", "macdsignal", "macdhist"]
     assert len(result) == len(prices)
@@ -92,5 +94,5 @@ def test_struct_expr_alias_as_label():
     assert get_label(custom) == "my-macd"
 
     prices = sample_prices(backend="polars")
-    result = apply_indicator(prices, custom)
+    result = get_view(prices).eval(custom)
     assert list(result.columns) == ["macd", "macdsignal", "macdhist"]

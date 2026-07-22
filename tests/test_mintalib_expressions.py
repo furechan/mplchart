@@ -34,5 +34,5 @@ def test_mintalib_expressions(expr, freq, max_bars=250):
     prices = sample_prices(freq=freq, backend="polars")
     chart = Chart(prices, title="Test", max_bars=max_bars)
     chart.plot([Candlesticks(), expr])
-    assert chart.count_axes() > 0
+    assert chart.canvas.count_axes() > 0
     plt.close()

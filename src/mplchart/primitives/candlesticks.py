@@ -59,9 +59,9 @@ class Candlesticks(Primitive):
         return self.__class__.__name__
 
     def apply_to_chart(self, chart):
-        ax = chart.get_axes()
+        ax = chart.canvas.get_axes()
 
-        prices = chart.slice(chart.prices, xcol="xloc")
+        prices = chart.view.slice(chart.view.prices, xcol="xloc")
         xvalues = np.asarray(prices["xloc"])
 
         label = str(self)

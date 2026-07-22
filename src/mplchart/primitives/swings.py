@@ -41,23 +41,23 @@ class Swings(BindingPrimitive):
         self.color = color
 
     def apply_to_chart(self, chart):
-        ax = chart.get_axes()
+        ax = chart.canvas.get_axes()
 
         if self.indicator is None:
             # OHLC mode — peaks on high, valleys on low of the prices frame.
-            windowed = chart.slice(chart.prices, xcol="xloc")
+            windowed = chart.view.slice(chart.view.prices, xcol="xloc")
             xv = np.asarray(windowed["xloc"])
             hi = np.asarray(col_to_numpy(windowed, "high"), dtype=float)
             lo = np.asarray(col_to_numpy(windowed, "low"), dtype=float)
         else:
             # Series mode — peaks and valleys on the same values.
-            result = chart.calc_result(self.indicator)
+            result = chart.view.eval(self.indicator)
             if hasattr(result, "columns"):
                 raise ValueError(
                     "Swings expects a single series; compose a single-output "
                     "expression to select one column of a multi-output result."
                 )
-            xv, arr = chart.series_xy(result)
+            xv, arr = chart.view.series_xy(result)
             arr = np.asarray(arr, dtype=float)
             hi = lo = arr
 

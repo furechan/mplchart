@@ -31,8 +31,8 @@ class Primitive(ABC):
         """Act on the chart — draw, create a pane, or otherwise modify it.
 
         Called before any indicator calculation. Prices are available as
-        ``chart.prices`` (full, unsliced); use ``chart.slice(chart.prices)``
-        to restrict prices to the current view window and ``chart.get_axes()``
+        ``chart.view.prices`` (full, unsliced); use ``chart.view.slice(chart.view.prices)``
+        to restrict prices to the current view window and ``chart.canvas.get_axes()``
         to obtain or create the target pane.
 
         Args:

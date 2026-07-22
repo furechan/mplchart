@@ -18,7 +18,7 @@ from mplchart.primitives import (  # noqa: E402
     Candlesticks, OHLC, Volume,
     LinePlot, AreaPlot, BarPlot,
     Swings, ZigZag, Stripes, Markers,
-    HLine, VLine,
+    HLine, VLine, TrendLines,
 )
 from mplchart.indicators import SMA, RSI  # noqa: E402
 
@@ -35,6 +35,7 @@ PRIMITIVES = [
     SMA(20) @ BarPlot(),
     Swings(),
     ZigZag(),
+    TrendLines(),
     HLine(25),
     HLine(25, color="red", linestyle="dashed"),
 ]
@@ -52,7 +53,7 @@ def test_primitives(primitive, freq):
     prices = sample_prices(freq=freq, backend="pandas")
     chart = Chart(prices, max_bars=100)
     chart.plot(primitive)
-    assert chart.count_axes() > 0
+    assert chart.canvas.count_axes() > 0
     plt.close()
 
 
@@ -62,7 +63,7 @@ def test_vline(freq):
     date = prices.index[len(prices) // 2]
     chart = Chart(prices, max_bars=100)
     chart.plot(Candlesticks(), VLine(date))
-    assert chart.count_axes() > 0
+    assert chart.canvas.count_axes() > 0
     plt.close()
 
 
@@ -72,7 +73,7 @@ def test_vline_method(freq):
     date = prices.index[len(prices) // 2]
     chart = Chart(prices, max_bars=100)
     chart.plot(Candlesticks()).vline(date)
-    assert chart.count_axes() > 0
+    assert chart.canvas.count_axes() > 0
     plt.close()
 
 
@@ -81,7 +82,7 @@ def test_hline_method(freq):
     prices = sample_prices(freq=freq, backend="pandas")
     chart = Chart(prices, max_bars=100)
     chart.plot(Candlesticks()).hline(25, color="red")
-    assert chart.count_axes() > 0
+    assert chart.canvas.count_axes() > 0
     plt.close()
 
 

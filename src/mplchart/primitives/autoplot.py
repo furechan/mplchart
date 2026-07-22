@@ -27,9 +27,9 @@ class AutoPlot(BindingPrimitive):
         self.label = label
 
     def apply_to_chart(self, chart):
-        ax = chart.get_axes()
+        ax = chart.canvas.get_axes()
 
-        data = chart.calc_result(self.required_indicator())
+        data = chart.view.eval(self.required_indicator())
 
         group_label = self.label if self.label is not None else get_label(self.indicator)
         columns = list(data.columns) if hasattr(data, "columns") else []
@@ -81,30 +81,30 @@ class AutoPlot(BindingPrimitive):
             linestyle = style
             marker = None
 
-        color = chart.get_color(item, ax, fallback="line")
-        xv, yv = chart.series_xy(self._series(data, item))
+        color = chart.canvas.get_color(item, ax, fallback="line")
+        xv, yv = chart.view.series_xy(self._series(data, item))
         ax.plot(xv, yv, label=label, linestyle=linestyle, marker=marker, color=color)
 
     def _plot_bars(self, chart, data, ax, item, *, label=None):
-        color = chart.get_color(item, ax, fallback="fill")
-        xv, yv = chart.series_xy(self._series(data, item))
+        color = chart.canvas.get_color(item, ax, fallback="fill")
+        xv, yv = chart.view.series_xy(self._series(data, item))
         plot_vbars(ax, xv, yv, color=color, alpha=0.5, width=0.8, label=label)
 
     def _plot_area(self, chart, data, ax, item, *, label=None):
-        color = chart.get_color(item, ax, fallback="fill")
-        xv, yv = chart.series_xy(self._series(data, item))
+        color = chart.canvas.get_color(item, ax, fallback="fill")
+        xv, yv = chart.view.series_xy(self._series(data, item))
         ax.fill_between(xv, yv, 0, label=label, interpolate=True, color=color, alpha=0.5)
 
     def _plot_bands(self, chart, data, ax, upper, lower, middle=None, label=None):
         key = get_label(self.indicator)
-        color = chart.get_color(key, ax, fallback="line")
+        color = chart.canvas.get_color(key, ax, fallback="line")
 
         if middle:
-            xv, mv = chart.series_xy(self._series(data, middle))
+            xv, mv = chart.view.series_xy(self._series(data, middle))
             ax.plot(xv, mv, color=color, linestyle="dashed")
 
-        xv, lv = chart.series_xy(self._series(data, lower))
-        xv, uv = chart.series_xy(self._series(data, upper))
+        xv, lv = chart.view.series_xy(self._series(data, lower))
+        xv, uv = chart.view.series_xy(self._series(data, upper))
 
         ax.plot(xv, lv, color=color, linestyle="dotted")
         ax.plot(xv, uv, color=color, linestyle="dotted")

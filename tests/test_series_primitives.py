@@ -16,7 +16,7 @@ def test_string_indicator_plots_price_column(backend):
     prices = sample_prices(freq="daily", backend=backend)
     chart = Chart(prices, max_bars=100)
     chart.plot(LinePlot("close"), BarPlot("volume"), AreaPlot("open"))
-    assert chart.count_axes() > 0
+    assert chart.canvas.count_axes() > 0
     plt.close()
 
 
@@ -32,7 +32,7 @@ def test_plot_string_directly(backend):
     prices = sample_prices(freq="daily", backend=backend)
     chart = Chart(prices, max_bars=100)
     chart.plot("close")
-    assert chart.count_axes() > 0
+    assert chart.canvas.count_axes() > 0
     plt.close()
 
 
@@ -72,5 +72,5 @@ def test_struct_field_selects_one_output():
     prices = sample_prices(freq="daily", backend="polars")
     chart = Chart(prices, max_bars=100)
     chart.plot(LinePlot(MACD().struct.field("macdhist")))
-    assert chart.count_axes() > 0
+    assert chart.canvas.count_axes() > 0
     plt.close()

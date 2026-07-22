@@ -12,6 +12,7 @@ from .lineplot import LinePlot
 from .areaplot import AreaPlot
 from .barplot import BarPlot
 from .zigzag import ZigZag
+from .trendlines import TrendLines
 from .pane import Pane
 from .vline import VLine
 from .hline import HLine

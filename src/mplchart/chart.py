@@ -1,23 +1,14 @@
 """charting main module"""
 
-import io
 import warnings
 
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-
-from collections import Counter
-from functools import cached_property
-
-from .colors import closest_color
-from .utils import detect_backend, apply_indicator, is_indicator_like, extract_prefix
+from .canvas import Canvas
+from .dataview import get_view
+from .dateaxis import config_date_axis
+from .utils import detect_backend, is_indicator_like
 from .utils import normalize_prices, check_prices
-from .layout import make_twinx, init_vplot, add_vplot
-from .mapper import get_mapper
 from .primitives.autoplot import AutoPlot
 
-
-USE_TIGHT_LAYOUT = True
 
 """
 How primitives/indicators are plotted
@@ -31,17 +22,16 @@ How primitives/indicators are plotted
 """
 
 
-
 class Chart:
     """Main charting class for creating financial charts with technical indicators.
 
-    Creates a matplotlib figure with one or more panes. Prices are required at
-    initialization and set up the date mapper; calls to ``plot()`` add
-    indicators to existing or new panes.
+    Composes a data view (``chart.view``) and a presentation canvas
+    (``chart.canvas``). Prices are required at initialization and set up the
+    data view; calls to ``plot()`` add indicators to existing or new panes.
 
     Args:
         prices (DataFrame): OHLCV prices DataFrame (pandas or polars), used to
-            initialize the date mapper. Required.
+            initialize the data view. Required.
         title (str, optional): Chart title displayed above the main pane.
         max_bars (int, optional): Maximum number of bars to display. When set,
             only the most recent ``max_bars`` bars are shown.
@@ -69,10 +59,7 @@ class Chart:
         chart.show()
     """
 
-    mapper = None
-    prices = None
-
-    DEFAULT_FIGSIZE = (12, 9)
+    view = None
 
     def __init__(
         self,
@@ -90,273 +77,60 @@ class Chart:
     ):
         self.start = start
         self.end = end
-        self.figsize = figsize
         self.max_bars = max_bars
         self.raw_dates = raw_dates
-        self.color_scheme = dict(color_scheme)
 
-        if figure is not None:
-            figure.clf()
-            self.figure = figure
+        self.canvas = Canvas(
+            figsize=figsize, figure=figure, title=title, color_scheme=color_scheme
+        )
 
-        self.init_axes()
-
-        if prices is not None:
-            self.init_prices(prices, normalize=normalize)
-        else:
+        if prices is None:
             raise ValueError("Prices data must be provided at initialization!")
 
-        if title:
-            self.set_title(title)
+        self.init_prices(prices, normalize=normalize)
 
-        if USE_TIGHT_LAYOUT:
-            self.figure.set_layout_engine("tight")
-
-    @cached_property
-    def counter(self):
-        return Counter()
-
-    @cached_property
+    @property
     def figure(self):
-        figsize = self.figsize or self.DEFAULT_FIGSIZE
-        return plt.figure(figsize=figsize)
+        """The canvas figure."""
+        return self.canvas.figure
 
+    @property
+    def mapper(self):
+        """Deprecated alias for the data view, kept for compatibility."""
+        warnings.warn(
+            "chart.mapper is deprecated, use chart.view instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.view
 
     def init_prices(self, prices, normalize: bool = False):
-        """Initialize the chart date mapper with price data.
+        """Initialize the chart data view with price data.
 
         Args:
             prices (DataFrame): OHLCV prices DataFrame with a datetime index
                 or a ``date``/``datetime`` column.
         """
 
-        if self.mapper is not None:
+        if self.view is not None:
             warnings.warn("init_prices was already called!", stacklevel=2)
             return
-
-        if self.prices is not None:
-            warnings.warn("init_prices was already called with different data!", stacklevel=2)
 
         if normalize:
             prices = normalize_prices(prices)
 
         check_prices(prices)
 
-        self.prices = prices
         self.backend = detect_backend(prices)
 
-        self.mapper = get_mapper(
+        self.view = get_view(
             prices, raw_dates=self.raw_dates, start=self.start, end=self.end, max_bars=self.max_bars
         )
 
-        ax = self.root_axes()
-        self.mapper.config_axes(ax)
+        if not self.view.raw_dates:
+            config_date_axis(self.canvas.root_axes(), self.view.dates)
 
         return prices
-
-
-    def next_line_color(self, ax):
-        """Next line color either text.color or cycled color"""
-        handles, _ = ax.get_legend_handles_labels()
-        if len(handles):
-            return ax._get_lines.get_next_color()
-        else:
-            return plt.rcParams["text.color"]
-
-    def next_fill_color(self, ax):
-        """Next cycled color for fill"""
-        return ax._get_patches_for_fill.get_next_color()
-
-    def get_color(self, name, ax=None, *, fallback=None):
-        """Lookup color through the color_scheme.
-
-        ``name`` can be a column name, a short id, or a full label — the
-        color_scheme is tried on the raw name first, then on the extracted
-        prefix (e.g. ``"macd-12-26-9"`` → ``"macd"``).
-        """
-
-        color = fallback
-
-        colors = self.color_scheme
-        if colors:
-            key = name if name in colors else extract_prefix(name)
-            if key in colors:
-                color = colors[key] or color
-
-        if isinstance(color, list):
-            ckey = ax, name
-            count = self.counter[ckey]
-            self.counter[ckey] += 1
-            color = color[count % len(color)] if color else None
-
-        if color and color.startswith("~"):
-            color = closest_color(color.removeprefix("~"))
-
-        if color == "line":
-            color = self.next_line_color(ax)
-        elif color == "fill":
-            color = self.next_fill_color(ax)
-
-        return color
-
-
-    def slice(self, data, *, xcol=None):
-        """Re-index and slice data to the visible window (backend-aware).
-
-        If ``xcol`` is given, the returned frame carries an extra column of
-        that name with the x-coordinates for each row — integer rownums for
-        the default mapper, datetime values in ``raw_dates`` mode.
-        """
-        if self.mapper is None:
-            raise ValueError("Date mapper was not configured yet. prices not provided!")
-        return self.mapper.slice(data, xcol=xcol)
-
-    def series_xy(self, *series):
-        """Return (x, *windowed_series) numpy arrays for plotting.
-
-        Each positional argument must be a full-length series/array aligned
-        with the prices; each is sliced to the visible window. x carries the
-        window's x-coordinates.
-        """
-        if self.mapper is None:
-            raise ValueError("Date mapper was not configured yet. prices not provided!")
-        return self.mapper.series_xy(*series)
-
-    def map_date(self, date):
-        """map date to value"""
-
-        if self.mapper is None:
-            raise ValueError("Date mapper was not configured yet. prices not provided!")
-
-        return self.mapper.map_date(date)
-
-    def set_title(self, title):
-        """Set chart title on root axes. Must be called after init_axes!"""
-
-        if title is None:
-            return
-
-        # self.figure.suptitle(title)
-
-        ax = self.root_axes()
-        ax.set_title(title)
-
-    def config_axes(self, ax, root=False):
-        """configure axes"""
-
-        ax.set_xmargin(0.0)
-        ax.set_axisbelow(True)
-        ax.patch.set_visible(
-            False
-        )  # make patch trasnparent to see through root axes drawings
-
-        # x grid is displayed by the root axes
-        # y grid is displayed by the sub axes
-
-        if root:
-            ax.xaxis.grid(True, alpha=0.4)
-            ax.yaxis.grid(False)
-            ax.tick_params(left=False, labelleft=False)
-            return
-
-        ax.xaxis.grid(False)
-        ax.yaxis.grid(True, alpha=0.4)
-        ax.yaxis.tick_right()
-
-        # remove ticks on non-root axes
-        ax.tick_params(
-            axis="x",  # changes apply to the x-axis
-            which="both",  # both major and minor ticks are affected
-            bottom=False,  # ticks along the bottom edge are off
-            top=False,  # ticks along the top edge are off
-            labelbottom=False,
-        )  # labels along the bottom edge are off
-
-    def init_axes(self):
-        """create root axes"""
-
-        # Create a root axes with label 'root'
-        # Must be called after the layout is set !
-        # The root axes is needed before set_title, config_mapping
-
-        ax = init_vplot(self.figure)
-        self.config_axes(ax, root=True)
-
-    def root_axes(self):
-        """root axes (usualy axes[0])"""
-
-        if not self.figure.axes:
-            warnings.warn("root_axes called before init_axes!")
-            self.init_axes()
-
-        return self.figure.axes[0]
-
-    def main_axes(self):
-        """main axes (usualy axes[1])"""
-
-        if not self.figure.axes:
-            warnings.warn("main_axes called before init_axes!")
-            self.init_axes()
-
-        if len(self.figure.axes) > 1:
-            ax = self.figure.axes[1]
-        else:
-            ax = self.get_axes()
-
-        return ax
-
-    @staticmethod
-    def valid_target(target):
-        """whether the target name is valid"""
-        return target in ("main", "same", "samex", "twinx", "above", "below")
-
-    def get_axes(self, target=None, *, height_ratio=None):
-        """
-        select existing axes or creates new axes depending on target
-
-        Args:
-            target: one of "main", "same" ("samex" is an alias), "twinx",
-                "above", "below"
-        """
-
-        if target is None:
-            target = "same"
-
-        if not self.valid_target(target):
-            raise ValueError("Invalid target %r" % target)
-
-        figure = self.figure
-
-        if not figure.axes:
-            self.init_axes()
-
-        # ignore root and volume axes
-        axes = [ax for ax in self.figure.axes if ax._label not in ("root", "twinx")]
-
-        if not axes:
-            ax = add_vplot(figure=figure)
-        else:
-            if target == "main":
-                return axes[0]
-
-            if target in ("same", "samex"):
-                return axes[-1]
-
-            if target == "twinx":
-                return make_twinx(axes[-1])
-
-            append = target == "below"
-
-            if not height_ratio:
-                height_ratio = 0.2
-
-            ax = add_vplot(
-                figure=figure, height_ratio=height_ratio, append=append
-            )
-
-        self.config_axes(ax)
-
-        return ax
 
     def pane(self, target="below", *, height_ratio=None, yticks=None):
         """create or select a pane and return self for chaining
@@ -367,39 +141,13 @@ class Chart:
             yticks: tuple of y-axis tick values (also draws heavy grid lines)
         """
 
-        ax = self.get_axes(target, height_ratio=height_ratio)
+        ax = self.canvas.get_axes(target, height_ratio=height_ratio)
 
         if yticks:
             ax.set_yticks(yticks)
             ax.grid(axis="y", which="major", linestyle="-", linewidth=2)
 
         return self
-
-    def dump_axes(self):
-        for i, ax in enumerate(self.figure.axes):
-            label = getattr(ax, "_label") or "none"
-            xlim = ax.get_xlim()
-            ylim = ax.get_ylim()
-            print(i, label, xlim, ylim)
-
-    def count_axes(self, include_root=False, include_twins=False):
-        """count axes that are neither root or twinx"""
-        count = 0
-        for ax in self.figure.axes:
-            label = getattr(ax, "_label", None)
-            if label == "root" and not include_root:
-                continue
-            if label == "twinx" and not include_twins:
-                continue
-            count += 1
-        return count
-
-    def calc_result(self, indicator):
-        """Evaluate an indicator against the prices; ``None`` yields the prices."""
-
-        if indicator is None:
-            return self.prices
-        return apply_indicator(self.prices, indicator)
 
     def plot_indicator(self, indicator):
         """calculate and plot an indicator"""
@@ -420,18 +168,6 @@ class Chart:
             return
 
         raise ValueError(f"Indicator {indicator!r} not callable")
-
-
-    def add_legends(self):
-        """add legends to all axes"""
-        for ax in self.figure.axes:
-            handles, labels = ax.get_legend_handles_labels()
-            if handles:
-                # default to upper left unless the user has explicitly set legend.loc
-                loc = mpl.rcParams["legend.loc"]
-                if loc == mpl.rcParamsDefault["legend.loc"]:
-                    loc = "upper left"
-                ax.legend(loc=loc)
 
     def plot(self, *args):
         """Plot one or more indicators onto the chart.
@@ -460,12 +196,12 @@ class Chart:
 
         # ensure a main pane exists — root-drawing primitives (e.g. Stripes)
         # never create one themselves
-        self.get_axes()
+        self.canvas.get_axes()
 
         for indicator in indicators:
             self.plot_indicator(indicator)
 
-        self.add_legends()
+        self.canvas.add_legends()
 
         return self
 
@@ -506,11 +242,7 @@ class Chart:
 
     def show(self):
         """show chart"""
-        if not self.figure.axes:
-            self.get_axes()
-
-        # figure.show() seems only to work if figure was not created by pyplot!
-        plt.show()
+        self.canvas.show()
 
     def render(self, format="svg", *, dpi="figure"):
         """Render the chart to bytes in the specified image format.
@@ -524,11 +256,4 @@ class Chart:
         Returns:
             bytes: The rendered image as a byte string.
         """
-        if not self.figure.axes:
-            self.get_axes()
-
-        file = io.BytesIO()
-        self.figure.savefig(file, format=format, dpi=dpi)
-        result = file.getvalue()
-
-        return result
+        return self.canvas.render(format=format, dpi=dpi)

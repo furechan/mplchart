@@ -1,6 +1,14 @@
 # Change Log
 
 ## 0.0.40
+- New experimental `TrendLines` primitive (`primitives/trendlines.py`) — walkback trend-line detection: backward hull walk with swing filter, fold gate, and leg scoring; developed in `playground/trend-lines-proto.ipynb`, documented in the primitives example notebooks, API likely to change
+- New `dateaxis.py` consolidating `locators.py` + `formatters.py` (both removed); added `config_date_axis(ax, dates)` wiring helper
+- Mapper is now matplotlib-free — `config_axes` and `_dt_array` removed; the native `dates` attribute feeds `config_date_axis` (which coerces to numpy at its boundary); `Chart.init_prices` wires it when not `raw_dates`
+- Renamed mapper → data view: `mapper.py` → `dataview.py`, `DateMapper` → `DataView`, `PandasDateMapper` → `PandasDataView`, `PolarsDateMapper` → `PolarsDataView`, `get_mapper` → `get_view` (removed), `chart.mapper` → `chart.view` (kept as deprecated alias)
+- New `canvas.py` — `Canvas` presentation plane (figure, title, styled root/panes, `get_axes` targets, color machinery, `show`/`render`); Chart now composes it: `chart.canvas` + `chart.view`, with Chart keeping only the fluent surface (`plot`, `pane`, `hline`, `vline`, `show`, `render`, `figure`, `title=`) — figure-plane calls go through `chart.canvas.*` (primitives/tests repointed; `count_axes`/`dump_axes`/`add_legends` moved to Canvas; `set_title`/`get_axes`/`get_color`/`root_axes`/`main_axes` removed from Chart; Chart no longer imports matplotlib)
+- Primitives now call the view directly (`chart.view.eval/series_xy/slice/map_date`); Chart's data-plane wrappers (`slice`, `series_xy`, `map_date`, `calc_result`) removed
+- Removed `chart.prices` and the dead `init_prices` re-entry warning — the view wraps the frame; access via `chart.view.prices` (primitives updated); `calc_result(None)` returns `view.prices`
+- Evaluation moved onto the view: each `DataView` subclass implements `eval(item)` in full — column strings, callables, and its native expressions (polars Expr/tuple with struct unnest; pandas Expression hook); view now wraps the prices frame (`view.prices`); `utils.apply_indicator` deprecated; `chart.calc_result` delegates to `view.eval`
 - Deprecated `Candlesticks(use_bars=True)` — legacy bar-based renderer; emits `DeprecationWarning`, slated for removal
 - Removed deprecated `Chart(bgcolor=...)` parameter (deprecated since 2024) — use matplotlib styles
 - Removed `Chart(holidays=...)` parameter — accepted but never implemented; the rownum date mapper eliminates gaps by construction

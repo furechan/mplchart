@@ -49,9 +49,9 @@ class Volume(Primitive):
         return self.__class__.__name__
 
     def apply_to_chart(self, chart):
-        ax = chart.get_axes("twinx")
+        ax = chart.canvas.get_axes("twinx")
 
-        prices = chart.slice(chart.prices, xcol="xloc")
+        prices = chart.view.slice(chart.view.prices, xcol="xloc")
         volume = np.asarray(col_to_numpy(prices, "volume"))
         close = np.asarray(col_to_numpy(prices, "close"))
 

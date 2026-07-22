@@ -32,6 +32,6 @@ def test_talib(freq, max_bars=250):
     chart = Chart(prices, title="Test", max_bars=max_bars)
     chart.plot(indicators)
 
-    assert chart.count_axes() > 0
+    assert chart.canvas.count_axes() > 0
 
     plt.close()

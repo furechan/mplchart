@@ -36,9 +36,9 @@ class OHLC(Primitive):
         return self.__class__.__name__
 
     def apply_to_chart(self, chart):
-        ax = chart.get_axes()
+        ax = chart.canvas.get_axes()
 
-        prices = chart.slice(chart.prices, xcol="xloc")
+        prices = chart.view.slice(chart.view.prices, xcol="xloc")
         xvalues = np.asarray(prices["xloc"])
         open_ = np.asarray(col_to_numpy(prices, "open"))
         high = np.asarray(col_to_numpy(prices, "high"))

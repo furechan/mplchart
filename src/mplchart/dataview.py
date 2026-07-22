@@ -1,29 +1,48 @@
-"""Date mappers — backend-native windowing and x-coordinate machinery.
+"""Data views — backend-native windowing and x-coordinate machinery.
 
-The contract is the ``DateMapper`` ABC; ``get_mapper`` routes on the prices
+The contract is the ``DataView`` ABC; ``get_view`` routes on the prices
 backend. ``raw_dates`` is a mode flag: it changes what ``xloc`` holds
-(integer rownums vs the datetimes themselves) and what ``map_date`` /
-``config_axes`` do — never which class runs.
+(integer rownums vs the datetimes themselves) and what ``map_date`` does —
+never which class runs. Evaluation is native per view: each subclass
+implements ``eval`` in full for its own item forms (column string, native
+expressions, callable) — no backend branch, no shared dispatch. Axis wiring
+lives outside the view: the composition layer reads ``dates`` and installs
+the dateaxis machinery when not ``raw_dates``. This module is matplotlib-free.
 """
 
 import numpy as np
 
 from abc import ABC, abstractmethod
 from datetime import datetime
+from typing import Any
 
-from .locators import DTArrayLocator
-from .formatters import DTArrayFormatter
+from .utils import detect_backend, is_polars_expr, is_pandas_expr
 
 
-class DateMapper(ABC):
-    """Pure contract for date mappers — no state at this level.
+class DataView(ABC):
+    """Pure contract for data views — no state at this level.
 
     Subclasses are backend-specific: they take the prices frame, derive and
     store dates and x-coordinates natively, and implement all data operations
     in their own backend. numpy appears only at the matplotlib boundary.
+
+    ``prices`` is part of the contract: the wrapped full-length prices frame
+    in its native backend, as supplied at construction. The view is a ranged
+    view over it — ``eval`` computes against the full frame, ``slice`` and
+    ``series_xy`` window prices-aligned data. It is the supported way to
+    reach the frame (``chart.view.prices``); the frame is not stored
+    anywhere else.
+
+    ``dates`` is part of the contract: the full datetime array in native form
+    (DatetimeIndex / polars Series). Its consumer is the dateaxis machinery,
+    which accepts any datetime array-like and coerces to numpy at its own
+    boundary — dateaxis may eventually consume the view directly; for now
+    the surface between them is ``dates``.
     """
 
     raw_dates: bool = False
+    prices: Any  # contract attribute — see class docstring
+    dates: Any  # contract attribute — see class docstring
 
     @abstractmethod
     def slice(self, data, *, xcol=None):
@@ -49,21 +68,20 @@ class DateMapper(ABC):
         ...
 
     @abstractmethod
-    def _dt_array(self) -> np.ndarray:
-        """Full datetime array as numpy — for the axis locator/formatter."""
+    def eval(self, item):
+        """Evaluate an indicator or expression against the prices frame.
+
+        Returns a full-length native result — no windowing. Each backend
+        implements its own dispatch: column string, its native expression
+        type, and callable. Native expressions must be checked before the
+        callable fallback (pandas Expressions are callable). An item the
+        receiving view doesn't recognize raises ``TypeError``.
+        """
         ...
 
-    def config_axes(self, ax):
-        """Configure the x-axis; rownum mode installs the date locator/formatter."""
-        if self.raw_dates:
-            return
-        arr = self._dt_array()
-        ax.xaxis.set_major_locator(DTArrayLocator(arr))
-        ax.xaxis.set_major_formatter(DTArrayFormatter(arr))
 
-
-class PandasDateMapper(DateMapper):
-    """Pandas-native date mapper.
+class PandasDataView(DataView):
+    """Pandas-native data view.
 
     Stores dates as a tz-naive DatetimeIndex and ``xloc`` as a date-indexed
     Series (integer rownums, or the dates themselves in ``raw_dates`` mode).
@@ -73,6 +91,7 @@ class PandasDateMapper(DateMapper):
     def __init__(self, prices, *, raw_dates=False, start=None, end=None, max_bars=None):
         import pandas as pd
 
+        self.prices = prices
         self.raw_dates = raw_dates
         self.start = start
         self.end = end
@@ -140,12 +159,24 @@ class PandasDateMapper(DateMapper):
             return ts.to_datetime64()
         return int(self.dates.searchsorted(ts))
 
-    def _dt_array(self) -> np.ndarray:
-        return self.dates.to_numpy()
+    def eval(self, item):
+        if isinstance(item, str):
+            return self.prices[item]
+
+        if is_pandas_expr(item):
+            return item._eval_expression(self.prices)
+
+        if callable(item):
+            return item(self.prices)
+
+        raise TypeError(
+            f"PandasDataView cannot evaluate {type(item).__name__!r}: "
+            f"expected a column name, pandas Expression, or callable indicator."
+        )
 
 
-class PolarsDateMapper(DateMapper):
-    """Polars-native date mapper.
+class PolarsDataView(DataView):
+    """Polars-native data view.
 
     Stores dates as a tz-naive Datetime Series and ``xloc`` as a Series
     (integer rownums, or the dates themselves in ``raw_dates`` mode).
@@ -155,6 +186,7 @@ class PolarsDateMapper(DateMapper):
     def __init__(self, prices, *, raw_dates=False, start=None, end=None, max_bars=None):
         import polars as pl
 
+        self.prices = prices
         self.raw_dates = raw_dates
         self.start = start
         self.end = end
@@ -227,19 +259,38 @@ class PolarsDateMapper(DateMapper):
             return np.datetime64(dt)
         return int(self.dates.search_sorted(dt))
 
-    def _dt_array(self) -> np.ndarray:
-        return self.dates.to_numpy()
+    def eval(self, item):
+        import polars as pl
+
+        if isinstance(item, str):
+            return self.prices[item]
+
+        if is_polars_expr(item):
+            series = self.prices.select(item).to_series()
+            if isinstance(series.dtype, pl.Struct):
+                return series.struct.unnest()
+            return series
+
+        if isinstance(item, tuple) and item and all(is_polars_expr(e) for e in item):
+            series = [self.prices.select(e).to_series() for e in item]
+            return pl.DataFrame({s.name: s for s in series})
+
+        if callable(item):
+            return item(self.prices)
+
+        raise TypeError(
+            f"PolarsDataView cannot evaluate {type(item).__name__!r}: "
+            f"expected a column name, polars Expr, tuple of Expr, or callable indicator."
+        )
 
 
-def get_mapper(prices, *, raw_dates=False, start=None, end=None, max_bars=None) -> DateMapper:
-    """Create the backend-native date mapper for a prices frame."""
-    from .utils import detect_backend
-
+def get_view(prices, *, raw_dates=False, start=None, end=None, max_bars=None) -> DataView:
+    """Create the backend-native data view for a prices frame."""
     match detect_backend(prices):
         case "polars":
-            cls = PolarsDateMapper
+            cls = PolarsDataView
         case "pandas":
-            cls = PandasDateMapper
+            cls = PandasDataView
         case backend:
             raise ValueError(f"Unsupported backend {backend!r}")
 

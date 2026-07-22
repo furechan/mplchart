@@ -57,7 +57,7 @@ def test_indicators(indicator, freq, max_bars=250):
     prices = sample_prices(freq=freq)
     chart = Chart(prices, title="Test", max_bars=max_bars)
     chart.plot([Candlesticks(), indicator])
-    assert chart.count_axes() > 0
+    assert chart.canvas.count_axes() > 0
     plt.close()
 
 

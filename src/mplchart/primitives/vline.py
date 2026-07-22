@@ -24,10 +24,10 @@ class VLine(Primitive):
         self.linestyle = linestyle
 
     def apply_to_chart(self, chart):
-        ax = chart.root_axes()
+        ax = chart.canvas.root_axes()
 
         color = self.color or mpl.rcParams["grid.color"]
         linestyle = self.linestyle or mpl.rcParams["grid.linestyle"]
 
-        xv = chart.map_date(self.date)
+        xv = chart.view.map_date(self.date)
         ax.axvline(xv, color=color, linestyle=linestyle)
