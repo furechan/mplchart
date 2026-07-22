@@ -23,7 +23,7 @@ jobs:
       - name: Install docs tooling
         run: uv sync --only-group docs
       - name: Check notebooks are executed
-        run: uv run --no-sync nbcheck -x examples docs
+        run: uv run --no-sync nbcheck -x examples docs docs/articles
       - name: Build site
         run: uv run --no-sync mkdocs build --strict
       - uses: actions/upload-pages-artifact@v3

@@ -45,7 +45,7 @@ def clean(ctx):
 @task
 def check(ctx):
     """Lint with ruff and check notebooks with nbcheck (validity + executed outputs)"""
-    ctx.run("nbcheck -x examples docs")
+    ctx.run("nbcheck -x examples docs docs/articles")
     ctx.run("ruff check")
 
 

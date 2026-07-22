@@ -2,10 +2,12 @@
 .pytest_cache/
 .ruff_cache/
 __pycache__/
+.cache/
 *.egg-info/
 .idea/
 build/
 dist/
+site/
 .venv/
 .tox/
 .nox/
@@ -17,5 +19,3 @@ dist/
 *.exp
 *.lib
 *.so
-site/
-.cache/

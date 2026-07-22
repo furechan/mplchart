@@ -47,6 +47,7 @@ dev = [
     "mintalib",
     "nbcheck>=0.0.4",
     "ty>=0.0.26",
+    "mplfinance>=0.12.10b0",
 ]
 docs = [
     "mkdocs-jupyter>=0.26.3",

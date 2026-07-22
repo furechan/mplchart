@@ -48,3 +48,4 @@ nav:
       - TA-Lib Functions: examples/talib-functions.ipynb
   - Articles:
       - Pandas and Polars Backends: articles/backends.md
+      - mplchart and mplfinance: articles/mplfinance.ipynb
