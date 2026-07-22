@@ -44,20 +44,20 @@ def clean(ctx):
 
 @task
 def check(ctx):
-    """Lint with ruff and check example notebooks with nbcheck"""
-    ctx.run("nbcheck examples")
+    """Lint with ruff and check notebooks with nbcheck (validity + executed outputs)"""
+    ctx.run("nbcheck -x examples docs")
     ctx.run("ruff check")
 
 
 @task
-def make(ctx):
-    """Regenerate README from scripts/process-readme.py"""
-    ctx.run("python scripts/process-readme.py")
+def gallery(ctx):
+    """Re-execute the docs gallery notebook in place"""
+    ctx.run("jupyter nbconvert --to notebook --execute --inplace docs/gallery.ipynb")
 
 
-@task(clean, make)
+@task(clean)
 def build(ctx):
-    """Build project wheel (runs clean and make first)"""
+    """Build project wheel (runs clean first)"""
     ctx.run("uv build --wheel")
 
 

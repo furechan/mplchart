@@ -5,7 +5,7 @@ from functools import lru_cache
 from typing import cast
 
 import pandas as pd
-import yfinance as yf  # type: ignore
+import yfinance as yf
 
 ROOTDIR = Path(__file__).parent.parent
 PKGDIR = ROOTDIR.joinpath("src/mplchart").resolve(strict=True)

@@ -8,7 +8,12 @@ Use local memory @.claude/memory/MEMORY.md instead of global memory.
 
 ## Architecture
 
-See [docs/architecture.md](docs/architecture.md).
+See [notes/architecture.md](notes/architecture.md).
+
+## Docs and notes
+
+- `notes/` — internal design and engineering notes (architecture, proposals, roadmaps). Not user-facing. Put new design notes here.
+- `docs/` — source of the published MkDocs documentation site (Material theme + mkdocs-jupyter, config in `mkdocs.yml`). `docs/examples` is a symlink to `examples/`; notebooks render from committed outputs (`execute: false`). Preview with `uv run mkdocs serve`, build with `uv run mkdocs build`.
 
 ## Setup
 
@@ -35,7 +40,7 @@ Only wheels are built and published — no sdist.
 
 ```bash
 inv check        # lint (ruff) + nbcheck examples
-inv build        # clean → update README → uv build --wheel
+inv build        # clean → uv build --wheel
 inv publish      # twine upload dist/*.whl to PyPI
 inv bump         # bump patch version in pyproject.toml + uv sync
 ```

@@ -1,0 +1,48 @@
+site_name: mplchart
+site_description: Classic technical analysis stock charts in Python, built on matplotlib
+site_url: https://furechan.github.io/mplchart/
+repo_url: https://github.com/furechan/mplchart
+repo_name: furechan/mplchart
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue grey
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue grey
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+
+plugins:
+  - search
+  - mkdocs-jupyter:
+      execute: false
+      include_source: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+
+nav:
+  - Home: index.md
+  - Gallery: gallery.ipynb
+  - Tutorials:
+      - Typical Usage: examples/typical-usage.ipynb
+      - How Indicators Work: examples/indicators.ipynb
+      - How Primitives Work: examples/primitives.ipynb
+      - How Expressions Work: examples/expressions.ipynb
+      - Multiple Tickers: examples/multiple-tickers.ipynb
+      - Chart Rendering: examples/chart-render.ipynb
+      - TA-Lib Functions: examples/talib-functions.ipynb

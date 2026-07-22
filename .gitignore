@@ -17,3 +17,5 @@ dist/
 *.exp
 *.lib
 *.so
+site/
+.cache/

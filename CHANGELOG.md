@@ -1,6 +1,20 @@
 # Change Log
 
 ## 0.0.41
+- MkDocs documentation site scaffold: `mkdocs.yml` + `docs/` source dir (Material theme, mkdocs-jupyter) rendering the example notebooks via symlink; new `docs` dependency group
+- Moved internal design notes from `docs/` to `notes/`; `docs/` is now the published site source
+- Docs gallery: `docs/gallery.ipynb` notebook rendered from bundled sample data; `inv gallery` re-executes it in place
+- New `examples/indicators.ipynb` — indicator mechanics (applying, panes, binding, chaining, `as_expr`, custom indicators); replaces `indicators-pandas.ipynb` in the docs nav
+- New `examples/expressions.ipynb` — expression mechanics (factories, `src` composition, boolean conditions, `wrap_expression` custom factories); replaces `expressions-polars.ipynb` in the docs nav
+- `sample_prices` now has typed overloads (`backend="pandas"` → `pd.DataFrame`, `backend="polars"` → `pl.DataFrame`) — fixes Pylance `Series[Any] is not callable` on polars usage
+- ty config: exclude `playground/` from type checking; removed stale `type: ignore` in `scripts/update-samples.py`
+- Removed `examples/indicators-pandas.ipynb` and `examples/expressions-polars.ipynb` — superseded by the mechanics notebooks and the gallery (unique charts harvested: DONCHIAN, DMI, MACDV, BBP/BBW)
+- New `examples/primitives.ipynb` — primitive mechanics by role (price/volume renderers, indicator renderers, condition primitives, panes/reference lines, pattern primitives); replaces `primitives-pandas.ipynb` and `primitives-polars.ipynb` (removed)
+- Moved `showcase.svg` and `preview.png` from `output/` to `docs/assets/`; README, update scripts, and pypi-readme paths updated
+- Removed `output/talib-functions.json` — orphaned ta-lib metadata dump, nothing referenced it
+- Removed the pypi-readme generation step: `readme = "README.md"` directly (showcase image now an absolute URL, examples link dropped); deleted `scripts/process-readme.py`, `output/`, the `inv make` task, and the `tomli` dev dependency
+- uv config: `default-groups = ["dev", "docs"]` so plain `uv sync` includes the docs tooling
+- `inv check` now runs `nbcheck -x examples docs` (nbcheck ≥ 0.0.4) — fails notebooks committed with unexecuted or cleared outputs, guarding the docs site against blank pages
 - README: added `TrendLines` to the primitives list
 
 ## 0.0.40

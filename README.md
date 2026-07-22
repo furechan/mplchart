@@ -16,7 +16,7 @@ and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
 > For a related project with a mature api you may want to look into [mplfinance](https://pypi.org/project/mplfinance/).
 
 
-![Showcase Chart](/output/showcase.svg "Showcase")
+![Showcase Chart](https://github.com/furechan/mplchart/raw/main/docs/assets/showcase.svg "Showcase")
 
 
 ## Typical Usage
@@ -208,7 +208,7 @@ Chart(prices).plot(indicators).show()
 
 ## Examples
 
-Example notebooks live in the [`examples/`](examples/) folder.
+Example notebooks live in the `examples` folder.
 
 
 ## Installation

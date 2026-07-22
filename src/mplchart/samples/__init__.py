@@ -1,10 +1,27 @@
 """Sample prices data"""
 
 from importlib import resources
+from typing import TYPE_CHECKING, Literal, overload
+
+if TYPE_CHECKING:
+    import pandas as pd
+    import polars as pl
 
 
 TIMEZONE = "America/New_York"
 SAMPLE_FREQUENCIES = "daily", "hourly", "minute"
+
+
+@overload
+def sample_prices(
+    freq: str = ..., *, max_bars: int = ..., backend: Literal["pandas"] = ...
+) -> "pd.DataFrame": ...
+
+
+@overload
+def sample_prices(
+    freq: str = ..., *, max_bars: int = ..., backend: Literal["polars"]
+) -> "pl.DataFrame": ...
 
 
 def sample_prices(freq: str = "daily", *, max_bars: int = 0, backend: str = "pandas"):
