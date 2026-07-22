@@ -9,6 +9,8 @@ Charts can be defined using a declarative interface,
 based on a set of drawing primitives like `Candlesticks`, `Volume`
 and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
 
+📖 **Documentation**: tutorials and a chart gallery at [furechan.github.io/mplchart](https://furechan.github.io/mplchart/)
+
 
 
 > [!WARNING]

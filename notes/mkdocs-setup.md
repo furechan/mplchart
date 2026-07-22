@@ -53,4 +53,3 @@ With the gallery in place, the per-item parade notebooks (indicators-pandas, pri
 
 1. More articles (how panes work, custom indicators).
 2. Gallery growth: more entries, then detail pages/thumbnail grid if the single page gets heavy.
-3. README: add a documentation link to the site once live.
