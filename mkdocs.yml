@@ -46,6 +46,7 @@ nav:
       - Multiple Tickers: examples/multiple-tickers.ipynb
       - Chart Rendering: examples/chart-render.ipynb
       - TA-Lib Functions: examples/talib-functions.ipynb
+  - Reference:
+      - Pandas and Polars Backends: reference/backends.md
   - Articles:
-      - Pandas and Polars Backends: articles/backends.md
       - mplfinance vs mplchart: articles/mplfinance.ipynb

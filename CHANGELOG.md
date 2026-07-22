@@ -16,7 +16,7 @@
 - uv config: `default-groups = ["dev", "docs"]` so plain `uv sync` includes the docs tooling
 - `inv check` now runs `nbcheck -x examples docs` (nbcheck ≥ 0.0.4) — fails notebooks committed with unexecuted or cleared outputs, guarding the docs site against blank pages
 - GitHub Pages deploy workflow (`.github/workflows/docs.yml`): docs-only env, nbcheck guard, `mkdocs build --strict`, deploy via Pages artifact
-- New article `docs/articles/backends.md` — pandas vs polars backends: what's shared, indicators vs expressions, choosing and mixing
+- New reference page `docs/reference/backends.md` — pandas vs polars backends: what's shared, indicators vs expressions, choosing and mixing
 - New article `docs/articles/mplfinance.ipynb` — mplchart vs mplfinance comparison with side-by-side charts; mplfinance added as a dev dependency
 - README: added `TrendLines` to the primitives list
 
