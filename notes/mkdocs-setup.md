@@ -45,9 +45,12 @@ With the gallery in place, the per-item parade notebooks (indicators-pandas, pri
 - **Done**: `examples/primitives.ipynb` — primitive mechanics organized by role (price/volume renderers with color options, indicator renderers `LinePlot`/`AreaPlot`/`BarPlot`, condition primitives `Stripes`/`Markers`, `Pane`/`HLine`/`VLine`, pattern primitives `Swings`/`ZigZag`/`TrendLines`), with backend-parity note. Replaces both primitives parades (removed).
 - **TODO**: backend-architecture article (plain md): what's shared, pandas-only (indicators), polars-only (expressions).
 
+## Publishing
+
+`.github/workflows/docs.yml` deploys on push to main: `uv sync --only-group docs` (nbcheck + mkdocs only — no ta-lib/numba, notebooks render from committed outputs), `nbcheck -x examples docs` (refuses to deploy unexecuted/cleared notebooks), `mkdocs build --strict`, then Pages artifact deploy. Pages source must be set to "GitHub Actions" in repo settings. Stale-notebook guard also runs locally via `inv check`.
+
 ## Next steps
 
-1. Pages deploy workflow + enable Pages in repo settings.
-2. ~~Stale-notebook guard~~ done: nbcheck 0.0.5 (uv_build backend) published with `-x/--executed`; `inv check` runs `nbcheck -x examples docs` (covers gallery.ipynb; glob does not descend into the docs/examples symlink). The Pages workflow should run the same guard before `mkdocs build` (add nbcheck to the docs group then). (0.0.3 had an empty wheel — yanked.)
-3. Article pages (how panes work, pandas vs polars backends, custom indicators).
-4. Gallery growth: more entries, then detail pages/thumbnail grid if the single page gets heavy.
+1. More articles (how panes work, custom indicators).
+2. Gallery growth: more entries, then detail pages/thumbnail grid if the single page gets heavy.
+3. README: add a documentation link to the site once live.

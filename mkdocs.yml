@@ -46,3 +46,5 @@ nav:
       - Multiple Tickers: examples/multiple-tickers.ipynb
       - Chart Rendering: examples/chart-render.ipynb
       - TA-Lib Functions: examples/talib-functions.ipynb
+  - Articles:
+      - Pandas and Polars Backends: articles/backends.md

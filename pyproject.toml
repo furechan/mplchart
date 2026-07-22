@@ -51,6 +51,7 @@ dev = [
 docs = [
     "mkdocs-jupyter>=0.26.3",
     "mkdocs-material>=9.7.7",
+    "nbcheck>=0.0.5",
 ]
 
 [tool.pytest.ini_options]
