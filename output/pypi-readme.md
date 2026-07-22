@@ -87,6 +87,7 @@ The main drawing primitives are :
 - `Markers` to mark signal crossings with symbols
 - `ZigZag` lines between pivot points
 - `Swings` to mark local peaks and valleys (swing highs/lows)
+- `TrendLines` to fit support and resistance trend lines (experimental)
 - `HLine` to draw a horizontal reference line on the current pane
 - `VLine` to draw a vertical line across all panes at a given date
 
@@ -207,8 +208,7 @@ Chart(prices).plot(indicators).show()
 
 ## Examples
 
-Example notebooks live in the [`examples/`](examples/) folder — see the [examples README](examples/README.md) for the full list.
-
+Example notebooks live in the [`examples/`](examples/) folder.
 
 
 ## Installation

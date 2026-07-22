@@ -87,6 +87,7 @@ The main drawing primitives are :
 - `Markers` to mark signal crossings with symbols
 - `ZigZag` lines between pivot points
 - `Swings` to mark local peaks and valleys (swing highs/lows)
+- `TrendLines` to fit support and resistance trend lines (experimental)
 - `HLine` to draw a horizontal reference line on the current pane
 - `VLine` to draw a vertical line across all panes at a given date
 

@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.41
+- README: added `TrendLines` to the primitives list
+
 ## 0.0.40
 - New experimental `TrendLines` primitive (`primitives/trendlines.py`) — walkback trend-line detection: backward hull walk with swing filter, fold gate, and leg scoring; developed in `playground/trend-lines-proto.ipynb`, documented in the primitives example notebooks, API likely to change
 - New `dateaxis.py` consolidating `locators.py` + `formatters.py` (both removed); added `config_date_axis(ax, dates)` wiring helper
