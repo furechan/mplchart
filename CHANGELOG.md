@@ -18,6 +18,7 @@
 - GitHub Pages deploy workflow (`.github/workflows/docs.yml`): docs-only env, nbcheck guard, `mkdocs build --strict`, deploy via Pages artifact
 - New reference page `docs/reference/backends.md` — pandas vs polars backends: what's shared, indicators vs expressions, choosing and mixing
 - New article `docs/articles/mplfinance.ipynb` — mplchart vs mplfinance comparison with side-by-side charts; mplfinance added as a dev dependency
+- New article `docs/articles/trendlines.ipynb` — plotting trend lines in Python with the `TrendLines` primitive
 - README: added `TrendLines` to the primitives list
 
 ## 0.0.40

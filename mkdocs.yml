@@ -50,3 +50,4 @@ nav:
       - Pandas and Polars Backends: reference/backends.md
   - Articles:
       - mplfinance vs mplchart: articles/mplfinance.ipynb
+      - Plotting Trend Lines in Python: articles/trendlines.ipynb
