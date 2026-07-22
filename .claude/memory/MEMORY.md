@@ -12,4 +12,5 @@
 - [Pandas expressions gotchas](project-pandas-expressions-gotchas.md) — `__getattr__` trap, `callable` trap, `@`-binding trap (Expression.__matmul__ shadows primitive binding), private `_eval_expression` hook; detection via `type(item).__dict__`
 - [Trend-lines exploration](project-trend-lines-exploration.md) — trend-lines-proto.ipynb (walkback design); conventions (single swing concept, avg_move scale, zero-disables knobs, side constants) and next steps
 - [No notebook globals in functions](feedback-no-notebook-globals.md) — pass everything as parameters; declare hook contracts as Callable aliases with annotated signatures
+- [README before inv build](project-publish-readme-ordering.md) — the wheel bakes pypi-readme at build time; README edits after build miss the published release
 - [Silence type checker with type: ignore, not casts](feedback-silence-pyright.md) — use `# type: ignore[...]` for false positives; don't wrap in runtime casts; Pylance-only complaints get `# pyright: ignore[rule]`; when both ty and pyright complain use `# ty: ignore[rule]  # pyright: ignore[rule]` (ty doesn't honor bracketed `type: ignore[...]`)
