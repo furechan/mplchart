@@ -1,4 +1,15 @@
-"""OHLC primitive"""
+"""OHLC primitive
+
+Style settings consumed by this primitive:
+
+    ohlc.up.color    up-bars, close ≥ previous close (default: text.color)
+    ohlc.down.color  down-bars (default: text.color)
+    ohlc.alpha       opacity (default: 1.0)
+
+Each kwarg overrides its own setting per side (kwarg → setting →
+``text.color``) — the side colors are independent params, not an atomic
+scheme; an explicit ``alpha=`` kwarg wins over ``ohlc.alpha``.
+"""
 
 import numpy as np
 
@@ -19,14 +30,15 @@ class OHLC(Primitive):
     Args:
         width (float): Width of each bar as a fraction of bar spacing.
             Defaults to 0.8.
-        alpha (float): Opacity of the bars, between 0.0 and 1.0. Defaults to 1.0.
+        alpha (float, optional): Opacity of the bars, between 0.0 and 1.0.
+            Defaults to the ``ohlc.alpha`` setting, else 1.0.
         colorup (str, optional): Color for up-bars (close ≥ previous close).
-            Defaults to the current ``text.color`` matplotlib parameter.
-        colordn (str, optional): Color for down-bars. Defaults to the current
-            ``text.color`` matplotlib parameter.
+            Defaults to the ``ohlc.up.color`` setting, else ``text.color``.
+        colordn (str, optional): Color for down-bars. Defaults to the
+            ``ohlc.down.color`` setting, else ``text.color``.
     """
 
-    def __init__(self, *, width: float = 0.8, alpha: float = 1.0, colorup: str | None = None, colordn: str | None = None):
+    def __init__(self, *, width: float = 0.8, alpha: float | None = None, colorup: str | None = None, colordn: str | None = None):
         self.width = width
         self.alpha = alpha
         self.colorup = colorup
@@ -49,9 +61,15 @@ class OHLC(Primitive):
 
         label = str(self)
         width = self.width
-        alpha = self.alpha
-        colorup = self.colorup or textcolor
-        colordn = self.colordn or textcolor
+
+        alpha = chart.canvas.get_setting("ohlc", "alpha", override=self.alpha, fallback=1.0)
+
+        # per-side chain: kwarg → setting → textcolor. The two side colors are
+        # independent params, not an atomic scheme (unlike candlesticks —
+        # there is no coordinated look to protect here)
+        resolve = chart.canvas.resolve_color
+        colorup = resolve("ohlc.up", ax, override=self.colorup, fallback=textcolor)
+        colordn = resolve("ohlc.down", ax, override=self.colordn, fallback=textcolor)
 
         return plot_ohlc(
             xvalues=xvalues,
@@ -68,9 +86,9 @@ class OHLC(Primitive):
 def plot_ohlc(xvalues, open_, high, low, close, ax=None, width=0.8, alpha=1.0, colorup=None, colordn=None, label=None):
     """Plot open-high-low-close charts as polygons."""
 
-    edgecolor = plt.rcParams["text.color"]
-    colorup = colorup or edgecolor
-    colordn = colordn or edgecolor
+    textcolor = plt.rcParams["text.color"]
+    colorup = colorup or textcolor
+    colordn = colordn or textcolor
     ax = ax or plt.gca()
 
     # floats up front (datetime64 → date numbers) so spacing and verts share one scale

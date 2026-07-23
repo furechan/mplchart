@@ -38,6 +38,8 @@ def test_get_setting_facets():
     assert styler.get_setting("candle.up", "color") == "green"
     assert styler.get_setting("candle", "alpha", fallback=1.0) == 0.0  # falsy is meaningful
     assert styler.get_setting("candle", "width", fallback=0.8) == 0.8
+    assert styler.get_setting("candle", "alpha", override=0.5) == 0.5  # override wins
+    assert styler.get_setting("candle", "width", override=0.0, fallback=0.8) == 0.0  # falsy override too
     assert styler.get_setting("macd-12-26-9", "color", fallback="gray") == "gray"
 
 
@@ -145,8 +147,8 @@ def test_replace_immutable():
 
 
 def test_get_styler_invalid_spec():
-    with pytest.raises(NotImplementedError):
-        get_styler("nightclouds")  # style names arrive with the Style spec
+    with pytest.raises(ValueError, match="Unknown style"):
+        get_styler("no-such-style")
     with pytest.raises(ValueError, match="Invalid style"):
         get_styler(42)
 

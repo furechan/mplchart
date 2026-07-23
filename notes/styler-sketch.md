@@ -8,7 +8,7 @@ Speculative reference (2026-07-22): target interfaces for an mplfinance-like sty
 chart = Chart(prices, style="nightclouds")                    # shipped style by name
 
 chart = Chart(prices, style={                                 # ad-hoc dict, same schema
-    "base_mpl_style": "dark_background",
+    "stylesheet": "dark_background",
     "rc": {"grid.color": "#333333"},
     "settings": {"candles.up.color": "#26a69a", "candles.dn.color": "#ef5350"},
 })
@@ -42,7 +42,8 @@ class Style:
 
 def resolve_style(spec: str | Mapping | Style) -> Style: ...
     # str → import mplchart.styles.lib.<name>, take its STYLE dict
-    # dict → normalize: expand base_mpl_style via mpl.style.library into rc, wrap in Style
+    # dict → normalize: {"stylesheet": ..., "rc": ..., "settings": ...} —
+    #        stylesheet collapsed under rc via load_stylesheet, wrap in Style
     # Style → passthrough
 
 def available_styles() -> list[str]: ...            # pkgutil.iter_modules over lib/
@@ -58,7 +59,7 @@ def get_styler(style=None, *, overrides=()) -> Styler: ...
 ```
 
 - `rc` is validated at construction by round-tripping through `mpl.RcParams` — matplotlib's 322 per-key validators are the schema; errors point at the style definition, not the first plot.
-- `base_mpl_style` is input sugar, not a field: a stock matplotlib style is itself an rc dict (`mpl.style.library[name]`); resolution collapses to `effective_rc = base ⊕ rc`.
+- The `stylesheet` dict key (spelling settled 2026-07-23, matching `Styler(stylesheet=)`; supersedes the draft `base_mpl_style`) is input sugar, not a field: a stock matplotlib style is itself an rc dict (`mpl.style.library[name]`); resolution collapses to `effective_rc = base ⊕ rc` (implemented in `resolve_style`).
 - `settings` validation is ours: `.color` values must be color-like, a list (cycle), or a sentinel (`line`, `fill`, `~`-prefixed); other properties validate per key (registry later, consumer contract for now).
 
 ### Settings key grammar
@@ -78,7 +79,7 @@ Non-color settings cover the mplfinance `marketcolors` extras (`alpha`, `hollow`
 ```python
 # styles/lib/nightclouds.py — pure data, zero imports
 STYLE = {
-    "base_mpl_style": "dark_background",
+    "stylesheet": "dark_background",
     "rc": {"grid.color": "#333333"},
     "settings": {
         "candles.up.color": "#26a69a",
@@ -105,10 +106,13 @@ class Styler:
         self.rcparams = dict(style.rc)
         self.cycles = WeakKeyDictionary()                        # ax → {role: color iterator}
 
-    def get_setting(self, name, facet, *, fallback=None): ...
-        # generic lookup, key assembled as f"{name}.{facet}"; tries raw name
+    def get_setting(self, name, facet, *, override=None, fallback=None): ...
+        # generic lookup: override → setting → fallback (the resolve_color
+        # chain, minus the color pipeline — primitives resolve non-color
+        # facets in one call: get_setting("ohlc", "alpha", override=self.alpha,
+        # fallback=1.0)). Key assembled as f"{name}.{facet}"; tries raw name
         # then extract_prefix(name) — the facet never goes through prefix
-        # extraction; defers to fallback on None only (alpha=0.0 is meaningful)
+        # extraction; each link defers on None only (alpha=0.0 is meaningful)
     def resolve_color(self, role, ax=None, *, override=None, fallback=None): ...
         # chain: override (user color, e.g. primitive kwarg) → setting
         # (get_setting(role, "color")) → fallback; role is a lookup key,
@@ -135,7 +139,7 @@ Cycle semantics (stated, previously implicit): a list-valued role advances per `
 - **No style state survives to draw time.** rc values bake into artists at creation inside scoped contexts; symbolic colors resolve eagerly to concrete hex inside `resolve_color` (`closest_color` already ends in `to_hex` for this reason). No global mutation observable from outside; no named-color-registry games (names resolve at *draw* time, per-draw — unusable for scoped styling).
 - **rc applies only via `styler.context()` at the creation choke points** (implemented 2026-07-23): `Canvas.__init__` (figure + root axes), `Canvas.root_axes`/`get_axes` (lazy pane creation), `Chart.plot_indicator` (all primitive drawing — the single `apply_to_chart` dispatch site; `vline`/`hline` now route through it), `Canvas.add_legends`, `Canvas.show`, `Canvas.render` (draw/savefig re-read rc). `rc_context` nests harmlessly.
 - **Primitives are covered by construction**: they only run when the pipeline calls them. Contract addition for [primitive-contract.md](primitive-contract.md): primitives draw synchronously inside `apply_to_chart` — no deferred drawing.
-- **Precedence**: mpl defaults < `base_mpl_style` < `rc` — and for roles: style `settings` < user overrides (`get_styler(overrides=)`) < explicit primitive kwargs.
+- **Precedence**: mpl defaults < `DEFAULT_RC` < `stylesheet` < `rc` — and for roles: style `settings` < user overrides (`get_styler(overrides=)`) < explicit primitive kwargs.
 - **Boundary**: mplchart styles what mplchart draws. Direct user access to axes between calls gets ambient matplotlib style (optionally warn via a `_style_active` debug flag when a style is configured).
 
 ## Canvas / Chart integration
@@ -168,7 +172,7 @@ Expanded candidate list in [style-settings.md](style-settings.md) — full mplfi
 | indicator prefixes (`macd`, `rsi`, `sma`, ...) | AutoPlot | already works via `extract_prefix` |
 | sentinels `line` / `fill`, `~` prefix | all | already works |
 
-Retrofit: Candlesticks/OHLC/Volume resolve defaults through `canvas.resolve_color(role, fallback=<current default>)`; explicit kwargs still win. This closes the asymmetry noted in [primitive-contract.md](primitive-contract.md) (scheme was AutoPlot-only). Candlesticks done 2026-07-23 (`candle.up/down/hollow`, `edge.up/down`, `wicks` keys; kwarg schemes atomic via always-set `override=` — see [candlestick-styles.md](candlestick-styles.md)); OHLC/Volume pending.
+Retrofit: Candlesticks/OHLC/Volume resolve defaults through `canvas.resolve_color(role, fallback=<current default>)`; explicit kwargs still win. This closes the asymmetry noted in [primitive-contract.md](primitive-contract.md) (scheme was AutoPlot-only). Candlesticks done 2026-07-23 (`candle.up/down/off`, `edge.up/down`, `wicks` keys; kwarg schemes atomic — see [candlestick-styles.md](candlestick-styles.md)); OHLC done 2026-07-23 (`ohlc.up/down.color` + `ohlc.alpha`; no anatomy, no mode flags — the interbar criterion is the chart type's definition; roles independent, shipped styles declare both palettes; side colors are independent per-side params — kwarg → setting → textcolor, no atomic scheme since there is no coordinated look to protect); Volume done 2026-07-23 (`volume.up/down/ma.color` + `volume.alpha`, per-element params like OHLC; direction fixed to intrabar close ≥ open matching candlesticks — was interbar; explicit kwargs now exact, no longer prop-cycle-snapped — only the `~`-defaults snap). Retrofit complete: every price/volume renderer resolves through the styler.
 
 ## mplfinance findings (reference)
 
@@ -188,7 +192,7 @@ Retrofit: Candlesticks/OHLC/Volume resolve defaults through `canvas.resolve_colo
 
 - ~~Fate of `Chart(color_scheme=)`~~ — resolved 2026-07-23: deprecated and ignored (DeprecationWarning at Chart, pointing at `style=` settings); removed from `Canvas`/`get_styler`, `map_color_scheme` deleted along with the bare-key munging (internal form is always canonical).
 - Role growth: `candles.wick` (mplfinance separates wick color; mplchart currently can't), body-edge vs fill split.
-- First shipped styles: `default` (current look), one dark, one broker-look — enough to prove the mechanism.
+- ~~First shipped styles~~ — shipped 2026-07-23: `tradingview` (light broker look), `nightclouds` (dark, sheet-based), `stockcharts` (mode flags in the style); the default look needs no style (it is the `DEFAULT_RC` baseline). `Style`/`resolve_style`/`available_styles` implemented in `styles/style.py` (which also owns `load_stylesheet` — the static layer imports nothing from the runtime layer).
 - `hline`/`vline`/`Stripes` roles, or leave them on rc grid defaults.
 - AutoPlot passes per-instance labels (`"sma-50"`) as `resolve_color` names, so scheme cycles don't advance across instances — align at retrofit time by passing the indicator type as the role name.
 - ~~Whether style should parameterize pane anatomy values (grid alpha 0.4 hardcoded in `config_pane_axes`)~~ — resolved 2026-07-23: the default look is now rc (`styles.DEFAULT_RC = {"axes.grid": True, "grid.alpha": 0.4}`, layered under every styler: mpl defaults < baseline < stylesheet < rcparams), and the config functions read `axes.grid`/`axes.grid.axis` — root draws x iff axis ∈ {x, both}, panes y iff axis ∈ {y, both}. Structure (where grids draw) stays Canvas's; whether/how is rc. mplfinance grid fidelity note: their `explicit_grid` rule (any of gridcolor/gridstyle/gridaxis → `axes.grid: True`, alpha 1.0) belongs in the style translator, not core.

@@ -133,14 +133,8 @@ class Candlesticks(Primitive):
 
         get_setting = chart.canvas.get_setting
 
-        if self.alpha is not None:
-            alpha = self.alpha
-        else:
-            alpha = get_setting("candle", "alpha", fallback=1.0)
-
-        use_prev_close = self.use_prev_close
-        if use_prev_close is None:
-            use_prev_close = bool(get_setting("candle", "use_prev_close", fallback=False))
+        alpha = get_setting("candle", "alpha", override=self.alpha, fallback=1.0)
+        use_prev_close = get_setting("candle", "use_prev_close", override=self.use_prev_close, fallback=False)
 
         resolve = chart.canvas.resolve_color
         textcolor = plt.rcParams["text.color"]
@@ -172,9 +166,7 @@ class Candlesticks(Primitive):
         wickdn = resolve("wicks", ax, override=colordn, fallback=edgedn)
 
         # mode chain: kwarg → candle.hollow setting → resolved-face default
-        hollow = self.hollow
-        if hollow is None:
-            hollow = get_setting("candle", "hollow")
+        hollow = get_setting("candle", "hollow", override=self.hollow)
         if hollow is None:
             hollow = faceup == facedn
 

@@ -14,10 +14,10 @@ from weakref import WeakKeyDictionary
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import matplotlib.style
 
 from ..colors import closest_color, normalize_color
 from ..utils import extract_prefix
+from .style import load_stylesheet, resolve_style
 
 
 class _NoAxes:
@@ -30,33 +30,14 @@ class _NoAxes:
 DEFAULT_RC: dict = {"axes.grid": True, "grid.alpha": 0.4}
 
 
-def load_stylesheet(spec):
-    """Load an rc mapping from a matplotlib stylesheet.
-
-    Accepts what ``plt.style.use`` accepts: a stock style name
-    (``matplotlib.style.library``), a path to an ``.mplstyle`` file, or the
-    special name ``"default"`` — the factory-default template (minus
-    non-style keys), giving an ambient-independent base. Named sheets and
-    files return only the keys they define, so scoped application doesn't
-    stomp the ambient theme. Values are validated by matplotlib's per-key
-    validators, failing fast on garbage.
-    """
-    if spec == "default":
-        # matplotlib special-cases this name in style.use the same way
-        blacklist = mpl.style.core.STYLE_BLACKLIST  # ty: ignore[unresolved-attribute]  # pyright: ignore[reportAttributeAccessIssue]  # runtime attr, missing from stubs
-        return {k: v for k, v in mpl.rcParamsDefault.items() if k not in blacklist}
-    if isinstance(spec, str) and spec in mpl.style.library:
-        return dict(mpl.style.library[spec])
-    return dict(mpl.rc_params_from_file(spec, use_default_template=False))
-
-
 def get_styler(style=None, *, overrides=()):
     """Normalize a style spec into a Styler.
 
     Args:
-        style: ``None`` for an empty styler, or a prebuilt ``Styler``
-            (passed through). Style specs (name, dict, ``Style``) will be
-            accepted here when the Style spec lands.
+        style: ``None`` for an empty styler, a prebuilt ``Styler`` (passed
+            through), or anything ``resolve_style`` accepts — a shipped
+            style name, a spec mapping (``stylesheet``/``rc``/``settings``),
+            or a ``Style``.
         overrides: settings mapping (canonical dotted keys, e.g.
             ``candle.up.color``) layered on top of the style settings —
             whatever their source, a prebuilt Styler included.
@@ -66,11 +47,9 @@ def get_styler(style=None, *, overrides=()):
         styler = style
     elif style is None:
         styler = Styler()
-    elif isinstance(style, str):
-        raise NotImplementedError("Style spec names not yet supported")  
     else:
-        raise ValueError(f"Invalid style spec {style!r}")
-
+        spec = resolve_style(style)
+        styler = Styler(settings=spec.settings, rcparams=spec.rc)
 
     overrides = dict(overrides)
 
@@ -140,15 +119,20 @@ class Styler:
         """Next cycled color for fill."""
         return ax._get_patches_for_fill.get_next_color()
 
-    def get_setting(self, role, facet, *, fallback=None):
-        """Lookup a setting by role and facet.
+    def get_setting(self, role, facet, *, override=None, fallback=None):
+        """Lookup a setting by role and facet: override → setting → fallback.
 
-        The key is assembled as ``f"{role}.{facet}"`` and tried raw first,
-        then with the role's extracted prefix (``"macd-12-26-9"`` →
-        ``"macd"``); the facet never goes through prefix extraction.
-        Defers to ``fallback`` on missing or ``None`` values only — falsy
-        values like ``0.0`` are returned as-is.
+        ``override`` (an explicit user value, e.g. a primitive kwarg) wins
+        when not ``None`` — the same chain as ``resolve_color``, minus the
+        color pipeline. The key is assembled as ``f"{role}.{facet}"`` and
+        tried raw first, then with the role's extracted prefix
+        (``"macd-12-26-9"`` → ``"macd"``); the facet never goes through
+        prefix extraction. Each link defers on ``None`` only — falsy values
+        like ``0.0`` or ``False`` are meaningful and returned as-is.
         """
+        if override is not None:
+            return override
+
         value = self.settings.get(f"{role}.{facet}")
 
         if value is None:
@@ -174,7 +158,7 @@ class Styler:
         Returns a concrete hex string (or ``None``) — only hex leaves the
         styler: scalar-safe for ``np.where``, validated by ``to_rgba``.
         """
-        color = override if override is not None else self.get_setting(role, "color", fallback=fallback)
+        color = self.get_setting(role, "color", override=override, fallback=fallback)
 
         if isinstance(color, list):
             if not color:

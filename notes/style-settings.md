@@ -24,16 +24,16 @@ Candlestick scheme taxonomy (mono hollow, two-color filled, yahoo-style, colored
 | `candle.alpha` | Candlesticks | `alpha` kwarg (`None` → setting, else 1.0) | `marketcolors.alpha` |
 | `candle.hollow` | Candlesticks | `hollow` kwarg mirror (`None` → setting → resolved-face default) | — (their `type=` territory) |
 | `candle.use_prev_close` | Candlesticks | `use_prev_close` kwarg mirror (`None` → setting, else False) | — (their `type='hollow_and_filled'` territory) |
-| `candle.width` | Candlesticks | `width` / 0.8 | width subsystem (not style) |
-| `ohlc.up.color` | OHLC | `colorup` / `text.color` | `marketcolors.ohlc.up` |
-| `ohlc.down.color` | OHLC | `colordn` / `text.color` | `marketcolors.ohlc.down` |
-| `ohlc.alpha` | OHLC | `alpha` / 1.0 | `marketcolors.alpha` |
-| `ohlc.width` | OHLC | `width` / 0.8 | width subsystem |
-| `volume.up.color` | Volume | `colorup` / `~green` | `marketcolors.volume.up` |
-| `volume.down.color` | Volume | `colordn` / `~red` | `marketcolors.volume.down` |
-| `volume.ma.color` | Volume | `colorma` / `~gray` | — (their mav is price-pane) |
-| `volume.alpha` | Volume | `alpha` / 0.5 | `marketcolors.volume_alpha` |
-| `volume.width` | Volume | `width` / 0.8 | width subsystem |
+| ~~`candle.width`~~ | Candlesticks | declined — width is data-density, not style | width subsystem (not style) |
+| `ohlc.up.color` | OHLC | `colorup` kwarg (`None` → setting, else `text.color`) | `marketcolors.ohlc.up` |
+| `ohlc.down.color` | OHLC | `colordn` kwarg (ditto) | `marketcolors.ohlc.down` |
+| `ohlc.alpha` | OHLC | `alpha` kwarg (`None` → setting, else 1.0) | `marketcolors.alpha` |
+| ~~`ohlc.width`~~ | OHLC | declined — width is data-density, not style (same verdict as `candle.width`) | width subsystem |
+| `volume.up.color` | Volume | `colorup` kwarg (`None` → setting, else `~green`) | `marketcolors.volume.up` |
+| `volume.down.color` | Volume | `colordn` kwarg (ditto, `~red`) | `marketcolors.volume.down` |
+| `volume.ma.color` | Volume | `colorma` kwarg (ditto, `~gray`) | — (their mav is price-pane) |
+| `volume.alpha` | Volume | `alpha` kwarg (`None` → setting, else 0.5; bars + ma line) | `marketcolors.volume_alpha` |
+| ~~`volume.width`~~ | Volume | declined — width is data-density, not style | width subsystem |
 
 ## Indicator traces (AutoPlot and explicit plots)
 

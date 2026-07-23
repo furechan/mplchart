@@ -15,6 +15,12 @@
 - Hollow-body fill key renamed `candle.off.color` (was `candle.hollow.color`), freeing the `hollow` stem for the mode flag
 - New `candle.hollow`/`candle.use_prev_close` settings — bool mirrors of the kwargs (chain: kwarg → setting → default; `use_prev_close=` now defaults to `None`); colored-hollow and StockCharts looks are expressible fully style-side
 - `color_scheme=` deprecated and ignored — DeprecationWarning at Chart pointing at `style=` settings; removed from `Canvas`/`get_styler`, `map_color_scheme` deleted, `playground/color-scheme.ipynb` removed
+- New `styles/style.py`: frozen `Style` spec (rc validated eagerly via `mpl.RcParams`), `resolve_style` (name | mapping | `Style`; the `stylesheet` key collapses under explicit rc), `available_styles`; `Chart(style=)`/`Canvas(style=)`/`get_styler` accept all spec forms; `load_stylesheet` moved to the static layer
+- First shipped styles under `styles/lib/` (the directory is the registry — one zero-import `STYLE` dict module per style): `tradingview`, `nightclouds`, `stockcharts`
+- `get_setting` gains `override=` — the full kwarg → setting → fallback chain in one call (mirrors `resolve_color`, which now delegates its chain); primitive kwarg-mirror resolutions collapse to one-liners
+- `Volume` settings hook: `volume.up/down/ma.color` + `volume.alpha` — per-element params (kwarg → setting → `~`-snapped default); explicit kwargs are now exact colors (previously snapped to the prop cycle); shipped styles declare volume palettes
+- `Volume` direction is now intrabar (close ≥ open, matching candlesticks) instead of close vs previous close
+- `OHLC` settings hook: `ohlc.up.color`/`ohlc.down.color` — independent per-side params (kwarg → setting → `text.color`; no atomic scheme, unlike candlesticks) and `ohlc.alpha` (`alpha=` now `None`-defaults); shipped styles declare their OHLC palettes
 - New `Styler(stylesheet=)` + `styles.load_stylesheet`: base matplotlib stylesheet collapsed eagerly under explicit `rcparams`; accepts what `plt.style.use` accepts — stock name, `.mplstyle` path, or `"default"` (factory template, ambient-independent base)
 - rc wiring: styler rcparams now apply via scoped `rc_context` at the creation choke points (canvas init, pane creation, `plot_indicator`, legends, show/render) — no ambient rc mutation; `vline`/`hline` route through `plot_indicator`
 - New `styles.DEFAULT_RC` baseline (`axes.grid: True`, `grid.alpha: 0.4`) — the default look as rc, layered under stylesheet and rcparams in every styler

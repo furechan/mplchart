@@ -25,9 +25,10 @@ class Canvas:
         figure (Figure, optional): Existing matplotlib Figure to adopt.
             The figure is cleared before use.
         title (str, optional): Title displayed above the main pane.
-        style (optional): Style spec, normalized via ``get_styler`` —
-            currently ``None`` or a prebuilt ``Styler`` (for testing or
-            debugging); style names/dicts will be accepted here later.
+        style (optional): Style spec, normalized via ``get_styler`` — a
+            shipped style name (see ``styles.available_styles()``), a spec
+            mapping (``stylesheet``/``rc``/``settings``), a ``Style``, or
+            a prebuilt ``Styler``.
 
     Creating a Canvas eagerly creates (or adopts) the figure, sets the tight
     layout engine (required by the pane geometry), and installs the styled
@@ -227,9 +228,9 @@ class Canvas:
 
     # --- colors ---
 
-    def get_setting(self, role, facet, *, fallback=None):
+    def get_setting(self, role, facet, *, override=None, fallback=None):
         """Lookup a style setting through the styler — see ``Styler.get_setting``."""
-        return self.styler.get_setting(role, facet, fallback=fallback)
+        return self.styler.get_setting(role, facet, override=override, fallback=fallback)
 
     def resolve_color(self, role, ax=None, *, override=None, fallback=None):
         """Resolve a role color through the styler — see ``Styler.resolve_color``."""
