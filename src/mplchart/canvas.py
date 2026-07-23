@@ -2,12 +2,8 @@
 
 Owns the matplotlib figure, creates styled panes on demand (root draws the
 x-grid, panes draw their y-grid), tracks the current pane, and resolves
-colors through the color scheme. Never sees a dataframe — numpy arrays and
+colors through its styler. Never sees a dataframe — numpy arrays and
 axes cross the boundary, frames don't.
-
-Standalone draft (canvas-view roadmap phase 2): not yet hooked into Chart,
-which still carries its own copies of the styling and pane logic. The
-geometry helpers are shared via ``layout``.
 """
 
 import io
@@ -15,11 +11,8 @@ import io
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-from collections import Counter
-
-from .colors import closest_color
 from .layout import make_twinx, init_vplot, add_vplot
-from .utils import extract_prefix
+from .styles import get_styler
 
 
 class Canvas:
@@ -32,8 +25,12 @@ class Canvas:
         figure (Figure, optional): Existing matplotlib Figure to adopt.
             The figure is cleared before use.
         title (str, optional): Title displayed above the main pane.
+        style (optional): Style spec, normalized via ``get_styler`` —
+            currently ``None`` or a prebuilt ``Styler`` (for testing or
+            debugging); style names/dicts will be accepted here later.
         color_scheme (dict or iterable of pairs, optional): Mapping of color
-            role names to color values (e.g. ``colorup``, ``colordn``).
+            role names to color values (e.g. ``colorup``, ``colordn``),
+            layered on top of the style.
 
     Creating a Canvas eagerly creates (or adopts) the figure, sets the tight
     layout engine (required by the pane geometry), and installs the styled
@@ -42,23 +39,23 @@ class Canvas:
 
     DEFAULT_FIGSIZE = (12, 9)
 
-    def __init__(self, figsize=None, *, figure=None, title=None, color_scheme=()):
-        self.color_scheme = dict(color_scheme)
-        self.counter = Counter()
+    def __init__(self, figsize=None, *, figure=None, title=None, style=None, color_scheme=()):
+        self.styler = get_styler(style, color_scheme=color_scheme)
 
-        if figure is not None:
-            figure.clf()
-            self.figure = figure
-        else:
-            self.figure = plt.figure(figsize=figsize or self.DEFAULT_FIGSIZE)
+        with self.styler.context():
+            if figure is not None:
+                figure.clf()
+                self.figure = figure
+            else:
+                self.figure = plt.figure(figsize=figsize or self.DEFAULT_FIGSIZE)
 
-        self.figure.set_layout_engine("tight")
+            self.figure.set_layout_engine("tight")
 
-        ax = init_vplot(self.figure)
-        self.config_root_axes(ax)
+            ax = init_vplot(self.figure)
+            self.config_root_axes(ax)
 
-        if title:
-            self.set_title(title)
+            if title:
+                self.set_title(title)
 
     def set_title(self, title):
         """Set the title on the root axes (displayed above the main pane)."""
@@ -69,7 +66,8 @@ class Canvas:
     def show(self):
         """show the figure"""
         # figure.show() only works if the figure was not created by pyplot!
-        plt.show()
+        with self.styler.context():
+            plt.show()
 
     def render(self, format="svg", *, dpi="figure"):
         """Render the figure to bytes in the specified image format.
@@ -84,29 +82,40 @@ class Canvas:
             bytes: The rendered image as a byte string.
         """
         file = io.BytesIO()
-        self.figure.savefig(file, format=format, dpi=dpi)
+        with self.styler.context():
+            self.figure.savefig(file, format=format, dpi=dpi)
         return file.getvalue()
 
     # --- pane styling ---
 
     @staticmethod
-    def config_root_axes(ax):
+    def grid_enabled(axis):
+        """Whether the effective rc enables the grid for ``axis`` ("x"/"y").
+
+        Reads ``axes.grid`` and ``axes.grid.axis`` — called inside the
+        styler's rc context, so styles control the grid (the mplchart
+        default look rides in ``styles.DEFAULT_RC``).
+        """
+        return mpl.rcParams["axes.grid"] and mpl.rcParams["axes.grid.axis"] in (axis, "both")
+
+    @classmethod
+    def config_root_axes(cls, ax):
         """Style the root axes: background layer drawing the x-grid."""
         ax.set_xmargin(0.0)
         ax.set_axisbelow(True)
         ax.patch.set_visible(False)
-        ax.xaxis.grid(True, alpha=0.4)
+        ax.xaxis.grid(cls.grid_enabled("x"))
         ax.yaxis.grid(False)
         ax.tick_params(left=False, labelleft=False)
 
-    @staticmethod
-    def config_pane_axes(ax):
+    @classmethod
+    def config_pane_axes(cls, ax):
         """Style a data pane: transparent patch, y-grid, right yticks, no x-ticks."""
         ax.set_xmargin(0.0)
         ax.set_axisbelow(True)
         ax.patch.set_visible(False)  # see through to root axes drawings
         ax.xaxis.grid(False)
-        ax.yaxis.grid(True, alpha=0.4)
+        ax.yaxis.grid(cls.grid_enabled("y"))
         ax.yaxis.tick_right()
         ax.tick_params(
             axis="x", which="both", bottom=False, top=False, labelbottom=False
@@ -122,8 +131,9 @@ class Canvas:
     def root_axes(self):
         """Root (background) axes — always present."""
         if not self.figure.axes:
-            ax = init_vplot(self.figure)
-            self.config_root_axes(ax)
+            with self.styler.context():
+                ax = init_vplot(self.figure)
+                self.config_root_axes(ax)
         return self.figure.axes[0]
 
     def main_axes(self):
@@ -147,6 +157,11 @@ class Canvas:
         if not self.valid_target(target):
             raise ValueError("Invalid target %r" % target)
 
+        with self.styler.context():
+            return self._get_axes(target, height_ratio=height_ratio)
+
+    def _get_axes(self, target, *, height_ratio=None):
+        """``get_axes`` body — runs inside the styler's rc context."""
         figure = self.figure
         self.root_axes()
 
@@ -181,6 +196,11 @@ class Canvas:
 
     def add_legends(self):
         """add legends to all axes that have labeled artists"""
+        with self.styler.context():
+            self._add_legends()
+
+    def _add_legends(self):
+        """``add_legends`` body — runs inside the styler's rc context."""
         for ax in self.figure.axes:
             handles, labels = ax.get_legend_handles_labels()
             if handles:
@@ -210,45 +230,10 @@ class Canvas:
 
     # --- colors ---
 
-    def next_line_color(self, ax):
-        """Next line color either text.color or cycled color"""
-        handles, _ = ax.get_legend_handles_labels()
-        if len(handles):
-            return ax._get_lines.get_next_color()
-        else:
-            return plt.rcParams["text.color"]
+    def get_setting(self, role, facet, *, fallback=None):
+        """Lookup a style setting through the styler — see ``Styler.get_setting``."""
+        return self.styler.get_setting(role, facet, fallback=fallback)
 
-    def next_fill_color(self, ax):
-        """Next cycled color for fill"""
-        return ax._get_patches_for_fill.get_next_color()
-
-    def get_color(self, name, ax=None, *, fallback=None):
-        """Lookup color through the color_scheme.
-
-        ``name`` can be a column name, a short id, or a full label — the
-        color_scheme is tried on the raw name first, then on the extracted
-        prefix (e.g. ``"macd-12-26-9"`` → ``"macd"``).
-        """
-        color = fallback
-
-        colors = self.color_scheme
-        if colors:
-            key = name if name in colors else extract_prefix(name)
-            if key in colors:
-                color = colors[key] or color
-
-        if isinstance(color, list):
-            ckey = ax, name
-            count = self.counter[ckey]
-            self.counter[ckey] += 1
-            color = color[count % len(color)] if color else None
-
-        if color and color.startswith("~"):
-            color = closest_color(color.removeprefix("~"))
-
-        if color == "line":
-            color = self.next_line_color(ax)
-        elif color == "fill":
-            color = self.next_fill_color(ax)
-
-        return color
+    def resolve_color(self, role, ax=None, *, override=None, fallback=None):
+        """Resolve a role color through the styler — see ``Styler.resolve_color``."""
+        return self.styler.resolve_color(role, ax, override=override, fallback=fallback)

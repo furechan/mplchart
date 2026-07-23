@@ -81,23 +81,23 @@ class AutoPlot(BindingPrimitive):
             linestyle = style
             marker = None
 
-        color = chart.canvas.get_color(item, ax, fallback="line")
+        color = chart.canvas.resolve_color(item, ax, fallback="line")
         xv, yv = chart.view.series_xy(self._series(data, item))
         ax.plot(xv, yv, label=label, linestyle=linestyle, marker=marker, color=color)
 
     def _plot_bars(self, chart, data, ax, item, *, label=None):
-        color = chart.canvas.get_color(item, ax, fallback="fill")
+        color = chart.canvas.resolve_color(item, ax, fallback="fill")
         xv, yv = chart.view.series_xy(self._series(data, item))
         plot_vbars(ax, xv, yv, color=color, alpha=0.5, width=0.8, label=label)
 
     def _plot_area(self, chart, data, ax, item, *, label=None):
-        color = chart.canvas.get_color(item, ax, fallback="fill")
+        color = chart.canvas.resolve_color(item, ax, fallback="fill")
         xv, yv = chart.view.series_xy(self._series(data, item))
         ax.fill_between(xv, yv, 0, label=label, interpolate=True, color=color, alpha=0.5)
 
     def _plot_bands(self, chart, data, ax, upper, lower, middle=None, label=None):
         key = get_label(self.indicator)
-        color = chart.canvas.get_color(key, ax, fallback="line")
+        color = chart.canvas.resolve_color(key, ax, fallback="line")
 
         if middle:
             xv, mv = chart.view.series_xy(self._series(data, middle))

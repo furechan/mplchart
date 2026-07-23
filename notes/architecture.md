@@ -2,7 +2,7 @@
 
 Design notes: [axes-stickiness.md](axes-stickiness.md) — pane vs axes vocabulary and current-pane semantics. [primitive-contract.md](primitive-contract.md) — the Chart API surface primitives may use (living document). [canvas-view-rationale.md](canvas-view-rationale.md) — agreed direction: Chart = Canvas (presentation plane) + DataView (data plane), primitives converging on `apply(canvas, view)`; target interfaces in [canvas-view-sketch.md](canvas-view-sketch.md), evolution plan in [canvas-view-roadmap.md](canvas-view-roadmap.md).
 
-Discussion (not decided): [polars-proposal.md](polars-proposal.md) — exploring a polars-only future.
+Discussion (not decided): [polars-proposal.md](polars-proposal.md) — exploring a polars-only future. [styler-sketch.md](styler-sketch.md) — mplfinance-like style option (Style spec + Styler runtime under `styles/`).
 
 ## Module layout
 
@@ -18,7 +18,8 @@ Discussion (not decided): [polars-proposal.md](polars-proposal.md) — exploring
 | `expressions/` | Polars-only expression factories returning `pl.Expr` (multi-output expressions return a `pl.struct(...)` Expr) |
 | `utils.py` | Backend detection, `is_indicator_like`, `col_to_numpy`, `normalize_prices`, etc. (`apply_indicator` deprecated — use `view.eval`) |
 | `layout.py` | Matplotlib figure/axes layout helpers |
-| `canvas.py` | `Canvas` — presentation plane: figure, title, styled panes, pane state, colors, show/render |
+| `canvas.py` | `Canvas` — presentation plane: figure, title, styled panes, pane state, show/render; owns the `Styler` and delegates color resolution to it |
+| `styles/` | Style machinery — runtime `Styler` (color-scheme lookup, per-pane color cycles, prop-cycle sentinels, scoped rc context); target design in [styler-sketch.md](styler-sketch.md) |
 | `dateaxis.py` | Date x-axis machinery — `DTArrayLocator`, `DTArrayFormatter`, `config_date_axis` |
 
 ## Backends
@@ -51,4 +52,4 @@ For each item passed to `chart.plot()`:
 
 ## Primitives
 
-Regular primitives (`LinePlot`, `AreaPlot`, `BarPlot`, `AutoPlot`) use `chart.view.series_xy(data)` for x/y extraction. Irregular primitives (`ZigZag`, `Swings`, `Stripes`, `Markers`) compute their own sparse row indices and map them through `chart.view.slice(..., xcol=...)` or `chart.view.series_xy`. The data plane is the view and the figure plane is the canvas: primitives call `chart.view.*` (`eval`, `series_xy`, `slice`, `map_date`, `prices`) and `chart.canvas.*` (`get_axes`, `get_color`, `root_axes`, `main_axes`) directly — Chart wraps neither. Chart keeps only the fluent surface (`plot`, `pane`, `hline`, `vline`, `show`, `render`, `figure`, `title=`).
+Regular primitives (`LinePlot`, `AreaPlot`, `BarPlot`, `AutoPlot`) use `chart.view.series_xy(data)` for x/y extraction. Irregular primitives (`ZigZag`, `Swings`, `Stripes`, `Markers`) compute their own sparse row indices and map them through `chart.view.slice(..., xcol=...)` or `chart.view.series_xy`. The data plane is the view and the figure plane is the canvas: primitives call `chart.view.*` (`eval`, `series_xy`, `slice`, `map_date`, `prices`) and `chart.canvas.*` (`get_axes`, `resolve_color`, `root_axes`, `main_axes`) directly — Chart wraps neither. Chart keeps only the fluent surface (`plot`, `pane`, `hline`, `vline`, `show`, `render`, `figure`, `title=`).

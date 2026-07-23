@@ -4,6 +4,18 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 
 
+def normalize_color(color):
+    """Normalize any matplotlib color spec (name, hex, RGB/RGBA tuple) to a hex string.
+
+    The styler guarantees only concrete hex strings leave color resolution —
+    hex is scalar-safe for ``np.where`` consumers (tuples are not) and
+    ``to_rgba`` validates the spec, failing fast on garbage. Alpha is kept
+    (``#rrggbbaa``) only when not fully opaque.
+    """
+    rgba = mcolors.to_rgba(color)
+    return mcolors.to_hex(rgba, keep_alpha=rgba[3] != 1.0)
+
+
 def closest_color(color, color_cycle=None):
     """closest color in the props cycle"""
     if color_cycle is None:

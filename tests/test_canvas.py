@@ -77,19 +77,25 @@ def test_get_axes_invalid_target(canvas):
         canvas.get_axes("bogus")
 
 
-def test_get_color_scheme_lookup(canvas):
-    canvas.color_scheme = {"macd": "red", "sma": "blue"}
-    assert canvas.get_color("macd-12-26-9") == "red"  # prefix match
-    assert canvas.get_color("sma") == "blue"  # raw match
-    assert canvas.get_color("other", fallback="green") == "green"
+def test_resolve_color_scheme_lookup():
+    from matplotlib.colors import to_hex
+
+    canvas = Canvas(color_scheme={"macd": "red", "sma": "blue"})
+    assert canvas.resolve_color("macd-12-26-9") == to_hex("red")  # prefix match
+    assert canvas.resolve_color("sma") == to_hex("blue")  # raw match
+    assert canvas.resolve_color("other", fallback="green") == to_hex("green")
+    plt.close(canvas.figure)
 
 
-def test_get_color_list_cycling(canvas):
-    canvas.color_scheme = {"sma": ["red", "blue"]}
+def test_resolve_color_list_cycling():
+    from matplotlib.colors import to_hex
+
+    canvas = Canvas(color_scheme={"sma": ["red", "blue"]})
     ax = canvas.get_axes()
-    assert canvas.get_color("sma", ax) == "red"
-    assert canvas.get_color("sma", ax) == "blue"
-    assert canvas.get_color("sma", ax) == "red"  # wraps around
+    assert canvas.resolve_color("sma", ax) == to_hex("red")
+    assert canvas.resolve_color("sma", ax) == to_hex("blue")
+    assert canvas.resolve_color("sma", ax) == to_hex("red")  # wraps around
+    plt.close(canvas.figure)
 
 
 def test_canvas_view_native_plot():
@@ -112,4 +118,39 @@ def test_canvas_view_native_plot():
     assert canvas.count_axes() == 2
     xs = ax.lines[0].get_xdata()
     assert len(xs) == 100
+    plt.close(canvas.figure)
+
+
+def test_grid_default_look():
+    # baseline DEFAULT_RC: root x-grid and pane y-grid on, alpha 0.4
+    canvas = Canvas(figsize=(2, 2))
+    root = canvas.root_axes()
+    pane = canvas.get_axes("below")
+    assert root.xaxis.get_gridlines()[0].get_visible()
+    assert pane.yaxis.get_gridlines()[0].get_visible()
+    assert root.xaxis.get_gridlines()[0].get_alpha() == 0.4
+    plt.close(canvas.figure)
+
+
+def test_grid_off_via_stylesheet():
+    # the classic sheet sets axes.grid False — styles can disable the grid
+    from mplchart.styles import Styler
+
+    canvas = Canvas(figsize=(2, 2), style=Styler(stylesheet="classic"))
+    root = canvas.root_axes()
+    pane = canvas.get_axes("below")
+    assert not root.xaxis.get_gridlines()[0].get_visible()
+    assert not pane.yaxis.get_gridlines()[0].get_visible()
+    plt.close(canvas.figure)
+
+
+def test_grid_axis_selection():
+    # axes.grid.axis composes with the root-x/pane-y structural split
+    from mplchart.styles import Styler
+
+    canvas = Canvas(figsize=(2, 2), style=Styler(rcparams={"axes.grid.axis": "y"}))
+    root = canvas.root_axes()
+    pane = canvas.get_axes("below")
+    assert not root.xaxis.get_gridlines()[0].get_visible()
+    assert pane.yaxis.get_gridlines()[0].get_visible()
     plt.close(canvas.figure)

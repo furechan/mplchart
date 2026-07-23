@@ -80,7 +80,7 @@ class Canvas:
     def render(self, format="svg", *, dpi="figure") -> bytes: ...   # figure → image bytes
 
     figure: Figure
-    color_scheme: dict
+    styler: Styler          # runtime style machinery (see styler-sketch.md)
 
     def root_axes(self) -> Axes: ...        # background axes: x-grid, spans all panes
     def main_axes(self) -> Axes: ...        # first data pane

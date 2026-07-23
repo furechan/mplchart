@@ -1,6 +1,25 @@
 # Change Log
 
 ## 0.0.41
+- `get_color` renamed `resolve_color` on `Styler` and `Canvas`; resolution chain: new `override=` param (explicit user color beats setting beats fallback), `name` renamed `role`; output always normalized to hex via new `colors.normalize_color` (np.where-safe, to_rgba-validated); `Candlesticks` normalizes kwarg colors — RGB tuples now work
+- `Candlesticks` direction is now close-vs-open (standard candle convention) instead of close-vs-previous-close; first candle no longer renders as down-colored
+- Removed the legacy `plot_csbars` bar renderer; `Candlesticks(use_bars=...)` is now a no-op with a `DeprecationWarning` (sample code preserved in `playground/candlesticks-as-bars.ipynb`)
+- `plot_cspoly` split: body rectangles (`PolyCollection`) + wick segments (`LineCollection`); takes six final colors — `faceup/facedn/edgeup/edgedn/wickup/wickdn` — with the color shuffling (hollow-up policy, wicks follow edges) moved into the `Candlesticks` primitive
+- `Candlesticks` scheme kwargs: new `color=` (mono hollow) alongside `colorup`/`colordn` (filled bicolor); schemes are atomic — passing `colordn` alone now declares filled bicolor instead of hollow-up (see `notes/candlestick-styles.md`)
+- `Candlesticks(use_prev_close=True)` — color bicolor candles by close vs previous close (interbar) instead of close vs open; first bar counts as up
+- `Candlesticks(hollow=)` — tri-state scheme-mode flag: `None` resolves per palette (mono → hollow, bicolor → filled), `True` with `colorup`/`colordn` gives colored hollow (TradingView hollow candles; add `use_prev_close=True` for the StockCharts look), `False` with a mono palette raises
+- `Candlesticks` settings hook: the no-kwargs path resolves its palette from the `candle.up`/`candle.down`/`candle.hollow`, `edge.up`/`edge.down`, and `wicks` color settings via `resolve_color` — distinct resolved up/down faces select the filled family, `edge.*` overrides the body outlines, `wicks` gives neutral wicks, `candle.hollow` the hollow-body fill; color kwargs bypass settings (atomic schemes) but still run the resolution pipeline
+- `Candlesticks` consistency checks are params-only: competing schemes raise at construction, explicit mono `color=` with `use_prev_close`/`hollow=False` at plot time; the default mode (no color kwargs) is never validated against the style — bare flags render as-is, and mode kwargs compose with settings palettes (StockCharts look via style + `hollow=True, use_prev_close=True`)
+- New `Canvas.get_setting` facade delegating to `Styler.get_setting`
+- New `candle.alpha` setting: `Candlesticks(alpha=)` defaults to `None` and resolves the setting (else 1.0); explicit kwarg wins — the module docstring lists all applicable settings
+- New `Styler(stylesheet=)` + `styles.load_stylesheet`: base matplotlib stylesheet collapsed eagerly under explicit `rcparams`; accepts what `plt.style.use` accepts — stock name, `.mplstyle` path, or `"default"` (factory template, ambient-independent base)
+- rc wiring: styler rcparams now apply via scoped `rc_context` at the creation choke points (canvas init, pane creation, `plot_indicator`, legends, show/render) — no ambient rc mutation; `vline`/`hline` route through `plot_indicator`
+- New `styles.DEFAULT_RC` baseline (`axes.grid: True`, `grid.alpha: 0.4`) — the default look as rc, layered under stylesheet and rcparams in every styler
+- Canvas grid honors rc: `config_root_axes`/`config_pane_axes` read `axes.grid`/`axes.grid.axis` (composing with the root-x/pane-y split) instead of hardcoding `grid(True, alpha=0.4)` — styles can now disable, dim, or axis-select the grid
+- `plot_cspoly` carries both criteria: fill flag always intrabar, color flag per `use_prev_close`; new `faceoff=` slot (third face color — body fill for hollow bodies) — all four scheme×criterion combinations renderable, including StockCharts-style hollow×interbar
+- New `styles` package: runtime `Styler` extracted from `Canvas` (color-scheme lookup, per-pane color cycles with weakly-held axes, prop-cycle sentinels, scoped rc context); `Canvas.resolve_color` delegates; the `Canvas.color_scheme` attribute is gone (constructor arg remains, feeding the styler)
+- New `style=` parameter on `Chart` and `Canvas`, normalized via `styles.get_styler` — accepts a prebuilt `Styler` for now; style names/dicts/specs to follow
+- Styler settings grammar: flat `<role>[.<variant>].<facet>` keys (e.g. `candles.up.color`, `volume.alpha`); new `get_setting(name, facet)` accessor, `resolve_color` rebased on it; `get_styler` takes canonical `overrides=` and legacy `color_scheme=` (munged via `map_color_scheme`) as separate arguments
 - MkDocs documentation site scaffold: `mkdocs.yml` + `docs/` source dir (Material theme, mkdocs-jupyter) rendering the example notebooks via symlink; new `docs` dependency group
 - Moved internal design notes from `docs/` to `notes/`; `docs/` is now the published site source
 - Docs gallery: `docs/gallery.ipynb` notebook rendered from bundled sample data; `inv gallery` re-executes it in place

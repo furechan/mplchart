@@ -49,9 +49,12 @@ class Chart:
             handles date formatting natively. Defaults to False, which maps
             dates to integer rownum positions with a custom date formatter
             (eliminating weekend/holiday gaps).
+        style (optional): Style spec, normalized via ``get_styler`` —
+            currently ``None`` or a prebuilt ``Styler`` (for testing or
+            debugging); style names/dicts will be accepted here later.
         color_scheme (dict or iterable of pairs, optional): Mapping of color
             role names to color values used to override default colors (e.g.
-            ``colorup``, ``colordn``).
+            ``colorup``, ``colordn``), layered on top of the style.
 
     Examples:
         chart = Chart(prices, title="AAPL", max_bars=252)
@@ -73,6 +76,7 @@ class Chart:
         figsize=None,
         normalize=False,
         raw_dates=False,
+        style=None,
         color_scheme=(),
     ):
         self.start = start
@@ -81,7 +85,7 @@ class Chart:
         self.raw_dates = raw_dates
 
         self.canvas = Canvas(
-            figsize=figsize, figure=figure, title=title, color_scheme=color_scheme
+            figsize=figsize, figure=figure, title=title, style=style, color_scheme=color_scheme
         )
 
         if prices is None:
@@ -152,6 +156,14 @@ class Chart:
     def plot_indicator(self, indicator):
         """calculate and plot an indicator"""
 
+        # All primitive drawing runs inside the styler's rc context — this is
+        # the single apply_to_chart dispatch site (vline/hline route through)
+        with self.canvas.styler.context():
+            self._plot_indicator(indicator)
+
+    def _plot_indicator(self, indicator):
+        """``plot_indicator`` body — runs inside the styler's rc context."""
+
         # Call the primitive's apply_to_chart if defined (before any calc)
         # this is the only location where apply_to_chart is called
         # apply_to_chart is currently defined only for Primitives
@@ -215,7 +227,7 @@ class Chart:
         """
         from .primitives.vline import VLine
 
-        VLine(date, color=color, linestyle=linestyle).apply_to_chart(self)
+        self.plot_indicator(VLine(date, color=color, linestyle=linestyle))
         return self
 
     def plot_vline(self, date):
@@ -237,7 +249,7 @@ class Chart:
         """
         from .primitives.hline import HLine
 
-        HLine(value, color=color, linestyle=linestyle).apply_to_chart(self)
+        self.plot_indicator(HLine(value, color=color, linestyle=linestyle))
         return self
 
     def show(self):
