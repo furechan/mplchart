@@ -47,19 +47,14 @@ def resolve_style(spec: str | Mapping | Style) -> Style: ...
 
 def available_styles() -> list[str]: ...            # pkgutil.iter_modules over lib/
 
-def get_styler(style=None, *, overrides=(), color_scheme=()) -> Styler: ...
+def get_styler(style=None, *, overrides=()) -> Styler: ...
     # single normalizer, mirrors get_view; one polymorphic style= slot on
     # Chart/Canvas, no parameter threading.
     # style: None | prebuilt Styler (passthrough — or a derived copy when
     #        mappings are given) | str | dict | Style (→ resolve_style)
     # overrides: canonical settings keys, layered over the style settings
     #            whatever their source — a prebuilt Styler included
-    # color_scheme: legacy color mapping, munged via map_color_scheme,
-    #               layered below overrides — retires with the argument
-
-def map_color_scheme(scheme) -> dict: ...
-    # transitional: munges legacy color_scheme keys into settings keys
-    # ("macd" → "macd.color"); retires with the color_scheme argument
+    # (color_scheme / map_color_scheme retired 2026-07-23 — see open questions)
 ```
 
 - `rc` is validated at construction by round-tripping through `mpl.RcParams` — matplotlib's 322 per-key validators are the schema; errors point at the style definition, not the first plot.
@@ -140,15 +135,15 @@ Cycle semantics (stated, previously implicit): a list-valued role advances per `
 - **No style state survives to draw time.** rc values bake into artists at creation inside scoped contexts; symbolic colors resolve eagerly to concrete hex inside `resolve_color` (`closest_color` already ends in `to_hex` for this reason). No global mutation observable from outside; no named-color-registry games (names resolve at *draw* time, per-draw — unusable for scoped styling).
 - **rc applies only via `styler.context()` at the creation choke points** (implemented 2026-07-23): `Canvas.__init__` (figure + root axes), `Canvas.root_axes`/`get_axes` (lazy pane creation), `Chart.plot_indicator` (all primitive drawing — the single `apply_to_chart` dispatch site; `vline`/`hline` now route through it), `Canvas.add_legends`, `Canvas.show`, `Canvas.render` (draw/savefig re-read rc). `rc_context` nests harmlessly.
 - **Primitives are covered by construction**: they only run when the pipeline calls them. Contract addition for [primitive-contract.md](primitive-contract.md): primitives draw synchronously inside `apply_to_chart` — no deferred drawing.
-- **Precedence**: mpl defaults < `base_mpl_style` < `rc` — and for roles: style `settings` < user overrides (`color_scheme=`) < explicit primitive kwargs.
+- **Precedence**: mpl defaults < `base_mpl_style` < `rc` — and for roles: style `settings` < user overrides (`get_styler(overrides=)`) < explicit primitive kwargs.
 - **Boundary**: mplchart styles what mplchart draws. Direct user access to axes between calls gets ambient matplotlib style (optionally warn via a `_style_active` debug flag when a style is configured).
 
 ## Canvas / Chart integration
 
 ```python
 class Canvas:
-    def __init__(self, figsize=None, *, figure=None, title=None, style=None, color_scheme=()):
-        self.styler = get_styler(style, overrides=color_scheme)
+    def __init__(self, figsize=None, *, figure=None, title=None, style=None):
+        self.styler = get_styler(style)
         with self.styler.context():
             ...create figure, root axes...
 
@@ -191,8 +186,7 @@ Retrofit: Candlesticks/OHLC/Volume resolve defaults through `canvas.resolve_colo
 
 ## Open questions
 
-- Fate of `Chart(color_scheme=)` — keep as the user-override layer (current sketch) or deprecate into `style=`.
-- ~~Legacy bare keys~~ — resolved: `map_color_scheme` munges `color_scheme` keys at the boundary (`"macd"` → `"macd.color"`); internal form is always canonical; the loader retires with `color_scheme`.
+- ~~Fate of `Chart(color_scheme=)`~~ — resolved 2026-07-23: deprecated and ignored (DeprecationWarning at Chart, pointing at `style=` settings); removed from `Canvas`/`get_styler`, `map_color_scheme` deleted along with the bare-key munging (internal form is always canonical).
 - Role growth: `candles.wick` (mplfinance separates wick color; mplchart currently can't), body-edge vs fill split.
 - First shipped styles: `default` (current look), one dark, one broker-look — enough to prove the mechanism.
 - `hline`/`vline`/`Stripes` roles, or leave them on rc grid defaults.

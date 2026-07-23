@@ -4,7 +4,7 @@ import pytest
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 
-from mplchart.styles import Styler, get_styler, map_color_scheme
+from mplchart.styles import Styler, get_styler
 from mplchart.styles.styler import DEFAULT_RC
 
 
@@ -44,15 +44,6 @@ def test_get_setting_facets():
 def test_get_setting_prefix_chain():
     styler = Styler(settings={"sma.color": "blue"})
     assert styler.get_setting("sma-50", "color") == "blue"  # prefix on the name part only
-
-
-def test_map_color_scheme():
-    scheme = {"macd": "red", "candle.up": "green", "sma.color": "blue"}
-    assert map_color_scheme(scheme) == {
-        "macd.color": "red",
-        "candle.up.color": "green",
-        "sma.color": "blue",  # already canonical, passes through
-    }
 
 
 def test_list_cycling_per_axes():
@@ -125,16 +116,6 @@ def test_get_styler_none():
     styler = get_styler(overrides={"candle.alpha": 0.9})
     assert isinstance(styler, Styler)
     assert styler.settings == {"candle.alpha": 0.9}  # canonical keys, no munging
-
-
-def test_get_styler_color_scheme():
-    styler = get_styler(color_scheme={"sma": "blue"})
-    assert styler.settings == {"sma.color": "blue"}  # legacy keys munged
-
-
-def test_get_styler_overrides_beat_color_scheme():
-    styler = get_styler(overrides={"sma.color": "red"}, color_scheme={"sma": "blue"})
-    assert styler.settings == {"sma.color": "red"}
 
 
 def test_get_styler_passthrough():

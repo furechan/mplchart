@@ -50,20 +50,7 @@ def load_stylesheet(spec):
     return dict(mpl.rc_params_from_file(spec, use_default_template=False))
 
 
-def map_color_scheme(scheme):
-    """Normalize a legacy ``color_scheme`` mapping into settings keys.
-
-    Bare role keys get the color facet appended (``"macd"`` →
-    ``"macd.color"``); keys already ending in ``".color"`` pass through.
-    Transitional — retires with the ``color_scheme`` argument.
-    """
-    return {
-        key if key.endswith(".color") else f"{key}.color": value
-        for key, value in dict(scheme).items()
-    }
-
-
-def get_styler(style=None, *, overrides=(), color_scheme=()):
+def get_styler(style=None, *, overrides=()):
     """Normalize a style spec into a Styler.
 
     Args:
@@ -73,9 +60,6 @@ def get_styler(style=None, *, overrides=(), color_scheme=()):
         overrides: settings mapping (canonical dotted keys, e.g.
             ``candle.up.color``) layered on top of the style settings —
             whatever their source, a prebuilt Styler included.
-        color_scheme: legacy color mapping (the ``color_scheme`` argument
-            of Canvas/Chart), normalized via ``map_color_scheme`` and
-            layered below ``overrides``. Retires with ``color_scheme``.
     """
 
     if isinstance(style, Styler):
@@ -88,7 +72,7 @@ def get_styler(style=None, *, overrides=(), color_scheme=()):
         raise ValueError(f"Invalid style spec {style!r}")
 
 
-    overrides = map_color_scheme(color_scheme) | dict(overrides)
+    overrides = dict(overrides)
 
     if overrides:
         styler = styler.replace(overrides=overrides)

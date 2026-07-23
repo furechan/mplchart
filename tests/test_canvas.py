@@ -80,7 +80,9 @@ def test_get_axes_invalid_target(canvas):
 def test_resolve_color_scheme_lookup():
     from matplotlib.colors import to_hex
 
-    canvas = Canvas(color_scheme={"macd": "red", "sma": "blue"})
+    from mplchart.styles import Styler
+
+    canvas = Canvas(style=Styler(settings={"macd.color": "red", "sma.color": "blue"}))
     assert canvas.resolve_color("macd-12-26-9") == to_hex("red")  # prefix match
     assert canvas.resolve_color("sma") == to_hex("blue")  # raw match
     assert canvas.resolve_color("other", fallback="green") == to_hex("green")
@@ -90,7 +92,9 @@ def test_resolve_color_scheme_lookup():
 def test_resolve_color_list_cycling():
     from matplotlib.colors import to_hex
 
-    canvas = Canvas(color_scheme={"sma": ["red", "blue"]})
+    from mplchart.styles import Styler
+
+    canvas = Canvas(style=Styler(settings={"sma.color": ["red", "blue"]}))
     ax = canvas.get_axes()
     assert canvas.resolve_color("sma", ax) == to_hex("red")
     assert canvas.resolve_color("sma", ax) == to_hex("blue")

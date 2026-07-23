@@ -7,11 +7,13 @@ Style settings consumed by this primitive (see notes/candlestick-styles.md):
     edge.up.color        body outlines (default: follow the faces)
     edge.down.color
     wicks.color          neutral wick color (default: follow the edges)
-    candle.hollow.color  hollow-body fill (default: axes.facecolor)
-    candle.alpha         opacity (default: 1.0)
+    candle.off.color       hollow-body fill (default: axes.facecolor)
+    candle.alpha           opacity (default: 1.0)
+    candle.hollow          hollow-mode flag (default: resolved faces equal)
+    candle.use_prev_close  interbar-coloring flag (default: False)
 
-Color kwargs bypass the color settings entirely (atomic schemes); an explicit
-``alpha=`` kwarg wins over ``candle.alpha``.
+Color kwargs bypass the color settings entirely (atomic schemes); explicit
+``alpha=``/``hollow=``/``use_prev_close=`` kwargs win over their settings.
 """
 
 import warnings
@@ -44,7 +46,7 @@ class Candlesticks(Primitive):
     the filled bicolor family (missing side falls to ``text.color``),
     ``edge.up.color`` / ``edge.down.color`` override the body outlines,
     ``wicks.color`` gives neutral wicks (yahoo-style; wicks otherwise follow
-    the edges), and ``candle.hollow.color`` sets the hollow-body fill
+    the edges), and ``candle.off.color`` sets the hollow-body fill
     (default ``axes.facecolor``). Color kwargs bypass settings entirely.
 
     Args:
@@ -60,14 +62,16 @@ class Candlesticks(Primitive):
             Defaults to the current ``text.color`` matplotlib parameter.
         hollow (bool, optional): Fill up-bodies with the background color
             (``axes.facecolor``) instead of the up color. Default (``None``)
-            resolves from the palette — hollow when the resolved faces are
-            mono, filled when they differ. ``False`` with an explicit mono
-            ``color=`` raises at plot time (direction-blind). Combine with
-            ``use_prev_close`` for the StockCharts look.
-        use_prev_close (bool): Color bars by close vs previous close
-            (interbar) instead of close vs open (intrabar). Meaningless for
-            a mono palette — raises at plot time with an explicit
-            ``color=``. Defaults to ``False``.
+            defers to the ``candle.hollow`` setting, else resolves from the
+            palette — hollow when the resolved faces are mono, filled when
+            they differ. ``False`` with an explicit mono ``color=`` raises
+            at plot time (direction-blind). Combine with ``use_prev_close``
+            for the StockCharts look.
+        use_prev_close (bool, optional): Color bars by close vs previous
+            close (interbar) instead of close vs open (intrabar). Default
+            (``None``) defers to the ``candle.use_prev_close`` setting,
+            else ``False``. Meaningless for a mono palette — ``True``
+            with an explicit ``color=`` raises at plot time.
         use_bars (bool): Deprecated and ignored — the legacy bar renderer was
             removed (sample code preserved in
             ``playground/candlesticks-as-bars.ipynb``).
@@ -82,7 +86,7 @@ class Candlesticks(Primitive):
         colorup: str | None = None,
         colordn: str | None = None,
         hollow: bool | None = None,
-        use_prev_close: bool = False,
+        use_prev_close: bool | None = None,
         use_bars: bool = False,
     ):
         if use_bars:
@@ -127,10 +131,16 @@ class Candlesticks(Primitive):
         label = str(self)
         width = self.width
 
+        get_setting = chart.canvas.get_setting
+
         if self.alpha is not None:
             alpha = self.alpha
         else:
-            alpha = chart.canvas.get_setting("candle", "alpha", fallback=1.0)
+            alpha = get_setting("candle", "alpha", fallback=1.0)
+
+        use_prev_close = self.use_prev_close
+        if use_prev_close is None:
+            use_prev_close = bool(get_setting("candle", "use_prev_close", fallback=False))
 
         resolve = chart.canvas.resolve_color
         textcolor = plt.rcParams["text.color"]
@@ -161,11 +171,16 @@ class Candlesticks(Primitive):
         wickup = resolve("wicks", ax, override=colorup, fallback=edgeup)
         wickdn = resolve("wicks", ax, override=colordn, fallback=edgedn)
 
-        hollow = self.hollow if self.hollow is not None else (faceup == facedn)
+        # mode chain: kwarg → candle.hollow setting → resolved-face default
+        hollow = self.hollow
+        if hollow is None:
+            hollow = get_setting("candle", "hollow")
+        if hollow is None:
+            hollow = faceup == facedn
 
         if hollow:
             # kwarg schemes (colorup set) pin the hollow fill to the background
-            faceoff = resolve("candle.hollow", ax, override=facecolor if colorup else None, fallback=facecolor)
+            faceoff = resolve("candle.off", ax, override=facecolor if colorup else None, fallback=facecolor)
         else:
             faceoff = None
 
@@ -173,7 +188,7 @@ class Candlesticks(Primitive):
             prices, xvalues, ax=ax, width=width, alpha=alpha,
             faceup=faceup, facedn=facedn, edgeup=edgeup, edgedn=edgedn,
             wickup=wickup, wickdn=wickdn, faceoff=faceoff,
-            use_prev_close=self.use_prev_close,
+            use_prev_close=use_prev_close,
             label=label,
         )
 

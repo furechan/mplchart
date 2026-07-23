@@ -52,9 +52,8 @@ class Chart:
         style (optional): Style spec, normalized via ``get_styler`` —
             currently ``None`` or a prebuilt ``Styler`` (for testing or
             debugging); style names/dicts will be accepted here later.
-        color_scheme (dict or iterable of pairs, optional): Mapping of color
-            role names to color values used to override default colors (e.g.
-            ``colorup``, ``colordn``), layered on top of the style.
+        color_scheme: Deprecated and ignored — use ``style=`` with settings
+            (e.g. ``Styler(settings={"sma.color": "red"})``).
 
     Examples:
         chart = Chart(prices, title="AAPL", max_bars=252)
@@ -79,14 +78,20 @@ class Chart:
         style=None,
         color_scheme=(),
     ):
+        if color_scheme:
+            warnings.warn(
+                "color_scheme is deprecated and ignored — use style= with "
+                "settings (e.g. Styler(settings={'sma.color': 'red'}))",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+
         self.start = start
         self.end = end
         self.max_bars = max_bars
         self.raw_dates = raw_dates
 
-        self.canvas = Canvas(
-            figsize=figsize, figure=figure, title=title, style=style, color_scheme=color_scheme
-        )
+        self.canvas = Canvas(figsize=figsize, figure=figure, title=title, style=style)
 
         if prices is None:
             raise ValueError("Prices data must be provided at initialization!")

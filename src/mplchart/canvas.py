@@ -28,9 +28,6 @@ class Canvas:
         style (optional): Style spec, normalized via ``get_styler`` —
             currently ``None`` or a prebuilt ``Styler`` (for testing or
             debugging); style names/dicts will be accepted here later.
-        color_scheme (dict or iterable of pairs, optional): Mapping of color
-            role names to color values (e.g. ``colorup``, ``colordn``),
-            layered on top of the style.
 
     Creating a Canvas eagerly creates (or adopts) the figure, sets the tight
     layout engine (required by the pane geometry), and installs the styled
@@ -39,8 +36,8 @@ class Canvas:
 
     DEFAULT_FIGSIZE = (12, 9)
 
-    def __init__(self, figsize=None, *, figure=None, title=None, style=None, color_scheme=()):
-        self.styler = get_styler(style, color_scheme=color_scheme)
+    def __init__(self, figsize=None, *, figure=None, title=None, style=None):
+        self.styler = get_styler(style)
 
         with self.styler.context():
             if figure is not None:

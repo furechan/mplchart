@@ -225,7 +225,7 @@ def get_label(indicator):
     5. fall back to ``repr(indicator)``
 
     The color map uses the label's prefix via :func:`extract_prefix` when no
-    direct match is found in ``color_scheme``.
+    direct match is found in the style settings.
     """
 
     if isinstance(indicator, str):
