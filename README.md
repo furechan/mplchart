@@ -112,6 +112,7 @@ The main drawing primitives are :
 - `LinePlot` draw an indicator as line plot
 - `AreaPlot` draw an indicator as area plot
 - `BarPlot` draw an indicator as bar plot
+- `Bands` draw upper/lower(/middle) band results with a translucent fill (e.g. `Bands(BBANDS(20))`)
 - `Stripes` to shade background areas where a condition is active
 - `Markers` to mark signal crossings with symbols
 - `ZigZag` lines between pivot points
