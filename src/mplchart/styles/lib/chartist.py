@@ -1,5 +1,6 @@
 # mplchart shipped style — pure data, zero imports (see notes/styler-sketch.md)
-# colored hollow × interbar: the mode flags make the look fully style-side
+# chartist: the classic technical-analysis look — colored hollow candles by
+# previous close (the StockCharts-style rendering); mode flags in-style
 STYLE = {
     "rc": {
         "axes.grid": True,

@@ -9,7 +9,7 @@ from mplchart.styles import Style, Styler, available_styles, get_styler, resolve
 
 def test_available_styles():
     names = available_styles()
-    assert {"nightclouds", "stockcharts", "tradingview"} <= set(names)
+    assert {"chartist", "modern", "mplchart", "nightclouds"} <= set(names)
 
 
 def test_resolve_style_name():

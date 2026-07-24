@@ -1,4 +1,6 @@
 # mplchart shipped style — pure data, zero imports (see notes/styler-sketch.md)
+# modern: the contemporary web-platform look — teal/red filled candles on
+# white with a light solid grid
 STYLE = {
     "rc": {
         "axes.grid": True,
