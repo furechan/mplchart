@@ -15,6 +15,10 @@ from pkgutil import iter_modules
 import matplotlib as mpl
 import matplotlib.style
 
+# direct from-import: robust across matplotlib versions (3.11 no longer
+# exposes the ``core`` submodule as an attribute of ``matplotlib.style``)
+from matplotlib.style.core import STYLE_BLACKLIST  # ty: ignore[unresolved-import]  # pyright: ignore[reportAttributeAccessIssue]  # runtime attr, missing from stubs
+
 
 # rcParams the totalized base never touches: matplotlib's own non-style keys
 # (backend, interactive, ...) plus environment preferences that belong to the
@@ -29,10 +33,9 @@ def base_template():
     and render identically regardless of ambient rcParams (no ambient
     inheritance; scoped, unlike mplfinance's global reset).
     """
-    blacklist = mpl.style.core.STYLE_BLACKLIST  # ty: ignore[unresolved-attribute]  # pyright: ignore[reportAttributeAccessIssue]  # runtime attr, missing from stubs
     return {
         k: v for k, v in mpl.rcParamsDefault.items()
-        if k not in blacklist and k not in ENVIRONMENT_KEYS
+        if k not in STYLE_BLACKLIST and k not in ENVIRONMENT_KEYS
     }
 
 
