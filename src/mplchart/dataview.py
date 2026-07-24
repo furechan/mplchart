@@ -16,7 +16,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any
 
-from .utils import detect_backend, is_polars_expr, is_pandas_expr
+from .utils import detect_backend, is_polars_expr, is_pandas_expr, is_series_data
 
 
 class DataView(ABC):
@@ -69,13 +69,15 @@ class DataView(ABC):
 
     @abstractmethod
     def eval(self, item):
-        """Evaluate an indicator or expression against the prices frame.
+        """Evaluate an indicator or expression — or adopt already-computed data.
 
         Returns a full-length native result — no windowing. Each backend
         implements its own dispatch: column string, its native expression
-        type, and callable. Native expressions must be checked before the
-        callable fallback (pandas Expressions are callable). An item the
-        receiving view doesn't recognize raises ``TypeError``.
+        type, callable, and series data (array-likes are adopted and
+        aligned — the view is the only layer that can align by date; see
+        each backend's data branch). Native expressions must be checked
+        before the callable fallback (pandas Expressions are callable). An
+        item the receiving view doesn't recognize raises ``TypeError``.
         """
         ...
 
@@ -166,13 +168,37 @@ class PandasDataView(DataView):
         if is_pandas_expr(item):
             return item._eval_expression(self.prices)
 
+        if is_series_data(item):
+            return self._adopt_data(item)
+
         if callable(item):
             return item(self.prices)
 
         raise TypeError(
             f"PandasDataView cannot evaluate {type(item).__name__!r}: "
-            f"expected a column name, pandas Expression, or callable indicator."
+            f"expected a column name, pandas Expression, callable indicator, "
+            f"or series data."
         )
+
+    def _adopt_data(self, data):
+        """Adopt already-computed data.
+
+        Date-indexed input aligns to the prices index (tz-stripped,
+        reindexed — partial or reordered data is fine); anything else is
+        positional and must be full-length in prices row order.
+        """
+        index = getattr(data, "index", None)
+        if index is not None and hasattr(index, "tz"):
+            if index.tz is not None:
+                data = data.set_axis(index.tz_localize(None))
+            return data.reindex(self.dates)
+
+        if len(data) != len(self.dates):
+            raise ValueError(
+                f"data must be full-length aligned with prices "
+                f"({len(self.dates)} rows), got {len(data)}"
+            )
+        return data
 
 
 class PolarsDataView(DataView):
@@ -275,12 +301,22 @@ class PolarsDataView(DataView):
             series = [self.prices.select(e).to_series() for e in item]
             return pl.DataFrame({s.name: s for s in series})
 
+        if is_series_data(item):
+            # polars data carries no index — positional, full-length only
+            if len(item) != len(self.dates):
+                raise ValueError(
+                    f"data must be full-length in prices row order "
+                    f"({len(self.dates)} rows), got {len(item)}"
+                )
+            return item
+
         if callable(item):
             return item(self.prices)
 
         raise TypeError(
             f"PolarsDataView cannot evaluate {type(item).__name__!r}: "
-            f"expected a column name, polars Expr, tuple of Expr, or callable indicator."
+            f"expected a column name, polars Expr, tuple of Expr, callable "
+            f"indicator, or series data."
         )
 
 

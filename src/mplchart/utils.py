@@ -46,6 +46,17 @@ def is_indicator_like(item) -> bool:
     return isinstance(item, str) or is_polars_expr_like(item) or is_pandas_expr(item) or callable(item)
 
 
+def is_series_data(item) -> bool:
+    """True for already-computed array-like data (Series/ndarray) — not an indicator form.
+
+    Boundary duck-test only (no backend imports): array-convertible and not
+    callable. The callable check excludes pandas Expressions, whose
+    ``__getattr__`` makes every ``hasattr`` true. Alignment is the data
+    view's job — see ``view.eval``.
+    """
+    return not callable(item) and hasattr(item, "__array__")
+
+
 def apply_indicator(prices, indicator):
     """Apply an indicator or expression to prices.
 
@@ -192,16 +203,6 @@ def plot_vbars(ax, xvalues, heights, *, width=0.8, color=None, alpha=None, label
     return poly
 
 
-def get_metadata(indicator, name: str, default=None):
-    """get named attribute from indicator, with a default"""
-
-    if is_pandas_expr(indicator):
-        return default
-
-    return getattr(indicator, name, default)
-
-
-
 def extract_prefix(text: str) -> str:
     """Extract a normalized short prefix from an identifier-ish string.
 
@@ -255,6 +256,10 @@ def get_label(indicator):
         except Exception:
             pass
 
+    if is_series_data(indicator):
+        name = getattr(indicator, "name", None)
+        return name if isinstance(name, str) and name else None
+
     return repr(indicator)
 
 
@@ -272,6 +277,12 @@ def _is_default(v, default):
         return False
 
 
+class _ReprStr(str):
+    """String whose repr is itself — placeholder tokens in ``short_repr``."""
+
+    __repr__ = str.__str__
+
+
 def short_repr(self):
     """short repr based on __init__ signature"""
 
@@ -281,6 +292,9 @@ def short_repr(self):
 
     for p in signature.parameters.values():
         v = getattr(self, p.name, p.default)
+
+        if is_series_data(v):
+            v = _ReprStr(f"<{type(v).__name__}>")  # don't dump bound data
 
         if p.kind in (Parameter.VAR_POSITIONAL, Parameter.VAR_KEYWORD):
             raise ValueError(f"Unsupported parameter type {p.kind}")

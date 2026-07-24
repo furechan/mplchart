@@ -11,9 +11,14 @@ class AreaPlot(BindingPrimitive):
     Plot any indicator or expression as an area plot. Use ``@`` to bind.
 
     Args:
-        indicator: indicator or expression to plot. Can also be bound via ``@``.
+        indicator: indicator, expression, or already-computed series data
+            (full-length prices-aligned; pandas date-indexed data aligns by
+            date). ``@`` binds indicators/expressions only — pass data via
+            the constructor.
         color (str) : color name or value
         alpha (float) : opacity value between 0.0 and 1.0
+        legend (bool) : include in the legend. Defaults to True — the label
+            still names the plot for styling either way.
         label (str) : plot label
 
     Examples:
@@ -28,12 +33,14 @@ class AreaPlot(BindingPrimitive):
         color: str | None = None,
         alpha: float | None = None,
         label: str | None = None,
+        legend: bool = True,
     ):
 
         super().__init__(indicator)
         self.color = color
         self.alpha = alpha
         self.label = label
+        self.legend = legend
 
     def apply_to_chart(self, chart):
         ax = chart.canvas.get_axes()
@@ -47,10 +54,12 @@ class AreaPlot(BindingPrimitive):
             )
         series = result
 
-        label = self.label or get_label(self.indicator)
+        label = self.label if self.label is not None else get_label(self.indicator)
+        color = chart.canvas.resolve_color(label, ax, override=self.color, fallback="fill")
+        label = label if self.legend else None
 
         kwargs = dict(
-            color=self.color,
+            color=color,
             alpha=self.alpha,
         )
 

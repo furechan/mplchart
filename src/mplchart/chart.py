@@ -5,7 +5,7 @@ import warnings
 from .canvas import Canvas
 from .dataview import get_view
 from .dateaxis import config_date_axis
-from .utils import detect_backend, is_indicator_like
+from .utils import detect_backend, is_indicator_like, is_series_data
 from .utils import normalize_prices, check_prices
 from .primitives.autoplot import AutoPlot
 
@@ -178,10 +178,11 @@ class Chart:
             indicator.apply_to_chart(self)
             return
 
-        # Anything else (polars Expr, pandas Expression, tuple-of-Expr, callable)
-        # is wrapped in the default AutoPlot primitive and dispatched through its
-        # apply_to_chart — the single auto-plot code path.
-        if is_indicator_like(indicator):
+        # Anything else (polars Expr, pandas Expression, tuple-of-Expr,
+        # callable, or already-computed series data) is wrapped in the default
+        # AutoPlot primitive and dispatched through its apply_to_chart — the
+        # single auto-plot code path.
+        if is_indicator_like(indicator) or is_series_data(indicator):
             AutoPlot(indicator).apply_to_chart(self)
             return
 

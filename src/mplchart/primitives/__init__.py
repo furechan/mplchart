@@ -10,6 +10,7 @@ from .markers import Markers
 from .autoplot import AutoPlot
 from .lineplot import LinePlot
 from .areaplot import AreaPlot
+from .bands import Bands
 from .barplot import BarPlot
 from .zigzag import ZigZag
 from .trendlines import TrendLines

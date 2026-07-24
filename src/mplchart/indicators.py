@@ -217,13 +217,11 @@ class CMF(Indicator):
 
     Oscillator that combines price and volume to measure the buying and selling
     pressure over a rolling window. Positive values indicate accumulation;
-    negative values indicate distribution. Plotted as an area chart by default.
+    negative values indicate distribution.
 
     Args:
         period (int): Lookback period in bars. Defaults to 20.
     """
-
-    line_style: str = "area"
 
     def __init__(self, period: int = 20):
         self.period = period

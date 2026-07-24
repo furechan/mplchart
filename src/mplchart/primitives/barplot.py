@@ -11,9 +11,14 @@ class BarPlot(BindingPrimitive):
     Plot any indicator or expression as a bar plot. Use ``@`` to bind.
 
     Args:
-        indicator: indicator or expression to plot. Can also be bound via ``@``.
+        indicator: indicator, expression, or already-computed series data
+            (full-length prices-aligned; pandas date-indexed data aligns by
+            date). ``@`` binds indicators/expressions only — pass data via
+            the constructor.
         color (str) : color name or value
         alpha (float) : opacity value between 0.0 and 1.0
+        legend (bool) : include in the legend. Defaults to True — the label
+            still names the plot for styling either way.
         width (float) : bar width setting
         label (str) : plot label
 
@@ -30,6 +35,7 @@ class BarPlot(BindingPrimitive):
         alpha: float | None = None,
         width: float | None = None,
         label: str | None = None,
+        legend: bool = True,
     ):
 
         if width is None:
@@ -40,6 +46,7 @@ class BarPlot(BindingPrimitive):
         self.alpha = alpha
         self.width = width
         self.label = label
+        self.legend = legend
 
     def apply_to_chart(self, chart):
         ax = chart.canvas.get_axes()
@@ -53,10 +60,12 @@ class BarPlot(BindingPrimitive):
             )
         series = result
 
-        label = self.label or get_label(self.indicator)
+        label = self.label if self.label is not None else get_label(self.indicator)
+        color = chart.canvas.resolve_color(label, ax, override=self.color, fallback="fill")
+        label = label if self.legend else None
 
         xv, yv = chart.view.series_xy(series)
         plot_vbars(
             ax, xv, yv,
-            width=self.width, color=self.color, alpha=self.alpha, label=label,
+            width=self.width, color=color, alpha=self.alpha, label=label,
         )

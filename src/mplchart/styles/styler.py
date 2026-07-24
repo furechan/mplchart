@@ -108,9 +108,14 @@ class Styler:
         return mpl.rc_context(self.rcparams)
 
     def next_line_color(self, ax):
-        """Next line color: text.color for the first trace, then cycled colors."""
-        handles, _ = ax.get_legend_handles_labels()
-        if len(handles):
+        """Next line color: text.color on an empty pane, then cycled colors.
+
+        Emptiness is ``ax.has_data()`` — any data artist counts (labeled or
+        not, whoever drew it); axis furniture (grid, ticks, spines) does not.
+        A solitary line reads in the theme's ink; multiples differentiate
+        via the prop cycle.
+        """
+        if ax.has_data():
             return ax._get_lines.get_next_color()
         else:
             return plt.rcParams["text.color"]
@@ -119,46 +124,49 @@ class Styler:
         """Next cycled color for fill."""
         return ax._get_patches_for_fill.get_next_color()
 
-    def get_setting(self, role, facet, *, override=None, fallback=None):
+    def get_setting(self, role, facet, *, override=None, fallback=None, extract=True):
         """Lookup a setting by role and facet: override → setting → fallback.
 
         ``override`` (an explicit user value, e.g. a primitive kwarg) wins
         when not ``None`` — the same chain as ``resolve_color``, minus the
-        color pipeline. The key is assembled as ``f"{role}.{facet}"`` and
-        tried raw first, then with the role's extracted prefix
-        (``"macd-12-26-9"`` → ``"macd"``); the facet never goes through
-        prefix extraction. Each link defers on ``None`` only — falsy values
+        color pipeline. The role is sanitized to its canonical key via
+        ``extract_prefix`` (``"SMA(50)"``/``"sma-50"`` → ``"sma"``) — a key
+        is a key, not a label; pass ``extract=False`` when the role is
+        already canonical. One lookup on ``f"{key}.{facet}"``; the facet is
+        never sanitized. Each link defers on ``None`` only — falsy values
         like ``0.0`` or ``False`` are meaningful and returned as-is.
         """
         if override is not None:
             return override
 
-        value = self.settings.get(f"{role}.{facet}")
+        if role is None:
+            return fallback
 
-        if value is None:
-            prefix = extract_prefix(role)
-            if prefix != role:
-                value = self.settings.get(f"{prefix}.{facet}")
+        key = extract_prefix(role) if extract else role
+        value = self.settings.get(f"{key}.{facet}")
 
         return fallback if value is None else value
 
-    def resolve_color(self, role, ax=None, *, override=None, fallback=None):
+    def resolve_color(self, role, ax=None, *, override=None, fallback=None, extract=True):
         """Resolve the color for a role: chain, pipeline, then normalize.
 
         Chain: first non-None of ``override`` (explicit user color, e.g. a
-        primitive kwarg) → the ``role`` setting (raw, then extracted prefix —
-        ``"macd-12-26-9"`` → ``"macd"``) → ``fallback``. The role is a lookup
-        key, never a color candidate.
+        primitive kwarg) → the setting under the role's canonical key
+        (sanitized via ``extract_prefix``: ``"SMA(50)"`` → ``"sma"``;
+        ``extract=False`` skips) → ``fallback``. The role is a lookup key,
+        never a color candidate.
 
-        Pipeline on the winner: a list cycles per ``(axes, role)`` as given
-        (pass a stable role, not a per-instance label, to share a cycle);
-        ``"~"`` snaps to the closest prop-cycle color; ``"line"``/``"fill"``
-        take the next color from the axes prop cycle (``None`` without axes).
+        Pipeline on the winner: a list cycles per ``(axes, canonical key)``
+        — per-instance labels share their role's cycle, so successive
+        ``SMA(20)``/``SMA(50)`` take successive list colors; ``"~"`` snaps
+        to the closest prop-cycle color; ``"line"``/``"fill"`` take the
+        next color from the axes prop cycle (``None`` without axes).
 
         Returns a concrete hex string (or ``None``) — only hex leaves the
         styler: scalar-safe for ``np.where``, validated by ``to_rgba``.
         """
-        color = self.get_setting(role, "color", override=override, fallback=fallback)
+        key = extract_prefix(role) if (extract and role is not None) else role
+        color = self.get_setting(key, "color", override=override, fallback=fallback, extract=False)
 
         if isinstance(color, list):
             if not color:
@@ -166,9 +174,9 @@ class Styler:
             else:
                 owner = ax if ax is not None else _NoAxes
                 cycles = self.cycles.setdefault(owner, {})
-                if role not in cycles:
-                    cycles[role] = cycle(color)
-                color = next(cycles[role])
+                if key not in cycles:
+                    cycles[key] = cycle(color)
+                color = next(cycles[key])
 
         if isinstance(color, str):
             if color.startswith("~"):

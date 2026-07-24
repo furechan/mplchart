@@ -35,6 +35,7 @@ PRIMITIVES = [
     SMA(20) @ BarPlot(),
     Swings(),
     ZigZag(),
+    ZigZag(color="purple"),
     TrendLines(),
     HLine(25),
     HLine(25, color="red", linestyle="dashed"),

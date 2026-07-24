@@ -51,11 +51,11 @@ class OHLC(Primitive):
         ax = chart.canvas.get_axes()
 
         prices = chart.view.slice(chart.view.prices, xcol="xloc")
-        xvalues = np.asarray(prices["xloc"])
-        open_ = np.asarray(col_to_numpy(prices, "open"))
-        high = np.asarray(col_to_numpy(prices, "high"))
-        low = np.asarray(col_to_numpy(prices, "low"))
-        close = np.asarray(col_to_numpy(prices, "close"))
+        xvalues = col_to_numpy(prices, "xloc")
+        open_ = col_to_numpy(prices, "open")
+        high = col_to_numpy(prices, "high")
+        low = col_to_numpy(prices, "low")
+        close = col_to_numpy(prices, "close")
 
         textcolor = plt.rcParams["text.color"]
 

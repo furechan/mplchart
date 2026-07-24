@@ -79,10 +79,13 @@ class ZigZag(Primitive):
     Args:
         threshold (float): Minimum percentage reversal required to register a
             new pivot. Defaults to 5.0.
+        color (str, optional): Line color. Defaults to the next cycled
+            line color.
     """
 
-    def __init__(self, threshold=5.0):
+    def __init__(self, threshold=5.0, *, color: str | None = None):
         self.threshold = threshold
+        self.color = color
 
     def apply_to_chart(self, chart):
         ax = chart.canvas.get_axes()
@@ -94,4 +97,4 @@ class ZigZag(Primitive):
         # map local indices to sliced x-coordinates
         xv = np.asarray(windowed["xloc"])[row_indices]
         label = repr(self)
-        ax.plot(xv, values, label=label, color=None)
+        ax.plot(xv, values, label=label, color=self.color)

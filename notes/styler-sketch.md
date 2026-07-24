@@ -106,18 +106,21 @@ class Styler:
         self.rcparams = dict(style.rc)
         self.cycles = WeakKeyDictionary()                        # ax → {role: color iterator}
 
-    def get_setting(self, name, facet, *, override=None, fallback=None): ...
+    def get_setting(self, name, facet, *, override=None, fallback=None, extract=True): ...
         # generic lookup: override → setting → fallback (the resolve_color
         # chain, minus the color pipeline — primitives resolve non-color
         # facets in one call: get_setting("ohlc", "alpha", override=self.alpha,
-        # fallback=1.0)). Key assembled as f"{name}.{facet}"; tries raw name
-        # then extract_prefix(name) — the facet never goes through prefix
-        # extraction; each link defers on None only (alpha=0.0 is meaningful)
+        # fallback=1.0)). The role is SANITIZED to its canonical key via
+        # extract_prefix ("SMA(50)" → "sma") — one lookup, a key is a key,
+        # not a label (settled 2026-07-24; raw-label keys like "sma-50.color"
+        # no longer consulted — styles style roles, never instances);
+        # extract=False skips sanitization. The facet is never sanitized;
+        # each link defers on None only (alpha=0.0 is meaningful)
     def resolve_color(self, role, ax=None, *, override=None, fallback=None): ...
-        # chain: override (user color, e.g. primitive kwarg) → setting
-        # (get_setting(role, "color")) → fallback; role is a lookup key,
-        # never a color candidate. Pipeline on the winner: list → cycle per
-        # (ax, role); "~" → closest_color; "line"/"fill" → ax prop cycle.
+        # chain: override (user color, e.g. primitive kwarg) → setting under
+        # the canonical key → fallback; role is a lookup key, never a color
+        # candidate. Pipeline on the winner: list → cycle per (ax, canonical
+        # key) — SMA(20)/SMA(50) share the sma cursor; "~" → closest_color; "line"/"fill" → ax prop cycle.
         # Output is normalize_color-munged: only concrete HEX leaves the
         # styler (np.where-safe scalars, to_rgba-validated)
     def replace(self, *, overrides=()): ...
@@ -180,6 +183,10 @@ Retrofit: Candlesticks/OHLC/Volume resolve defaults through `canvas.resolve_colo
 - Marketcolors never go near rcParams — threaded explicitly to artist constructors (same split as this design; only their rc half is unhygienic).
 - Style dict = rc-ish keys + `marketcolors` + exactly three non-color settings (`alpha`, `y_on_right`, `vcdopcod`). No widths/linestyles in styles — separate subsystem. Validates colors-only scope for v1.
 - One dedicated cycle (`mavcolors`, moving averages only, reset per plot call) + ambient prop cycle.
+
+## Performance (measured 2026-07-24)
+
+No caching anywhere — measured and rejected. `load_stylesheet`: 4µs (library name), 64µs (`"default"` template filter), 22µs (`.mplstyle` file, warm); `resolve_style("nightclouds")`/`get_styler`: ~30µs incl. `RcParams` validation (module imports cached by `sys.modules`); `rc_context` enter/exit: 123µs (matplotlib copies rcParams — paid by unstyled charts too since `DEFAULT_RC` makes contexts never null). Chart+Candlesticks: 6.9ms unstyled vs 7.2ms styled (~4% delta); PNG render 46ms dwarfs it all. Caching resolution would save ~0.4% of chart creation; frozendicts are a shared-cache safety device with no cache to protect — eager `dict(...)` copies stay. The one future knob if profiling ever demands: collapsing the several per-chart `rc_context` entries into one (~0.5ms) — architectural, not justified today. Bench script pattern: timeit over load/resolve/context/chart/render layers. (Incidental confirmation: `.mplstyle` inline `#` truncation is real — the bench sheet had to write bare hex, as the interop caveat below warns.)
 
 ## Deferred (mechanisms verified, not v1)
 

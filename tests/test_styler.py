@@ -43,9 +43,20 @@ def test_get_setting_facets():
     assert styler.get_setting("macd-12-26-9", "color", fallback="gray") == "gray"
 
 
-def test_get_setting_prefix_chain():
+def test_get_setting_sanitizes_role():
     styler = Styler(settings={"sma.color": "blue"})
-    assert styler.get_setting("sma-50", "color") == "blue"  # prefix on the name part only
+    assert styler.get_setting("sma-50", "color") == "blue"  # label → canonical key
+    assert styler.get_setting("SMA(50)", "color") == "blue"
+    assert styler.get_setting("sma-50", "color", extract=False) is None  # a key is a key
+
+
+def test_instance_labels_share_role_cycle():
+    # list cycles key on the canonical role — SMA(20)/SMA(50) share one cursor
+    styler = Styler(settings={"sma.color": ["red", "blue"]})
+    ax = StubAxes()
+    assert styler.resolve_color("SMA(20)", ax) == hexc("red")
+    assert styler.resolve_color("SMA(50)", ax) == hexc("blue")
+    assert styler.resolve_color("sma-10", ax) == hexc("red")  # wraps, same cursor
 
 
 def test_list_cycling_per_axes():

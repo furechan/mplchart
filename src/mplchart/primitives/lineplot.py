@@ -13,13 +13,19 @@ class LinePlot(BindingPrimitive):
     Plot any indicator or expression as a line plot. Use ``@`` to bind.
 
     Args:
-        indicator: indicator or expression to plot. Can also be bound via ``@``.
-        label (str) : legend label override. When None, derived from the indicator.
+        indicator: indicator, expression, or already-computed series data
+            (full-length prices-aligned; pandas date-indexed data aligns by
+            date). ``@`` binds indicators/expressions only — pass data via
+            the constructor.
+        label (str) : legend label override. When None, derived from the indicator
+            (the series name for data) — also the styling key for color settings.
         style (str) : line style like 'solid', 'dashed', 'dotted', 'dashdot', 'marker'
         marker (str) : marker character like '.' or 'o'
         width (float) : line width override
         color (str) : color name or value
         alpha (float) : opacity value between 0.0 and 1.0
+        legend (bool) : include in the legend. Defaults to True — the label
+            still names the plot for styling either way.
         overbought (float) : level above which to shade a fill-between band
         oversold (float) : level below which to shade a fill-between band
 
@@ -34,6 +40,7 @@ class LinePlot(BindingPrimitive):
         indicator=None,
         *,
         label: str | None = None,
+        legend: bool = True,
         style: str | None = None,
         marker: str | None = None,
         width: float | None = None,
@@ -49,6 +56,7 @@ class LinePlot(BindingPrimitive):
 
         super().__init__(indicator)
         self.label = label
+        self.legend = legend
         self.style = style
         self.marker = marker
         self.color = color
@@ -69,13 +77,15 @@ class LinePlot(BindingPrimitive):
             )
         series = result
 
-        label = self.label or get_label(self.indicator)
+        label = self.label if self.label is not None else get_label(self.indicator)
+        color = chart.canvas.resolve_color(label, ax, override=self.color, fallback="line")
+        label = label if self.legend else None
 
         kwargs = dict(
             linestyle=self.style,
             linewidth=self.width,
             marker=self.marker,
-            color=self.color,
+            color=color,
             alpha=self.alpha,
         )
 

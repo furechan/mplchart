@@ -228,10 +228,10 @@ class Canvas:
 
     # --- colors ---
 
-    def get_setting(self, role, facet, *, override=None, fallback=None):
+    def get_setting(self, role, facet, *, override=None, fallback=None, extract=True):
         """Lookup a style setting through the styler — see ``Styler.get_setting``."""
-        return self.styler.get_setting(role, facet, override=override, fallback=fallback)
+        return self.styler.get_setting(role, facet, override=override, fallback=fallback, extract=extract)
 
-    def resolve_color(self, role, ax=None, *, override=None, fallback=None):
+    def resolve_color(self, role, ax=None, *, override=None, fallback=None, extract=True):
         """Resolve a role color through the styler — see ``Styler.resolve_color``."""
-        return self.styler.resolve_color(role, ax, override=override, fallback=fallback)
+        return self.styler.resolve_color(role, ax, override=override, fallback=fallback, extract=extract)

@@ -126,7 +126,7 @@ class Candlesticks(Primitive):
         ax = chart.canvas.get_axes()
 
         prices = chart.view.slice(chart.view.prices, xcol="xloc")
-        xvalues = np.asarray(prices["xloc"])
+        xvalues = col_to_numpy(prices, "xloc")
 
         label = str(self)
         width = self.width

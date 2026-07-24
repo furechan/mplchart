@@ -63,11 +63,11 @@ class Volume(Primitive):
         ax = chart.canvas.get_axes("twinx")
 
         prices = chart.view.slice(chart.view.prices, xcol="xloc")
-        volume = np.asarray(col_to_numpy(prices, "volume"))
-        open_ = np.asarray(col_to_numpy(prices, "open"))
-        close = np.asarray(col_to_numpy(prices, "close"))
+        volume = col_to_numpy(prices, "volume")
+        open_ = col_to_numpy(prices, "open")
+        close = col_to_numpy(prices, "close")
 
-        xv = np.asarray(prices["xloc"])
+        xv = col_to_numpy(prices, "xloc")
 
         width = self.width
         alpha = chart.canvas.get_setting("volume", "alpha", override=self.alpha, fallback=0.5)
