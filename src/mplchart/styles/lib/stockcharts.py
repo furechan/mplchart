@@ -1,6 +1,10 @@
 # mplchart shipped style — pure data, zero imports (see notes/styler-sketch.md)
 # colored hollow × interbar: the mode flags make the look fully style-side
 STYLE = {
+    "rc": {
+        "axes.grid": True,
+        "grid.alpha": 0.4,
+    },
     "settings": {
         "candle.up.color": "#0f9948",
         "candle.down.color": "#d91e18",

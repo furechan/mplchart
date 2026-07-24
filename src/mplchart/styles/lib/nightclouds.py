@@ -2,6 +2,7 @@
 STYLE = {
     "stylesheet": "dark_background",
     "rc": {
+        "axes.grid": True,
         "grid.color": "#333333",
         "grid.alpha": 1.0,
     },

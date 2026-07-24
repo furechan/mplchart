@@ -1,6 +1,7 @@
 # mplchart shipped style — pure data, zero imports (see notes/styler-sketch.md)
 STYLE = {
     "rc": {
+        "axes.grid": True,
         "axes.facecolor": "white",
         "figure.facecolor": "white",
         "grid.color": "#e0e3eb",

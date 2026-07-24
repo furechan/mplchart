@@ -17,27 +17,23 @@ import matplotlib.pyplot as plt
 
 from ..colors import closest_color, normalize_color
 from ..utils import extract_prefix
-from .style import load_stylesheet, resolve_style
+from .style import base_template, load_stylesheet, resolve_style
 
 
 class _NoAxes:
     """Sentinel key for axis-less color cycles — weak-referenceable, unlike None."""
 
 
-# mplchart's default look, as rc — the baseline layer under every styler:
-# mpl defaults < DEFAULT_RC < stylesheet < rcparams overrides. Canvas pane
-# config reads the effective rc instead of hardcoding these.
-DEFAULT_RC: dict = {"axes.grid": True, "grid.alpha": 0.4}
-
-
 def get_styler(style=None, *, overrides=()):
     """Normalize a style spec into a Styler.
 
     Args:
-        style: ``None`` for an empty styler, a prebuilt ``Styler`` (passed
-            through), or anything ``resolve_style`` accepts — a shipped
-            style name, a spec mapping (``stylesheet``/``rc``/``settings``),
-            or a ``Style``.
+        style: ``None`` for the default ``"mplchart"`` style, a prebuilt
+            ``Styler`` (passed through), or anything ``resolve_style``
+            accepts — a shipped style name, a matplotlib stylesheet name,
+            a spec mapping (``stylesheet``/``rc``/``settings``), or a
+            ``Style``. Every result is total: fully specified rc, no
+            ambient inheritance.
         overrides: settings mapping (canonical dotted keys, e.g.
             ``candle.up.color``) layered on top of the style settings —
             whatever their source, a prebuilt Styler included.
@@ -46,7 +42,8 @@ def get_styler(style=None, *, overrides=()):
     if isinstance(style, Styler):
         styler = style
     elif style is None:
-        styler = Styler()
+        spec = resolve_style("mplchart")   # the default style is a style
+        styler = Styler(settings=spec.settings, rcparams=spec.rc)
     else:
         spec = resolve_style(style)
         styler = Styler(settings=spec.settings, rcparams=spec.rc)
@@ -74,12 +71,12 @@ class Styler:
         rcparams (dict or iterable of pairs, optional): matplotlib rcParams
             overrides, applied via ``context()`` around artist creation.
         stylesheet (str or Path, optional): base matplotlib stylesheet —
-            what ``plt.style.use`` accepts: a stock style name, an
-            ``.mplstyle`` path, or ``"default"`` (factory template,
-            ambient-independent) — loaded via ``load_stylesheet`` and
+            what ``plt.style.use`` accepts: a stock style name or an
+            ``.mplstyle`` path — loaded via ``load_stylesheet`` and
             collapsed eagerly under ``rcparams`` (explicit rcparams win).
-            Only the collapsed dict is stored; derived stylers carry it as
-            plain rcparams.
+            Every styler is totalized over the factory template
+            (``base_template()``), so the stored rcparams are always fully
+            specified — ambient rcParams never affect a chart.
 
     Cycle state lives in ``cycles`` — a per-axes dict of per-role color
     cycles, created on first use and persisting for the lifetime of the
@@ -90,7 +87,9 @@ class Styler:
     def __init__(self, settings=(), rcparams=(), stylesheet=None):
         rc = load_stylesheet(stylesheet) if stylesheet else {}
         self.settings = dict(settings)
-        self.rcparams = DEFAULT_RC | rc | dict(rcparams)  # later layers win
+        # totalized: factory template ⊕ sheet ⊕ explicit rc — every styler is
+        # fully specified, ambient rcParams never leak into a chart
+        self.rcparams = base_template() | rc | dict(rcparams)
         self.cycles = WeakKeyDictionary()  # ax → {role: color iterator}
 
     def replace(self, *, overrides=()):
@@ -104,7 +103,7 @@ class Styler:
         return type(self)(settings=settings, rcparams=self.rcparams)
 
     def context(self):
-        """Scoped rc overrides — always at least the ``DEFAULT_RC`` baseline."""
+        """Scoped, fully-specified rc — the style is the whole look."""
         return mpl.rc_context(self.rcparams)
 
     def next_line_color(self, ax):

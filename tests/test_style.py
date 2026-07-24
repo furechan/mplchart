@@ -72,3 +72,30 @@ def test_canvas_style_by_name():
         assert canvas.figure.get_facecolor() == mcolors.to_rgba("black")
     finally:
         plt.close(canvas.figure)
+
+
+def test_standard_sheet_as_style():
+    # matplotlib sheet names are accepted as whole looks — no mplchart opinions
+    style = resolve_style("ggplot")
+    assert style.name == "ggplot"
+    assert style.rc["axes.grid"] is True  # ggplot's own grid, full alpha
+
+    from mplchart.canvas import Canvas
+
+    canvas = Canvas(figsize=(2, 2), style="classic")  # classic sheet: gridless
+    root = canvas.root_axes()
+    assert not root.xaxis.get_gridlines()[0].get_visible()
+    plt.close(canvas.figure)
+
+
+def test_styles_are_ambient_isolated():
+    # totalized styles: ambient rcParams never affect a chart
+    from mplchart.canvas import Canvas
+    import matplotlib.colors as mc
+
+    with plt.rc_context({"axes.facecolor": "black", "axes.grid": False}):
+        canvas = Canvas(figsize=(2, 2))  # default mplchart style
+        root = canvas.root_axes()
+        assert root.get_facecolor() == mc.to_rgba("white")  # template, not ambient
+        assert root.xaxis.get_gridlines()[0].get_visible()
+        plt.close(canvas.figure)

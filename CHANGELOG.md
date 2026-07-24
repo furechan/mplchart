@@ -19,7 +19,11 @@
 - First shipped styles under `styles/lib/` (the directory is the registry — one zero-import `STYLE` dict module per style): `tradingview`, `nightclouds`, `stockcharts`
 - `get_setting` gains `override=` — the full kwarg → setting → fallback chain in one call (mirrors `resolve_color`, which now delegates its chain); primitive kwarg-mirror resolutions collapse to one-liners
 - `next_line_color` first-trace test is now `ax.has_data()` (any data artist, labeled or not) instead of legend handles — decouples the text.color-on-empty-pane behavior from labeling discipline
+- Styles are total: every styler is fully specified over the factory template (minus non-style keys and the environment carve-out — `figure.dpi`/`savefig.dpi` stay ambient) — ambient rcParams never affect charts; `plt.style.use` no longer flows in, pass the sheet name as the style instead; `DEFAULT_RC` removed
+- The default look is the shipped `mplchart` style (template + `axes.grid: True` + `grid.alpha: 0.4`) — `style=None` resolves it; styles that don't set the grid keys render bare charts
+- Matplotlib stylesheet names are accepted as styles — `style="ggplot"` is the sheet's complete look with no mplchart opinions (lib names shadow sheet names)
 - `get_setting`/`resolve_color` sanitize the role to its canonical key via `extract_prefix` (`"SMA(50)"` → `"sma"`) — one lookup, a key is a key; raw-label settings keys (`"sma-50.color"`) are no longer consulted, and list-valued settings now cycle per canonical role so `SMA(20)`/`SMA(50)` take successive colors; new `extract=False` opt-out
+- Root axes patch is now visible — the one place `axes.facecolor` renders (panes stay transparent overlays); panel-based stylesheets (ggplot, fivethirtyeight, ...) now show their background and their grids read correctly; no change where axes and figure facecolors match (the default and all shipped styles)
 - `ZigZag` gains a `color=` param (kwarg only; the `zigzag.color` setting comes later)
 - New `Bands` primitive — the band rendering (dotted upper/lower + fill, dashed middle) extracted from AutoPlot, with configurable column names (`upper=`/`middle=`/`lower=`); explicit use: `Bands(BBANDS(20))` or `KELTNER(20) @ Bands()`
 - `AutoPlot` is now a pure dispatcher: `*hist` columns → `BarPlot`, band columns → `Bands`, everything else → `LinePlot`; the `_plot_*` helpers are gone

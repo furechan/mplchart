@@ -26,9 +26,11 @@ class Canvas:
             The figure is cleared before use.
         title (str, optional): Title displayed above the main pane.
         style (optional): Style spec, normalized via ``get_styler`` — a
-            shipped style name (see ``styles.available_styles()``), a spec
-            mapping (``stylesheet``/``rc``/``settings``), a ``Style``, or
-            a prebuilt ``Styler``.
+            shipped style name (see ``styles.available_styles()``), a
+            matplotlib stylesheet name, a spec mapping
+            (``stylesheet``/``rc``/``settings``), a ``Style``, or a
+            prebuilt ``Styler``. Defaults to the ``"mplchart"`` style.
+            Styles are total — ambient rcParams never affect the chart.
 
     Creating a Canvas eagerly creates (or adopts) the figure, sets the tight
     layout engine (required by the pane geometry), and installs the styled
@@ -91,17 +93,21 @@ class Canvas:
         """Whether the effective rc enables the grid for ``axis`` ("x"/"y").
 
         Reads ``axes.grid`` and ``axes.grid.axis`` — called inside the
-        styler's rc context, so styles control the grid (the mplchart
-        default look rides in ``styles.DEFAULT_RC``).
+        styler's rc context, so styles control the grid (the default look's
+        grid keys live in the shipped ``mplchart`` style).
         """
         return mpl.rcParams["axes.grid"] and mpl.rcParams["axes.grid.axis"] in (axis, "both")
 
     @classmethod
     def config_root_axes(cls, ax):
-        """Style the root axes: background layer drawing the x-grid."""
+        """Style the root axes: background layer drawing the x-grid.
+
+        The root patch stays visible — it is the one place
+        ``axes.facecolor`` renders (panel-based styles like ggplot draw
+        their grids against it); panes overlay with transparent patches.
+        """
         ax.set_xmargin(0.0)
         ax.set_axisbelow(True)
-        ax.patch.set_visible(False)
         ax.xaxis.grid(cls.grid_enabled("x"))
         ax.yaxis.grid(False)
         ax.tick_params(left=False, labelleft=False)

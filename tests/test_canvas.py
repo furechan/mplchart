@@ -126,7 +126,7 @@ def test_canvas_view_native_plot():
 
 
 def test_grid_default_look():
-    # baseline DEFAULT_RC: root x-grid and pane y-grid on, alpha 0.4
+    # the default "mplchart" style: root x-grid and pane y-grid on, alpha 0.4
     canvas = Canvas(figsize=(2, 2))
     root = canvas.root_axes()
     pane = canvas.get_axes("below")
@@ -152,9 +152,22 @@ def test_grid_axis_selection():
     # axes.grid.axis composes with the root-x/pane-y structural split
     from mplchart.styles import Styler
 
-    canvas = Canvas(figsize=(2, 2), style=Styler(rcparams={"axes.grid.axis": "y"}))
+    canvas = Canvas(figsize=(2, 2), style=Styler(rcparams={"axes.grid": True, "axes.grid.axis": "y"}))
     root = canvas.root_axes()
     pane = canvas.get_axes("below")
     assert not root.xaxis.get_gridlines()[0].get_visible()
     assert pane.yaxis.get_gridlines()[0].get_visible()
+    plt.close(canvas.figure)
+
+
+def test_root_patch_renders_facecolor():
+    # the root patch is where axes.facecolor renders (panel styles like
+    # ggplot draw grids against it); panes stay transparent overlays
+    from mplchart.styles import Styler
+
+    canvas = Canvas(figsize=(2, 2), style=Styler(rcparams={"axes.facecolor": "#e5e5e5"}))
+    root = canvas.root_axes()
+    pane = canvas.get_axes("below")
+    assert root.patch.get_visible()
+    assert not pane.patch.get_visible()
     plt.close(canvas.figure)

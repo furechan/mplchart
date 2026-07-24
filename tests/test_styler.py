@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 
 from mplchart.styles import Styler, get_styler
-from mplchart.styles.styler import DEFAULT_RC
+from mplchart.styles.style import base_template
 
 
 class StubAxes:
@@ -144,7 +144,7 @@ def test_get_styler_overrides_prebuilt():
     styler = get_styler(prebuilt, overrides={"sma.color": "green"})
     assert styler is not prebuilt  # derived, prebuilt untouched
     assert styler.settings == {"sma.color": "green", "macd.color": "red"}
-    assert styler.rcparams == DEFAULT_RC | {"grid.color": "#123456"}
+    assert styler.rcparams == base_template() | {"grid.color": "#123456"}
     assert prebuilt.settings["sma.color"] == "blue"
 
 
@@ -176,15 +176,27 @@ def test_canvas_accepts_prebuilt_styler():
         plt.close(canvas.figure)
 
 
-def test_context_applies_baseline():
-    # an empty styler carries exactly the DEFAULT_RC baseline, scoped
+def test_styler_is_totalized():
+    # every styler is fully specified over the factory template — a bare
+    # Styler is the bare-matplotlib look (grid off), and ambient rcParams
+    # never leak into the context
     styler = Styler()
-    assert styler.rcparams == DEFAULT_RC
+    assert styler.rcparams == base_template()
+
     before = dict(plt.rcParams)
-    with styler.context():
-        assert plt.rcParams["axes.grid"] is True
-        assert plt.rcParams["grid.alpha"] == 0.4
-    assert dict(plt.rcParams) == before  # fully restored outside
+    plt.rcParams["axes.grid"] = True  # ambient pollution
+    try:
+        with styler.context():
+            assert plt.rcParams["axes.grid"] is False  # isolated
+    finally:
+        plt.rcParams.update(before)
+
+
+def test_default_style_is_mplchart():
+    # no style → the shipped "mplchart" style: template + the two grid keys
+    styler = get_styler(None)
+    assert styler.rcparams["axes.grid"] is True
+    assert styler.rcparams["grid.alpha"] == 0.4
 
 
 def test_load_stylesheet_library_name():

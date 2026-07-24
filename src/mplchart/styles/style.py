@@ -16,6 +16,26 @@ import matplotlib as mpl
 import matplotlib.style
 
 
+# rcParams the totalized base never touches: matplotlib's own non-style keys
+# (backend, interactive, ...) plus environment preferences that belong to the
+# user's session, not to a look (dpi overrides survive styling).
+ENVIRONMENT_KEYS = frozenset({"figure.dpi", "savefig.dpi"})
+
+
+def base_template():
+    """The factory rcParams template minus non-style and environment keys.
+
+    Every Styler is totalized over this base — charts are fully specified
+    and render identically regardless of ambient rcParams (no ambient
+    inheritance; scoped, unlike mplfinance's global reset).
+    """
+    blacklist = mpl.style.core.STYLE_BLACKLIST  # ty: ignore[unresolved-attribute]  # pyright: ignore[reportAttributeAccessIssue]  # runtime attr, missing from stubs
+    return {
+        k: v for k, v in mpl.rcParamsDefault.items()
+        if k not in blacklist and k not in ENVIRONMENT_KEYS
+    }
+
+
 def load_stylesheet(spec):
     """Load an rc mapping from a matplotlib stylesheet.
 
@@ -29,8 +49,7 @@ def load_stylesheet(spec):
     """
     if spec == "default":
         # matplotlib special-cases this name in style.use the same way
-        blacklist = mpl.style.core.STYLE_BLACKLIST  # ty: ignore[unresolved-attribute]  # pyright: ignore[reportAttributeAccessIssue]  # runtime attr, missing from stubs
-        return {k: v for k, v in mpl.rcParamsDefault.items() if k not in blacklist}
+        return base_template()
     if isinstance(spec, str) and spec in mpl.style.library:
         return dict(mpl.style.library[spec])
     return dict(mpl.rc_params_from_file(spec, use_default_template=False))
@@ -61,8 +80,9 @@ def resolve_style(spec, *, name=""):
     """Normalize a style spec into a ``Style``.
 
     Accepted forms:
-        - str: shipped style name — imports ``styles/lib/<name>.py`` and
-          resolves its ``STYLE`` dict
+        - str: shipped style name (``styles/lib/<name>.py``, which shadows),
+          or a matplotlib stylesheet name — the sheet as the complete look,
+          no mplchart opinions
         - mapping: ``{"stylesheet": ..., "rc": ..., "settings": ...}`` (all
           optional) — the stylesheet (anything ``load_stylesheet`` accepts)
           is collapsed eagerly under the explicit rc
@@ -75,8 +95,15 @@ def resolve_style(spec, *, name=""):
         try:
             module = import_module(f".lib.{spec}", __package__)
         except ModuleNotFoundError:
+            if spec == "default" or spec in mpl.style.library:
+                # a standard matplotlib stylesheet as the whole look —
+                # no mplchart opinions ride along (grid keys per the sheet)
+                return resolve_style({"stylesheet": spec}, name=spec)
             available = ", ".join(available_styles())
-            raise ValueError(f"Unknown style {spec!r} — available: {available}") from None
+            raise ValueError(
+                f"Unknown style {spec!r} — available: {available}, "
+                f"or any matplotlib stylesheet name"
+            ) from None
         return resolve_style(module.STYLE, name=spec)
 
     if isinstance(spec, Mapping):
