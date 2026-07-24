@@ -45,6 +45,33 @@ Chart(prices, title=ticker, max_bars=250, normalize=True).plot(
 ```
 
 
+## Styles
+
+Charts are styled via the `style=` option — a builtin style, any matplotlib stylesheet name, or a custom style dict. Styles are total: ambient matplotlib settings never affect a chart.
+
+```python
+from mplchart.styles import available_styles
+
+available_styles()
+# ['chartist', 'modern', 'mplchart', 'nightclouds']
+
+# builtin style
+Chart(prices, title=ticker, style="nightclouds").plot(Candlesticks()).show()
+
+# any matplotlib stylesheet
+Chart(prices, title=ticker, style="ggplot").plot(Candlesticks()).show()
+
+# custom style dict
+MY_STYLE = {
+    "stylesheet": "dark_background",
+    "settings": {
+        "candle.up.color": "#26a69a",
+        "candle.down.color": "#ef5350",
+    },
+}
+Chart(prices, title=ticker, style=MY_STYLE).plot(Candlesticks()).show()
+```
+
 ## Conventions
 
 Prices data is expected to be a dataframe with columns `open`, `high`, `low`, `close`, `volume` in **lower case** and a datetime column named `date` or `datetime` (or a datetime index for pandas). 
