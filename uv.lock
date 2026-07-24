@@ -1572,6 +1572,19 @@ wheels = [
 ]
 
 [[package]]
+name = "morethemes"
+version = "0.7.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "matplotlib" },
+    { name = "pyfonts" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/dc/04/0bdf015ee7e91504e2bf47170b394dd6b158b54667faf13f4584fe1c6f2f/morethemes-0.7.0.tar.gz", hash = "sha256:bbf2973334e2c936f3b6e3420df2116071346520f62efdb366e8950dae204411", size = 3240541, upload-time = "2026-06-24T20:55:07.983Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/23/8c/b20272912d446acdd8daf90b0afbb145e3f70f5bc8c64469d26a0e87bab1/morethemes-0.7.0-py3-none-any.whl", hash = "sha256:a4c945ee91a1dee842a06b05f443327e7947dfc7bb57c407f97d0514a951c07d", size = 8634, upload-time = "2026-06-24T20:55:06.779Z" },
+]
+
+[[package]]
 name = "mplchart"
 version = "0.0.43"
 source = { editable = "." }
@@ -1603,6 +1616,7 @@ dev = [
     { name = "ipywidgets" },
     { name = "jinja2" },
     { name = "mintalib" },
+    { name = "morethemes" },
     { name = "mplfinance" },
     { name = "nbcheck" },
     { name = "nbmake" },
@@ -1646,6 +1660,7 @@ dev = [
     { name = "ipywidgets" },
     { name = "jinja2" },
     { name = "mintalib" },
+    { name = "morethemes", specifier = ">=0.7.0" },
     { name = "mplfinance", specifier = ">=0.12.10b0" },
     { name = "nbcheck", specifier = ">=0.0.4" },
     { name = "nbmake" },
@@ -2498,6 +2513,19 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/1b/7d/92392ff7815c21062bea51aa7b87d45576f649f16458d78b7cf94b9ab2e6/pycparser-3.0.tar.gz", hash = "sha256:600f49d217304a5902ac3c37e1281c9fe94e4d0489de643a9504c5cdfdfc6b29", size = 103492, upload-time = "2026-01-21T14:26:51.89Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0c/c3/44f3fbbfa403ea2a7c779186dc20772604442dde72947e7d01069cbe98e3/pycparser-3.0-py3-none-any.whl", hash = "sha256:b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992", size = 48172, upload-time = "2026-01-21T14:26:50.693Z" },
+]
+
+[[package]]
+name = "pyfonts"
+version = "1.4.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "matplotlib" },
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ad/2a/6497ac9ed4956da2cf24e0e472902cd00bf74c2a3c928322dd33ec44bba0/pyfonts-1.4.1.tar.gz", hash = "sha256:ad17290747fdeb433502c44f5fde06574e27430396411a47a62319c1c2ace545", size = 267736, upload-time = "2026-06-24T20:46:01.325Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ac/9c/e50494abca5047dbb38783db1ab06cefdcd182ce69014baff8fea2afe8ab/pyfonts-1.4.1-py3-none-any.whl", hash = "sha256:9097596ba16f07833b06cb5d0a2bdcb2102b90e1db0f299bc1c515eebb356bdb", size = 14077, upload-time = "2026-06-24T20:46:00.13Z" },
 ]
 
 [[package]]

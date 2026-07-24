@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.43
+- External theme providers: with `morethemes` installed, its themes resolve as styles by name (`style="economist"`, `style="wsj"`, ...) — after lib styles and matplotlib sheets; the theme is the complete look
+
 ## 0.0.42
 - Fix `Chart()` crash on matplotlib 3.11 (`STYLE_BLACKLIST` import — 3.11 no longer exposes `matplotlib.style.core` as an attribute)
 

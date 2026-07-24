@@ -79,13 +79,32 @@ class Style:
         object.__setattr__(self, "settings", dict(self.settings))
 
 
+def external_theme_rc(name):
+    """rc dict for ``name`` from optional external theme packages, or None.
+
+    Currently supports `morethemes <https://pypi.org/project/morethemes/>`_
+    when installed: its themes resolve as complete looks
+    (``style="economist"``), after lib styles and matplotlib sheets.
+    """
+    try:
+        import morethemes
+    except ImportError:
+        return None
+
+    if name in getattr(morethemes, "ALL_THEMES", {}):
+        return dict(morethemes.get_rcparams(name))
+
+    return None
+
+
 def resolve_style(spec, *, name=""):
     """Normalize a style spec into a ``Style``.
 
     Accepted forms:
         - str: shipped style name (``styles/lib/<name>.py``, which shadows),
-          or a matplotlib stylesheet name — the sheet as the complete look,
-          no mplchart opinions
+          a matplotlib stylesheet name, or a theme from an installed
+          provider package (morethemes) — sheets and external themes are
+          the complete look, no mplchart opinions
         - mapping: ``{"stylesheet": ..., "rc": ..., "settings": ...}`` (all
           optional) — the stylesheet (anything ``load_stylesheet`` accepts)
           is collapsed eagerly under the explicit rc
@@ -102,10 +121,15 @@ def resolve_style(spec, *, name=""):
                 # a standard matplotlib stylesheet as the whole look —
                 # no mplchart opinions ride along (grid keys per the sheet)
                 return resolve_style({"stylesheet": spec}, name=spec)
+            rc = external_theme_rc(spec)
+            if rc is not None:
+                # an external theme as the whole look (e.g. morethemes)
+                return resolve_style({"rc": rc}, name=spec)
             available = ", ".join(available_styles())
             raise ValueError(
                 f"Unknown style {spec!r} — available: {available}, "
-                f"or any matplotlib stylesheet name"
+                f"any matplotlib stylesheet name, or a theme from an "
+                f"installed provider (morethemes)"
             ) from None
         return resolve_style(module.STYLE, name=spec)
 

@@ -99,3 +99,30 @@ def test_styles_are_ambient_isolated():
         assert root.get_facecolor() == mc.to_rgba("white")  # template, not ambient
         assert root.xaxis.get_gridlines()[0].get_visible()
         plt.close(canvas.figure)
+
+
+def test_external_morethemes_provider():
+    pytest.importorskip("morethemes")
+
+    style = resolve_style("economist")
+    assert style.name == "economist"
+    assert style.rc["axes.facecolor"] == "#e8f4f4"  # the theme's rc, complete look
+
+    with pytest.raises(ValueError, match="Unknown style"):
+        resolve_style("no-such-theme")
+
+
+def test_style_namespaces_are_disjoint():
+    # the style name chain (lib → mpl sheets → providers) shares one flat
+    # namespace — this tripwire turns silent shadowing into a loud failure
+    # the moment any registry grows an overlapping name
+    import matplotlib.style
+
+    lib = set(available_styles())
+    sheets = set(matplotlib.style.library) | {"default"}
+    assert not lib & sheets, f"lib styles shadow matplotlib sheets: {lib & sheets}"
+
+    morethemes = pytest.importorskip("morethemes")
+    themes = set(morethemes.ALL_THEMES)
+    assert not themes & lib, f"provider themes shadowed by lib styles: {themes & lib}"
+    assert not themes & sheets, f"provider themes shadowed by mpl sheets: {themes & sheets}"
