@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.42
+- Fix `Chart()` crash on matplotlib 3.11 (`STYLE_BLACKLIST` import — 3.11 no longer exposes `matplotlib.style.core` as an attribute)
+
 ## 0.0.41
 - `get_color` renamed `resolve_color` on `Styler` and `Canvas`; resolution chain: new `override=` param (explicit user color beats setting beats fallback), `name` renamed `role`; output always normalized to hex via new `colors.normalize_color` (np.where-safe, to_rgba-validated); `Candlesticks` normalizes kwarg colors — RGB tuples now work
 - `Candlesticks` direction is now close-vs-open (standard candle convention) instead of close-vs-previous-close; first candle no longer renders as down-colored
