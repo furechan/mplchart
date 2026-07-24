@@ -15,3 +15,4 @@
 - [No notebook globals in functions](feedback-no-notebook-globals.md) — pass everything as parameters; declare hook contracts as Callable aliases with annotated signatures
 - [README before inv build](project-publish-readme-ordering.md) — the wheel bakes README.md at build time (no more pypi-readme generation); README edits after build miss the published release; keep README links absolute
 - [Silence type checker with type: ignore, not casts](feedback-silence-pyright.md) — use `# type: ignore[...]` for false positives; don't wrap in runtime casts; Pylance-only complaints get `# pyright: ignore[rule]`; when both ty and pyright complain use `# ty: ignore[rule]  # pyright: ignore[rule]` (ty doesn't honor bracketed `type: ignore[...]`)
+- [Smoke-test wheel before publishing](feedback-publish-smoke-test.md) — isolated env with latest deps; dev venv masked the mpl 3.11 breakage in 0.0.41
