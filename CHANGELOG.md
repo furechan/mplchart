@@ -1,5 +1,12 @@
 # Change Log
 
+## 0.0.44
+- `Candlesticks` accepts a positional indicator supplying alternative OHLC data — any indicator or expression producing `open`/`high`/`low`/`close` columns (`@` binds) — and a `label=` override
+- New `HeikinAshi` primitive — a `Candlesticks` specialization bound to the new `calc_heikin_ashi` indicator, which computes Heikin-Ashi bars in numpy from a prices frame of either backend
+- New `wrap_result(result, source)` util — wraps a numpy array or dict/namedtuple of arrays into the source frame's backend (pandas keeps the index, polars converts NaN to null); modules fetched from `sys.modules`, never imported
+- `plot_cspoly` takes `xvalues, open_, high, low, close` arrays instead of a prices frame (mirrors `plot_ohlc`)
+- `get_label` falls back to `__name__` for plain-function indicators instead of `repr`
+
 ## 0.0.43
 - External theme providers: with `morethemes` installed, its themes resolve as styles by name (`style="economist"`, `style="wsj"`, ...) — after lib styles and matplotlib sheets; the theme is the complete look
 

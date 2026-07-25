@@ -2,6 +2,7 @@
 
 from ..model.primitive import BindingPrimitive
 from .candlesticks import Candlesticks
+from .heikinashi import HeikinAshi
 from .volume import Volume
 from .ohlc import OHLC
 from .swings import Swings

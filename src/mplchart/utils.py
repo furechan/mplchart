@@ -1,5 +1,6 @@
 """mplchart utils"""
 
+import sys
 import warnings
 
 import numpy as np
@@ -156,6 +157,43 @@ def col_to_numpy(df, col: str) -> np.ndarray:
     return df[col].to_numpy()
 
 
+def wrap_result(result, source, name: str | None = None):
+    """Wrap a numpy result to match the source data form (pandas, polars).
+
+    ``result`` is a single numpy array, or a dict/namedtuple of numpy arrays;
+    ``source`` is the frame or series the result derives from. An array wraps
+    as a Series, a dict/namedtuple as a DataFrame; pandas results carry the
+    source index, polars results convert NaN to null. The backend module is
+    fetched from ``sys.modules`` — never imported: the source is proof it is
+    already loaded. An unrecognized source returns the result unchanged.
+    """
+    backend = detect_backend(source)
+
+    if isinstance(result, tuple) and hasattr(result, "_asdict"):
+        result = result._asdict()  # pyright: ignore[reportAttributeAccessIssue]  # namedtuple duck-test
+
+    if backend == "pandas":
+        pandas = sys.modules["pandas"]
+        index = getattr(source, "index", None)
+
+        if isinstance(result, dict):
+            return pandas.DataFrame(result, index=index)
+
+        if isinstance(result, np.ndarray):
+            return pandas.Series(result, index=index, name=name)
+
+    if backend == "polars":
+        polars = sys.modules["polars"]
+
+        if isinstance(result, dict):
+            return polars.DataFrame(result).fill_nan(None)
+
+        if isinstance(result, np.ndarray):
+            return polars.Series(name=name, values=result).fill_nan(None)
+
+    return result
+
+
 def xvalues_to_float(xvalues) -> np.ndarray:
     """x-coordinates as a float array; datetime64 converts to matplotlib date numbers"""
     arr = np.asarray(xvalues)
@@ -223,7 +261,8 @@ def get_label(indicator):
     2. explicit ``.label`` attribute (set by custom wrappers)
     3. talib ``func_object`` → ``"name(params)"``
     4. polars ``Expr`` → ``.meta.output_name()``
-    5. fall back to ``repr(indicator)``
+    5. plain function → ``__name__``
+    6. fall back to ``repr(indicator)``
 
     The color map uses the label's prefix via :func:`extract_prefix` when no
     direct match is found in the style settings.
@@ -259,6 +298,12 @@ def get_label(indicator):
     if is_series_data(indicator):
         name = getattr(indicator, "name", None)
         return name if isinstance(name, str) and name else None
+
+    if callable(indicator):
+        # plain functions — instances don't reach their class __name__
+        name = getattr(indicator, "__name__", None)
+        if isinstance(name, str):
+            return name
 
     return repr(indicator)
 

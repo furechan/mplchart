@@ -245,19 +245,15 @@ def test_dual_criteria_stockcharts_cell():
     import numpy as np
     from mplchart.primitives.candlesticks import plot_cspoly
 
-    prices = pd.DataFrame(
-        {
-            "open": [10.0, 12.0, 10.0],
-            "high": [12.0, 12.5, 10.5],
-            "low": [9.5, 11.0, 9.5],
-            "close": [10.0, 11.5, 10.2],  # body: up, dn, up — trend: up, up, dn
-        }
-    )
+    open_ = np.array([10.0, 12.0, 10.0])
+    high = np.array([12.0, 12.5, 10.5])
+    low = np.array([9.5, 11.0, 9.5])
+    close = np.array([10.0, 11.5, 10.2])  # body: up, dn, up — trend: up, up, dn
     green, red, white = rgba("green"), rgba("red"), rgba("white")
 
     fig, ax = plt.subplots()
     plot_cspoly(
-        prices, np.arange(3), ax=ax, width=0.8, alpha=1.0,
+        np.arange(3), open_, high, low, close, ax=ax, width=0.8, alpha=1.0,
         faceup="green", facedn="red", edgeup="green", edgedn="red",
         wickup="green", wickdn="red", faceoff="white", use_prev_close=True,
     )
@@ -307,6 +303,40 @@ def test_default_mode_flags_render():
 
     fig, wicks, poly = plot_candles(use_prev_close=True)  # renders, colors moot
     plt.close(fig)
+
+
+def test_label_kwarg():
+    chart = Chart(make_prices(), figsize=(4, 3))
+    chart.plot(Candlesticks(label="Candles"))
+    wicks, poly = chart.canvas.main_axes().collections
+    assert poly.get_label() == "Candles"
+    plt.close(chart.figure)
+
+
+def double_ohlc(prices):
+    return prices[["open", "high", "low", "close"]] * 2
+
+
+def test_indicator_binding():
+    # positional indicator supplies alternative OHLC data
+    chart = Chart(make_prices(), figsize=(4, 3))
+    chart.plot(Candlesticks(double_ohlc))
+    wicks, poly = chart.canvas.main_axes().collections
+    ys = poly.get_paths()[0].vertices[:, 1]
+    assert ys.max() == 22.0  # first bar body top = close * 2
+    plt.close(chart.figure)
+
+
+def test_indicator_matmul_binding():
+    prim = double_ohlc @ Candlesticks()
+    assert prim.indicator is double_ohlc
+
+
+def test_indicator_requires_ohlc():
+    chart = Chart(make_prices(), figsize=(4, 3))
+    with pytest.raises(ValueError, match="OHLC columns"):
+        chart.plot(Candlesticks(lambda prices: prices["close"]))
+    plt.close("all")
 
 
 def test_color_scheme_deprecated():

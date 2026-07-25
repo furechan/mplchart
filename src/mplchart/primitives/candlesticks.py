@@ -24,14 +24,18 @@ import matplotlib.pyplot as plt
 
 from matplotlib.collections import LineCollection, PolyCollection
 
-from ..model.primitive import Primitive
-from ..utils import col_to_numpy, xvalues_to_float
+from ..model.primitive import BindingPrimitive
+from ..utils import col_to_numpy, get_label, xvalues_to_float
 
 
-class Candlesticks(Primitive):
+class Candlesticks(BindingPrimitive):
     """Candlesticks primitive.
 
     Plots OHLC prices as a candlestick chart. Up-bars are close ≥ open.
+    An optional indicator supplies alternative OHLC data — any indicator or
+    expression producing ``open``/``high``/``low``/``close`` columns; without
+    one the chart prices are plotted. See ``HeikinAshi`` for a subclass bound
+    to such an indicator.
     The color kwargs declare a complete scheme — schemes are atomic:
 
     - no color kwargs — style-driven: palette from the ``candle.*`` color
@@ -50,6 +54,12 @@ class Candlesticks(Primitive):
     (default ``axes.facecolor``). Color kwargs bypass settings entirely.
 
     Args:
+        indicator: indicator or expression producing OHLC data — a frame
+            with ``open``, ``high``, ``low``, ``close`` columns aligned with
+            prices. ``@`` binds as an equivalent alternative. Defaults to
+            None — plot the chart prices.
+        label (str, optional): legend label override. When None, derived
+            from the indicator, else the class name.
         width (float): Width of each candlestick body as a fraction of bar
             spacing. Defaults to 0.8.
         alpha (float, optional): Opacity of the candlesticks, between 0.0
@@ -79,7 +89,9 @@ class Candlesticks(Primitive):
 
     def __init__(
         self,
+        indicator=None,
         *,
+        label: str | None = None,
         width: float = 0.8,
         alpha: float | None = None,
         color: str | None = None,
@@ -100,6 +112,8 @@ class Candlesticks(Primitive):
         if color and (colorup or colordn):
             raise ValueError("Cannot pass color together with colorup/colordn!")
 
+        super().__init__(indicator)
+        self.label = label
         self.width = width
         self.alpha = alpha
         self.color = color
@@ -125,10 +139,33 @@ class Candlesticks(Primitive):
     def apply_to_chart(self, chart):
         ax = chart.canvas.get_axes()
 
-        prices = chart.view.slice(chart.view.prices, xcol="xloc")
-        xvalues = col_to_numpy(prices, "xloc")
+        if self.indicator is not None:
+            result = chart.view.eval(self.indicator)
+            columns = getattr(result, "columns", ())
+            missing = [c for c in ("open", "high", "low", "close") if c not in columns]
+            if missing:
+                raise ValueError(
+                    f"Candlesticks indicator must produce OHLC columns; "
+                    f"missing {', '.join(missing)}"
+                )
+            data = result
+        else:
+            data = chart.view.prices
 
-        label = str(self)
+        prices = chart.view.slice(data, xcol="xloc")
+        xvalues = col_to_numpy(prices, "xloc")
+        open_ = col_to_numpy(prices, "open")
+        high = col_to_numpy(prices, "high")
+        low = col_to_numpy(prices, "low")
+        close = col_to_numpy(prices, "close")
+
+        if self.label is not None:
+            label = self.label
+        elif self.indicator is not None:
+            label = get_label(self.indicator)
+        else:
+            label = str(self)
+
         width = self.width
 
         get_setting = chart.canvas.get_setting
@@ -177,7 +214,7 @@ class Candlesticks(Primitive):
             faceoff = None
 
         return plot_cspoly(
-            prices, xvalues, ax=ax, width=width, alpha=alpha,
+            xvalues, open_, high, low, close, ax=ax, width=width, alpha=alpha,
             faceup=faceup, facedn=facedn, edgeup=edgeup, edgedn=edgedn,
             wickup=wickup, wickdn=wickdn, faceoff=faceoff,
             use_prev_close=use_prev_close,
@@ -186,8 +223,8 @@ class Candlesticks(Primitive):
 
 
 def plot_cspoly(
-    data, xvalues, *, ax, width, alpha, faceup, facedn, edgeup, edgedn, wickup, wickdn,
-    faceoff=None, use_prev_close=False, label=None
+    xvalues, open_, high, low, close, *, ax, width, alpha, faceup, facedn,
+    edgeup, edgedn, wickup, wickdn, faceoff=None, use_prev_close=False, label=None
 ):
     """plots candlesticks — body rectangles + wick lines, final colors per up/dn
 
@@ -200,11 +237,6 @@ def plot_cspoly(
     (intrabar-up) bodies; ``None`` means bodies are always filled with the
     up/dn face colors.
     """
-
-    high   = col_to_numpy(data, "high")
-    low    = col_to_numpy(data, "low")
-    open_  = col_to_numpy(data, "open")
-    close  = col_to_numpy(data, "close")
 
     body_up = close >= open_  # fill criterion: always intrabar
 
