@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.0.45
+- PyPI project urls: documentation (docs site), repository, changelog
+- mplfinance article: factual framing, project history, "the data is the view" section; chart types and styling brought up to date
+
 ## 0.0.44
 - `Candlesticks` accepts a positional indicator supplying alternative OHLC data — any indicator or expression producing `open`/`high`/`low`/`close` columns (`@` binds) — and a `label=` override
 - New `HeikinAshi` primitive — a `Candlesticks` specialization bound to the new `calc_heikin_ashi` indicator, which computes Heikin-Ashi bars in numpy from a prices frame of either backend
