@@ -6,7 +6,7 @@ requires = ["uv_build>=0.8.0,<0.9.0"]
 
 [project]
 name = "mplchart"
-version = "0.0.45"
+version = "0.0.46"
 requires-python = ">=3.10"
 readme = "README.md"
 description = "Classic Stock Charts in Python"
