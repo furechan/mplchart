@@ -6,6 +6,10 @@
 - New `wrap_result(result, source)` util — wraps a numpy array or dict/namedtuple of arrays into the source frame's backend (pandas keeps the index, polars converts NaN to null); modules fetched from `sys.modules`, never imported
 - `plot_cspoly` takes `xvalues, open_, high, low, close` arrays instead of a prices frame (mirrors `plot_ohlc`)
 - `get_label` falls back to `__name__` for plain-function indicators instead of `repr`
+- New `Chart.get_view(transform=None)` — the data view is created lazily on first access and cached; `chart.view` is now a property over it; the first access may pass a prices transform (renko/pnf-style domain transforms), later transforms raise; `transform` is incompatible with `raw_dates`; date-axis config moved into view creation
+- New `Renko` primitive — binds `calc_renko` as the chart prices transform (must be plotted first) and renders bricks through Candlesticks with touching full-width bodies; close-based 2-brick reversal, brick size defaults to the mean true range, per-brick volume (even-split on multi-brick bars), same-bar bricks nudged +1ns for one-to-one date alignment; windowing operates in brick space
+- New `PointFigure` primitive — binds `calc_pnf` as the chart prices transform (must be plotted first) and draws X/O glyphs on the box grid; close-based n-box reversal (default 3), box size defaults to the mean true range, volume is a per-bar rate over the column lifetime; colors from `pnf.up`/`pnf.down` settings (default green/red)
+- `wrap_result` gains `dates=` — domain-transform results carry their own datetime domain (pandas DatetimeIndex / polars leading `date` column); new `get_dates` util reads the datetime domain of a prices frame in either backend
 
 ## 0.0.43
 - External theme providers: with `morethemes` installed, its themes resolve as styles by name (`style="economist"`, `style="wsj"`, ...) — after lib styles and matplotlib sheets; the theme is the complete look

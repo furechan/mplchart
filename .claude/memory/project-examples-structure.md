@@ -10,7 +10,7 @@ Current notebooks (7):
 - `typical-usage.ipynb` — quickstart landing page
 - `indicators.ipynb` — indicator mechanics (callables, panes, binding, `|` chaining, `as_expr`, custom indicators; pandas)
 - `expressions.ipynb` — expression mechanics (factories, `src` composition, boolean conditions, `wrap_expression`; polars); mirrors the indicators page section-for-section
-- `primitives.ipynb` — primitive mechanics by role (price/volume renderers, indicator renderers, condition primitives, panes/reference lines, pattern primitives); backend-agnostic
+- `primitives.ipynb` — primitive mechanics by role (price/volume renderers, chart types — HeikinAshi/Renko/PointFigure incl. the transform-first contract, indicator renderers, condition primitives, panes/reference lines, pattern primitives); backend-agnostic
 - `chart-render.ipynb` — render to SVG / PNG / JPG via `chart.render()`
 - `multiple-tickers.ipynb` — multi-ticker overlay via `merge_prices` (pandas-only; polars equivalent is backlogged)
 - `talib-functions.ipynb` — ta-lib `Function` integration

@@ -157,7 +157,7 @@ def col_to_numpy(df, col: str) -> np.ndarray:
     return df[col].to_numpy()
 
 
-def wrap_result(result, source, name: str | None = None):
+def wrap_result(result, source, name: str | None = None, *, dates=None):
     """Wrap a numpy result to match the source data form (pandas, polars).
 
     ``result`` is a single numpy array, or a dict/namedtuple of numpy arrays;
@@ -166,15 +166,27 @@ def wrap_result(result, source, name: str | None = None):
     source index, polars results convert NaN to null. The backend module is
     fetched from ``sys.modules`` — never imported: the source is proof it is
     already loaded. An unrecognized source returns the result unchanged.
+
+    ``dates`` supplies the result's own datetime domain for domain transforms
+    (renko, point-and-figure) whose output is not row-aligned with the
+    source: pandas frames get a DatetimeIndex, polars frames a leading
+    ``date`` column. Requires a dict/namedtuple result.
     """
     backend = detect_backend(source)
 
     if isinstance(result, tuple) and hasattr(result, "_asdict"):
         result = result._asdict()  # pyright: ignore[reportAttributeAccessIssue]  # namedtuple duck-test
 
+    if dates is not None and not isinstance(result, dict):
+        raise ValueError("dates requires a dict or namedtuple result")
+
     if backend == "pandas":
         pandas = sys.modules["pandas"]
-        index = getattr(source, "index", None)
+
+        if dates is not None:
+            index = pandas.DatetimeIndex(dates, name="date")
+        else:
+            index = getattr(source, "index", None)
 
         if isinstance(result, dict):
             return pandas.DataFrame(result, index=index)
@@ -186,12 +198,33 @@ def wrap_result(result, source, name: str | None = None):
         polars = sys.modules["polars"]
 
         if isinstance(result, dict):
+            if dates is not None:
+                result = {"date": np.asarray(dates, dtype="datetime64[ns]"), **result}
             return polars.DataFrame(result).fill_nan(None)
 
         if isinstance(result, np.ndarray):
             return polars.Series(name=name, values=result).fill_nan(None)
 
     return result
+
+
+def get_dates(prices) -> np.ndarray:
+    """The datetime domain of a prices frame as a datetime64 array.
+
+    Pandas frames read the index; polars frames the first Date or Datetime
+    column. Backend modules come from ``sys.modules`` — never imported.
+    """
+    if is_pandas(prices):
+        return prices.index.to_numpy()
+
+    if is_polars(prices):
+        polars = sys.modules["polars"]
+        for name, dtype in prices.schema.items():
+            if dtype == polars.Date or dtype == polars.Datetime:
+                return prices[name].to_numpy()
+        raise ValueError("No Date or Datetime column found in DataFrame")
+
+    raise TypeError(f"Unsupported prices backend {detect_backend(prices)!r}")
 
 
 def xvalues_to_float(xvalues) -> np.ndarray:

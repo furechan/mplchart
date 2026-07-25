@@ -1,5 +1,7 @@
 # Memory Index
 
+- [Renko/PnF via prices transforms + deferred view](project-view-transforms.md) — shipped: Renko/PointFigure primitives bind transforms via Chart.get_view; transform-first plot contract; volume conventions differ by design
+
 - [Examples notebook structure](project-examples-structure.md) — mechanics restructure in progress; parades retiring, breadth goes to gallery
 - [Run pytest after each refactoring](feedback-run-pytest.md) — always run pytest after each fix, not just at the end
 - [Optional imports in tests](feedback-optional-imports.md) — use `pytest.importorskip` not try/except+None; put importorskip after normal imports to avoid ruff E402

@@ -26,8 +26,9 @@ class Chart:
     """Main charting class for creating financial charts with technical indicators.
 
     Composes a data view (``chart.view``) and a presentation canvas
-    (``chart.canvas``). Prices are required at initialization and set up the
-    data view; calls to ``plot()`` add indicators to existing or new panes.
+    (``chart.canvas``). Prices are required at initialization; the data view
+    is created lazily on first access (see ``get_view``) and cached. Calls
+    to ``plot()`` add indicators to existing or new panes.
 
     Args:
         prices (DataFrame): OHLCV prices DataFrame (pandas or polars), used to
@@ -64,7 +65,8 @@ class Chart:
         chart.show()
     """
 
-    view = None
+    _prices = None
+    _view = None
 
     def __init__(
         self,
@@ -107,6 +109,11 @@ class Chart:
         return self.canvas.figure
 
     @property
+    def view(self):
+        """The chart data view — created lazily on first access (see ``get_view``)."""
+        return self.get_view()
+
+    @property
     def mapper(self):
         """Deprecated alias for the data view, kept for compatibility."""
         warnings.warn(
@@ -117,14 +124,17 @@ class Chart:
         return self.view
 
     def init_prices(self, prices, normalize: bool = False):
-        """Initialize the chart data view with price data.
+        """Prepare and store the chart price data.
+
+        The data view is not created here — ``get_view`` creates it lazily
+        on first access.
 
         Args:
             prices (DataFrame): OHLCV prices DataFrame with a datetime index
                 or a ``date``/``datetime`` column.
         """
 
-        if self.view is not None:
+        if self._prices is not None:
             warnings.warn("init_prices was already called!", stacklevel=2)
             return
 
@@ -134,15 +144,45 @@ class Chart:
         check_prices(prices)
 
         self.backend = detect_backend(prices)
+        self._prices = prices
 
-        self.view = get_view(
+        return prices
+
+    def get_view(self, transform=None):
+        """Return the chart data view, creating and caching it on first call.
+
+        The first call creates the view from the chart prices and installs
+        the date-axis machinery; later calls return the cached view.
+
+        Args:
+            transform (callable, optional): prices transform (e.g. a renko or
+                point-and-figure calc) applied to the prices before the view
+                is created. Only allowed while the view does not exist yet —
+                the first view access wins. Incompatible with ``raw_dates``
+                (transformed frames only make sense on the rownum x-axis).
+        """
+
+        if self._view is not None:
+            if transform is not None:
+                raise ValueError("view already created — pass transform before first use")
+            return self._view
+
+        prices = self._prices
+
+        if transform is not None:
+            if self.raw_dates:
+                raise ValueError("transform is incompatible with raw_dates!")
+            prices = transform(prices)
+            check_prices(prices)
+
+        self._view = get_view(
             prices, raw_dates=self.raw_dates, start=self.start, end=self.end, max_bars=self.max_bars
         )
 
-        if not self.view.raw_dates:
-            config_date_axis(self.canvas.root_axes(), self.view.dates)
+        if not self._view.raw_dates:
+            config_date_axis(self.canvas.root_axes(), self._view.dates)
 
-        return prices
+        return self._view
 
     def pane(self, target="below", *, height_ratio=None, yticks=None):
         """create or select a pane and return self for chaining

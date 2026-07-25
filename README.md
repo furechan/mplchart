@@ -107,6 +107,8 @@ Chart(prices, title=title, max_bars=250).plot(
 The main drawing primitives are :
 - `Candlesticks` for candlestick plots
 - `HeikinAshi` for Heikin-Ashi candle plots
+- `Renko` for Renko brick plots (time-independent bricks of fixed price size)
+- `PointFigure` for Point & Figure plots (X/O columns on a box grid)
 - `OHLC` for open, high, low, close bar plots
 - `Volume` for volume bar plots
 - `Pane` to switch to a different pane (above or below)
