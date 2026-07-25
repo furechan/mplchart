@@ -3,6 +3,7 @@
 - [Examples notebook structure](project-examples-structure.md) — mechanics restructure in progress; parades retiring, breadth goes to gallery
 - [Run pytest after each refactoring](feedback-run-pytest.md) — always run pytest after each fix, not just at the end
 - [Optional imports in tests](feedback-optional-imports.md) — use `pytest.importorskip` not try/except+None; put importorskip after normal imports to avoid ruff E402
+- [Backend test parametrization](feedback-backend-test-parametrization.md) — backend-agnostic features get one test file parametrized over both backends via a params fixture; module-level importorskip only for single-backend files
 - [pane() API replaces target= on plot()](project-pane-api.md) — new fluent method for pane selection; all notebooks migrated
 - [Indicator/expression operator API](project-operator-api.md) — constructor form primary, `@` operator alternative; `|` chains indicators
 - [Backend architecture (pandas/polars split)](project-backend-architecture.md) — core is backend-agnostic; indicators/library/pandas are pandas-only opt-in; expressions is polars-only opt-in
