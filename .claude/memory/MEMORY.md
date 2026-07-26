@@ -13,6 +13,7 @@
 - [Commit .envrc files](feedback-envrc.md) — `.envrc` is project metadata, not secrets; commit it. Secrets live in separate gitignored files it sources.
 - [VS Code interpreter path warning](feedback-vscode-interpreter-path.md) — if `.venv` exists but VS Code warns on `.venv/bin/python`, set `python.defaultInterpreterPath` to `${workspaceFolder}/.venv/bin/python` in workspace settings.
 - [Changelog style](feedback-changelog-style.md) — keep entries terse; no inline rationale
+- [Protos are artifacts](feedback-protos-are-artifacts.md) — playground proto notebooks stay self-contained and frozen; never retrofit them to src imports
 - [Module placement](feedback-module-placement.md) — low-level helpers get subject modules (arrays.py, datetimes.py, colors.py); utils.py is general-purpose only
 - [Expression concepts: polars-native vs pandas 3.0 adaptation](project-expression-concepts.md) — expressions are native to polars (mplchart.expressions); "pandas expressions" = pandas 3.0 column Expression (`pd.col`) interop via `as_expr`, a lightweight adaptation, not a native feature
 - [Pandas expressions gotchas](project-pandas-expressions-gotchas.md) — pandas 3.0 column Expression pitfalls: `__getattr__` trap, `callable` trap, `@`-binding trap (Expression.__matmul__ shadows primitive binding), private `_eval_expression` hook; detection via `type(item).__dict__`
