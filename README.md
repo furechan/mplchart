@@ -241,7 +241,7 @@ Chart(prices).plot(indicators).show()
 
 ## Examples
 
-Example notebooks live in the `examples` folder.
+Example notebooks live in the `examples` folder and render as tutorials on the documentation site at [furechan.github.io/mplchart](https://furechan.github.io/mplchart/).
 
 
 ## Installation

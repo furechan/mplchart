@@ -15,6 +15,6 @@ Current notebooks (7):
 - `multiple-tickers.ipynb` — multi-ticker overlay via `merge_prices` (pandas-only; polars equivalent is backlogged)
 - `talib-functions.ipynb` — ta-lib `Function` integration
 
-`examples/README.md` is the index table; the main README's `## Examples` section links to it. The docs site renders these notebooks via the `docs/examples` symlink; nav in `mkdocs.yml`. Site/docs conventions live in `notes/mkdocs-setup.md`.
+There is deliberately no `examples/README.md` (removed 2026-07-26 — it duplicated the notebook listing below the fold on GitHub and was an unlinked orphan on the site; the mkdocs sidebar nav *is* the examples index — do not recreate it). The main README's `## Examples` section links to the docs-site Tutorials (absolute URL). The docs site renders these notebooks via the `docs/examples` symlink; nav in `mkdocs.yml`. Site/docs conventions live in `notes/mkdocs-setup.md`.
 
-**How to apply:** Don't add per-indicator notebooks or backend-duplicated pairs — mechanics content goes in the concept notebooks, visual breadth in `docs/gallery.ipynb`. Keep `examples/README.md` and the `mkdocs.yml` nav in sync when adding or renaming notebooks.
+**How to apply:** Don't add per-indicator notebooks or backend-duplicated pairs — mechanics content goes in the concept notebooks, visual breadth in `docs/gallery.ipynb`. Update the `mkdocs.yml` nav when adding or renaming notebooks.
