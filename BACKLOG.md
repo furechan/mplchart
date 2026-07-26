@@ -17,4 +17,3 @@ Items decided or considered but not scheduled. Add new items at the end.
 - ~~Implement a low-level numpy-based `forward_fill` util for the identical sign/clip + NaN forward-fill blocks in `primitives/markers.py` and `primitives/stripes.py`~~ — done 2026-07-26: `forward_fill` in the new `arrays.py` module (low-level numpy utilities live there, not in `utils.py`); both primitives converted, edge cases pinned in `tests/test_arrays.py`
 - Remove `mplchart.pandas.merge_prices` (deprecated in 0.0.46) and decide `rebase_series`'s fate — after a release or two of grace
 - Reuse twinx overlays in `Canvas.get_axes("twinx")` — currently every call on a pane with content creates a fresh twin (no lookup); flagged in notes/axes-stickiness.md
-- Slim `playground/renko-proto.ipynb` / `pnf-proto.ipynb` to import `calc_renko`/`calc_pnf` from src instead of defining local copies (local `wrap_bricks`/`wrap_frame` helpers superseded by `wrap_result(dates=)`)
