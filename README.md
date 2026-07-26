@@ -111,7 +111,7 @@ The main drawing primitives are :
 - `PointFigure` for Point & Figure plots (X/O columns on a box grid)
 - `OHLC` for open, high, low, close bar plots
 - `Volume` for volume bar plots
-- `Pane` to switch to a different pane (above or below)
+- `Pane` to open a new pane (above or below) for the primitives that follow
 - `LinePlot` draw an indicator as line plot
 - `AreaPlot` draw an indicator as area plot
 - `BarPlot` draw an indicator as bar plot
