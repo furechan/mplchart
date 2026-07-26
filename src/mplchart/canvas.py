@@ -186,14 +186,11 @@ class Canvas:
         if target is None:
             target = "same"
 
-        if target in ("above", "below"):
-            raise ValueError(
-                f"get_axes({target!r}): creating targets are not accepted — "
-                f"pane creation goes through Pane() / chart.pane()"
-            )
-
         if not self.valid_target(target):
-            raise ValueError("Invalid target %r" % target)
+            raise ValueError(
+                f"Invalid target {target!r} — valid targets are 'main', "
+                f"'same', 'twinx'; pane creation goes through Pane() / chart.pane()"
+            )
 
         with self.styler.context():
             return self._get_axes(target)

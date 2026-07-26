@@ -65,9 +65,9 @@ def test_new_axes_above_below(canvas):
 
 def test_get_axes_rejects_creating_targets(canvas):
     # creation goes through new_axes (Pane) — get_axes is selective only
-    with pytest.raises(ValueError, match="creating targets"):
+    with pytest.raises(ValueError, match="Invalid target"):
         canvas.get_axes("below")
-    with pytest.raises(ValueError, match="creating targets"):
+    with pytest.raises(ValueError, match="Invalid target"):
         canvas.get_axes("above")
 
 

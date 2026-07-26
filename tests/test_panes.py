@@ -76,7 +76,7 @@ def test_renderer_pane_is_ephemeral(prices):
 
 def test_renderer_pane_creating_rejected(prices):
     chart = Chart(prices, figsize=(6, 4))
-    with pytest.raises(ValueError, match="creating targets"):
+    with pytest.raises(ValueError, match="Invalid target"):
         chart.plot(LinePlot("close", pane="above"))  # ty: ignore[invalid-argument-type]  # pyright: ignore[reportArgumentType]
     plt.close(chart.figure)
 
