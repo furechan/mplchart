@@ -53,18 +53,39 @@ def test_get_axes_creates_main_pane(canvas):
     assert canvas.get_axes("main") is ax
 
 
-def test_get_axes_above_below(canvas):
+def test_new_axes_above_below(canvas):
     main = canvas.get_axes()
-    below = canvas.get_axes("below")
-    above = canvas.get_axes("above")
+    below = canvas.new_axes("below")
+    above = canvas.new_axes("above")
     assert canvas.count_axes() == 3
     assert len({id(main), id(below), id(above)}) == 3
     assert canvas.main_axes() is main
     assert canvas.get_axes("same") is above  # last created pane is current
 
 
+def test_get_axes_rejects_creating_targets(canvas):
+    # creation goes through new_axes (Pane) — get_axes is selective only
+    with pytest.raises(ValueError, match="creating targets"):
+        canvas.get_axes("below")
+    with pytest.raises(ValueError, match="creating targets"):
+        canvas.get_axes("above")
+
+
+def test_new_axes_rejects_selecting_positions(canvas):
+    with pytest.raises(ValueError, match="Invalid position"):
+        canvas.new_axes("main")
+
+
+def test_get_axes_twinx_empty_pane_is_itself(canvas):
+    # an empty pane is its own overlay — nothing to be scale-independent from
+    main = canvas.get_axes()
+    assert canvas.get_axes("twinx") is main
+    assert canvas.count_axes(include_twins=True) == 1
+
+
 def test_get_axes_twinx(canvas):
     main = canvas.get_axes()
+    main.plot([1.0, 2.0])  # content to overlay
     twin = canvas.get_axes("twinx")
     assert twin is not main
     assert twin._label == "twinx"
@@ -116,7 +137,7 @@ def test_canvas_view_native_plot():
 
     ax = canvas.get_axes()
     ax.plot(*view.series_xy(view.eval("close")))
-    below = canvas.get_axes("below")
+    below = canvas.new_axes("below")
     below.plot(*view.series_xy(view.eval(lambda p: p["close"].rolling(20).mean())))
 
     assert canvas.count_axes() == 2
@@ -129,7 +150,7 @@ def test_grid_default_look():
     # the default "mplchart" style: root x-grid and pane y-grid on, alpha 0.4
     canvas = Canvas(figsize=(2, 2))
     root = canvas.root_axes()
-    pane = canvas.get_axes("below")
+    pane = canvas.new_axes("below")
     assert root.xaxis.get_gridlines()[0].get_visible()
     assert pane.yaxis.get_gridlines()[0].get_visible()
     assert root.xaxis.get_gridlines()[0].get_alpha() == 0.4
@@ -142,7 +163,7 @@ def test_grid_off_via_stylesheet():
 
     canvas = Canvas(figsize=(2, 2), style=Styler(stylesheet="classic"))
     root = canvas.root_axes()
-    pane = canvas.get_axes("below")
+    pane = canvas.new_axes("below")
     assert not root.xaxis.get_gridlines()[0].get_visible()
     assert not pane.yaxis.get_gridlines()[0].get_visible()
     plt.close(canvas.figure)
@@ -154,7 +175,7 @@ def test_grid_axis_selection():
 
     canvas = Canvas(figsize=(2, 2), style=Styler(rcparams={"axes.grid": True, "axes.grid.axis": "y"}))
     root = canvas.root_axes()
-    pane = canvas.get_axes("below")
+    pane = canvas.new_axes("below")
     assert not root.xaxis.get_gridlines()[0].get_visible()
     assert pane.yaxis.get_gridlines()[0].get_visible()
     plt.close(canvas.figure)
@@ -167,7 +188,7 @@ def test_root_patch_renders_facecolor():
 
     canvas = Canvas(figsize=(2, 2), style=Styler(rcparams={"axes.facecolor": "#e5e5e5"}))
     root = canvas.root_axes()
-    pane = canvas.get_axes("below")
+    pane = canvas.new_axes("below")
     assert root.patch.get_visible()
     assert not pane.patch.get_visible()
     plt.close(canvas.figure)

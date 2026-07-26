@@ -5,6 +5,7 @@
 - [Run pytest after each refactoring](feedback-run-pytest.md) — always run pytest after each fix, not just at the end
 - [Optional imports in tests](feedback-optional-imports.md) — use `pytest.importorskip` not try/except+None; put importorskip after normal imports to avoid ruff E402
 - [Backend test parametrization](feedback-backend-test-parametrization.md) — backend-agnostic features get one test file parametrized over both backends via a params fixture; module-level importorskip only for single-backend files
+- [Pane model](project-pane-model.md) — Pane(position=) creative+sticky is the only pane creator; renderer pane= selective+ephemeral; no cursor state (current = last created by construction); Volume owns empty panes
 - [Indicator/expression operator API](project-operator-api.md) — constructor form primary, `@` operator alternative; `|` chains indicators
 - [Backend architecture (pandas/polars split)](project-backend-architecture.md) — core is backend-agnostic; indicators/library/pandas are pandas-only opt-in; expressions is polars-only opt-in
 - [wrap_result origin (mintalib)](project-wrap-result-origin.md) — numpy→backend-frame wrapper ported from mintalib model/function.py; the original dual-backend indicator design
@@ -12,6 +13,7 @@
 - [Commit .envrc files](feedback-envrc.md) — `.envrc` is project metadata, not secrets; commit it. Secrets live in separate gitignored files it sources.
 - [VS Code interpreter path warning](feedback-vscode-interpreter-path.md) — if `.venv` exists but VS Code warns on `.venv/bin/python`, set `python.defaultInterpreterPath` to `${workspaceFolder}/.venv/bin/python` in workspace settings.
 - [Changelog style](feedback-changelog-style.md) — keep entries terse; no inline rationale
+- [Module placement](feedback-module-placement.md) — low-level helpers get subject modules (arrays.py, datetimes.py, colors.py); utils.py is general-purpose only
 - [Expression concepts: polars-native vs pandas 3.0 adaptation](project-expression-concepts.md) — expressions are native to polars (mplchart.expressions); "pandas expressions" = pandas 3.0 column Expression (`pd.col`) interop via `as_expr`, a lightweight adaptation, not a native feature
 - [Pandas expressions gotchas](project-pandas-expressions-gotchas.md) — pandas 3.0 column Expression pitfalls: `__getattr__` trap, `callable` trap, `@`-binding trap (Expression.__matmul__ shadows primitive binding), private `_eval_expression` hook; detection via `type(item).__dict__`
 - [Trend-lines exploration](project-trend-lines-exploration.md) — trend-lines-proto.ipynb (walkback design); conventions (single swing concept, avg_move scale, zero-disables knobs, side constants) and next steps

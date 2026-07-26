@@ -9,6 +9,6 @@ Items decided or considered but not scheduled. Add new items at the end.
 
 ## Cleanup
 
-- Pane/axes cleanup per [notes/axes-stickiness.md](notes/axes-stickiness.md): add `_current_axes` with `get_axes` (pure resolver) / `set_axes` (mover) split; make `pane()`/`Pane` sugar over `set_axes` (dedup); fixes `Pane("main")` silent no-op. (`target=` removal from plot/LinePlot/AreaPlot/BarPlot: done 2026-07)
-- Implement a low-level numpy-based `forward_fill` util for the identical sign/clip + NaN forward-fill blocks in `primitives/markers.py` and `primitives/stripes.py`
+- ~~Pane/axes cleanup per [notes/axes-stickiness.md](notes/axes-stickiness.md)~~ — done 2026-07-26 with a simpler model than sketched: no cursor state — `Pane(position=)` creative+sticky (only creator), renderer `pane=` selective+ephemeral, disjoint vocabularies; `get_axes`/`new_axes` split at canvas level; `Pane("main")` now raises; Volume owns empty panes (dedicated volume sub-pane works)
+- ~~Implement a low-level numpy-based `forward_fill` util for the identical sign/clip + NaN forward-fill blocks in `primitives/markers.py` and `primitives/stripes.py`~~ — done 2026-07-26: `forward_fill` in the new `arrays.py` module (low-level numpy utilities live there, not in `utils.py`); both primitives converted, edge cases pinned in `tests/test_arrays.py`
 

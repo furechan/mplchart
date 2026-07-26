@@ -36,6 +36,7 @@ class BarPlot(BindingPrimitive):
         width: float | None = None,
         label: str | None = None,
         legend: bool = True,
+        pane: str | None = None,
     ):
 
         if width is None:
@@ -47,9 +48,10 @@ class BarPlot(BindingPrimitive):
         self.width = width
         self.label = label
         self.legend = legend
+        self.pane = pane
 
     def apply_to_chart(self, chart):
-        ax = chart.canvas.get_axes()
+        ax = chart.canvas.get_axes(self.pane)
 
         result = chart.view.eval(self.required_indicator())
 

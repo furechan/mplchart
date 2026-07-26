@@ -129,8 +129,8 @@ class Canvas:
 
     @staticmethod
     def valid_target(target):
-        """whether the target name is valid"""
-        return target in ("main", "same", "samex", "twinx", "above", "below")
+        """whether the target name is a valid selective target"""
+        return target in ("main", "same", "samex", "twinx")
 
     def root_axes(self):
         """Root (background) axes — always present."""
@@ -147,54 +147,99 @@ class Canvas:
             return self.figure.axes[1]
         return self.get_axes()
 
-    def get_axes(self, target=None, *, height_ratio=None):
-        """Select existing axes or create new axes depending on target.
+    def panes(self):
+        """The pane axes in creation order — root and twinx overlays excluded."""
+        return [
+            ax for ax in self.figure.axes
+            if getattr(ax, "_label", None) not in ("root", "twinx")
+        ]
+
+    def get_axes(self, target=None):
+        """Select axes — never creates a pane, never moves the current pane.
+
+        Selective targets only: "same" (default) is the current pane — the
+        last created; "main" is the first pane; "twinx" is a twin overlay of
+        the current pane. Pane creation goes through ``new_axes`` (the
+        ``Pane`` primitive / ``chart.pane()``).
+
+        One exception: resolving with no pane yet bootstraps the first pane
+        (initialization, not movement).
+
+        "twinx" resolves to an overlay of the current pane: the pane itself
+        when it is empty (nothing to be scale-independent from), else a
+        fresh twin labeled "twinx" — callers inspect ``ax._label`` to tell
+        the two apart (see Volume).
 
         Args:
-            target: one of "main", "same" ("samex" is an alias), "twinx",
-                "above", "below". Defaults to "same" (the current pane).
-            height_ratio: relative height of a newly created pane.
+            target: one of "main", "same" ("samex" is an alias), "twinx".
+                Defaults to "same" (the current pane).
         """
         if target is None:
             target = "same"
+
+        if target in ("above", "below"):
+            raise ValueError(
+                f"get_axes({target!r}): creating targets are not accepted — "
+                f"pane creation goes through Pane() / chart.pane()"
+            )
 
         if not self.valid_target(target):
             raise ValueError("Invalid target %r" % target)
 
         with self.styler.context():
-            return self._get_axes(target, height_ratio=height_ratio)
+            return self._get_axes(target)
 
-    def _get_axes(self, target, *, height_ratio=None):
+    def _get_axes(self, target):
         """``get_axes`` body — runs inside the styler's rc context."""
-        figure = self.figure
         self.root_axes()
-
-        # ignore root and twinx axes
-        axes = [
-            ax for ax in figure.axes
-            if getattr(ax, "_label", None) not in ("root", "twinx")
-        ]
+        axes = self.panes()
 
         if not axes:
-            ax = add_vplot(figure=figure)
-        else:
-            if target == "main":
-                return axes[0]
+            # bootstrap: first pane (a plain pane even for "twinx")
+            ax = add_vplot(figure=self.figure)
+            self.config_pane_axes(ax)
+            return ax
 
-            if target in ("same", "samex"):
-                return axes[-1]
+        if target == "main":
+            return axes[0]
 
-            if target == "twinx":
-                return make_twinx(axes[-1])
+        if target in ("same", "samex"):
+            return axes[-1]
 
-            append = target == "below"
+        # twinx: an empty current pane is its own overlay
+        current = axes[-1]
+        if not current.has_data():
+            return current
+        return make_twinx(current)
 
-            if not height_ratio:
-                height_ratio = 0.2
+    def new_axes(self, position="below", *, height_ratio=None):
+        """Create a new pane — the only pane creator.
 
-            ax = add_vplot(figure=figure, height_ratio=height_ratio, append=append)
+        The new pane is the last created, hence current: subsequent draws
+        land on it ("creation is sticky by construction").
 
-        self.config_pane_axes(ax)
+        Args:
+            position: "below" (default) or "above" — where the new pane is
+                inserted in the vertical stack.
+            height_ratio: relative height of the new pane. Defaults to 0.2.
+        """
+        if position not in ("above", "below"):
+            raise ValueError("Invalid position %r" % position)
+
+        with self.styler.context():
+            self.root_axes()
+
+            if not self.panes():
+                # first pane is the main pane, full height
+                ax = add_vplot(figure=self.figure)
+            else:
+                ax = add_vplot(
+                    figure=self.figure,
+                    height_ratio=height_ratio or 0.2,
+                    append=position == "below",
+                )
+
+            self.config_pane_axes(ax)
 
         return ax
 

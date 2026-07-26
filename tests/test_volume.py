@@ -30,8 +30,8 @@ def plot_volume(settings=(), style=None, **kwargs):
     """Plot and return the volume-bars PolyCollection; caller closes the figure."""
     chart = Chart(make_prices(), figsize=(4, 3), style=style or Styler(settings=settings))
     chart.plot(Volume(**kwargs))
-    twinx = [ax for ax in chart.figure.axes if getattr(ax, "_label", None) == "twinx"]
-    (poly,) = twinx[0].collections
+    # volume-only chart: Volume owns the main pane outright (no twin)
+    (poly,) = chart.canvas.main_axes().collections
     return chart.figure, poly
 
 
@@ -91,8 +91,7 @@ def test_settings_ma_color():
     scheme = {"volume.ma.color": "purple"}
     chart = Chart(make_prices(), figsize=(4, 3), style=Styler(settings=scheme))
     chart.plot(Volume(sma=2))
-    twinx = [ax for ax in chart.figure.axes if getattr(ax, "_label", None) == "twinx"]
-    (line,) = twinx[0].lines
+    (line,) = chart.canvas.main_axes().lines
     assert mcolors.to_rgba(line.get_color()) == rgba("purple")
     plt.close(chart.figure)
 

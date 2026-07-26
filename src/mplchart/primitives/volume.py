@@ -21,8 +21,11 @@ class Volume(Primitive):
     """Volume primitive.
 
     Plots volume bars colored by bar direction (close ≥ open, matching the
-    candlesticks). Rendered as a twinx overlay on the main pane so it does
-    not affect the price axis. An optional SMA of volume can be overlaid.
+    candlesticks). When the current pane already has content, volume rides
+    a twinx overlay squashed at the bottom so it does not affect the price
+    axis; an empty current pane (volume-only chart, or right after
+    ``Pane``) is owned outright — full height, visible scale. An optional
+    SMA of volume can be overlaid.
 
     Args:
         sma (int, optional): Period for the volume SMA overlay. Omit to skip
@@ -60,6 +63,9 @@ class Volume(Primitive):
         return self.__class__.__name__
 
     def apply_to_chart(self, chart):
+        # an empty current pane resolves as its own overlay (volume-only
+        # charts, or right after Pane) — owned outright, full height,
+        # visible scale; a pane with content yields a squashed twin
         ax = chart.canvas.get_axes("twinx")
 
         prices = chart.view.slice(chart.view.prices, xcol="xloc")

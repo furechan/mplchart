@@ -184,16 +184,22 @@ class Chart:
 
         return self._view
 
-    def pane(self, target="below", *, height_ratio=None, yticks=None):
-        """create or select a pane and return self for chaining
+    def pane(self, position="below", *, height_ratio=None, yticks=None):
+        """create a new pane and return self for chaining
+
+        Creation is sticky: the new pane becomes current and subsequent
+        plots land on it. To draw a single primitive on an existing pane
+        use the renderers' ``pane=`` parameter instead (e.g.
+        ``LinePlot(x, pane="main")``).
 
         Args:
-            target: one of "same", "above", "below", "twinx"
+            position: "below" (default) or "above" — where the new pane is
+                inserted in the vertical stack
             height_ratio: relative height of the new pane
             yticks: tuple of y-axis tick values (also draws heavy grid lines)
         """
 
-        ax = self.canvas.get_axes(target, height_ratio=height_ratio)
+        ax = self.canvas.new_axes(position, height_ratio=height_ratio)
 
         if yticks:
             ax.set_yticks(yticks)

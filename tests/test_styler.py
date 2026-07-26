@@ -231,7 +231,7 @@ def test_rc_context_wiring():
 
     canvas = Canvas(figsize=(2, 2), style=Styler(stylesheet="dark_background"))
     assert canvas.figure.get_facecolor() == mcolors.to_rgba("black")
-    ax = canvas.get_axes("below")
+    ax = canvas.new_axes("below")
     assert ax.get_facecolor() == mcolors.to_rgba("black")
 
     # ambient rc untouched outside the styler context

@@ -1,49 +1,64 @@
-# Axes stickiness — Pane vs axes, current-pane semantics
+# Panes and axes — creation vs selection
 
-Design note, July 2026. Records the analysis and decisions behind the pane/axes cleanup. Status: **agreed; `target=` removals done, `_current_axes` / `set_axes` split pending**.
+Design note, July 2026. Records the analysis and decisions behind the pane/axes model. Status: **final model agreed and implemented 2026-07-26 (supersedes the earlier `_current_axes`/`set_axes` sketch); `target=` removals done 2026-07.**
 
 ## Vocabulary
 
 - **pane** — the user-facing concept: an inner subplot in the vertical stack. Not a runtime type; a role certain Axes play.
-- **axes** — the matplotlib object. The figure holds three kinds: the *root* axes (label `"root"`, x-grid and title), *twinx* overlays (label `"twinx"`, e.g. Volume), and the unlabeled inner subplots — only the last kind are panes.
-- Docstrings and user API say *pane*; code-level methods and attributes say *axes* (`get_axes`, `_current_axes`). The bridge sentence: `pane()` selects or creates a pane and makes its axes current; indicators draw on the current axes.
+- **axes** — the matplotlib object. The figure holds three kinds, discriminated by the `_label` attribute: the *root* axes (`"root"`, x-grid and title), *twinx* overlays (`"twinx"`, e.g. Volume), and the unlabeled inner subplots — only the last kind are panes.
+- Client-facing parameter names are `position` (creation: `"above"`/`"below"`) and `pane` (selection: `"main"`, `"twinx"`). **`target` is internal jargon of the axes layer only** — it never appears in user-facing signatures.
 
-## The problem
+## The problem (historical)
 
-There is no explicit "current pane" state. The `"same"` target resolves to `axes[-1]` — the most recently **created** pane in figure order. Selection does not reorder that list; creation appends to it. So stickiness is an accident of creation:
+There was no explicit "current pane" state. The `"same"` target resolved to `axes[-1]` — the most recently **created** pane. Selection did not reorder that list; creation appended. So stickiness was an accident of creation:
 
-| | creates a pane (`"above"`/`"below"`) | selects existing (`"main"`, `"same"`) |
-|---|---|---|
-| `LinePlot(target=...)` | **leaks** — followers move to the new pane (unintended) | scoped, correct |
-| `Pane` / `.pane()` | works — followers move (intended) | **doesn't stick** — silent no-op (broken) |
+- `LinePlot(target="below")` **leaked** — it created a pane and dragged every following indicator into it (unintended stickiness). Fixed 2026-07 by removing `target=` from the renderers and `plot()`.
+- `Pane("main")` was a **silent no-op** — selection could not stick because only creation moved `axes[-1]`.
 
-Verified empirically: `chart.plot([Candlesticks(), Pane("below"), RSI(), Pane("main"), EMA(10)])` puts the EMA in the RSI pane — `Pane("main")` is a silent no-op. Conversely `SMA(20) @ LinePlot(target="below")` drags the next indicator into the SMA's new pane. Both cells that misbehave do so for the same root cause: "current" is derived from creation order, so creation is sticky and selection cannot be.
+Both misbehaviors had one root cause: creation was sticky, selection could not be, and nothing in the API distinguished the two.
 
-Nobody hit the `Pane("main")` bug because all notebook uses are `"below"`/`"above"` — the cells where the accident happens to do the right thing.
+## The final model: disjoint verbs, no state
 
-## The decision
+Stickiness is a property of the *type*, not of the argument:
 
-Resolve the ambiguity at the axes-management level — not by having `pane()`/`Pane` poke chart state from above. `Chart` gains explicit current-axes state and a getter/setter split:
+- **`Pane(position="above"|"below")` / `chart.pane(position)` — creative and sticky, the only pane creator.** Every call creates a new pane; the new pane becomes current. Selecting values are rejected — `Pane("main")` is a loud `ValueError`, not a fixed behavior.
+- **Renderer `pane="main"|"twinx"` (`LinePlot`, `AreaPlot`, `BarPlot`, `Bands`) — selective and ephemeral.** Places that one primitive; never moves the cursor. Creating values are rejected — a new pane is chart structure and structure is declared by `Pane`.
 
-```python
-_current_axes = None   # the current pane's axes; never root/twinx
-```
+The vocabularies are **disjoint** — creation uses prepositions (`"above"`, `"below"`), selection uses locations (`"main"`, `"twinx"`; future `"top"`, `"bottom"`). The sticky/ephemeral question cannot be asked of the wrong object, and the parameter names (`position` vs `pane`) don't overlap either.
 
-- **`get_axes(target=None) -> Axes`** — pure resolver, never moves the cursor. `"same"` → current axes; `"main"` → first pane; `"twinx"` → twin of current. Creating targets (`"above"`/`"below"`) are **not accepted** — creation is inherently cursor-relevant. One documented exception: resolving `"same"` with no pane yet bootstraps the first pane and makes it current (initialization, not movement — there is nothing to preserve).
-- **`set_axes(target=None, *, height_ratio=None) -> Axes`** — resolver + cursor move. Accepts all targets including `"above"`/`"below"`, records the result as current, returns it. Name echoes matplotlib's `sca` (set current axes).
-- **`set_axes("twinx")` raises** — a twin is a y-scale overlay, not a pane; the invariant *current axes is always a pane* is enforced by the only writer. Overlays go through `get_axes("twinx")`.
+**No cursor state.** With selection stripped of stickiness, "current = last created" is *correct by construction* — `axes[-1]` is the current pane because nothing but creation can compete. The earlier design's underlying assumption is vindicated rather than replaced; `_current_axes`/`set_axes` (a previous iteration of this note) are unnecessary.
 
-The rule becomes structural rather than conventional: **`get_axes` answers questions; `set_axes` changes the answer. Creation is always sticky, and only `set_axes` creates.** The sticky/punctual ambiguity is unrepresentable.
+Rule of thumb: **`Pane` opens panes for what follows; `pane=` borrows an existing pane for one primitive.** A shared side pane is always spelled `Pane("above"), RSI(), ADX()`; a one-off overlay is `LinePlot(x, pane="main")`.
 
-## Consequences
+## Canvas layer
 
-- `pane()` / `Pane` become trivial sugar over `set_axes` (+ yticks); the duplicated body goes away, and `Pane("main")` starts working.
-- The `target=` parameter is **removed** from `LinePlot`/`AreaPlot`/`BarPlot` (zero usage anywhere). The user vocabulary shrinks to *pane*; `target` survives only as internal jargon in the axes layer. Punctual placement for custom primitives is `chart.get_axes(...)`; punctual pane *creation* is intentionally impossible.
-- `plot(target=...)` is **removed** (superseded by `pane()`, zero usage; the memory records that migration).
-- Grouping is explicit: to put ROC and its EMA in one pane, write `[Pane("below"), ROC(1), ROC(1) | EMA(20)]`. Adjacency-based coupling ("the next line inherits my pane because I happened to create one") is exactly what is being removed — it breaks on reorder and is invisible in the code.
+- **`get_axes(target=None)`** — selective, pure, never moves anything. `"same"` (default) → last-created pane; `"main"` → first pane; `"twinx"` → twin overlay of the current pane. Raises on `"above"`/`"below"` (pointing at `Pane`). One documented exception: resolving with no pane yet bootstraps the first pane (initialization, not movement — and for `"twinx"` the bootstrap returns the *plain pane*, see Volume below).
+- **`new_axes(position="below", *, height_ratio=None)`** — the creative half, surfacing `layout.add_vplot` (which existed all along; `get_axes` used to reach down to it). Creates the pane; by list order it is immediately current. Name avoids matplotlib's `Figure.add_axes` (different meaning).
+
+## The Volume special case (by design)
+
+`Volume` always asks `get_axes("twinx")` and inspects the result's `_label`. The ownership rule lives in `get_axes` itself (moved there 2026-07-26): **an empty current pane resolves as its own overlay** — nothing to be scale-independent from — while a pane with content (`has_data()`) yields a fresh twin stamped `_label="twinx"`:
+
+- current pane has content → twin → overlay etiquette: bars squashed into the bottom quarter (`set_ylim(0, 4*vmax)`), y-axis hidden.
+- current pane empty (volume-only chart `chart.plot(Volume(sma=50))`, or right after `Pane("below")`) → the pane itself → Volume owns it: full height, visible scale. The second case is the classic dedicated volume sub-pane, which the old bootstrap-based detection could never produce (a pane *existed*, so it twinned the empty pane — also, `plot()` pre-bootstraps a pane for root-drawing primitives, so "no pane exists" was unobservable inside `plot()` anyway).
+
+Known wrinkle (still open): when the pane has content, `get_axes("twinx")` creates a *new* twin every call (no reuse) — add a lookup when this layer is next touched.
+
+## Scope of `pane=`
+
+Only the four indicator renderers: `LinePlot`, `AreaPlot`, `BarPlot`, `Bands`. Everything else keeps its hardwired discipline: price/chart-type renderers draw on the current pane (and Renko/PointFigure must be first anyway); `AutoPlot` is a dispatcher, not user-facing — no `pane=` at this stage; `Volume` has the twinx discipline; `Stripes`/`VLine` are root-layer; `Markers` pins to main (draws at close); `HLine` stays simple on the current pane. Primitives advance on demand, never as a sweep (the styling maturity-model doctrine applies).
+
+## Future extensions (designed-for, not implemented)
+
+- Selective vocabulary can grow freely without touching creation: `pane="top"` / `pane="bottom"` (visually extreme panes — genuinely new addressing: `"main"` is *first-created*, not topmost once `"above"` panes exist).
+- If bulk return-to-a-prior-pane ever proves needed, letting `Pane` also select-and-stick is a backward-compatible escape valve. Until then, order the plot list so grouped content is contiguous; stragglers use `pane=`.
+
+## Consequences (mostly landed 2026-07)
+
+- `target=` removed from `plot()`/`LinePlot`/`AreaPlot`/`BarPlot` (done); reinstated as `pane=` with sound (ephemeral) semantics — not a flip-flop: the removal was of the broken accidental stickiness.
+- `pane()` / `Pane` are trivial sugar over `new_axes` (+ yticks); the duplicated bodies go away.
+- Grouping is explicit: `[Pane("below"), ROC(1), ROC(1) | EMA(20)]`. Adjacency-based coupling breaks on reorder and is invisible — exactly what was removed.
 
 ## Naming rationale
 
-`_current_axes`, not `_current_pane`: the attribute holds what `get_axes()` returns — a matplotlib Axes — and `return self._current_pane` inside `get_axes` would mix the vocabularies at the code level. The pane invariant (never root/twinx) doesn't need the name; it lives in the write discipline (`set_axes` is the only writer, and it rejects twins) and a comment.
-
-`pane()`, not `add_pane()`: the method selects as often as it creates ("create or select"), `add_*` in matplotlib conventionally returns the created object (this returns `self` for chaining), the fluent chain reads as scoping, and finchart uses the same name with the same contract.
+`pane()`, not `add_pane()`: the fluent chain reads as scoping, `add_*` conventionally returns the created object (this returns `self`), and finchart uses the same name. `new_axes`, not `add_axes`: matplotlib's `Figure.add_axes` means explicit-coordinate placement. `position`, not `target`, for creation: with only `"above"`/`"below"` left, the argument is a position in the vertical stack. `pane=`, not `target=`, for selection: it names the thing being selected in the user's vocabulary.

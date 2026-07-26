@@ -4,6 +4,10 @@
 - `PandasDataView.slice` is now positional like the polars view — dates are labels, not join keys; fixes windowed slicing of duplicate-dated frames (renko multi-brick days rendered zero-width bodies)
 - `calc_renko` no longer nudges same-bar brick timestamps by +1ns — bricks completed by the same bar share its date
 - `mplchart.pandas.merge_prices` deprecated — merging is data preparation; the multiple-tickers example shows the merge inline in pandas and polars
+- New `arrays` module for low-level numpy utilities; `forward_fill` extracted from the duplicated blocks in `Stripes` and `Markers`
+- Pane model split: `Pane`/`chart.pane()` are creative and sticky (`position="above"|"below"`, the only pane creators — selecting values now raise); `LinePlot`/`AreaPlot`/`BarPlot`/`Bands` gain `pane=` for ephemeral placement on an existing pane (`"main"`, `"twinx"`)
+- `Canvas.get_axes` is selective-only (raises on `"above"`/`"below"`); new `Canvas.new_axes(position=)` is the pane creator; new `Canvas.panes()` accessor
+- The `"twinx"` target resolves an empty current pane as itself — `Volume` owns it (full height, visible scale) instead of twinning it; `chart.plot(Volume())` and the classic `[..., Pane("below"), Volume()]` dedicated volume sub-pane now render properly; overlay behavior on non-empty panes unchanged
 
 ## 0.0.45
 - PyPI project urls: documentation (docs site), repository, changelog

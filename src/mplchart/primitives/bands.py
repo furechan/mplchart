@@ -38,6 +38,7 @@ class Bands(BindingPrimitive):
         label: str | None = None,
         legend: bool = True,
         color: str | None = None,
+        pane: str | None = None,
     ):
         super().__init__(indicator)
         self.upper = upper
@@ -46,9 +47,10 @@ class Bands(BindingPrimitive):
         self.label = label
         self.legend = legend
         self.color = color
+        self.pane = pane
 
     def apply_to_chart(self, chart):
-        ax = chart.canvas.get_axes()
+        ax = chart.canvas.get_axes(self.pane)
 
         data = chart.view.eval(self.required_indicator())
         columns = list(data.columns) if hasattr(data, "columns") else []

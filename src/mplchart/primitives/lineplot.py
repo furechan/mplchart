@@ -26,6 +26,9 @@ class LinePlot(BindingPrimitive):
         alpha (float) : opacity value between 0.0 and 1.0
         legend (bool) : include in the legend. Defaults to True — the label
             still names the plot for styling either way.
+        pane (str) : pane to draw on — "main" or "twinx". Default the
+            current pane. Selection only, never sticky — pane creation goes
+            through the ``Pane`` primitive.
         overbought (float) : level above which to shade a fill-between band
         oversold (float) : level below which to shade a fill-between band
 
@@ -41,6 +44,7 @@ class LinePlot(BindingPrimitive):
         *,
         label: str | None = None,
         legend: bool = True,
+        pane: str | None = None,
         style: str | None = None,
         marker: str | None = None,
         width: float | None = None,
@@ -57,6 +61,7 @@ class LinePlot(BindingPrimitive):
         super().__init__(indicator)
         self.label = label
         self.legend = legend
+        self.pane = pane
         self.style = style
         self.marker = marker
         self.color = color
@@ -66,7 +71,7 @@ class LinePlot(BindingPrimitive):
         self.oversold = oversold
 
     def apply_to_chart(self, chart):
-        ax = chart.canvas.get_axes()
+        ax = chart.canvas.get_axes(self.pane)
 
         result = chart.view.eval(self.required_indicator())
 
