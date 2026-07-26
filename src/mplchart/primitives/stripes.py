@@ -4,6 +4,7 @@ import numpy as np
 
 from matplotlib.collections import PolyCollection
 
+from ..arrays import forward_fill
 from ..model.primitive import BindingPrimitive
 from ..utils import xvalues_to_float
 
@@ -44,13 +45,8 @@ class Stripes(BindingPrimitive):
         if not len(values):
             return
 
-        # clip to 0/1 and forward-fill NaNs
-        flag = np.clip(np.sign(values.astype(float)), 0.0, 1.0)
-        nan_mask = np.isnan(flag)
-        if nan_mask.any():
-            idx = np.where(~nan_mask, np.arange(len(flag)), 0)
-            np.maximum.accumulate(idx, out=idx)
-            flag = flag[idx]
+        # clip to 0/1; NaNs (indicator warm-up) keep the last known state
+        flag = forward_fill(np.clip(np.sign(values.astype(float)), 0.0, 1.0))
 
         # find contiguous on-regions via diff
         padded = np.concatenate([[0.0], flag, [0.0]])

@@ -2,6 +2,7 @@
 
 import numpy as np
 
+from ..arrays import forward_fill
 from ..model.primitive import BindingPrimitive
 from ..utils import col_to_numpy
 
@@ -54,12 +55,8 @@ class Markers(BindingPrimitive):
 
         xs, flag, close = chart.view.series_xy(flag, close)
 
-        # forward-fill NaNs in flag
-        nan_mask = np.isnan(flag)
-        if nan_mask.any():
-            idx = np.where(~nan_mask, np.arange(len(flag)), 0)
-            np.maximum.accumulate(idx, out=idx)
-            flag = flag[idx]
+        # NaNs (indicator warm-up) keep the last known state
+        flag = forward_fill(flag)
 
         # find positions where flag changes
         diff = np.diff(flag, prepend=np.nan)
