@@ -48,8 +48,11 @@ class DataView(ABC):
     def slice(self, data, *, xcol=None):
         """Slice prices-aligned data to the visible window.
 
-        If ``xcol`` is given, the result carries an extra column of that name
-        with per-row x-coordinates.
+        Positional contract (both backends): data must be full-length in
+        prices row order and is cut by row position — dates are coordinates,
+        not join keys, so duplicate dates are fine. If ``xcol`` is given,
+        the result carries an extra column of that name with per-row
+        x-coordinates.
         """
         ...
 
@@ -87,7 +90,10 @@ class PandasDataView(DataView):
 
     Stores dates as a tz-naive DatetimeIndex and ``xloc`` as a date-indexed
     Series (integer rownums, or the dates themselves in ``raw_dates`` mode).
-    Slicing joins prices-aligned data on that series.
+    Slicing is positional — data is assumed full-length in prices row order,
+    matching the polars view. (An earlier version joined on the date index,
+    which silently assumed unique dates — broken by domain transforms like
+    renko where several bricks share a completion date.)
     """
 
     def __init__(self, prices, *, raw_dates=False, start=None, end=None, max_bars=None):
@@ -130,17 +136,11 @@ class PandasDataView(DataView):
 
     def slice(self, data, *, xcol=None):
         w = self._window()
-        xloc = self.xloc.iloc[w]
-
-        if hasattr(data.index, "tz") and data.index.tz is not None:
-            data = data.set_axis(data.index.tz_localize(None))
-
-        xloc, data = xloc.align(data, join="inner")
-        data = data.set_axis(xloc)
+        sliced = data.iloc[w]
         if xcol is not None:
-            data = data.copy()
-            data[xcol] = data.index.values
-        return data
+            sliced = sliced.copy()
+            sliced[xcol] = self.xloc.to_numpy()[w]
+        return sliced
 
     def series_xy(self, *series):
         w = self._window()

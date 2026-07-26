@@ -17,8 +17,9 @@ def calc_renko(prices, brick_size=None):
     Returns an OHLCV frame in the source backend, dated by brick completion:
     ``open``/``close`` are the brick bottom/top (directional), ``high``/``low``
     coincide with them, and volume accumulated since the previous brick is
-    shared evenly across the bricks a bar completes. Same-bar bricks are
-    nudged +1ns apart so date-aligned slicing stays one-to-one.
+    shared evenly across the bricks a bar completes. Bricks completed by the
+    same bar share its date — fine: view slicing is positional, dates are
+    labels, not keys.
 
     Args:
         brick_size (float, optional): Brick height in price units. Defaults
@@ -64,13 +65,7 @@ def calc_renko(prices, brick_size=None):
 
     opens = np.array(opens, dtype=float)
     closes = np.array(closes, dtype=float)
-    idx = np.array(idx, dtype=int)
-
-    # nudge same-bar bricks +1ns each: pandas date-aligned slicing goes
-    # cartesian on duplicate dates — unique timestamps keep it one-to-one;
-    # the offset is invisible in date labels
-    rank = np.arange(len(idx)) - np.searchsorted(idx, idx)
-    brick_dates = dates[idx].astype("datetime64[ns]") + rank * np.timedelta64(1, "ns")
+    brick_dates = dates[np.array(idx, dtype=int)]
 
     result = dict(
         open=opens,

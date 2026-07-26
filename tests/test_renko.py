@@ -55,7 +55,7 @@ def test_calc_bricks(backend):
     assert bricks["volume"].to_numpy() == pytest.approx([5.5, 5.5, 100.0])
 
 
-def test_same_bar_bricks_nudged(backend):
+def test_same_bar_bricks_share_date(backend):
     prices = make_prices(
         backend,
         ["2024-01-01", "2024-01-02"],
@@ -66,8 +66,27 @@ def test_same_bar_bricks_nudged(backend):
     dates = bricks["date"].to_numpy() if backend == "polars" else bricks.index.to_numpy()
 
     assert len(bricks) == 3
-    assert len(np.unique(dates)) == 3  # +1ns nudge keeps timestamps unique
-    assert (np.diff(dates) == np.timedelta64(1, "ns")).all()
+    # dates are labels, not keys — same-bar bricks carry the bar's date as-is
+    assert len(np.unique(dates)) == 1
+
+
+def test_duplicate_dates_windowed_render(backend):
+    # regression: the pandas view once joined the window by date, going
+    # cartesian on duplicate dates (rows multiplied, body widths collapsed
+    # to zero via nanmin(diff)); slicing is positional now
+    prices = make_prices(
+        backend,
+        ["2024-01-01", "2024-01-02", "2024-01-02", "2024-01-03"],
+        close=[10.0, 11.0, 12.0, 13.0],
+        volume=[1.0, 1.0, 1.0, 1.0],
+    )
+    chart = Chart(prices, max_bars=3, figsize=(4, 3))
+    chart.plot(Candlesticks())
+    wicks, poly = chart.canvas.main_axes().collections
+
+    assert len(poly.get_paths()) == 3  # window rows, no cartesian blow-up
+    verts = np.asarray(poly.get_paths()[0].vertices)
+    assert verts[:, 0].max() > verts[:, 0].min()  # nonzero body width
 
 
 def test_renko_primitive(backend):
