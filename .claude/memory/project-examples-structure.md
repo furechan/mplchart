@@ -13,7 +13,7 @@ Current notebooks (7):
 - `expressions.ipynb` — expression mechanics (factories, `src` composition, boolean conditions, `wrap_expression`; polars); mirrors the indicators page section-for-section
 - `primitives.ipynb` — primitive mechanics by role (price/volume renderers, chart types — HeikinAshi/Renko/PointFigure incl. the transform-first contract, indicator renderers, condition primitives, panes/reference lines, pattern primitives); backend-agnostic
 - `chart-render.ipynb` — render to SVG / PNG / JPG via `chart.render()`
-- `multiple-tickers.ipynb` — multi-ticker overlay via `merge_prices` (pandas-only; polars equivalent is backlogged)
+- `multiple-tickers.ipynb` — multi-ticker overlay with the merge done *inline* in both backends (join + rebase shown transparently; `merge_prices` deprecated 2026-07-26 — data prep belongs in user code, don't reintroduce a merge util)
 - `talib-functions.ipynb` — ta-lib `Function` integration
 
 There is deliberately no `examples/README.md` (removed 2026-07-26 — it duplicated the notebook listing below the fold on GitHub and was an unlinked orphan on the site; the mkdocs sidebar nav *is* the examples index — do not recreate it). The main README's `## Examples` section links to the docs-site Tutorials (absolute URL). The docs site renders these notebooks via the `docs/examples` symlink; nav in `mkdocs.yml`. Site/docs conventions live in `notes/mkdocs-setup.md`.

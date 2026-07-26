@@ -1,5 +1,7 @@
 """pandas specific helpers for mplchart — pandas pipeline only"""
 
+import warnings
+
 import pandas as pd
 
 
@@ -29,6 +31,10 @@ def rebase_series(series, prices):
 def merge_prices(prices, rebase=False, **kwargs):
     """Merge additional price series into a prices DataFrame.
 
+    Deprecated — merging is ordinary data preparation (a join plus an
+    optional rebase); do it inline in your own code. The multiple-tickers
+    example notebook shows the pandas and polars versions.
+
     Appends one named column per kwarg, taken from the close price of each
     DataFrame. pandas aligns on the index, so dates missing from any series
     will be NaN. Use rebase=True to scale each series to the same starting
@@ -45,6 +51,13 @@ def merge_prices(prices, rebase=False, **kwargs):
     Example:
         merge_prices(prices, aapl=prices_aapl, msft=prices_msft, rebase=True)
     """
+    warnings.warn(
+        "merge_prices is deprecated — merge price series inline; see the "
+        "multiple-tickers example notebook",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+
     extra = {}
     
     for name, series in kwargs.items():

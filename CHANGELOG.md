@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.0.46
+- `PandasDataView.slice` is now positional like the polars view — dates are labels, not join keys; fixes windowed slicing of duplicate-dated frames (renko multi-brick days rendered zero-width bodies)
+- `calc_renko` no longer nudges same-bar brick timestamps by +1ns — bricks completed by the same bar share its date
+- `mplchart.pandas.merge_prices` deprecated — merging is data preparation; the multiple-tickers example shows the merge inline in pandas and polars
+
 ## 0.0.45
 - PyPI project urls: documentation (docs site), repository, changelog
 - mplfinance article: factual framing, project history, "the data is the view" section; chart types and styling brought up to date
