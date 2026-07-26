@@ -2,6 +2,7 @@
 
 import numpy as np
 
+from ..canvas import PaneSelect
 from ..model.primitive import BindingPrimitive
 from ..utils import get_label
 
@@ -44,7 +45,7 @@ class LinePlot(BindingPrimitive):
         *,
         label: str | None = None,
         legend: bool = True,
-        pane: str | None = None,
+        pane: PaneSelect | None = None,
         style: str | None = None,
         marker: str | None = None,
         width: float | None = None,

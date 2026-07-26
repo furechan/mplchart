@@ -2,7 +2,7 @@
 
 import warnings
 
-from .canvas import Canvas
+from .canvas import Canvas, PanePosition
 from .dataview import get_view
 from .dateaxis import config_date_axis
 from .utils import detect_backend, is_indicator_like, is_series_data
@@ -184,7 +184,7 @@ class Chart:
 
         return self._view
 
-    def pane(self, position="below", *, height_ratio=None, yticks=None):
+    def pane(self, position: PanePosition = "below", *, height_ratio=None, yticks=None):
         """create a new pane and return self for chaining
 
         Creation is sticky: the new pane becomes current and subsequent

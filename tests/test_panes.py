@@ -46,12 +46,12 @@ def test_pane_selecting_rejected(prices):
     # Pane is creational only — selection is not a Pane job
     chart = Chart(prices, figsize=(6, 4))
     with pytest.raises(ValueError, match="Invalid position"):
-        chart.plot([Candlesticks(), Pane("main")])
+        chart.plot([Candlesticks(), Pane("main")])  # ty: ignore[invalid-argument-type]  # pyright: ignore[reportArgumentType]
     plt.close(chart.figure)
 
     chart = Chart(prices, figsize=(6, 4))
     with pytest.raises(ValueError, match="Invalid position"):
-        chart.pane("main")
+        chart.pane("main")  # ty: ignore[invalid-argument-type]  # pyright: ignore[reportArgumentType]
     plt.close(chart.figure)
 
 
@@ -77,7 +77,7 @@ def test_renderer_pane_is_ephemeral(prices):
 def test_renderer_pane_creating_rejected(prices):
     chart = Chart(prices, figsize=(6, 4))
     with pytest.raises(ValueError, match="creating targets"):
-        chart.plot(LinePlot("close", pane="above"))
+        chart.plot(LinePlot("close", pane="above"))  # ty: ignore[invalid-argument-type]  # pyright: ignore[reportArgumentType]
     plt.close(chart.figure)
 
 

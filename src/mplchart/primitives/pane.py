@@ -1,5 +1,6 @@
 """Pane primitive"""
 
+from ..canvas import PanePosition
 from ..model.primitive import Primitive
 
 
@@ -25,7 +26,7 @@ class Pane(Primitive):
         chart.plot(Pane("below", yticks=(30, 50, 70)), LinePlot(RSI(14)))
     """
 
-    def __init__(self, position="below", *, height_ratio=None, yticks=None):
+    def __init__(self, position: PanePosition = "below", *, height_ratio: float | None = None, yticks: tuple | None = None):
         self.position = position
         self.height_ratio = height_ratio
         self.yticks = yticks

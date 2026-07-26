@@ -1,18 +1,27 @@
-"""Canvas — the presentation plane: figure, styled panes, pane state, colors.
+"""Canvas — the presentation plane: figure, styled panes, colors.
 
 Owns the matplotlib figure, creates styled panes on demand (root draws the
-x-grid, panes draw their y-grid), tracks the current pane, and resolves
-colors through its styler. Never sees a dataframe — numpy arrays and
-axes cross the boundary, frames don't.
+x-grid, panes draw their y-grid), and resolves colors through its styler.
+There is no current-pane state — the current pane is the last created, by
+construction (see notes/axes-stickiness.md). Never sees a dataframe —
+numpy arrays and axes cross the boundary, frames don't.
 """
 
 import io
+
+from typing import Literal
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 from .layout import make_twinx, init_vplot, add_vplot
 from .styles import get_styler
+
+PanePosition = Literal["above", "below"]
+"""Creative pane positions — accepted by ``new_axes`` / ``Pane`` / ``chart.pane()``."""
+
+PaneSelect = Literal["main", "same", "twinx"]
+"""Selective pane addresses — accepted by the renderers' ``pane=`` parameter."""
 
 
 class Canvas:
@@ -212,7 +221,7 @@ class Canvas:
             return current
         return make_twinx(current)
 
-    def new_axes(self, position="below", *, height_ratio=None):
+    def new_axes(self, position: PanePosition = "below", *, height_ratio: float | None = None):
         """Create a new pane — the only pane creator.
 
         The new pane is the last created, hence current: subsequent draws
