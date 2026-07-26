@@ -20,7 +20,7 @@ from .styles import get_styler
 PanePosition = Literal["above", "below"]
 """Creative pane positions — accepted by ``new_axes`` / ``Pane`` / ``chart.pane()``."""
 
-PaneSelect = Literal["main", "same", "twinx"]
+PaneTarget = Literal["main", "same", "twinx"]
 """Selective pane addresses — accepted by the renderers' ``pane=`` parameter."""
 
 

@@ -1,6 +1,6 @@
 """AreaPlot primitive"""
 
-from ..canvas import PaneSelect
+from ..canvas import PaneTarget
 from ..model.primitive import BindingPrimitive
 from ..utils import get_label
 
@@ -35,7 +35,7 @@ class AreaPlot(BindingPrimitive):
         alpha: float | None = None,
         label: str | None = None,
         legend: bool = True,
-        pane: PaneSelect | None = None,
+        pane: PaneTarget | None = None,
     ):
 
         super().__init__(indicator)

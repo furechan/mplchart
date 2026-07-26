@@ -1,6 +1,6 @@
 """Bands primitive"""
 
-from ..canvas import PaneSelect
+from ..canvas import PaneTarget
 from ..model.primitive import BindingPrimitive
 from ..utils import get_label
 
@@ -39,7 +39,7 @@ class Bands(BindingPrimitive):
         label: str | None = None,
         legend: bool = True,
         color: str | None = None,
-        pane: PaneSelect | None = None,
+        pane: PaneTarget | None = None,
     ):
         super().__init__(indicator)
         self.upper = upper

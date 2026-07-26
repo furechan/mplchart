@@ -1,6 +1,6 @@
 """BarPlot primitive"""
 
-from ..canvas import PaneSelect
+from ..canvas import PaneTarget
 from ..model.primitive import BindingPrimitive
 from ..utils import get_label, plot_vbars
 
@@ -37,7 +37,7 @@ class BarPlot(BindingPrimitive):
         width: float | None = None,
         label: str | None = None,
         legend: bool = True,
-        pane: PaneSelect | None = None,
+        pane: PaneTarget | None = None,
     ):
 
         if width is None:
