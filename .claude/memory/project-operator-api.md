@@ -1,7 +1,8 @@
 ---
-name: Indicator/expression operator API
+name: project-operator-api
 description: Constructor form is the primary binding style; @ is the operator alternative; | chains indicators
-type: project
+metadata:
+  type: project
 ---
 
 Binding an indicator/expression to a primitive has two equivalent forms. Since 2026-07 the **constructor form is the primary documented style** (README, notebooks, docstrings); `@` remains fully supported as the operator form:

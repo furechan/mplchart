@@ -1,7 +1,8 @@
 ---
-name: Optional imports in tests
+name: feedback-optional-imports
 description: Use pytest.importorskip for optional test dependencies, not try/except with None fallback
-type: feedback
+metadata:
+  type: feedback
 ---
 
 Use `pytest.importorskip("module")` instead of the try/except pattern for optional deps in tests.

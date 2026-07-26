@@ -1,7 +1,8 @@
 ---
-name: Changelog style — keep entries brief
+name: feedback-changelog-style
 description: User prefers terse changelog entries; no inline rationale or explanation
-type: feedback
+metadata:
+  type: feedback
 ---
 
 Keep changelog entries short — just what changed, no explanation of why.

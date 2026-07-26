@@ -1,10 +1,11 @@
 ---
-name: Pandas expressions gotchas
+name: project-pandas-expressions-gotchas
 description: Known pitfalls with pandas.api.typing.Expression (__getattr__ trap, callable trap, private eval hook)
-type: project
+metadata:
+  type: project
 ---
 
-`pandas.api.typing.Expression` (introduced in pandas 3.0 via `pd.col()`) has several design problems that make it hazardous to handle alongside normal Python objects.
+`pandas.api.typing.Expression` (introduced in pandas 3.0 via `pd.col()`) has several design problems that make it hazardous to handle alongside normal Python objects. Concept framing — pandas column expressions as a lightweight adaptation of the polars-native idea — is in [[project-expression-concepts]].
 
 ## The `__getattr__` trap
 

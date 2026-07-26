@@ -1,7 +1,8 @@
 ---
-name: Run pytest after each refactoring
+name: feedback-run-pytest
 description: Always run pytest after each fix or refactoring step
-type: feedback
+metadata:
+  type: feedback
 ---
 
 Run `uv run pytest` after each fix or refactoring, not just at the end.

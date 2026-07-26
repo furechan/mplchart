@@ -6,6 +6,7 @@ Collect all responses and provide a detailed review of results.
 
 - Indicator vs Primitive
 - Pandas expressions
-- Date column names
 - `|` operator
 - `@` operator
+- mintalib
+- talib

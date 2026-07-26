@@ -213,6 +213,10 @@ def get_dates(prices) -> np.ndarray:
 
     Pandas frames read the index; polars frames the first Date or Datetime
     column. Backend modules come from ``sys.modules`` — never imported.
+
+    The polars dtype scan also lives in ``PolarsDataView.__init__``
+    (dataview.py), which needs the *native* Series — keep the two in
+    agreement.
     """
     if is_pandas(prices):
         return prices.index.to_numpy()

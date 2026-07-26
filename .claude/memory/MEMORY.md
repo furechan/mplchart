@@ -1,12 +1,10 @@
 # Memory Index
 
 - [Renko/PnF via prices transforms + deferred view](project-view-transforms.md) — shipped: Renko/PointFigure primitives bind transforms via Chart.get_view; transform-first plot contract; volume conventions differ by design
-
-- [Examples notebook structure](project-examples-structure.md) — mechanics restructure in progress; parades retiring, breadth goes to gallery
+- [Examples notebook structure](project-examples-structure.md) — 7 concept/mechanics notebooks + gallery (restructure done July 2026); no examples/README — the mkdocs nav is the index; update mkdocs.yml nav when adding notebooks
 - [Run pytest after each refactoring](feedback-run-pytest.md) — always run pytest after each fix, not just at the end
 - [Optional imports in tests](feedback-optional-imports.md) — use `pytest.importorskip` not try/except+None; put importorskip after normal imports to avoid ruff E402
 - [Backend test parametrization](feedback-backend-test-parametrization.md) — backend-agnostic features get one test file parametrized over both backends via a params fixture; module-level importorskip only for single-backend files
-- [pane() API replaces target= on plot()](project-pane-api.md) — new fluent method for pane selection; all notebooks migrated
 - [Indicator/expression operator API](project-operator-api.md) — constructor form primary, `@` operator alternative; `|` chains indicators
 - [Backend architecture (pandas/polars split)](project-backend-architecture.md) — core is backend-agnostic; indicators/library/pandas are pandas-only opt-in; expressions is polars-only opt-in
 - [wrap_result origin (mintalib)](project-wrap-result-origin.md) — numpy→backend-frame wrapper ported from mintalib model/function.py; the original dual-backend indicator design
@@ -14,9 +12,10 @@
 - [Commit .envrc files](feedback-envrc.md) — `.envrc` is project metadata, not secrets; commit it. Secrets live in separate gitignored files it sources.
 - [VS Code interpreter path warning](feedback-vscode-interpreter-path.md) — if `.venv` exists but VS Code warns on `.venv/bin/python`, set `python.defaultInterpreterPath` to `${workspaceFolder}/.venv/bin/python` in workspace settings.
 - [Changelog style](feedback-changelog-style.md) — keep entries terse; no inline rationale
-- [Pandas expressions gotchas](project-pandas-expressions-gotchas.md) — `__getattr__` trap, `callable` trap, `@`-binding trap (Expression.__matmul__ shadows primitive binding), private `_eval_expression` hook; detection via `type(item).__dict__`
+- [Expression concepts: polars-native vs pandas 3.0 adaptation](project-expression-concepts.md) — expressions are native to polars (mplchart.expressions); "pandas expressions" = pandas 3.0 column Expression (`pd.col`) interop via `as_expr`, a lightweight adaptation, not a native feature
+- [Pandas expressions gotchas](project-pandas-expressions-gotchas.md) — pandas 3.0 column Expression pitfalls: `__getattr__` trap, `callable` trap, `@`-binding trap (Expression.__matmul__ shadows primitive binding), private `_eval_expression` hook; detection via `type(item).__dict__`
 - [Trend-lines exploration](project-trend-lines-exploration.md) — trend-lines-proto.ipynb (walkback design); conventions (single swing concept, avg_move scale, zero-disables knobs, side constants) and next steps
-- [Style option design](project-styler-sketch.md) — notes/styler-sketch.md converged (Style + Styler under styles/, lib/ dict modules); Styler extracted to styles/styler.py, rest pending; registry/CN hacks rejected
+- [Style system record](project-style-system.md) — implemented: Style spec + Styler + settings doctrine (roles never instances, params-only validation, total styles, rejected registry/CN hacks); design notes in notes/styler-sketch.md + style-settings.md
 - [No notebook globals in functions](feedback-no-notebook-globals.md) — pass everything as parameters; declare hook contracts as Callable aliases with annotated signatures
 - [README before inv build](project-publish-readme-ordering.md) — the wheel bakes README.md at build time (no more pypi-readme generation); README edits after build miss the published release; keep README links absolute
 - [Silence type checker with type: ignore, not casts](feedback-silence-pyright.md) — use `# type: ignore[...]` for false positives; don't wrap in runtime casts; Pylance-only complaints get `# pyright: ignore[rule]`; when both ty and pyright complain use `# ty: ignore[rule]  # pyright: ignore[rule]` (ty doesn't honor bracketed `type: ignore[...]`)

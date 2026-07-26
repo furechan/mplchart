@@ -1,7 +1,8 @@
 ---
-name: Commit .envrc files; don't gitignore them
+name: feedback-envrc
 description: .envrc is a project-metadata pointer file and should be committed. Secrets live in separately-gitignored files that it sources.
-type: feedback
+metadata:
+  type: feedback
 ---
 
 `.envrc` files (direnv configs) should be **committed**, not gitignored.

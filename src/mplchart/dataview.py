@@ -218,6 +218,8 @@ class PolarsDataView(DataView):
         self.end = end
         self.max_bars = max_bars
 
+        # same dtype scan as utils.get_dates, kept native here (search_sorted,
+        # tz handling need the polars Series) — keep the two in agreement
         col = next(
             (prices[name] for name, dtype in prices.schema.items()
              if dtype == pl.Date or dtype == pl.Datetime),
