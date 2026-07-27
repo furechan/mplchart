@@ -241,11 +241,13 @@ def xvalues_to_float(xvalues) -> np.ndarray:
     return arr.astype(float)
 
 
-def plot_vbars(ax, xvalues, heights, *, width=0.8, color=None, alpha=None, label=None):
+def plot_vbars(ax, xvalues, heights, *, width=0.8, color=None, edgecolor=None,
+               alpha=None, label=None):
     """Vertical bars as a single PolyCollection — one artist instead of one Rectangle per bar.
 
-    Same data-unit ``width`` semantics as ``ax.bar``; ``color`` may be a single
-    color or an array of per-bar colors.
+    Same data-unit ``width`` semantics as ``ax.bar``; ``color`` and
+    ``edgecolor`` may each be a single color or an array of per-bar colors.
+    ``edgecolor=None`` leaves the bars unoutlined.
     """
     from matplotlib.collections import PolyCollection
 
@@ -257,9 +259,12 @@ def plot_vbars(ax, xvalues, heights, *, width=0.8, color=None, alpha=None, label
 
     valid = np.isfinite(xv) & np.isfinite(top)
     if not valid.all():
+        count = len(valid)
         xv, top = xv[valid], top[valid]
-        if isinstance(color, np.ndarray) and len(color) == len(valid):
-            color = color[valid]
+        color, edgecolor = (
+            c[valid] if isinstance(c, np.ndarray) and len(c) == count else c
+            for c in (color, edgecolor)
+        )
 
     bottom = np.zeros_like(top)
 
@@ -271,7 +276,8 @@ def plot_vbars(ax, xvalues, heights, *, width=0.8, color=None, alpha=None, label
 
     poly = PolyCollection(
         verts,  # ty: ignore[invalid-argument-type]  # pyright: ignore[reportArgumentType]  # stubs say Sequence[ArrayLike]; 3-D ndarray is supported
-        facecolors=color, edgecolors="none", alpha=alpha, label=label,
+        facecolors=color, edgecolors="none" if edgecolor is None else edgecolor,
+        alpha=alpha, label=label,
     )
     ax.add_collection(poly)
     ax.autoscale_view()

@@ -263,6 +263,8 @@ Volume(
     colorup: str | None = None,
     colordn: str | None = None,
     colorma: str | None = None,
+    edgeup: str | None = None,
+    edgedn: str | None = None,
     use_prev_close: bool | None = None,
 )
 ```
@@ -291,6 +293,12 @@ Defaults to 0.8.
 `volume.down.color` setting, else red (prop-cycle snapped).
 - **colorma** (str): Color for the SMA overlay line. Defaults to
 the `volume.ma.color` setting, else gray (prop-cycle snapped).
+- **edgeup** (str): Outline color for up-bars. Defaults to the
+`volume.edge.up.color` setting; with neither side set the bars
+are unoutlined, and setting only one side leaves the other
+following its face color.
+- **edgedn** (str): Outline color for down-bars. Defaults to the
+`volume.edge.down.color` setting (see `edgeup`).
 - **use_prev_close** (bool): Color bars by close vs previous
 close (interbar) instead of close vs open (intrabar). Default
 (`None`) defers to the `volume.use_prev_close` setting,

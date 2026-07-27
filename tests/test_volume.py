@@ -121,3 +121,33 @@ def test_shipped_style_colors_volume():
     fig, poly = plot_volume(style="nightclouds")
     assert rgb(poly.get_facecolor()) == [rgba("white")[:3], rgba("#4a90d9")[:3]]
     plt.close(fig)
+
+
+def test_edge_colors_default_none():
+    # bars are unoutlined by default
+    fig, poly = plot_volume()
+    assert len(poly.get_edgecolor()) == 0 or all(c[3] == 0 for c in poly.get_edgecolor())
+    plt.close(fig)
+
+
+def test_edge_colors_kwargs():
+    # directional outlines, mirroring the face colors
+    fig, poly = plot_volume(edgeup="navy", edgedn="purple")
+    assert rgb(poly.get_edgecolor()) == [rgba("navy")[:3], rgba("purple")[:3]]
+    plt.close(fig)
+
+
+def test_edge_colors_setting_neutral():
+    # both sides alike gives a neutral outline (the tradingview look)
+    scheme = {"volume.edge.up.color": "white", "volume.edge.down.color": "white"}
+    fig, poly = plot_volume(settings=scheme)
+    assert rgb(poly.get_edgecolor()) == [rgba("white")[:3]] * 2
+    plt.close(fig)
+
+
+def test_edge_one_side_only():
+    # with one side set the other follows its face color (candle-edge rule),
+    # so the down bar's outline matches its fill rather than going black
+    fig, poly = plot_volume(colorup="green", colordn="red", edgeup="navy")
+    assert rgb(poly.get_edgecolor()) == [rgba("navy")[:3], rgba("red")[:3]]
+    plt.close(fig)

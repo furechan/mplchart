@@ -34,6 +34,7 @@ Candlestick scheme taxonomy (mono hollow, two-color filled, yahoo-style, colored
 | `volume.ma.color` | Volume | `colorma` kwarg (ditto, `~gray`) | — (their mav is price-pane) |
 | `volume.alpha` | Volume | `alpha` kwarg (`None` → setting, else 0.5; bars + ma line) | `marketcolors.volume_alpha` |
 | `volume.use_prev_close` | Volume | `use_prev_close` kwarg mirror (`None` → setting, else False) — the `candle.use_prev_close` twin | `marketcolors.vcdopcod` |
+| `volume.edge.up.color` / `volume.edge.down.color` | Volume | `edgeup` / `edgedn` kwargs; opt-in as a pair — neither set means unoutlined bars, one set makes the other follow its face | `marketcolors.vcedge` |
 | ~~`volume.width`~~ | Volume | declined — width is data-density, not style | width subsystem |
 
 ## Indicator styling doctrine (settled 2026-07-23)

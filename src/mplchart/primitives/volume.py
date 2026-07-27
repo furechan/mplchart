@@ -4,6 +4,10 @@ Style settings consumed by this primitive:
 
     volume.up.color        up bars, close ≥ open (default: ~green)
     volume.down.color      down bars (default: ~red)
+    volume.edge.up.color   bar outlines — unset on both sides means no
+    volume.edge.down.color   outline; one side set makes the other follow
+                             its face color (set both alike for a neutral
+                             outline)
     volume.ma.color        SMA overlay line (default: ~gray)
     volume.alpha           opacity, bars and ma line (default: 0.5)
     volume.use_prev_close  interbar-coloring flag (default: False)
@@ -42,6 +46,12 @@ class Volume(Primitive):
             ``volume.down.color`` setting, else red (prop-cycle snapped).
         colorma (str, optional): Color for the SMA overlay line. Defaults to
             the ``volume.ma.color`` setting, else gray (prop-cycle snapped).
+        edgeup (str, optional): Outline color for up-bars. Defaults to the
+            ``volume.edge.up.color`` setting; with neither side set the bars
+            are unoutlined, and setting only one side leaves the other
+            following its face color.
+        edgedn (str, optional): Outline color for down-bars. Defaults to the
+            ``volume.edge.down.color`` setting (see ``edgeup``).
         use_prev_close (bool, optional): Color bars by close vs previous
             close (interbar) instead of close vs open (intrabar). Default
             (``None``) defers to the ``volume.use_prev_close`` setting,
@@ -58,6 +68,8 @@ class Volume(Primitive):
         colorup: str | None = None,
         colordn: str | None = None,
         colorma: str | None = None,
+        edgeup: str | None = None,
+        edgedn: str | None = None,
         use_prev_close: bool | None = None,
     ):
         self.sma = sma
@@ -66,6 +78,8 @@ class Volume(Primitive):
         self.colorup = colorup
         self.colordn = colordn
         self.colorma = colorma
+        self.edgeup = edgeup
+        self.edgedn = edgedn
         self.use_prev_close = use_prev_close
 
     def __str__(self):
@@ -106,12 +120,24 @@ class Volume(Primitive):
 
         color = np.where(up, colorup, colordn)
 
+        # outlines are opt-in as a pair: unset with neither side gives
+        # unoutlined bars (the default look); with one side set the other
+        # follows its face, as candle edges follow their faces
+        edgeup = resolve("volume.edge.up", ax, override=self.edgeup)
+        edgedn = resolve("volume.edge.down", ax, override=self.edgedn)
+        edgecolor = (
+            np.where(up, edgeup or colorup, edgedn or colordn)
+            if edgeup or edgedn
+            else None
+        )
+
         if ax._label == "twinx":
             vmax = volume.max()
             ax.set_ylim(0.0, vmax * 4.0)
             ax.yaxis.set_visible(False)
 
-        plot_vbars(ax, xv, volume, width=width, alpha=alpha, color=color)
+        plot_vbars(ax, xv, volume, width=width, alpha=alpha, color=color,
+                   edgecolor=edgecolor)
 
         if self.sma:
             colorma = resolve("volume.ma", ax, override=self.colorma, fallback="~gray")
