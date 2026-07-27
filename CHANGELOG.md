@@ -1,7 +1,7 @@
 # Change Log
 
 ## 0.0.47
-- New `wicks.up.color` / `wicks.down.color` settings for directional candle wicks — chain: directional → neutral `wicks.color` → the edge colors
+- New `wicks.up.color` / `wicks.down.color` settings for candle wicks, each side defaulting to its edge color — they replace the flat `wicks.color` (removed; neutral wicks are both sides set to the same color), so every style role now carries up/down variants
 - `Stripes` alpha defaults to 0.2 — was None, which rendered fully opaque bands
 - `Styler.context` restores only the keys it sets — the previous full-snapshot restore (`mpl.rc_context`) reverted the interactive/backend state set by lazy backend resolution when the chart was the first figure of a notebook session, silently disabling inline auto-display of all subsequent charts (figures accumulated until an explicit `show`)
 - API reference pages in the docs (chart, primitives, indicators, expressions, styles), generated from docstrings by the griffe-based `scripts/make-api-docs.py` (`inv apidocs`), with a built-in render check

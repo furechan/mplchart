@@ -4,7 +4,7 @@ Working list (2026-07-22) of settings keys we are entertaining for the [styler-s
 
 ## Naming rules
 
-- Roles are singular nouns in mplchart lingo: `candle`, `ohlc`, `volume`, `hline`, `trendline` (note: supersedes the plural `candles.*` spellings in earlier sketch drafts). Deliberate exception: `wicks` — collective noun for the wick LineCollection, no variant.
+- Roles are singular nouns in mplchart lingo: `candle`, `ohlc`, `volume`, `hline`, `trendline` (note: supersedes the plural `candles.*` spellings in earlier sketch drafts). Exception: `wicks` — collective noun for the wick LineCollection; it takes `up`/`down` variants like every other direction-colored role (the flat variant-less `wicks.color` was removed 2026-07-27 — every role now carries its variants, no singletons).
 - Variants: `up` / `down` / `off` for direction-colored elements (settled 2026-07-23: `down`, not `dn` — the kwargs keep `colorup`/`colordn`; `off` for the hollow-body fill, freeing `candle.hollow` for the future bool mode flag); element names (`ma`, `support`, `resistance`) where the role has sub-elements.
 - Candle body outlines are their own role, not a variant: `edge.up.color` / `edge.down.color`.
 - Facets: `color`, `alpha`, `width`, `linestyle` — always explicit, always last.
@@ -19,7 +19,7 @@ Candlestick scheme taxonomy (mono hollow, two-color filled, yahoo-style, colored
 | `candle.up.color` | Candlesticks | `colorup` / `text.color` | `marketcolors.candle.up` |
 | `candle.down.color` | Candlesticks | `colordn` / `text.color` | `marketcolors.candle.down` |
 | `candle.off.color` | Candlesticks | hollow-body fill / `axes.facecolor` | `marketcolors.hollow` |
-| `wicks.color` | Candlesticks | neutral wick (yahoo-style); defaults follow the edges | `marketcolors.wick.up/down` |
+| `wicks.up.color` / `wicks.down.color` | Candlesticks | wicks per side; default to the edge colors — set both alike for neutral wicks (yahoo-style) | `marketcolors.wick.up/down` |
 | `edge.up.color` / `edge.down.color` | Candlesticks | body outlines; default to `candle.up/down` colors | `marketcolors.edge.up/down` |
 | `candle.alpha` | Candlesticks | `alpha` kwarg (`None` → setting, else 1.0) | `marketcolors.alpha` |
 | `candle.hollow` | Candlesticks | `hollow` kwarg mirror (`None` → setting → resolved-face default) | — (their `type=` territory) |
@@ -73,7 +73,7 @@ Every style-exposed mplfinance knob, and where it lands here:
 | mplfinance | Disposition |
 |---|---|
 | `marketcolors.candle/ohlc/volume` up/down | ✓ `candle.*`, `ohlc.*`, `volume.*` above |
-| `marketcolors.wick`, `marketcolors.edge` | ✓ `wicks.color` (flat) and `edge.up.color`/`edge.down.color` (per-direction); a per-direction wick split is representable later as `wicks.up.color` (grammar is positional-from-the-right) if a style ever needs it |
+| `marketcolors.wick`, `marketcolors.edge` | ✓ `wicks.up.color`/`wicks.down.color` and `edge.up.color`/`edge.down.color` — full per-direction parity (the wick split landed 2026-07-27; `tradingview`'s teal/red wicks map exactly) |
 | `marketcolors.hollow` | ✓ `candle.off.color` |
 | `marketcolors.alpha`, `volume_alpha` | ✓ `candle.alpha` / `ohlc.alpha`, `volume.alpha` |
 | `mavcolors` | ✓ rc `axes.prop_cycle` (the shared line cycle; list-valued `sma.color` fragments the cycle per prefix — demoted from the mavcolors story) |

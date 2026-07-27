@@ -109,8 +109,12 @@ def test_settings_bicolor_hollow_kwarg():
 
 
 def test_settings_neutral_wick():
-    # wicks gives yahoo-style neutral wicks; edges keep the up/down colors
-    scheme = {"candle.up.color": "green", "candle.down.color": "red", "wicks.color": "gray"}
+    # both wick sides in one color gives yahoo-style neutral wicks;
+    # edges keep the up/down colors
+    scheme = {
+        "candle.up.color": "green", "candle.down.color": "red",
+        "wicks.up.color": "gray", "wicks.down.color": "gray",
+    }
     fig, wicks, poly = plot_candles(settings=scheme)
     green, red, gray = rgba("green"), rgba("red"), rgba("gray")
     assert [tuple(c) for c in poly.get_edgecolor()] == [green, red, green]
@@ -130,16 +134,15 @@ def test_settings_directional_wicks():
     plt.close(fig)
 
 
-def test_settings_directional_wicks_over_neutral():
-    # a directional wick setting wins over the neutral one; the unset side
-    # falls back to the neutral color rather than to its edge
+def test_settings_wick_side_falls_back_to_edge():
+    # an unset wick side follows its edge — sides are independent
     scheme = {
         "candle.up.color": "green", "candle.down.color": "red",
-        "wicks.color": "gray", "wicks.up.color": "navy",
+        "wicks.up.color": "navy",
     }
     fig, wicks, poly = plot_candles(settings=scheme)
-    navy, gray = rgba("navy"), rgba("gray")
-    assert [tuple(c) for c in wicks.get_color()] == [navy] * 2 + [gray] * 2 + [navy] * 2
+    navy, red = rgba("navy"), rgba("red")
+    assert [tuple(c) for c in wicks.get_color()] == [navy] * 2 + [red] * 2 + [navy] * 2
     plt.close(fig)
 
 

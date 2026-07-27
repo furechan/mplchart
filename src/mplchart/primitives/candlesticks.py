@@ -6,9 +6,8 @@ Style settings consumed by this primitive (see notes/candlestick-styles.md):
     candle.down.color    down-bar faces (ditto)
     edge.up.color        body outlines (default: follow the faces)
     edge.down.color
-    wicks.color          neutral wick color (default: follow the edges)
-    wicks.up.color       directional wick colors (default: the neutral
-    wicks.down.color       color, else follow the edges)
+    wicks.up.color       wick colors (default: follow the edges); set both
+    wicks.down.color       to one color for neutral wicks (yahoo-style)
     candle.off.color       hollow-body fill (default: axes.facecolor)
     candle.alpha           opacity (default: 1.0)
     candle.hollow          hollow-mode flag (default: resolved faces equal)
@@ -51,9 +50,9 @@ class Candlesticks(BindingPrimitive):
     In the no-kwargs path, ``candle.up.color`` / ``candle.down.color`` select
     the filled bicolor family (missing side falls to ``text.color``),
     ``edge.up.color`` / ``edge.down.color`` override the body outlines,
-    ``wicks.color`` gives neutral wicks (yahoo-style) and
-    ``wicks.up.color`` / ``wicks.down.color`` directional ones (wicks
-    otherwise follow the edges), and ``candle.off.color`` sets the hollow-body fill
+    ``wicks.up.color`` / ``wicks.down.color`` color the wicks (which
+    otherwise follow the edges — set both to one color for yahoo-style
+    neutral wicks), and ``candle.off.color`` sets the hollow-body fill
     (default ``axes.facecolor``). Color kwargs bypass settings entirely.
 
     Args:
@@ -202,9 +201,8 @@ class Candlesticks(BindingPrimitive):
         facedn = resolve("candle.down", ax, override=colordn, fallback=textcolor)
         edgeup = resolve("edge.up", ax, override=colorup, fallback=faceup)
         edgedn = resolve("edge.down", ax, override=colordn, fallback=facedn)
-        wickneutral = resolve("wicks", ax)
-        wickup = resolve("wicks.up", ax, override=colorup, fallback=wickneutral or edgeup)
-        wickdn = resolve("wicks.down", ax, override=colordn, fallback=wickneutral or edgedn)
+        wickup = resolve("wicks.up", ax, override=colorup, fallback=edgeup)
+        wickdn = resolve("wicks.down", ax, override=colordn, fallback=edgedn)
 
         # mode chain: kwarg → candle.hollow setting → resolved-face default
         hollow = get_setting("candle", "hollow", override=self.hollow)

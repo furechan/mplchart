@@ -29,7 +29,7 @@ mplfinance encodes chart colors in a nested `marketcolors` dict; mplchart encode
 
 **mpf has, mplchart does not:**
 
-- ~~`marketcolors.wick.up` / `.down` — directional wick colors~~ — closed 2026-07-27: `wicks.up.color` / `wicks.down.color` added, chaining to the neutral `wicks.color` and then to the edges. `tradingview`'s teal/red wicks now convert exactly.
+- ~~`marketcolors.wick.up` / `.down` — directional wick colors~~ — closed 2026-07-27: `wicks.up.color` / `wicks.down.color` added (each side falling back to its edge), replacing the flat `wicks.color`. `tradingview`'s teal/red wicks now convert exactly; neutral wicks are both sides set alike.
 - `marketcolors.vcedge` — volume bar edge color. mplchart volume has no edge setting.
 - `marketcolors.vcdopcod` — "volume color depends on price change, not candle direction" mode flag. mplchart always colors volume by bar direction.
 
