@@ -9,6 +9,7 @@ colors here — artists never see them, so no style state survives to draw
 time (see notes/styler-sketch.md).
 """
 
+from contextlib import contextmanager
 from itertools import cycle
 from weakref import WeakKeyDictionary
 
@@ -18,6 +19,17 @@ import matplotlib.pyplot as plt
 from ..colors import closest_color, normalize_color
 from ..utils import extract_prefix
 from .style import base_template, load_stylesheet, resolve_style
+
+
+@contextmanager
+def _scoped_rc(rcparams):
+    """Apply ``rcparams`` scoped, restoring only those keys on exit."""
+    saved = {key: mpl.rcParams[key] for key in rcparams}
+    mpl.rcParams.update(rcparams)
+    try:
+        yield
+    finally:
+        mpl.rcParams.update(saved)
 
 
 class _NoAxes:
@@ -103,8 +115,16 @@ class Styler:
         return type(self)(settings=settings, rcparams=self.rcparams)
 
     def context(self):
-        """Scoped, fully-specified rc — the style is the whole look."""
-        return mpl.rc_context(self.rcparams)
+        """Scoped, fully-specified rc — the style is the whole look.
+
+        Restores only the keys it sets. A full-snapshot restore
+        (``mpl.rc_context``) would also revert dynamic state such as
+        ``interactive`` and ``backend``: when the chart is the first pyplot
+        activity in a notebook kernel, the backend resolves *inside* this
+        context, and reverting that on exit permanently disables inline
+        auto-display (figures accumulate until an explicit ``show``).
+        """
+        return _scoped_rc(self.rcparams)
 
     def next_line_color(self, ax):
         """Next line color: text.color on an empty pane, then cycled colors.

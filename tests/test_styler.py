@@ -239,6 +239,34 @@ def test_rc_context_wiring():
     plt.close(canvas.figure)
 
 
+def test_context_restores_only_its_keys():
+    """Styler.context must not clobber dynamic state changed inside it.
+
+    Regression: mpl.rc_context restored a full rcParams snapshot, undoing
+    the interactive/backend activation that happens inside the context when
+    the chart is the first figure of a notebook kernel — which disabled
+    inline auto-display for the rest of the session.
+    """
+    import matplotlib as mpl
+
+    styler = get_styler(None)
+    assert "interactive" not in styler.rcparams  # blacklisted, never applied
+
+    before = mpl.is_interactive()
+    try:
+        with styler.context():
+            mpl.interactive(not before)  # simulate in-context backend activation
+        assert mpl.is_interactive() == (not before)  # survives context exit
+    finally:
+        mpl.interactive(before)
+
+    # keys the styler owns are still restored on exit
+    ambient = plt.rcParams["lines.linewidth"]
+    with styler.context():
+        plt.rcParams["lines.linewidth"] = ambient + 1
+    assert plt.rcParams["lines.linewidth"] == ambient
+
+
 def test_load_stylesheet_default():
     from mplchart.styles import load_stylesheet
 
