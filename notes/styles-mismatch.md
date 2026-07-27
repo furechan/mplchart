@@ -57,9 +57,9 @@ So `mavcolors` does not override the stylesheet cycle; it bypasses it for MAs on
 
 mplchart has **one** cycle (the rcParams `axes.prop_cycle`) but consumes it *per role*: `resolve_color` keys a cycle per canonical role, so `SMA(20)`/`SMA(50)` take successive colors, and a role setting may itself be a list that cycles per role (`{"sma.color": [...]}`). That is more expressive per-indicator than mpf's single global MA cycle, but there is no "all moving averages" role to receive a mav palette wholesale.
 
-Consequence for conversion: `mavcolors → rc["axes.prop_cycle"]` is an **approximation**, not an equivalence. It gives the intended look (mplchart indicator lines are the analog of mpf's MAs) but replaces the stylesheet's own cycle, which mpf would have kept for non-MA artists. Since no mav palette equals its sheet cycle, this substitution always changes something.
+Consequence for conversion: `mavcolors → rc["axes.prop_cycle"]` collapses mpf's two cycles into one. Note this is the **deliberate** mapping under the settled doctrine — [style-settings.md](style-settings.md) names `axes.prop_cycle` "the `mavcolors` generalization", with the tradeoff accepted explicitly ("a style that pins mav-ish cycle colors accepts that unclaimed pane indicators draw from the same palette — pin their roles to opt them out"). It is not a defect, and an earlier revision of this note wrongly framed it as a gap.
 
-Designed fix: **key aliases** — see [key-aliases.md](key-aliases.md). `mavcolors` → a list-valued `overlay.color`, plus aliases `{"sma": "overlay", "ema": "overlay"}`, leaving `axes.prop_cycle` alone. Two cycles on each side doing the same jobs — isomorphic rather than approximate. Not implemented yet.
+It is still a *fidelity* loss, and quantifying it is what this survey added: the mav palette never equals the sheet cycle (0 of 16), so the substitution always discards a cycle mpf would have kept. That evidence is one of the two grounds on which the doctrine was revised on 2026-07-27 in favour of **key aliases** — see [key-aliases.md](key-aliases.md). Under that design the conversion becomes `mavcolors` → list-valued `overlay.color` plus aliases `{"sma": "overlay", "ema": "overlay"}`, leaving `axes.prop_cycle` alone: two cycles on each side doing the same jobs. Not implemented.
 
 ## Gotcha
 
