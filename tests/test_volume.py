@@ -52,6 +52,27 @@ def test_default_snapped_colors_intrabar():
     plt.close(fig)
 
 
+def test_use_prev_close_kwarg():
+    # interbar: bar 1 closes above the previous close, so both bars are up
+    # (the first bar compares to itself)
+    fig, poly = plot_volume(colorup="green", colordn="red", use_prev_close=True)
+    assert rgb(poly.get_facecolor()) == [rgba("green")[:3]] * 2
+    plt.close(fig)
+
+
+def test_use_prev_close_setting():
+    # a style can declare the interbar mode; the kwarg wins over the setting
+    scheme = {"volume.up.color": "green", "volume.down.color": "red",
+              "volume.use_prev_close": True}
+    fig, poly = plot_volume(settings=scheme)
+    assert rgb(poly.get_facecolor()) == [rgba("green")[:3]] * 2
+    plt.close(fig)
+
+    fig, poly = plot_volume(settings=scheme, use_prev_close=False)
+    assert rgb(poly.get_facecolor()) == [rgba("green")[:3], rgba("red")[:3]]
+    plt.close(fig)
+
+
 def test_color_kwargs_exact():
     # explicit kwargs are exact — no prop-cycle snapping (unlike the defaults)
     teal = "#26a69a"

@@ -263,13 +263,15 @@ Volume(
     colorup: str | None = None,
     colordn: str | None = None,
     colorma: str | None = None,
+    use_prev_close: bool | None = None,
 )
 ```
 
 Volume primitive.
 
-Plots volume bars colored by bar direction (close ≥ open, matching the
-candlesticks). When the current pane already has content, volume rides
+Plots volume bars colored by bar direction — close ≥ open, matching the
+candlesticks, or close vs previous close with `use_prev_close`. When
+the current pane already has content, volume rides
 a twinx overlay squashed at the bottom so it does not affect the price
 axis; an empty current pane (volume-only chart, or right after
 `Pane`) is owned outright — full height, visible scale. An optional
@@ -289,6 +291,11 @@ Defaults to 0.8.
 `volume.down.color` setting, else red (prop-cycle snapped).
 - **colorma** (str): Color for the SMA overlay line. Defaults to
 the `volume.ma.color` setting, else gray (prop-cycle snapped).
+- **use_prev_close** (bool): Color bars by close vs previous
+close (interbar) instead of close vs open (intrabar). Default
+(`None`) defers to the `volume.use_prev_close` setting,
+else `False`. Mirrors the flag of the same name on
+`Candlesticks`.
 
 ### LinePlot
 

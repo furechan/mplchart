@@ -1,6 +1,7 @@
 # Change Log
 
 ## 0.0.47
+- `Volume` gains `use_prev_close=` and the matching `volume.use_prev_close` setting — colors bars by close vs previous close (interbar) instead of close vs open, mirroring the `Candlesticks` flag
 - New `wicks.up.color` / `wicks.down.color` settings for candle wicks, each side defaulting to its edge color — they replace the flat `wicks.color` (removed; neutral wicks are both sides set to the same color), so every style role now carries up/down variants
 - `Stripes` alpha defaults to 0.2 — was None, which rendered fully opaque bands
 - `Styler.context` restores only the keys it sets — the previous full-snapshot restore (`mpl.rc_context`) reverted the interactive/backend state set by lazy backend resolution when the chart was the first figure of a notebook session, silently disabling inline auto-display of all subsequent charts (figures accumulated until an explicit `show`)

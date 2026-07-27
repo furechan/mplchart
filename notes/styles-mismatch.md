@@ -23,6 +23,7 @@ mplfinance encodes chart colors in a nested `marketcolors` dict; mplchart encode
 | `marketcolors.wick.up` / `.down` | `settings["wicks.up.color"]` / `["wicks.down.color"]` |
 | `marketcolors.ohlc.up` / `.down` | `settings["ohlc.up.color"]` / `["ohlc.down.color"]` |
 | `marketcolors.volume.up` / `.down` | `settings["volume.up.color"]` / `["volume.down.color"]` |
+| `marketcolors.vcdopcod` | `settings["volume.use_prev_close"]` (3 styles: `charles`, `ibd`, `yahoo`) |
 | `marketcolors.hollow` | `settings["candle.off.color"]` (1 style: `kenan`) |
 | `marketcolors.alpha` | `settings["candle.alpha"]` and `settings["ohlc.alpha"]` |
 | `marketcolors.volume_alpha` | `settings["volume.alpha"]` (1 style: `tradingview`) |
@@ -35,7 +36,7 @@ mplfinance encodes chart colors in a nested `marketcolors` dict; mplchart encode
 
 - ~~`marketcolors.wick.up` / `.down` — directional wick colors~~ — closed 2026-07-27: `wicks.up.color` / `wicks.down.color` added (each side falling back to its edge), replacing the flat `wicks.color`. `tradingview`'s teal/red wicks now convert exactly; neutral wicks are both sides set alike.
 - `marketcolors.vcedge` — volume bar edge color. mplchart volume has no edge setting. **Low value:** all 16 styles define it, but only `tradingview` sets it to something other than the volume colors (white edges on teal/red bars) — purely cosmetic, 1 style affected.
-- `marketcolors.vcdopcod` — "volume color depends on price change, not candle direction" mode flag. mplchart hardcodes intrabar direction (`close >= open`, matching the candlesticks). **Worth considering:** 3 styles enable it (`charles`, `ibd`, `yahoo`), and mplchart already has the exact analog one primitive over — `candle.use_prev_close`. A `volume.use_prev_close` flag would close the gap *and* make volume symmetric with candlesticks, which is the better argument for it.
+- ~~`marketcolors.vcdopcod` — "volume color depends on price change, not candle direction" mode flag~~ — closed 2026-07-27: `volume.use_prev_close` (kwarg + setting, mirroring `candle.use_prev_close`; first bar compares to itself). The symmetry with candlesticks was the real argument; mpf parity for `charles`/`ibd`/`yahoo` came with it. Verified against `yahoo`'s colors.
 
 **mplchart has, mpf does not** (the model is a superset on candles):
 
