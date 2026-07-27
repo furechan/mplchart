@@ -1,6 +1,8 @@
 # Styles Mismatch — mplfinance vs mplchart
 
-How mplfinance style dicts map onto mplchart styles, and where the two models diverge. Findings from a July 2026 experiment (mplfinance 0.12.10b0, matplotlib 3.10.8): a ~30-line converter rendered 7 of 8 sampled mpf styles correctly on the first try. Key inventory below is exhaustive — all 16 shipped mpf styles surveyed, with usage counts.
+How mplfinance style dicts map onto mplchart styles. Findings from a July 2026 experiment (mplfinance 0.12.10b0, matplotlib 3.10.8). Key inventory below is exhaustive — all 16 shipped mpf styles surveyed, with usage counts.
+
+**Verified 2026-07-27, after closing the three gaps below:** a ~45-line converter maps all 16 styles with **zero unmapped keys**, all 16 render (candlesticks + SMA + volume, and OHLC + volume), and the rendered candle edges, wicks, volume faces and volume edges match the mplfinance spec **exactly** for every style. The two models are now equivalent for everything mpf styles express.
 
 Every mpf style carries the same top-level keys (`base_mpl_style`, `marketcolors`, `mavcolors`, `y_on_right`, `gridcolor`, `gridstyle`, `facecolor`, `rc`) and the same `marketcolors` keys (`candle`, `edge`, `wick`, `ohlc`, `volume`, `vcedge`, `vcdopcod`, `alpha`) — plus two rare ones: `hollow` (1 style: `kenan`) and `volume_alpha` (1 style: `tradingview`).
 
@@ -46,11 +48,15 @@ mplfinance encodes chart colors in a nested `marketcolors` dict; mplchart encode
 
 ## Gotcha
 
-Three mpf styles (`binance`, `default`, `kenan`) declare `base_mpl_style: "seaborn-darkgrid"`, a stylesheet name matplotlib retired. Any converter needs to alias the legacy `seaborn-*` names to `seaborn-v0_8-*`. This was the single failure of the eight sampled.
+Three mpf styles (`binance`, `default`, `kenan`) declare `base_mpl_style: "seaborn-darkgrid"`, a stylesheet name matplotlib retired. Any converter needs to alias the legacy `seaborn-*` names to `seaborn-v0_8-*` — this was the only conversion failure before the alias was added.
+
+Volume outlines cannot use `"none"` as a per-bar array entry: matplotlib parses it to transparent black, then the collection alpha overrides the alpha channel, producing visible semi-transparent outlines. Hence the pair rule (neither side set → no outline; one side set → the other follows its face).
 
 ## Status
 
-No converter shipped — the experiment lived in a scratchpad. Options if it ever matters: port selected mpf palettes into `styles/lib/` as shipped styles, or expose a `from_mplfinance` utility so users bring their own. Neither is scheduled; recorded here so the analysis does not have to be redone.
+No converter shipped — the validation harness lived in a scratchpad and was not kept. Its full mapping is the "Direct mappings" table above, so it can be rebuilt from this note in minutes; the pieces that took experimenting to find (the `seaborn-*` alias, the `"none"` edge trap, the exact role names) are recorded in Gotcha.
+
+Options if it ever matters: port selected mpf palettes into `styles/lib/` as shipped styles, or expose a `from_mplfinance` utility so users bring their own. Neither is scheduled — and note the converter is only worth shipping if users actually have custom mpf styles to bring; the 16 built-ins would be better ported once as native palettes than converted at runtime.
 
 Note for issue #19 (platform themes): converting mpf styles does **not** deliver ThinkOrSwim/Bloomberg/IBKR looks — those do not exist in mplfinance either (see `notes/themes-review.md`). Platform palettes have to be sampled from real screenshots.
 
