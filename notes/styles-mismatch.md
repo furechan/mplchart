@@ -2,7 +2,7 @@
 
 How mplfinance style dicts map onto mplchart styles. Findings from a July 2026 experiment (mplfinance 0.12.10b0, matplotlib 3.10.8). Key inventory below is exhaustive — all 16 shipped mpf styles surveyed, with usage counts.
 
-**Verified 2026-07-27, after closing the three gaps below:** a ~45-line converter maps all 16 styles with **zero unmapped keys**, all 16 render (candlesticks + SMA + volume, and OHLC + volume), and the rendered candle edges, wicks, volume faces and volume edges match the mplfinance spec **exactly** for every style. The two models are now equivalent for everything mpf styles express.
+**Verified 2026-07-27, after closing the three gaps below:** a ~45-line converter maps all 16 styles with **zero unmapped keys**, all 16 render (candlesticks + SMA + volume, and OHLC + volume), and the rendered candle edges, wicks, volume faces and volume edges match the mplfinance spec **exactly** for every style. Price-renderer colors are therefore equivalent; line colors are an approximation — see Cycles.
 
 Every mpf style carries the same top-level keys (`base_mpl_style`, `marketcolors`, `mavcolors`, `y_on_right`, `gridcolor`, `gridstyle`, `facecolor`, `rc`) and the same `marketcolors` keys (`candle`, `edge`, `wick`, `ohlc`, `volume`, `vcedge`, `vcdopcod`, `alpha`) — plus two rare ones: `hollow` (1 style: `kenan`) and `volume_alpha` (1 style: `tradingview`).
 
@@ -19,7 +19,7 @@ mplfinance encodes chart colors in a nested `marketcolors` dict; mplchart encode
 | `gridcolor` | `rc["grid.color"]` |
 | `gridstyle` | `rc["grid.linestyle"]` |
 | `rc` (list of pairs) | `rc` (dict) — just `dict(...)` |
-| `mavcolors` | `rc["axes.prop_cycle"]` (via cycler) |
+| `mavcolors` | `rc["axes.prop_cycle"]` (via cycler) — **approximation, see Cycles below** |
 | `marketcolors.candle.up` / `.down` | `settings["candle.up.color"]` / `["candle.down.color"]` |
 | `marketcolors.edge.up` / `.down` | `settings["edge.up.color"]` / `["edge.down.color"]` |
 | `marketcolors.wick.up` / `.down` | `settings["wicks.up.color"]` / `["wicks.down.color"]` |
@@ -45,6 +45,19 @@ mplfinance encodes chart colors in a nested `marketcolors` dict; mplchart encode
 
 - `candle.hollow` and `candle.use_prev_close` mode flags — the `chartist` style ships them in-style; mpf treats hollow as a plot type, not a style property. (Note mpf *does* have `marketcolors.hollow`, but it is the hollow-body *fill color* — the twin of `candle.off.color`, not a mode flag.)
 - Symbolic color values (`"~green"` snap-to-cycle, `"line"`/`"fill"` sentinels) and per-pane color cycling — no mpf equivalent.
+
+## Cycles — the one real model difference
+
+mplfinance runs **two parallel color cycles**:
+
+1. `mavcolors` — a plain list turned into an `itertools.cycle` and consumed explicitly (`color=next(mavc)`) when drawing moving averages. It lives entirely outside rcParams.
+2. the base stylesheet's `axes.prop_cycle`, which `plt.style.use(base_mpl_style)` leaves in place — it still drives addplots and anything else drawn on the axes.
+
+So `mavcolors` does not override the stylesheet cycle; it bypasses it for MAs only. Survey of the 16 styles (2026-07-27): the mav palette is **never** equal to the sheet cycle (0/16) — 10 styles set a distinct palette, 6 set `mavcolors: None` and let MAs fall back to the rcParams cycle. Only 8 distinct mav palettes exist across the 16. They are short (2–7 colors vs matplotlib's 10) and purpose-built for overlaying a price pane, sometimes deliberately degenerate — `tradingview` is `['#2962ff', '#2962ff']` (all MAs the same blue), `mike` a near-black ramp.
+
+mplchart has **one** cycle (the rcParams `axes.prop_cycle`) but consumes it *per role*: `resolve_color` keys a cycle per canonical role, so `SMA(20)`/`SMA(50)` take successive colors, and a role setting may itself be a list that cycles per role (`{"sma.color": [...]}`). That is more expressive per-indicator than mpf's single global MA cycle, but there is no "all moving averages" role to receive a mav palette wholesale.
+
+Consequence for conversion: `mavcolors → rc["axes.prop_cycle"]` is an **approximation**, not an equivalence. It gives the intended look (mplchart indicator lines are the analog of mpf's MAs) but replaces the stylesheet's own cycle, which mpf would have kept for non-MA artists. Since no mav palette equals its sheet cycle, this substitution always changes something. A closer mapping would need either a "line/indicator default" role in mplchart or per-role palettes assigned at conversion time.
 
 ## Gotcha
 
