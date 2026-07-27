@@ -1,4 +1,4 @@
-# Classic Stock Charts in Python
+# Classic stock charts in Python
 
 
 Create classic technical analysis stock charts in Python with minimal code.
@@ -9,7 +9,7 @@ Charts can be defined using a declarative interface,
 based on a set of drawing primitives like `Candlesticks`, `Volume`
 and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
 
-📖 **Documentation**: tutorials and a chart gallery at [furechan.github.io/mplchart](https://furechan.github.io/mplchart/)
+📖 **Documentation**: tutorials, API reference and a chart gallery at [furechan.github.io/mplchart](https://furechan.github.io/mplchart/)
 
 
 
@@ -21,7 +21,7 @@ and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
 ![Showcase Chart](https://github.com/furechan/mplchart/raw/main/docs/assets/showcase.svg "Showcase")
 
 
-## Typical Usage
+## Typical usage
 
 ```python
 # Candlesticks chart with SMA, RSI and MACD indicators
@@ -88,7 +88,7 @@ prices = normalize_prices(yf.Ticker(ticker).history('5y'))
 
 
 
-## Drawing Primitives
+## Drawing primitives
 
 The library contains drawing primitives that can be used like an indicator in the plot api.
 Primitives are classes and must be instantiated as objects before being used with the plot api.
@@ -126,7 +126,7 @@ The main drawing primitives are :
 
 
 
-## Builtin Indicators
+## Builtin indicators
 
 The library includes some standard technical analysis indicators for **pandas** DataFrames.
 Indicators are classes and must be instantiated as objects before being used with the plot api.
@@ -183,7 +183,7 @@ Chart(prices).plot(indicators)
 ```
 
 
-## Polars Expressions
+## Polars expressions
 
 For **polars** DataFrames, the `expressions` subpackage provides polars `Expr` factories
 as an alternative to the indicator pattern.
@@ -220,9 +220,9 @@ SMA(50) @ LinePlot(color="red")    # operator form
 ```
 
 
-## Talib Functions
+## TA-Lib functions
 
-If you have ta-lib installed you can use its abstract functions as indicators. They are created by calling the `Function` factory with the name of the function and its parameters. Ta-lib functions work with both pandas and polars backends.
+If you have TA-Lib installed you can use its abstract functions as indicators. They are created by calling the `Function` factory with the name of the function and its parameters. TA-Lib functions work with both pandas and polars backends.
 
 ```python
 # Candlesticks chart with talib functions
@@ -275,7 +275,7 @@ Optional extras:
 - `[all]` — pandas and polars
 
 
-## Related Projects
+## Related projects
 - [mplfinance](https://pypi.org/project/mplfinance/) - Matplotlib utilities for the visualization, and visual analysis, of financial data
 - [cufflinks](https://github.com/santosjorge/cufflinks) - Productivity Tools for Plotly + Pandas
 - [matplotlib](https://github.com/matplotlib/matplotlib) - Matplotlib: plotting with Python

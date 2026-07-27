@@ -1,4 +1,4 @@
-# Pandas and Polars Backends
+# Pandas and polars backends
 
 mplchart works with both pandas and polars DataFrames. You pass whichever you have to `Chart(prices)`, and the charting layer — primitives, panes, styling, rendering — behaves identically. This page explains what is shared, what differs, and how to choose.
 

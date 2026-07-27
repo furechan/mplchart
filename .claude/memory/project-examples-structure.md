@@ -7,14 +7,15 @@ metadata:
 
 The `examples/` folder was consolidated from 29 notebooks to a handful in April 2026, then restructured in July 2026 when the MkDocs site + gallery landed: the per-item "parade" notebooks (indicators-pandas, expressions-polars, primitives-pandas, primitives-polars) were removed in favor of concept-organized *mechanics* notebooks, one backend each — visual breadth lives in the gallery (`docs/gallery.ipynb`), backend parity is a test concern (`test_backend_parity.py`), not a docs concern.
 
-Current notebooks (7):
+Current notebooks (6):
 - `typical-usage.ipynb` — quickstart landing page
 - `indicators.ipynb` — indicator mechanics (callables, panes, binding, `|` chaining, `as_expr`, custom indicators; pandas)
 - `expressions.ipynb` — expression mechanics (factories, `src` composition, boolean conditions, `wrap_expression`; polars); mirrors the indicators page section-for-section
 - `primitives.ipynb` — primitive mechanics by role (price/volume renderers, chart types — HeikinAshi/Renko/PointFigure incl. the transform-first contract, indicator renderers, condition primitives, panes/reference lines, pattern primitives); backend-agnostic
 - `chart-render.ipynb` — render to SVG / PNG / JPG via `chart.render()`
-- `multiple-tickers.ipynb` — multi-ticker overlay with the merge done *inline* in both backends (join + rebase shown transparently; `merge_prices` deprecated 2026-07-26 — data prep belongs in user code, don't reintroduce a merge util)
 - `talib-functions.ipynb` — ta-lib `Function` integration
+
+Moved out 2026-07-27: `multiple-tickers.ipynb` → `docs/articles/` — mostly a pandas/polars merge recipe, not an mplchart tutorial (join + rebase shown inline in both backends; `merge_prices` deprecated 2026-07-26 and its warning points to this notebook — data prep belongs in user code, don't reintroduce a merge util).
 
 There is deliberately no `examples/README.md` (removed 2026-07-26 — it duplicated the notebook listing below the fold on GitHub and was an unlinked orphan on the site; the mkdocs sidebar nav *is* the examples index — do not recreate it). The main README's `## Examples` section links to the docs-site Tutorials (absolute URL). The docs site renders these notebooks via the `docs/examples` symlink; nav in `mkdocs.yml`. Site/docs conventions live in `notes/mkdocs-setup.md`.
 

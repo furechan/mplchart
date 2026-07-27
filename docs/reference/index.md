@@ -1,4 +1,4 @@
-# API Reference
+# API reference
 
 Classic technical analysis stock charts in Python, built on matplotlib.
 
@@ -12,7 +12,7 @@ The pages in this section are generated from the source docstrings by `scripts/m
 - [mplchart.expressions](expressions.md) — polars expression factories, the polars-pipeline counterparts of the indicators
 - [mplchart.styles](styles.md) — chart styling: the `Style` spec and runtime `Styler`
 
-See also [Pandas and Polars Backends](../backends.md) for how the two data pipelines relate.
+See also [Pandas and polars backends](../backends.md) for how the two data pipelines relate.
 
 ## Conventions
 

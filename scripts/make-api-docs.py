@@ -50,10 +50,13 @@ This site is rendered HTML for humans. The markdown sources below are
 better suited for LLM consumption.
 """
 
-# hand-written pages to list after the generated ones (docs-relative path -> summary)
-LLMS_EXTRA_PAGES = {
+# hand-written pages to list in llms.txt (docs-relative path -> summary)
+LLMS_REFERENCE_EXTRAS = {
     "reference/index.md": "Reference overview and conventions",
-    "backends.md": "Pandas and polars data pipelines",
+}
+
+LLMS_GUIDES = {
+    "backends.md": "pandas and polars data pipelines",
 }
 
 # markdown extensions used by mkdocs (see mkdocs.yml), for the verify step
@@ -222,7 +225,7 @@ def verify(name: str, text: str) -> list[str]:
 
 
 def write_llms_txt(package) -> None:
-    lines = [LLMS_INTRO, "## API Reference", ""]
+    lines = [LLMS_INTRO, "## API reference", ""]
     for module_path, (stem, _) in MODULES.items():
         docstring = package[module_path].docstring
         summary = (
@@ -231,7 +234,10 @@ def write_llms_txt(package) -> None:
         lines.append(
             f"- [{PACKAGE}.{module_path}]({RAW_BASE}/reference/{stem}.md): {summary}"
         )
-    for page, summary in LLMS_EXTRA_PAGES.items():
+    for page, summary in LLMS_REFERENCE_EXTRAS.items():
+        lines.append(f"- [{Path(page).stem}]({RAW_BASE}/{page}): {summary}")
+    lines += ["", "## Guides", ""]
+    for page, summary in LLMS_GUIDES.items():
         lines.append(f"- [{Path(page).stem}]({RAW_BASE}/{page}): {summary}")
     lines.append("")
     path = OUTPUT_DIR.parent / "llms.txt"

@@ -3,6 +3,7 @@
 ## 0.0.47
 - API reference pages in the docs (chart, primitives, indicators, expressions, styles), generated from docstrings by the griffe-based `scripts/make-api-docs.py` (`inv apidocs`), with a built-in render check
 - Generated `docs/llms.txt` published at the site root — points LLM agents at the raw markdown reference pages
+- Docs nav: backends note moved to Tutorials, multiple-tickers notebook moved to Articles; titles switched to sentence case
 - `mplchart.primitives` gains `__all__`; module docstrings fleshed out for the documented modules
 
 ## 0.0.46

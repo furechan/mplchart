@@ -1,5 +1,7 @@
 # Memory Index
 
+- [Docs title style: sentence case](feedback-docs-title-style.md) — titles/nav sentence-cased; brand canonical casing (mplchart/mplfinance/pandas lowercase, Polars/TA-Lib capitalized)
+- [Notebook nav titles come from the H1](project-mkdocs-notebook-nav-titles.md) — mkdocs-jupyter overrides mkdocs.yml nav labels with the notebook H1; edit the H1 to change nav text
 - [API reference docs are generated](project-api-reference-docs.md) — docs/reference/*.md via `inv apidocs` (griffe-based, render check built in); committed md is a deliverable for agents; griffe2md/mkdocstrings rejected
 
 - [Renko/PnF via prices transforms + deferred view](project-view-transforms.md) — shipped: Renko/PointFigure primitives bind transforms via Chart.get_view; transform-first plot contract; volume conventions differ by design

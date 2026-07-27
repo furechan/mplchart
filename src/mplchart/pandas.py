@@ -33,7 +33,7 @@ def merge_prices(prices, rebase=False, **kwargs):
 
     Deprecated — merging is ordinary data preparation (a join plus an
     optional rebase); do it inline in your own code. The multiple-tickers
-    example notebook shows the pandas and polars versions.
+    notebook (docs articles) shows the pandas and polars versions.
 
     Appends one named column per kwarg, taken from the close price of each
     DataFrame. pandas aligns on the index, so dates missing from any series
@@ -53,7 +53,7 @@ def merge_prices(prices, rebase=False, **kwargs):
     """
     warnings.warn(
         "merge_prices is deprecated — merge price series inline; see the "
-        "multiple-tickers example notebook",
+        "multiple-tickers notebook in the docs articles",
         DeprecationWarning,
         stacklevel=2,
     )

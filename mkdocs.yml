@@ -40,13 +40,13 @@ nav:
   - Home: index.md
   - Gallery: gallery.ipynb
   - Tutorials:
-      - Typical Usage: examples/typical-usage.ipynb
-      - How Indicators Work: examples/indicators.ipynb
-      - How Primitives Work: examples/primitives.ipynb
-      - How Expressions Work: examples/expressions.ipynb
-      - Multiple Tickers: examples/multiple-tickers.ipynb
-      - Chart Rendering: examples/chart-render.ipynb
-      - TA-Lib Indicators: examples/talib-functions.ipynb
+      - Typical usage: examples/typical-usage.ipynb
+      - How indicators work: examples/indicators.ipynb
+      - How primitives work: examples/primitives.ipynb
+      - How expressions work: examples/expressions.ipynb
+      - Pandas and polars backends: backends.md
+      - Rendering charts to images: examples/chart-render.ipynb
+      - Plotting TA-Lib indicators: examples/talib-functions.ipynb
   - Reference:
       - reference/index.md
       - Chart: reference/chart.md
@@ -54,7 +54,7 @@ nav:
       - Indicators: reference/indicators.md
       - Expressions: reference/expressions.md
       - Styles: reference/styles.md
-      - Pandas and Polars Backends: backends.md
   - Articles:
+      - Comparing multiple tickers: articles/multiple-tickers.ipynb
       - mplfinance vs mplchart: articles/mplfinance.ipynb
-      - Plotting Trend Lines in Python: articles/trendlines.ipynb
+      - Plotting trend lines in Python: articles/trendlines.ipynb
