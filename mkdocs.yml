@@ -45,7 +45,7 @@ nav:
       - How primitives work: examples/primitives.ipynb
       - How expressions work: examples/expressions.ipynb
       - Pandas and polars backends: backends.md
-      - Rendering charts to images: examples/chart-render.ipynb
+      - Exporting charts to SVG and PNG: examples/chart-render.ipynb
       - Plotting TA-Lib indicators: examples/talib-functions.ipynb
   - Reference:
       - reference/index.md

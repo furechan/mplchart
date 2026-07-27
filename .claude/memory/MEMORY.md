@@ -1,5 +1,6 @@
 # Memory Index
 
+- [NotebookEdit cell-type conversion gotcha](feedback-notebookedit-celltype.md) — code→markdown leaves stale execution_count/outputs (schema-invalid); strip fields + re-execute after source replacements
 - [Docs title style: sentence case](feedback-docs-title-style.md) — titles/nav sentence-cased; brand canonical casing (mplchart/mplfinance/pandas lowercase, Polars/TA-Lib capitalized)
 - [Notebook nav titles come from the H1](project-mkdocs-notebook-nav-titles.md) — mkdocs-jupyter overrides mkdocs.yml nav labels with the notebook H1; edit the H1 to change nav text
 - [API reference docs are generated](project-api-reference-docs.md) — docs/reference/*.md via `inv apidocs` (griffe-based, render check built in); committed md is a deliverable for agents; griffe2md/mkdocstrings rejected
