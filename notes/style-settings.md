@@ -2,6 +2,8 @@
 
 Working list (2026-07-22) of settings keys we are entertaining for the [styler-sketch.md](styler-sketch.md) grammar `<role>[.<variant>].<facet>`. Sourced two ways: everything mplfinance exposes through its style system (full accounting at the bottom), and every styling parameter our own primitives expose today. Candidate list, not a commitment — roles land with the primitive retrofit.
 
+Planned extension: **key aliases** — a style-owned rename step in settings lookup (`sma` → `overlay`), which is what makes list-valued settings (color cycles) meaningful across a semantic group. See [key-aliases.md](key-aliases.md). Not implemented.
+
 ## Naming rules
 
 - Roles are singular nouns in mplchart lingo: `candle`, `ohlc`, `volume`, `hline`, `trendline` (note: supersedes the plural `candles.*` spellings in earlier sketch drafts). Exception: `wicks` — collective noun for the wick LineCollection; it takes `up`/`down` variants like every other direction-colored role (the flat variant-less `wicks.color` was removed 2026-07-27 — every role now carries its variants, no singletons).

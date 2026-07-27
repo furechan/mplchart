@@ -57,7 +57,9 @@ So `mavcolors` does not override the stylesheet cycle; it bypasses it for MAs on
 
 mplchart has **one** cycle (the rcParams `axes.prop_cycle`) but consumes it *per role*: `resolve_color` keys a cycle per canonical role, so `SMA(20)`/`SMA(50)` take successive colors, and a role setting may itself be a list that cycles per role (`{"sma.color": [...]}`). That is more expressive per-indicator than mpf's single global MA cycle, but there is no "all moving averages" role to receive a mav palette wholesale.
 
-Consequence for conversion: `mavcolors → rc["axes.prop_cycle"]` is an **approximation**, not an equivalence. It gives the intended look (mplchart indicator lines are the analog of mpf's MAs) but replaces the stylesheet's own cycle, which mpf would have kept for non-MA artists. Since no mav palette equals its sheet cycle, this substitution always changes something. A closer mapping would need either a "line/indicator default" role in mplchart or per-role palettes assigned at conversion time.
+Consequence for conversion: `mavcolors → rc["axes.prop_cycle"]` is an **approximation**, not an equivalence. It gives the intended look (mplchart indicator lines are the analog of mpf's MAs) but replaces the stylesheet's own cycle, which mpf would have kept for non-MA artists. Since no mav palette equals its sheet cycle, this substitution always changes something.
+
+Designed fix: **key aliases** — see [key-aliases.md](key-aliases.md). `mavcolors` → a list-valued `overlay.color`, plus aliases `{"sma": "overlay", "ema": "overlay"}`, leaving `axes.prop_cycle` alone. Two cycles on each side doing the same jobs — isomorphic rather than approximate. Not implemented yet.
 
 ## Gotcha
 

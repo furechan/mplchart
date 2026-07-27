@@ -11,6 +11,7 @@ Items decided or considered but not scheduled. Add new items at the end.
 - Configurable renko `reversal=` — the 2-brick reversal is implicit in the symmetric top/bottom rule; other values need explicit trend tracking in `calc_renko`
 - Selective pane addresses `pane="top"` / `pane="bottom"` (visually extreme panes) — designed-for in notes/axes-stickiness.md; `"main"` is first-created, not topmost once `"above"` panes exist
 - Review all primitive styling parameters that should get their own styler setting (e.g. `stripes.alpha`/`stripes.color` resolved like `candle.*`; Stripes got a plain `alpha=0.2` default 2026-07-27 as the interim fix)
+- Implement key aliases + the overlay cycle per [notes/key-aliases.md](notes/key-aliases.md) — style-owned key rename in `get_setting` (`sma`/`ema` → `overlay`), `aliases` as a third mapping in the `Style` spec; what makes list-valued settings (color cycles) meaningful and closes the mplfinance mavcolors gap
 
 ## Cleanup
 
