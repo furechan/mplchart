@@ -500,7 +500,7 @@ Markers(MACD().as_expr("macdhist") > 0, color=["red", "green"])
 ### Stripes
 
 ```python
-Stripes(indicator=None, *, label: str | None = None, color=None, alpha=None)
+Stripes(indicator=None, *, label: str | None = None, color=None, alpha: float = 0.2)
 ```
 
 Stripes primitive.
@@ -517,7 +517,7 @@ Can also be bound via `@`.
 - **label** (str): Legend label. Omit to skip the legend entry.
 - **color** (str): Fill color for the shaded regions.
 - **alpha** (float): Opacity of the shaded regions, between 0.0
-and 1.0.
+and 1.0. Defaults to 0.2.
 
 **Examples:**
 

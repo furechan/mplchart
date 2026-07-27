@@ -1,6 +1,7 @@
 # Change Log
 
 ## 0.0.47
+- `Stripes` alpha defaults to 0.2 — was None, which rendered fully opaque bands
 - `Styler.context` restores only the keys it sets — the previous full-snapshot restore (`mpl.rc_context`) reverted the interactive/backend state set by lazy backend resolution when the chart was the first figure of a notebook session, silently disabling inline auto-display of all subsequent charts (figures accumulated until an explicit `show`)
 - API reference pages in the docs (chart, primitives, indicators, expressions, styles), generated from docstrings by the griffe-based `scripts/make-api-docs.py` (`inv apidocs`), with a built-in render check
 - Generated `docs/llms.txt` published at the site root — points LLM agents at the raw markdown reference pages

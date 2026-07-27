@@ -22,14 +22,14 @@ class Stripes(BindingPrimitive):
             Can also be bound via ``@``.
         label (str, optional): Legend label. Omit to skip the legend entry.
         color (str, optional): Fill color for the shaded regions.
-        alpha (float, optional): Opacity of the shaded regions, between 0.0
-            and 1.0.
+        alpha (float): Opacity of the shaded regions, between 0.0
+            and 1.0. Defaults to 0.2.
 
     Examples:
         Stripes(MACD().as_expr("macdhist") > 0, color="green", alpha=0.15)
     """
 
-    def __init__(self, indicator=None, *, label: str | None = None, color=None, alpha=None):
+    def __init__(self, indicator=None, *, label: str | None = None, color=None, alpha: float = 0.2):
         super().__init__(indicator)
         self.label = label
         self.color = color
