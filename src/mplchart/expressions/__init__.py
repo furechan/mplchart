@@ -1,4 +1,11 @@
-"""mplchart polars expression factories"""
+"""Polars expression factories.
+
+Each factory returns a native ``polars.Expr`` computing the indicator over
+an OHLCV frame: ``prices.select(SMA(50))``. In charts, expressions are
+passed to ``chart.plot(...)`` directly (auto-plotted) or bound to a
+renderer primitive via ``@``, as in ``RSI(14) @ LinePlot()``. These are
+the polars-pipeline counterparts of ``mplchart.indicators``.
+"""
 
 from .prelude import wrap_expression, OPEN, HIGH, LOW, CLOSE, VOLUME
 

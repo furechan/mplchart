@@ -1,6 +1,15 @@
-"""mplchart drawing primitives"""
+"""mplchart drawing primitives.
 
-from ..model.primitive import BindingPrimitive
+Primitives are the drawing building blocks passed to ``chart.plot(...)``:
+price renderers (``Candlesticks``, ``OHLC``, ``Renko``, ...), generic
+renderers that bind an indicator or expression via ``@`` or a positional
+argument (``LinePlot``, ``AreaPlot``, ``BarPlot``, ``Bands``), overlays
+(``Markers``, ``Stripes``, ``VLine``, ``HLine``), and layout controls
+(``Pane``). Plot order matters: primitives land on the current pane, and
+``Pane`` creates a new one for the primitives that follow.
+"""
+
+from ..model.primitive import Primitive, BindingPrimitive
 from .candlesticks import Candlesticks
 from .heikinashi import HeikinAshi
 from .renko import Renko
@@ -20,3 +29,27 @@ from .trendlines import TrendLines
 from .pane import Pane
 from .vline import VLine
 from .hline import HLine
+
+__all__ = [
+    "AutoPlot",
+    "Candlesticks",
+    "HeikinAshi",
+    "OHLC",
+    "Renko",
+    "PointFigure",
+    "Volume",
+    "LinePlot",
+    "AreaPlot",
+    "BarPlot",
+    "Bands",
+    "Markers",
+    "Stripes",
+    "Swings",
+    "ZigZag",
+    "TrendLines",
+    "Pane",
+    "VLine",
+    "HLine",
+    "Primitive",
+    "BindingPrimitive",
+]

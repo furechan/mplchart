@@ -1,5 +1,7 @@
 # Memory Index
 
+- [API reference docs are generated](project-api-reference-docs.md) — docs/reference/*.md via `inv apidocs` (griffe-based, render check built in); committed md is a deliverable for agents; griffe2md/mkdocstrings rejected
+
 - [Renko/PnF via prices transforms + deferred view](project-view-transforms.md) — shipped: Renko/PointFigure primitives bind transforms via Chart.get_view; transform-first plot contract; volume conventions differ by design
 - [Examples notebook structure](project-examples-structure.md) — 7 concept/mechanics notebooks + gallery (restructure done July 2026); no examples/README — the mkdocs nav is the index; update mkdocs.yml nav when adding notebooks
 - [Run pytest after each refactoring](feedback-run-pytest.md) — always run pytest after each fix, not just at the end

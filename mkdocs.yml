@@ -21,6 +21,7 @@ theme:
         name: Switch to light mode
   features:
     - navigation.sections
+    - navigation.indexes
     - navigation.top
     - content.code.copy
 
@@ -45,9 +46,15 @@ nav:
       - How Expressions Work: examples/expressions.ipynb
       - Multiple Tickers: examples/multiple-tickers.ipynb
       - Chart Rendering: examples/chart-render.ipynb
-      - TA-Lib Functions: examples/talib-functions.ipynb
+      - TA-Lib Indicators: examples/talib-functions.ipynb
   - Reference:
-      - Pandas and Polars Backends: reference/backends.md
+      - reference/index.md
+      - Chart: reference/chart.md
+      - Primitives: reference/primitives.md
+      - Indicators: reference/indicators.md
+      - Expressions: reference/expressions.md
+      - Styles: reference/styles.md
+      - Pandas and Polars Backends: backends.md
   - Articles:
       - mplfinance vs mplchart: articles/mplfinance.ipynb
       - Plotting Trend Lines in Python: articles/trendlines.ipynb

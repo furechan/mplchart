@@ -5,11 +5,20 @@ import polars as pl
 from functools import wraps
 
 
-OPEN   = pl.col("open")
-HIGH   = pl.col("high")
-LOW    = pl.col("low")
-CLOSE  = pl.col("close")
+OPEN = pl.col("open")
+"""Column expression for the ``open`` price."""
+
+HIGH = pl.col("high")
+"""Column expression for the ``high`` price."""
+
+LOW = pl.col("low")
+"""Column expression for the ``low`` price."""
+
+CLOSE = pl.col("close")
+"""Column expression for the ``close`` price. The default source of single-series factories."""
+
 VOLUME = pl.col("volume")
+"""Column expression for the ``volume`` series."""
 
 
 def _build_label(func, args, kwargs, sig):

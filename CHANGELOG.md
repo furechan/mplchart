@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.0.47
+- API reference pages in the docs (chart, primitives, indicators, expressions, styles), generated from docstrings by the griffe-based `scripts/make-api-docs.py` (`inv apidocs`), with a built-in render check
+- Generated `docs/llms.txt` published at the site root — points LLM agents at the raw markdown reference pages
+- `mplchart.primitives` gains `__all__`; module docstrings fleshed out for the documented modules
+
 ## 0.0.46
 - `PandasDataView.slice` is now positional like the polars view — dates are labels, not join keys; fixes windowed slicing of duplicate-dated frames (renko multi-brick days rendered zero-width bodies)
 - `calc_renko` no longer nudges same-bar brick timestamps by +1ns — bricks completed by the same bar share its date

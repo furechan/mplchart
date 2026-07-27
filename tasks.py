@@ -50,6 +50,12 @@ def check(ctx):
 
 
 @task
+def apidocs(ctx):
+    """Regenerate the API reference pages in docs/reference from docstrings"""
+    ctx.run("uv run python scripts/make-api-docs.py")
+
+
+@task
 def gallery(ctx):
     """Re-execute the docs gallery notebook in place"""
     ctx.run("jupyter nbconvert --to notebook --execute --inplace docs/gallery.ipynb")

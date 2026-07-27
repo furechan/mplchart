@@ -308,7 +308,12 @@ class Chart:
         return self
 
     def show(self):
-        """show chart"""
+        """Display the chart via ``matplotlib.pyplot.show``.
+
+        In scripts this opens the interactive figure window and blocks until
+        it is closed; in notebooks the chart displays inline automatically at
+        the end of the cell, so calling ``show()`` is usually not needed.
+        """
         self.canvas.show()
 
     def render(self, format="svg", *, dpi="figure"):

@@ -18,20 +18,20 @@ class LinePlot(BindingPrimitive):
             (full-length prices-aligned; pandas date-indexed data aligns by
             date). ``@`` binds indicators/expressions only — pass data via
             the constructor.
-        label (str) : legend label override. When None, derived from the indicator
+        label (str): legend label override. When None, derived from the indicator
             (the series name for data) — also the styling key for color settings.
-        style (str) : line style like 'solid', 'dashed', 'dotted', 'dashdot', 'marker'
-        marker (str) : marker character like '.' or 'o'
-        width (float) : line width override
-        color (str) : color name or value
-        alpha (float) : opacity value between 0.0 and 1.0
-        legend (bool) : include in the legend. Defaults to True — the label
+        style (str): line style like 'solid', 'dashed', 'dotted', 'dashdot', 'marker'
+        marker (str): marker character like '.' or 'o'
+        width (float): line width override
+        color (str): color name or value
+        alpha (float): opacity value between 0.0 and 1.0
+        legend (bool): include in the legend. Defaults to True — the label
             still names the plot for styling either way.
-        pane (str) : pane to draw on — "main" or "twinx". Default the
+        pane (str): pane to draw on — "main" or "twinx". Default the
             current pane. Selection only, never sticky — pane creation goes
             through the ``Pane`` primitive.
-        overbought (float) : level above which to shade a fill-between band
-        oversold (float) : level below which to shade a fill-between band
+        overbought (float): level above which to shade a fill-between band
+        oversold (float): level below which to shade a fill-between band
 
     Examples:
         LinePlot(SMA(50), style="dashdot", color="red")

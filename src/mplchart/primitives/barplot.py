@@ -16,12 +16,12 @@ class BarPlot(BindingPrimitive):
             (full-length prices-aligned; pandas date-indexed data aligns by
             date). ``@`` binds indicators/expressions only — pass data via
             the constructor.
-        color (str) : color name or value
-        alpha (float) : opacity value between 0.0 and 1.0
-        legend (bool) : include in the legend. Defaults to True — the label
+        color (str): color name or value
+        alpha (float): opacity value between 0.0 and 1.0
+        legend (bool): include in the legend. Defaults to True — the label
             still names the plot for styling either way.
-        width (float) : bar width setting
-        label (str) : plot label
+        width (float): bar width setting
+        label (str): plot label
 
     Examples:
         BarPlot(SMA(50), color="red", alpha=0.5)
