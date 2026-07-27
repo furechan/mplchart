@@ -82,8 +82,9 @@ The color kwargs declare a complete scheme — schemes are atomic:
 In the no-kwargs path, `candle.up.color` / `candle.down.color` select
 the filled bicolor family (missing side falls to `text.color`),
 `edge.up.color` / `edge.down.color` override the body outlines,
-`wicks.color` gives neutral wicks (yahoo-style; wicks otherwise follow
-the edges), and `candle.off.color` sets the hollow-body fill
+`wicks.color` gives neutral wicks (yahoo-style) and
+`wicks.up.color` / `wicks.down.color` directional ones (wicks
+otherwise follow the edges), and `candle.off.color` sets the hollow-body fill
 (default `axes.facecolor`). Color kwargs bypass settings entirely.
 
 **Arguments:**

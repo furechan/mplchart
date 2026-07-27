@@ -118,6 +118,31 @@ def test_settings_neutral_wick():
     plt.close(fig)
 
 
+def test_settings_directional_wicks():
+    # wicks.up/wicks.down color the wicks per side (tradingview-style)
+    scheme = {
+        "candle.up.color": "green", "candle.down.color": "red",
+        "wicks.up.color": "navy", "wicks.down.color": "purple",
+    }
+    fig, wicks, poly = plot_candles(settings=scheme)
+    navy, purple = rgba("navy"), rgba("purple")
+    assert [tuple(c) for c in wicks.get_color()] == [navy] * 2 + [purple] * 2 + [navy] * 2
+    plt.close(fig)
+
+
+def test_settings_directional_wicks_over_neutral():
+    # a directional wick setting wins over the neutral one; the unset side
+    # falls back to the neutral color rather than to its edge
+    scheme = {
+        "candle.up.color": "green", "candle.down.color": "red",
+        "wicks.color": "gray", "wicks.up.color": "navy",
+    }
+    fig, wicks, poly = plot_candles(settings=scheme)
+    navy, gray = rgba("navy"), rgba("gray")
+    assert [tuple(c) for c in wicks.get_color()] == [navy] * 2 + [gray] * 2 + [navy] * 2
+    plt.close(fig)
+
+
 def test_settings_edge_colors():
     # edge.up/edge.down override the body outlines; wicks follow the edges
     scheme = {

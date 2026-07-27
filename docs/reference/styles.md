@@ -113,4 +113,4 @@ resolve_style(spec, *, name='')
 
 Normalize a style spec into a `Style`.
 
-<griffe._internal.docstrings.models.DocstringAdmonition object at 0xffffb7d3dfd0>
+<griffe._internal.docstrings.models.DocstringAdmonition object at 0xffff9cad5fd0>
