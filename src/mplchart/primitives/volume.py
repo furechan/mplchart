@@ -99,7 +99,7 @@ class Volume(Primitive):
         xv = col_to_numpy(prices, "xloc")
 
         width = self.width
-        alpha = chart.canvas.get_setting("volume", "alpha", override=self.alpha, fallback=0.5)
+        alpha = chart.canvas.get_setting("volume", "alpha", ax, override=self.alpha, fallback=0.5)
 
         # per-element chain: kwarg → setting → snapped default (independent
         # params, not an atomic scheme — same policy as OHLC)
@@ -110,7 +110,7 @@ class Volume(Primitive):
         # direction: intrabar (close vs open, matching the candlesticks) by
         # default, or interbar with use_prev_close — first bar compares to itself
         use_prev_close = chart.canvas.get_setting(
-            "volume", "use_prev_close", override=self.use_prev_close, fallback=False
+            "volume", "use_prev_close", ax, override=self.use_prev_close, fallback=False
         )
         if use_prev_close:
             prev = np.concatenate((close[:1], close[:-1]))

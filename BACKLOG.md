@@ -11,10 +11,11 @@ Items decided or considered but not scheduled. Add new items at the end.
 - Configurable renko `reversal=` — the 2-brick reversal is implicit in the symmetric top/bottom rule; other values need explicit trend tracking in `calc_renko`
 - Selective pane addresses `pane="top"` / `pane="bottom"` (visually extreme panes) — designed-for in notes/axes-stickiness.md; `"main"` is first-created, not topmost once `"above"` panes exist
 - Review all primitive styling parameters that should get their own styler setting (e.g. `stripes.alpha`/`stripes.color` resolved like `candle.*`; Stripes got a plain `alpha=0.2` default 2026-07-27 as the interim fix)
-- Implement key aliases + the overlay cycle per [notes/key-aliases.md](notes/key-aliases.md) — style-owned key rename in `get_setting` (`sma`/`ema` → `overlay`), `aliases` as a third mapping in the `Style` spec; what makes list-valued settings (color cycles) meaningful and closes the mplfinance mavcolors gap
+- ~~Implement key aliases + the overlay cycle per [notes/styler-aliases.md](notes/styler-aliases.md) — style-owned key rename in `get_setting` (`sma`/`ema` → `overlay`), `aliases` as a third mapping in the `Style` spec; what makes list-valued settings (color cycles) meaningful and closes the mplfinance mavcolors gap~~ — done 2026-07-27, with two departures from the note: cycle counters key on the full key (not the prefix) now that every facet cycles, and the shipped `cascade` style demos it
 
 ## Cleanup
 
 - ~~Pane/axes cleanup per [notes/axes-stickiness.md](notes/axes-stickiness.md)~~ — done 2026-07-26 with a simpler model than sketched: no cursor state — `Pane(position=)` creative+sticky (only creator), renderer `pane=` selective+ephemeral, disjoint vocabularies; `get_axes`/`new_axes` split at canvas level; `Pane("main")` now raises; Volume owns empty panes (dedicated volume sub-pane works)
 - ~~Implement a low-level numpy-based `forward_fill` util for the identical sign/clip + NaN forward-fill blocks in `primitives/markers.py` and `primitives/stripes.py`~~ — done 2026-07-26: `forward_fill` in the new `arrays.py` module (low-level numpy utilities live there, not in `utils.py`); both primitives converted, edge cases pinned in `tests/test_arrays.py`
 - Remove `mplchart.pandas.merge_prices` (deprecated in 0.0.46) and decide `rebase_series`'s fate — after a release or two of grace
+- Drop `pdoc` from the dev dependencies — unused since the API reference moved to griffe (`scripts/make-api-docs.py`)

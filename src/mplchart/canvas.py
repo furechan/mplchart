@@ -37,7 +37,7 @@ class Canvas:
         style (optional): Style spec, normalized via ``get_styler`` — a
             shipped style name (see ``styles.available_styles()``), a
             matplotlib stylesheet name, a spec mapping
-            (``stylesheet``/``rc``/``settings``), a ``Style``, or a
+            (``stylesheet``/``rc``/``settings``/``aliases``), a ``Style``, or a
             prebuilt ``Styler``. Defaults to the ``"mplchart"`` style.
             Styles are total — ambient rcParams never affect the chart.
 
@@ -285,10 +285,10 @@ class Canvas:
 
     # --- colors ---
 
-    def get_setting(self, role, facet, *, override=None, fallback=None, extract=True):
+    def get_setting(self, name, facet, ax=None, *, override=None, fallback=None, extract=True):
         """Lookup a style setting through the styler — see ``Styler.get_setting``."""
-        return self.styler.get_setting(role, facet, override=override, fallback=fallback, extract=extract)
+        return self.styler.get_setting(name, facet, ax, override=override, fallback=fallback, extract=extract)
 
-    def resolve_color(self, role, ax=None, *, override=None, fallback=None, extract=True):
-        """Resolve a role color through the styler — see ``Styler.resolve_color``."""
-        return self.styler.resolve_color(role, ax, override=override, fallback=fallback, extract=extract)
+    def resolve_color(self, name, ax=None, *, override=None, fallback=None, extract=True):
+        """Resolve a color through the styler — see ``Styler.resolve_color``."""
+        return self.styler.resolve_color(name, ax, override=override, fallback=fallback, extract=extract)

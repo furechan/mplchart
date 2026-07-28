@@ -10,7 +10,7 @@ from mplchart.styles.style import STYLE_BLACKLIST, base_template
 
 def test_available_styles():
     names = available_styles()
-    assert {"chartist", "modern", "mplchart", "nightclouds"} <= set(names)
+    assert {"cascade", "chartist", "modern", "mplchart", "nightclouds"} <= set(names)
 
 
 def test_resolve_style_name():
@@ -47,6 +47,35 @@ def test_base_template_excludes_non_style_keys():
     assert not (set(template) & set(STYLE_BLACKLIST))  # backend, interactive, ...
     assert "figure.dpi" not in template  # environment preference, not a look
     assert "axes.grid" in template  # a real style key survives
+
+
+def test_resolve_style_aliases():
+    style = resolve_style({
+        "settings": {"overlay.color": ["red", "blue"]},
+        "aliases": {"sma": "overlay"},
+    })
+    assert style.aliases == {"sma": "overlay"}
+    assert get_styler(style).aliases == {"sma": "overlay"}  # carried into the styler
+
+
+def test_styles_without_aliases_declare_none():
+    # no library-wide default map — aliases ship with the style that wants them
+    assert resolve_style("nightclouds").aliases == {}
+    assert resolve_style("dark_background").aliases == {}  # a plain mpl sheet
+    assert resolve_style({"rc": {"grid.color": "red"}}).aliases == {}
+
+
+def test_cascade_shares_one_overlay_cycle():
+    styler = get_styler("cascade")
+    palette = styler.settings["overlay.color"]
+    assert styler.aliases["sma"] == styler.aliases["ema"] == "overlay"
+
+    ax = plt.figure().add_subplot()
+    try:
+        drawn = [styler.resolve_color(name, ax) for name in ("SMA(20)", "EMA(50)", "sma-200")]
+        assert drawn == [mcolors.to_hex(c) for c in palette[:3]]  # one cursor, in order
+    finally:
+        plt.close("all")
 
 
 def test_resolve_style_passthrough():

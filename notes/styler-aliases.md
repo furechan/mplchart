@@ -2,9 +2,9 @@
 
 Design for a key-rename step in settings lookup, owned by the style. Flagship application: a shared color cycle for price-pane overlays (`sma`, `ema`, `hma`, ... drawing successive colors from one palette), which is what mplfinance's `mavcolors` does and what mplchart cannot express today.
 
-Status: **designed, not implemented** (July 2026). Companion to [style-settings.md](style-settings.md) and [styles-mismatch.md](styles-mismatch.md).
+Status: **implemented** (2026-07-27), as designed below except where marked. Companion to [styler-settings.md](styler-settings.md) and [styles-mismatch.md](styles-mismatch.md). The shipped `cascade` style is the worked example: aliases fold the seven moving-average prefixes onto `overlay`, and a list-valued `overlay.color` cycles across them.
 
-This reinstates the "category mapping" that the 2026-07-23 doctrine in [style-settings.md](style-settings.md) rejected. That rejection was correctly reasoned on what was known then; the grounds for revisiting are recorded there and summarised below (the prop cycle cannot carry two palettes, and the identity-keyed reserve mechanism is not serializable).
+This reinstates the "category mapping" that the 2026-07-23 doctrine in [styler-settings.md](styler-settings.md) rejected. That rejection was correctly reasoned on what was known then; the grounds for revisiting are recorded there and summarised below (the prop cycle cannot carry two palettes, and the identity-keyed reserve mechanism is not serializable).
 
 Name note: "key alias" — not "style alias", which would read as an alias for a *style name* (morethemes names already resolve as styles). What gets renamed is the settings lookup key.
 
@@ -48,15 +48,18 @@ Cost, named honestly: `get_setting` grows an `ax` parameter used solely for coun
 
 ### Cycle state
 
-A `Counter` per axes, keyed by post-alias prefix, with modulo indexing — the shape of the original 2026-07 design (`count % len(colors)`), restored:
+A `Counter` per axes, keyed by the **full post-alias key**, with modulo indexing — the shape of the original 2026-07 design (`count % len(colors)`), restored:
 
 ```python
-self.counters = WeakKeyDictionary()   # ax -> Counter(prefix -> uses)
+self.counters = WeakKeyDictionary()   # ax -> Counter(key -> uses)
 ```
+
+**Corrected during implementation (2026-07-27): the counter keys on `key`, not `prefix`.** Prefix-keying was written when cycling was color-only, and is wrong once `get_setting` cycles every facet: a lookup of `overlay.color` would advance the cursor that `overlay.alpha` then reads. Per-key counters also give lockstep for free — each renderer requests each facet once per instance, so overlay #2 takes `color[1]` *and* `alpha[1]`.
 
 - **Keyed by axes, not styler-wide.** A prebuilt `Styler` passes through `get_styler` by identity and can be shared across charts (verified), so styler-level counters would leak chart 1's position into chart 2.
 - **Counter, not `itertools.cycle`.** An int is inspectable when debugging why the third overlay came out wrong, restartable, and re-reads the palette each time so it cannot go stale against a changed list. The cycle-object leaves are opaque on all three counts.
-- **`ax=None` raises** if the value is a list. Every real call site passes axes today; the only consumer is colors. Raising is loud, defers the question until someone actually needs it, and retires the `_NoAxes` sentinel class — which exists purely because `None` is not weakly referenceable.
+- **`ax=None` raises** if the value is a list. Every real call site passes axes today; the only consumer is colors. Raising is loud, defers the question until someone actually needs it, and retires the `_NoAxes` sentinel class — which exists purely because `None` is not weakly referenceable. (Implementation: `get_setting` grew the `ax` parameter, and every primitive call site now threads it — `candle.alpha`, `candle.hollow`, `candle.use_prev_close`, `ohlc.alpha`, `volume.alpha`, `volume.use_prev_close` — so the raise cannot fire from a shipped renderer.)
+- **An empty list defers to `fallback`.** Nothing to cycle, and the pre-alias behavior (a bare `None`) discarded the caller's default for no reason.
 - **Wrap, do not fall through to the prop cycle.** `tradingview` ships `mavcolors = ['#2962ff', '#2962ff']` — two identical blues, deliberately, so every MA renders alike. Wrapping preserves that intent for any number of overlays; falling through would hand the third overlay an unrelated color and silently break the style's meaning. Wrapping is also the ecosystem convention (matplotlib's prop cycle wraps; mpf uses `itertools.cycle`).
 
 ## Why not identity-keyed cycles
@@ -106,3 +109,10 @@ Two cycles on each side, doing the same jobs. The last approximation in the mism
 ## Vocabulary
 
 Start with `overlay` alone — the one group with a proven use case and a direct mav mapping. Let `oscillator` / `signal` or anything else arrive with demand rather than being seeded speculatively.
+
+## What shipped
+
+- `Style` gained an `aliases` mapping (third alongside `rc`/`settings`), accepted in spec mappings and carried into `Styler` (and through `replace`).
+- `Styler.resolve_key(name, facet)` is the whole walk, `Styler.next_value(values, key, ax)` the cycle step; `get_setting(name, facet, ax=None, ...)` resolves and cycles, `resolve_color` keeps only `~`/`line`/`fill` interpretation and normalization.
+- The `role` parameter name is retired across `Styler` and the `Canvas` delegates — the first argument is `name` everywhere.
+- Shipped style `cascade` (light, green/red candles) is the demo: MA aliases + a four-color `overlay.color`. No other shipped style declares aliases, so nothing else changed.

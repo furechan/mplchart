@@ -62,7 +62,7 @@ class OHLC(Primitive):
         label = str(self)
         width = self.width
 
-        alpha = chart.canvas.get_setting("ohlc", "alpha", override=self.alpha, fallback=1.0)
+        alpha = chart.canvas.get_setting("ohlc", "alpha", ax, override=self.alpha, fallback=1.0)
 
         # per-side chain: kwarg → setting → textcolor. The two side colors are
         # independent params, not an atomic scheme (unlike candlesticks —

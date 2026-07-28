@@ -43,15 +43,15 @@ def test_get_setting_facets():
     assert styler.get_setting("macd-12-26-9", "color", fallback="gray") == "gray"
 
 
-def test_get_setting_sanitizes_role():
+def test_get_setting_extracts_prefix():
     styler = Styler(settings={"sma.color": "blue"})
-    assert styler.get_setting("sma-50", "color") == "blue"  # label → canonical key
+    assert styler.get_setting("sma-50", "color") == "blue"  # label → prefix
     assert styler.get_setting("SMA(50)", "color") == "blue"
     assert styler.get_setting("sma-50", "color", extract=False) is None  # a key is a key
 
 
-def test_instance_labels_share_role_cycle():
-    # list cycles key on the canonical role — SMA(20)/SMA(50) share one cursor
+def test_instance_labels_share_prefix_cycle():
+    # list cycles key on the resolved key — SMA(20)/SMA(50) share one cursor
     styler = Styler(settings={"sma.color": ["red", "blue"]})
     ax = StubAxes()
     assert styler.resolve_color("SMA(20)", ax) == hexc("red")
@@ -68,20 +68,92 @@ def test_list_cycling_per_axes():
     assert styler.resolve_color("sma", ax1) == hexc("red")  # wraps around
 
 
-def test_list_cycling_without_axes():
+def test_list_cycling_without_axes_raises():
+    # cycles key on axes — without one there is nothing to key on, so say so
     styler = Styler(settings={"sma.color": ["red", "blue"]})
-    assert styler.resolve_color("sma") == hexc("red")
-    assert styler.resolve_color("sma") == hexc("blue")
-    assert styler.resolve_color("sma") == hexc("red")  # axis-less cycles advance too
+    with pytest.raises(ValueError, match="needs axes"):
+        styler.resolve_color("sma")
+
+
+def test_empty_list_defers_to_fallback():
+    styler = Styler(settings={"sma.color": []})
+    assert styler.resolve_color("sma", StubAxes(), fallback="green") == hexc("green")
 
 
 def test_cycles_die_with_axes():
     styler = Styler(settings={"sma.color": ["red", "blue"]})
     ax = StubAxes()
     styler.resolve_color("sma", ax)
-    assert len(styler.cycles) == 1
+    assert len(styler.counters) == 1
     del ax
-    assert len(styler.cycles) == 0  # weakly-keyed: pane gone, cycle gone
+    assert len(styler.counters) == 0  # weakly-keyed: pane gone, counter gone
+
+
+def test_aliases_share_one_cycle():
+    # the flagship case: every moving average draws from one overlay palette
+    styler = Styler(
+        settings={"overlay.color": ["red", "blue", "green"]},
+        aliases={"sma": "overlay", "ema": "overlay"},
+    )
+    ax = StubAxes()
+    assert styler.resolve_color("SMA(20)", ax) == hexc("red")
+    assert styler.resolve_color("EMA(50)", ax) == hexc("blue")  # same cursor, not its own
+    assert styler.resolve_color("sma-200", ax) == hexc("green")
+    assert styler.resolve_color("EMA(10)", ax) == hexc("red")  # wraps
+
+
+def test_alias_is_a_rename_not_a_fallback():
+    # the pre-alias prefix is never tried — an aliased key silently shadows it
+    styler = Styler(
+        settings={"sma.color": "blue", "overlay.color": "red"},
+        aliases={"sma": "overlay"},
+    )
+    assert styler.resolve_color("sma") == hexc("red")
+
+    unaliased = Styler(settings={"sma.color": "blue"}, aliases={"sma": "overlay"})
+    assert unaliased.resolve_color("sma") is None  # renamed away, no fallthrough
+
+
+def test_aliases_apply_to_every_facet():
+    styler = Styler(
+        settings={"overlay.alpha": 0.5, "overlay.width": [1, 2]},
+        aliases={"sma": "overlay", "ema": "overlay"},
+    )
+    ax = StubAxes()
+    assert styler.get_setting("SMA(20)", "alpha", fallback=1.0) == 0.5
+    assert styler.get_setting("SMA(20)", "width", ax) == 1  # cycling is not color-only
+    assert styler.get_setting("EMA(50)", "width", ax) == 2
+
+
+def test_facets_cycle_independently():
+    # counters key on the full key, so color and width stay in lockstep
+    # across instances instead of stealing each other's positions
+    styler = Styler(
+        settings={"overlay.color": ["red", "blue"], "overlay.width": [1, 2]},
+        aliases={"sma": "overlay", "ema": "overlay"},
+    )
+    ax = StubAxes()
+    assert styler.resolve_color("SMA(20)", ax) == hexc("red")
+    assert styler.get_setting("SMA(20)", "width", ax) == 1
+    assert styler.resolve_color("EMA(50)", ax) == hexc("blue")
+    assert styler.get_setting("EMA(50)", "width", ax) == 2
+
+
+def test_override_and_fallback_are_never_cycled():
+    styler = Styler(settings={"sma.color": ["red", "blue"]}, aliases={"ema": "overlay"})
+    ax = StubAxes()
+    assert styler.get_setting("sma", "width", ax, override=[1, 2]) == [1, 2]
+    assert styler.get_setting("ema", "width", ax, fallback=[3, 4]) == [3, 4]
+
+
+def test_aliases_carry_through_replace():
+    styler = Styler(
+        settings={"overlay.color": ["red", "blue"]},
+        aliases={"sma": "overlay"},
+    )
+    derived = styler.replace(overrides={"candle.alpha": 0.9})
+    assert derived.aliases == {"sma": "overlay"}
+    assert derived.resolve_color("SMA(20)", StubAxes()) == hexc("red")  # fresh cursor
 
 
 def test_non_string_colors_normalize():

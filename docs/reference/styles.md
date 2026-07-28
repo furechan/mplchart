@@ -6,17 +6,24 @@ Chart styling — static `Style` spec + runtime `Styler`.
 
 A chart's look is set with `Chart(style=...)`, which accepts a shipped
 style name (see `available_styles`), a matplotlib stylesheet name, a spec
-mapping (`stylesheet`/`rc`/`settings`), a `Style`, or a prebuilt
-`Styler`. Styles are total — ambient rcParams never affect the chart.
+mapping (`stylesheet`/`rc`/`settings`/`aliases`), a `Style`, or a
+prebuilt `Styler`. Styles are total — ambient rcParams never affect the
+chart.
 
-Design notes in `notes/styler-sketch.md` and `notes/style-settings.md`.
+Design notes in `notes/styler-sketch.md`, `notes/styler-settings.md` and
+`notes/styler-aliases.md`.
 
 ---
 
 ### Style
 
 ```python
-Style(name: str = '', rc: dict = dict(), settings: dict = dict())
+Style(
+    name: str = '',
+    rc: dict = dict(),
+    settings: dict = dict(),
+    aliases: dict = dict(),
+)
 ```
 
 Static style spec: validated rc overrides + symbolic settings.
@@ -28,11 +35,16 @@ Static style spec: validated rc overrides + symbolic settings.
 round-tripping through `mpl.RcParams`, so a bad key or value
 errors at the style definition, not the first plot.
 - **settings** (dict): flat dotted settings keys (`candle.up.color`, ...).
+- **aliases** (dict): prefix renames applied during settings lookup
+(`{"sma": "overlay", "ema": "overlay"}`) — the mechanism
+behind shared cycles, since the cycle counter keys on the
+post-alias prefix. Aliases ship with the style; there is no
+library-wide default map (see notes/styler-aliases.md).
 
 ### Styler
 
 ```python
-Styler(settings=(), rcparams=(), stylesheet=None)
+Styler(settings=(), rcparams=(), stylesheet=None, aliases=())
 ```
 
 Runtime styling state for one canvas.
@@ -40,12 +52,12 @@ Runtime styling state for one canvas.
 **Arguments:**
 
 - **settings** (dict or iterable of pairs): Mapping of flat
-dotted setting keys `<role>[.<variant>].<facet>` to values
-(e.g. `candle.up.color`, `volume.alpha`). A `.color`
-value may be a color, a list of colors (cycled per pane and
-role), a `"~"`-prefixed color (snapped to the closest
-prop-cycle color), or the `"line"`/`"fill"` sentinels
-(next color from the axes prop cycle).
+dotted setting keys `<prefix>.<facet>` to values (e.g.
+`candle.up.color`, `volume.alpha`). Any value may be a list,
+which cycles per pane and key. A `.color` value may also be a
+`"~"`-prefixed color (snapped to the closest prop-cycle
+color), or the `"line"`/`"fill"` sentinels (next color from
+the axes prop cycle).
 - **rcparams** (dict or iterable of pairs): matplotlib rcParams
 overrides, applied via `context()` around artist creation.
 - **stylesheet** (str or Path): base matplotlib stylesheet —
@@ -55,11 +67,16 @@ collapsed eagerly under `rcparams` (explicit rcparams win).
 Every styler is totalized over the factory template
 (`base_template()`), so the stored rcparams are always fully
 specified — ambient rcParams never affect a chart.
+- **aliases** (dict or iterable of pairs): prefix renames
+applied during lookup — `{"sma": "overlay", "ema": "overlay"}`
+makes every moving average draw from one `overlay.color`
+cycle. A rename, not a fallback: the pre-alias prefix is never
+tried, which is what keys the shared cycle correctly.
 
-Cycle state lives in `cycles` — a per-axes dict of per-role color
-cycles, created on first use and persisting for the lifetime of the
-styler (one chart) — fresh chart, fresh cycles. Axes are held weakly:
-when a pane is garbage-collected, its cycles go with it.
+Cycle state lives in `counters` — a per-axes `Counter` of uses per
+key, created on first use and persisting for the lifetime of the styler
+(one chart) — fresh chart, fresh cycles. Axes are held weakly: when a
+pane is garbage-collected, its counters go with it.
 
 ### available_styles
 
@@ -82,7 +99,7 @@ Normalize a style spec into a Styler.
 - **style**: `None` for the default `"mplchart"` style, a prebuilt
 `Styler` (passed through), or anything `resolve_style`
 accepts — a shipped style name, a matplotlib stylesheet name,
-a spec mapping (`stylesheet`/`rc`/`settings`), or a
+a spec mapping (`stylesheet`/`rc`/`settings`/`aliases`), or a
 `Style`. Every result is total: fully specified rc, no
 ambient inheritance.
 - **overrides**: settings mapping (canonical dotted keys, e.g.
@@ -113,4 +130,4 @@ resolve_style(spec, *, name='')
 
 Normalize a style spec into a `Style`.
 
-<griffe._internal.docstrings.models.DocstringAdmonition object at 0xffff8659dfd0>
+<griffe._internal.docstrings.models.DocstringAdmonition object at 0xffff8aec5fd0>

@@ -75,4 +75,4 @@ Each is a `base_mpl_style` plus market colors:
 - mplchart styles have no machine-readable description — a `DESCRIPTION` key in each `STYLE` dict would let `available_styles()` and the API reference show what each look is (currently header comments only).
 - No docs page shows the looks side by side. The gallery shows chart *types*; a "styles and themes" tutorial rendering the four native styles plus matplotlib/morethemes usage is the visible gap. Needs executed chart cells per style — sizeable, and a candidate for the backlog rather than an inline edit.
 
-Related: `notes/style-settings.md`, `notes/styler-sketch.md`, memory `project-style-system`.
+Related: `notes/styler-settings.md`, `notes/styler-sketch.md`, memory `project-style-system`.

@@ -1,6 +1,6 @@
 # Candlestick Styles — Scheme Taxonomy
 
-Survey (2026-07-23) of single-mode candlestick coloring schemes across platforms, distilled from all 16 mplfinance shipped styles plus TradingView/StockCharts conventions. Grounds the `candle.*` settings in [style-settings.md](style-settings.md) and the six-color renderer surface in `plot_cspoly`. Companion to [styler-sketch.md](styler-sketch.md).
+Survey (2026-07-23) of single-mode candlestick coloring schemes across platforms, distilled from all 16 mplfinance shipped styles plus TradingView/StockCharts conventions. Grounds the `candle.*` settings in [styler-settings.md](styler-settings.md) and the six-color renderer surface in `plot_cspoly`. Companion to [styler-sketch.md](styler-sketch.md).
 
 ## The design space
 

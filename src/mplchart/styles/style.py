@@ -73,15 +73,22 @@ class Style:
             round-tripping through ``mpl.RcParams``, so a bad key or value
             errors at the style definition, not the first plot.
         settings: flat dotted settings keys (``candle.up.color``, ...).
+        aliases: prefix renames applied during settings lookup
+            (``{"sma": "overlay", "ema": "overlay"}``) — the mechanism
+            behind shared cycles, since the cycle counter keys on the
+            post-alias prefix. Aliases ship with the style; there is no
+            library-wide default map (see notes/styler-aliases.md).
     """
 
     name: str = ""
     rc: dict = field(default_factory=dict)
     settings: dict = field(default_factory=dict)
+    aliases: dict = field(default_factory=dict)
 
     def __post_init__(self):
         object.__setattr__(self, "rc", dict(mpl.RcParams(self.rc)))
         object.__setattr__(self, "settings", dict(self.settings))
+        object.__setattr__(self, "aliases", dict(self.aliases))
 
 
 def external_theme_rc(name):
@@ -110,9 +117,10 @@ def resolve_style(spec, *, name=""):
           a matplotlib stylesheet name, or a theme from an installed
           provider package (morethemes) — sheets and external themes are
           the complete look, no mplchart opinions
-        - mapping: ``{"stylesheet": ..., "rc": ..., "settings": ...}`` (all
-          optional) — the stylesheet (anything ``load_stylesheet`` accepts)
-          is collapsed eagerly under the explicit rc
+        - mapping: ``{"stylesheet": ..., "rc": ..., "settings": ...,
+          "aliases": ...}`` (all optional) — the stylesheet (anything
+          ``load_stylesheet`` accepts) is collapsed eagerly under the
+          explicit rc
         - Style: passthrough
     """
     if isinstance(spec, Style):
@@ -145,9 +153,10 @@ def resolve_style(spec, *, name=""):
         rc = load_stylesheet(sheet) if sheet else {}
         rc |= dict(spec.pop("rc", ()) or ())
         settings = dict(spec.pop("settings", ()) or ())
+        aliases = dict(spec.pop("aliases", ()) or ())
         if spec:
             raise ValueError(f"Unknown style keys: {sorted(spec)}")
-        return Style(name=name, rc=rc, settings=settings)
+        return Style(name=name, rc=rc, settings=settings, aliases=aliases)
 
     raise ValueError(f"Invalid style spec {spec!r}")
 

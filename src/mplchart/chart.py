@@ -53,7 +53,7 @@ class Chart:
         style (optional): Style spec, normalized via ``get_styler`` — a
             shipped style name (see ``styles.available_styles()``), a
             matplotlib stylesheet name, a spec mapping
-            (``stylesheet``/``rc``/``settings``), a ``Style``, or a
+            (``stylesheet``/``rc``/``settings``/``aliases``), a ``Style``, or a
             prebuilt ``Styler``. Defaults to the ``"mplchart"`` style.
             Styles are total — ambient rcParams never affect the chart.
         color_scheme: Deprecated and ignored — use ``style=`` with settings

@@ -57,9 +57,9 @@ So `mavcolors` does not override the stylesheet cycle; it bypasses it for MAs on
 
 mplchart has **one** cycle (the rcParams `axes.prop_cycle`) but consumes it *per role*: `resolve_color` keys a cycle per canonical role, so `SMA(20)`/`SMA(50)` take successive colors, and a role setting may itself be a list that cycles per role (`{"sma.color": [...]}`). That is more expressive per-indicator than mpf's single global MA cycle, but there is no "all moving averages" role to receive a mav palette wholesale.
 
-Consequence for conversion: `mavcolors → rc["axes.prop_cycle"]` collapses mpf's two cycles into one. Note this is the **deliberate** mapping under the settled doctrine — [style-settings.md](style-settings.md) names `axes.prop_cycle` "the `mavcolors` generalization", with the tradeoff accepted explicitly ("a style that pins mav-ish cycle colors accepts that unclaimed pane indicators draw from the same palette — pin their roles to opt them out"). It is not a defect, and an earlier revision of this note wrongly framed it as a gap.
+Consequence for conversion: `mavcolors → rc["axes.prop_cycle"]` collapses mpf's two cycles into one. Note this is the **deliberate** mapping under the settled doctrine — [styler-settings.md](styler-settings.md) names `axes.prop_cycle` "the `mavcolors` generalization", with the tradeoff accepted explicitly ("a style that pins mav-ish cycle colors accepts that unclaimed pane indicators draw from the same palette — pin their roles to opt them out"). It is not a defect, and an earlier revision of this note wrongly framed it as a gap.
 
-It is still a *fidelity* loss, and quantifying it is what this survey added: the mav palette never equals the sheet cycle (0 of 16), so the substitution always discards a cycle mpf would have kept. That evidence is one of the two grounds on which the doctrine was revised on 2026-07-27 in favour of **key aliases** — see [key-aliases.md](key-aliases.md). Under that design the conversion becomes `mavcolors` → list-valued `overlay.color` plus aliases `{"sma": "overlay", "ema": "overlay"}`, leaving `axes.prop_cycle` alone: two cycles on each side doing the same jobs. Not implemented.
+It is still a *fidelity* loss, and quantifying it is what this survey added: the mav palette never equals the sheet cycle (0 of 16), so the substitution always discards a cycle mpf would have kept. That evidence is one of the two grounds on which the doctrine was revised on 2026-07-27 in favour of **key aliases** — see [styler-aliases.md](styler-aliases.md). Under that design the conversion becomes `mavcolors` → list-valued `overlay.color` plus aliases `{"sma": "overlay", "ema": "overlay"}`, leaving `axes.prop_cycle` alone: two cycles on each side doing the same jobs. Key aliases shipped 2026-07-27, so a converter can now take that route; the converter itself remains exploratory (no conversion code in `src`).
 
 ## Gotcha
 
@@ -75,4 +75,4 @@ Options if it ever matters: port selected mpf palettes into `styles/lib/` as shi
 
 Note for issue #19 (platform themes): converting mpf styles does **not** deliver ThinkOrSwim/Bloomberg/IBKR looks — those do not exist in mplfinance either (see `notes/themes-review.md`). Platform palettes have to be sampled from real screenshots.
 
-Related: `notes/themes-review.md`, `notes/candlestick-styles.md`, `notes/style-settings.md`.
+Related: `notes/themes-review.md`, `notes/candlestick-styles.md`, `notes/styler-settings.md`.

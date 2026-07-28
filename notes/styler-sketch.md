@@ -167,7 +167,7 @@ Three objects, two planes: Chart = canvas + view; the styler nests inside Canvas
 
 ## Role vocabulary (draft)
 
-Expanded candidate list in [style-settings.md](style-settings.md) — full mplfinance coverage accounting plus per-primitive keys; that note also switches roles to singular (`candle.*`, superseding the plural `candles.*` spellings below and in the examples above).
+Expanded candidate list in [styler-settings.md](styler-settings.md) — full mplfinance coverage accounting plus per-primitive keys; that note also switches roles to singular (`candle.*`, superseding the plural `candles.*` spellings below and in the examples above).
 
 | Role | Consumer | Today |
 |---|---|---|

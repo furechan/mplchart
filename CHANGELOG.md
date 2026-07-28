@@ -1,6 +1,11 @@
 # Change Log
 
 ## 0.0.47
+- Key aliases: styles gain an `aliases` mapping (`{"sma": "overlay", "ema": "overlay"}`) that renames the lookup prefix, so an aliased group shares one settings key — and one cycle
+- `Styler.get_setting` now owns the whole lookup (name → prefix → alias → key) including cycling of list values, and takes `ax` for cycle keying; `resolve_color` keeps only color interpretation (`~`, `line`/`fill`, normalization)
+- Cycling applies to every facet, not just `.color`; cycles wrap instead of running out, and an empty list defers to the fallback. A list value without `ax` now raises
+- The first parameter of `Styler`/`Canvas` `get_setting`/`resolve_color` is named `name` — the `role` vocabulary is retired
+- New `cascade` shipped style — moving averages cycle a shared four-color `overlay.color` palette, the mplfinance `mavcolors` model
 - `STYLE_BLACKLIST` now resolves as `style._STYLE_BLACKLIST` on matplotlib 3.11+, falling back to `style.core` on 3.10 and earlier — the deprecated module is no longer imported
 - `Volume` gains `edgeup=` / `edgedn=` kwargs and the matching `volume.edge.up.color` / `volume.edge.down.color` settings — bar outlines, opt-in as a pair (unset on both sides keeps bars unoutlined, one side set makes the other follow its face); `plot_vbars` takes an `edgecolor=`
 - `Volume` gains `use_prev_close=` and the matching `volume.use_prev_close` setting — colors bars by close vs previous close (interbar) instead of close vs open, mirroring the `Candlesticks` flag
