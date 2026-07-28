@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 
 from mplchart.styles import Style, Styler, available_styles, get_styler, resolve_style
+from mplchart.styles.style import STYLE_BLACKLIST, base_template
 
 
 def test_available_styles():
@@ -29,6 +30,23 @@ def test_resolve_style_mapping():
     assert style.rc["grid.color"] == "red"
     assert mcolors.to_hex(style.rc["text.color"]) == "#ffffff"
     assert style.settings == {"sma.color": "blue"}
+
+
+def test_style_blacklist_resolves():
+    """Whichever spelling this matplotlib uses, the set must be usable.
+
+    Private since 3.11 (``style._STYLE_BLACKLIST``), public before it
+    (``style.core.STYLE_BLACKLIST``) — a rename on either side would surface
+    here, as an ImportError at import or as a set that lost its contents.
+    """
+    assert {"backend", "interactive"} <= set(STYLE_BLACKLIST)
+
+
+def test_base_template_excludes_non_style_keys():
+    template = base_template()
+    assert not (set(template) & set(STYLE_BLACKLIST))  # backend, interactive, ...
+    assert "figure.dpi" not in template  # environment preference, not a look
+    assert "axes.grid" in template  # a real style key survives
 
 
 def test_resolve_style_passthrough():

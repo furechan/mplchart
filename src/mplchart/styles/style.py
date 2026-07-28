@@ -15,9 +15,14 @@ from pkgutil import iter_modules
 import matplotlib as mpl
 import matplotlib.style
 
-# direct from-import: robust across matplotlib versions (3.11 no longer
-# exposes the ``core`` submodule as an attribute of ``matplotlib.style``)
-from matplotlib.style.core import STYLE_BLACKLIST  # ty: ignore[unresolved-import]  # pyright: ignore[reportAttributeAccessIssue]  # runtime attr, missing from stubs
+# the keys matplotlib refuses to let a style set — private since 3.11, where the
+# ``style.core`` module became a deprecated shim due for removal in 3.13.
+# New name first: importing ``core`` on 3.11+ succeeds and warns, so trying it
+# first would keep emitting that deprecation until the module disappears.
+try:
+    from matplotlib.style import _STYLE_BLACKLIST as STYLE_BLACKLIST  # matplotlib >= 3.11  # ty: ignore[unresolved-import]  # pyright: ignore[reportAttributeAccessIssue]  # private, missing from stubs
+except ImportError:
+    from matplotlib.style.core import STYLE_BLACKLIST  # matplotlib <= 3.10  # ty: ignore[unresolved-import]  # pyright: ignore[reportAttributeAccessIssue]  # runtime attr, missing from stubs
 
 
 # rcParams the totalized base never touches: matplotlib's own non-style keys

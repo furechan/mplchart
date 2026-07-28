@@ -1,6 +1,7 @@
 # Change Log
 
 ## 0.0.47
+- `STYLE_BLACKLIST` now resolves as `style._STYLE_BLACKLIST` on matplotlib 3.11+, falling back to `style.core` on 3.10 and earlier — the deprecated module is no longer imported
 - `Volume` gains `edgeup=` / `edgedn=` kwargs and the matching `volume.edge.up.color` / `volume.edge.down.color` settings — bar outlines, opt-in as a pair (unset on both sides keeps bars unoutlined, one side set makes the other follow its face); `plot_vbars` takes an `edgecolor=`
 - `Volume` gains `use_prev_close=` and the matching `volume.use_prev_close` setting — colors bars by close vs previous close (interbar) instead of close vs open, mirroring the `Candlesticks` flag
 - New `wicks.up.color` / `wicks.down.color` settings for candle wicks, each side defaulting to its edge color — they replace the flat `wicks.color` (removed; neutral wicks are both sides set to the same color), so every style role now carries up/down variants
