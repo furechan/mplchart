@@ -29,3 +29,4 @@
 - [Silence type checker with type: ignore, not casts](feedback-silence-pyright.md) — use `# type: ignore[...]` for false positives; don't wrap in runtime casts; Pylance-only complaints get `# pyright: ignore[rule]`; when both ty and pyright complain use `# ty: ignore[rule]  # pyright: ignore[rule]` (ty doesn't honor bracketed `type: ignore[...]`)
 - [Smoke-test wheel before publishing](feedback-publish-smoke-test.md) — isolated env with latest deps; dev venv masked the mpl 3.11 breakage in 0.0.41
 - [PyPI URL labels: explicit only](feedback-pypi-url-labels.md) — documentation/repository/changelog, no ambiguous homepage link
+- [Material MkDocs 2.0 banner is expected noise](project-material-mkdocs2-banner.md) — red stderr banner on every build; not an error, ignore it; opt-out env var NO_MKDOCS_2_WARNING if ever needed
