@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.48
+- Removed the `homepage` project URL — explicit labels only (documentation, repository, changelog)
+
 ## 0.0.47
 - Added the `Framework :: Matplotlib` PyPI classifier
 - Key aliases: styles gain an `aliases` mapping (`{"sma": "overlay", "ema": "overlay"}`) that renames the lookup prefix, so an aliased group shares one settings key — and one cycle
