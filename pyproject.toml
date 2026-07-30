@@ -19,6 +19,7 @@ authors = [{ name = "Furechan", email = "furechan@xsmail.com" }]
 keywords = ["finance", "charting", "matplotlib", "candlesticks"]
 dependencies = ["matplotlib", "numpy", "pyarrow"]
 classifiers = [
+    "Framework :: Matplotlib",
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",

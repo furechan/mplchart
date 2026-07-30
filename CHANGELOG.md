@@ -1,6 +1,7 @@
 # Change Log
 
 ## 0.0.47
+- Added the `Framework :: Matplotlib` PyPI classifier
 - Key aliases: styles gain an `aliases` mapping (`{"sma": "overlay", "ema": "overlay"}`) that renames the lookup prefix, so an aliased group shares one settings key — and one cycle
 - `Styler.get_setting` now owns the whole lookup (name → prefix → alias → key) including cycling of list values, and takes `ax` for cycle keying; `resolve_color` keeps only color interpretation (`~`, `line`/`fill`, normalization)
 - Cycling applies to every facet, not just `.color`; cycles wrap instead of running out, and an empty list defers to the fallback. A list value without `ax` now raises
