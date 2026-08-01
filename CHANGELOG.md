@@ -2,6 +2,14 @@
 
 ## 0.0.48
 - Removed the `homepage` project URL — explicit labels only (documentation, repository, changelog)
+- New `mplchart.styles.mplfinance` module — `load_mpf_style` converts an mplfinance style (name or `make_mpf_style` dict) into a `Styler`: `base_mpl_style`/rc/face/grid keys to rc, `marketcolors` to settings, `mavcolors` to a shared `overlay.color` cycle; requires mplfinance
+- New `mplchart.styles.morethemes` module — `load_mt_theme` converts a morethemes theme into a `Styler`; requires morethemes
+- Removed bare-name morethemes resolution in `Chart(style=...)` (shipped 0.0.47) — external providers convert via the explicit loader modules
+- API docs generator renders docstring admonition sections (previously emitted an object repr)
+- Provider style prefixes: `style="mpf:yahoo"` / `style="mt:economist"` dispatch to the loader modules
+- New `styles/stylesheet.py` submodule — `base_template` and `load_stylesheet` (the matplotlib layer)
+- New `styles/registry.py` submodule — `ENTRY_POINTS` and `available_styles` (the name registries)
+- Removed the `Style` spec class and the `styles/style.py` module — `Styler` is the single style object: `Styler.from_spec` builds from a spec mapping, `resolve_style` resolves a name (shipped style, matplotlib sheet, or provider-prefixed) into a `Styler`, and `get_styler` dispatches any spec form and layers overrides
 
 ## 0.0.47
 - Added the `Framework :: Matplotlib` PyPI classifier

@@ -37,8 +37,8 @@ class Canvas:
         style (optional): Style spec, normalized via ``get_styler`` — a
             shipped style name (see ``styles.available_styles()``), a
             matplotlib stylesheet name, a spec mapping
-            (``stylesheet``/``rc``/``settings``/``aliases``), a ``Style``, or a
-            prebuilt ``Styler``. Defaults to the ``"mplchart"`` style.
+            (``stylesheet``/``rc``/``settings``/``aliases``), or a prebuilt
+            ``Styler``. Defaults to the ``"mplchart"`` style.
             Styles are total — ambient rcParams never affect the chart.
 
     Creating a Canvas eagerly creates (or adopts) the figure, sets the tight

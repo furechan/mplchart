@@ -4,6 +4,10 @@ The Styler holds all mutable styling state for one canvas: the settings
 mapping, the alias map, the per-pane cycle counters, and the rc overrides
 applied around artist creation.
 
+``resolve_style`` resolves names against the registries in ``registry.py``
+(shipped styles under ``styles/lib/``, then matplotlib sheets, then the
+provider prefixes).
+
 Lookup vocabulary (see notes/styler-aliases.md) — five terms, one step each::
 
     name "SMA(20)" → prefix "sma" → alias → prefix "overlay" → key "overlay.color"
@@ -21,15 +25,19 @@ notes/styler-sketch.md).
 """
 
 from collections import Counter
+from collections.abc import Mapping
 from contextlib import contextmanager
+from importlib import import_module
 from weakref import WeakKeyDictionary
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import matplotlib.style
 
 from ..colors import closest_color, normalize_color
 from ..utils import extract_prefix
-from .style import base_template, load_stylesheet, resolve_style
+from .registry import ENTRY_POINTS, available_styles
+from .stylesheet import base_template, load_stylesheet
 
 
 @contextmanager
@@ -48,24 +56,27 @@ def get_styler(style=None, *, overrides=()):
 
     Args:
         style: ``None`` for the default ``"mplchart"`` style, a prebuilt
-            ``Styler`` (passed through), or anything ``resolve_style``
-            accepts — a shipped style name, a matplotlib stylesheet name,
-            a spec mapping (``stylesheet``/``rc``/``settings``/``aliases``), or a
-            ``Style``. Every result is total: fully specified rc, no
-            ambient inheritance.
+            ``Styler`` (passed through), a shipped style name, a matplotlib
+            stylesheet name, a provider-prefixed name (``"mpf:yahoo"``,
+            ``"mt:economist"``), or a spec mapping
+            (``stylesheet``/``rc``/``settings``/``aliases``). Every result
+            is total: fully specified rc, no ambient inheritance.
         overrides: settings mapping (canonical dotted keys, e.g.
             ``candle.up.color``) layered on top of the style settings —
             whatever their source, a prebuilt Styler included.
     """
 
+    if style is None:
+        style = "mplchart"   # the default style is a style
+
     if isinstance(style, Styler):
         styler = style
-    elif style is None:
-        spec = resolve_style("mplchart")   # the default style is a style
-        styler = Styler(settings=spec.settings, rcparams=spec.rc, aliases=spec.aliases)
+    elif isinstance(style, Mapping):
+        styler = Styler.from_spec(style)
+    elif isinstance(style, str):
+        styler = resolve_style(style)
     else:
-        spec = resolve_style(style)
-        styler = Styler(settings=spec.settings, rcparams=spec.rc, aliases=spec.aliases)
+        raise ValueError(f"Invalid style spec {style!r}")
 
     overrides = dict(overrides)
 
@@ -73,6 +84,41 @@ def get_styler(style=None, *, overrides=()):
         styler = styler.replace(overrides=overrides)
 
     return styler
+
+
+def resolve_style(name):
+    """Resolve a style name into a ``Styler``.
+
+    Names resolve in order: shipped style (``styles/lib/<name>.py``, which
+    shadows), then matplotlib stylesheet name, with ``provider:`` prefixed
+    names (``"mpf:yahoo"``, ``"mt:economist"``) dispatching to the matching
+    loader module — requires that provider package.
+    """
+    prefix, sep, name = name.rpartition(":")
+    if sep:
+        if prefix not in ENTRY_POINTS:
+            known = ", ".join(sorted(ENTRY_POINTS))
+            raise ValueError(f"Unknown style prefix {prefix!r} — known prefixes: {known}")
+        module_name, loader_name = ENTRY_POINTS[prefix]
+        module = import_module(f".{module_name}", __package__)
+        loader = getattr(module, loader_name)
+
+        return loader(name)  # loaders build the Styler
+
+    if name in available_styles():
+        module = import_module(f".lib.{name}", __package__)
+        return Styler.from_spec(module.STYLE)
+
+    if name == "default" or name in mpl.style.library:
+        # a standard matplotlib stylesheet as the whole look —
+        # no mplchart opinions ride along (grid keys per the sheet)
+        return Styler(stylesheet=name)
+
+    available = ", ".join(available_styles())
+    raise ValueError(
+        f"Unknown style {name!r} — available: {available}, "
+        f"or any matplotlib stylesheet name"
+    )
 
 
 
@@ -116,6 +162,26 @@ class Styler:
         # fully specified, ambient rcParams never leak into a chart
         self.rcparams = base_template() | rc | dict(rcparams)
         self.counters = WeakKeyDictionary()  # ax → Counter(key → uses)
+
+    @classmethod
+    def from_spec(cls, spec):
+        """Build a Styler from a spec mapping.
+
+        Keys (all optional): ``stylesheet`` / ``rc`` / ``settings`` /
+        ``aliases`` — ``__init__`` collapses the stylesheet under the
+        explicit rc; rc values are validated eagerly. A ``name`` key is
+        accepted and discarded (Styler carries no display name). Unknown
+        keys raise.
+        """
+        spec = dict(spec)
+        spec.pop("name", None)              # Styler carries no display name
+        sheet = spec.pop("stylesheet", None)
+        rc = dict(mpl.RcParams(dict(spec.pop("rc", ()) or ())))  # eager rc validation
+        settings = dict(spec.pop("settings", ()) or ())
+        aliases = dict(spec.pop("aliases", ()) or ())
+        if spec:
+            raise ValueError(f"Unknown style keys: {sorted(spec)}")
+        return cls(settings=settings, rcparams=rc, stylesheet=sheet, aliases=aliases)
 
     def replace(self, *, overrides=()):
         """Return a new Styler with ``overrides`` merged over the settings.

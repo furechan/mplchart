@@ -2,44 +2,19 @@
 
 # mplchart.styles
 
-Chart styling — static `Style` spec + runtime `Styler`.
+Chart styling — the runtime `Styler` and its spec forms.
 
 A chart's look is set with `Chart(style=...)`, which accepts a shipped
-style name (see `available_styles`), a matplotlib stylesheet name, a spec
-mapping (`stylesheet`/`rc`/`settings`/`aliases`), a `Style`, or a
-prebuilt `Styler`. Styles are total — ambient rcParams never affect the
-chart.
+style name (see `available_styles`), a matplotlib stylesheet name, a
+provider-prefixed name (`"mpf:yahoo"` for mplfinance styles,
+`"mt:economist"` for morethemes — requires that provider package), a spec
+mapping (`stylesheet`/`rc`/`settings`/`aliases`), or a prebuilt
+`Styler`. Styles are total — ambient rcParams never affect the chart.
 
 Design notes in `notes/styler-sketch.md`, `notes/styler-settings.md` and
 `notes/styler-aliases.md`.
 
 ---
-
-### Style
-
-```python
-Style(
-    name: str = '',
-    rc: dict = dict(),
-    settings: dict = dict(),
-    aliases: dict = dict(),
-)
-```
-
-Static style spec: validated rc overrides + symbolic settings.
-
-**Arguments:**
-
-- **name** (str): display name (the module name for shipped styles).
-- **rc** (dict): matplotlib rcParams overrides — validated eagerly by
-round-tripping through `mpl.RcParams`, so a bad key or value
-errors at the style definition, not the first plot.
-- **settings** (dict): flat dotted settings keys (`candle.up.color`, ...).
-- **aliases** (dict): prefix renames applied during settings lookup
-(`{"sma": "overlay", "ema": "overlay"}`) — the mechanism
-behind shared cycles, since the cycle counter keys on the
-post-alias prefix. Aliases ship with the style; there is no
-library-wide default map (see notes/styler-aliases.md).
 
 ### Styler
 
@@ -97,11 +72,11 @@ Normalize a style spec into a Styler.
 **Arguments:**
 
 - **style**: `None` for the default `"mplchart"` style, a prebuilt
-`Styler` (passed through), or anything `resolve_style`
-accepts — a shipped style name, a matplotlib stylesheet name,
-a spec mapping (`stylesheet`/`rc`/`settings`/`aliases`), or a
-`Style`. Every result is total: fully specified rc, no
-ambient inheritance.
+`Styler` (passed through), a shipped style name, a matplotlib
+stylesheet name, a provider-prefixed name (`"mpf:yahoo"`,
+`"mt:economist"`), or a spec mapping
+(`stylesheet`/`rc`/`settings`/`aliases`). Every result
+is total: fully specified rc, no ambient inheritance.
 - **overrides**: settings mapping (canonical dotted keys, e.g.
 `candle.up.color`) layered on top of the style settings —
 whatever their source, a prebuilt Styler included.
@@ -125,9 +100,12 @@ validators, failing fast on garbage.
 ### resolve_style
 
 ```python
-resolve_style(spec, *, name='')
+resolve_style(name)
 ```
 
-Normalize a style spec into a `Style`.
+Resolve a style name into a `Styler`.
 
-<griffe._internal.docstrings.models.DocstringAdmonition object at 0xffff8aec5fd0>
+Names resolve in order: shipped style (`styles/lib/<name>.py`, which
+shadows), then matplotlib stylesheet name, with `provider:` prefixed
+names (`"mpf:yahoo"`, `"mt:economist"`) dispatching to the matching
+loader module — requires that provider package.

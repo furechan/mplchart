@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 
 from mplchart.styles import Styler, get_styler
-from mplchart.styles.style import base_template
+from mplchart.styles.stylesheet import base_template
 
 
 class StubAxes:
@@ -346,3 +346,28 @@ def test_load_stylesheet_default():
     assert rc["axes.facecolor"] == "white"
     assert "figure.figsize" in rc  # full template — ambient-independent base
     assert "backend" not in rc  # non-style keys filtered (STYLE_BLACKLIST)
+
+
+def test_styler_from_spec():
+    styler = Styler.from_spec({
+        "stylesheet": "dark_background",
+        "rc": {"grid.color": "red"},
+        "settings": {"sma.color": "blue"},
+        "name": "ignored",  # accepted and discarded
+    })
+    assert styler.rcparams["grid.color"] == "red"  # explicit rc wins over the sheet
+    assert mcolors.to_hex(styler.rcparams["text.color"]) == "#ffffff"  # sheet collapsed
+    assert styler.settings == {"sma.color": "blue"}
+
+
+def test_get_styler_validates():
+    with pytest.raises(ValueError, match="Unknown style keys"):
+        get_styler({"colors": {}})
+    with pytest.raises(ValueError, match="Unknown style prefix"):
+        get_styler("nosuch:name")
+    with pytest.raises(ValueError, match="Unknown style"):
+        get_styler("no-such-style")
+    with pytest.raises(ValueError, match="Invalid style spec"):
+        get_styler(42)
+    with pytest.raises(ValueError):
+        get_styler({"rc": {"grid.color": "no-such-color"}})  # eager rc validation kept

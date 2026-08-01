@@ -146,6 +146,9 @@ def render_docstring(docstring) -> list[str]:
             for _, text in section.value:
                 lines.append(text.strip())
             lines += ["```", ""]
+        elif kind == "admonition":
+            # any unrecognized "Foo:" docstring section parses as an admonition
+            lines += [f"**{section.title}:**", "", clean_prose(section.value.contents.strip()), ""]
         else:
             value = getattr(section, "value", None)
             text = value if isinstance(value, str) else str(value)

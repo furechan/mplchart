@@ -1,11 +1,10 @@
-"""Tests for the static Style spec, resolve_style, and shipped styles."""
+"""Tests for style resolution and the shipped styles."""
 
-import pytest
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 
-from mplchart.styles import Style, Styler, available_styles, get_styler, resolve_style
-from mplchart.styles.style import STYLE_BLACKLIST, base_template
+from mplchart.styles import Styler, available_styles, get_styler, resolve_style
+from mplchart.styles.stylesheet import STYLE_BLACKLIST, base_template
 
 
 def test_available_styles():
@@ -14,22 +13,21 @@ def test_available_styles():
 
 
 def test_resolve_style_name():
-    style = resolve_style("nightclouds")
-    assert style.name == "nightclouds"
-    assert mcolors.to_hex(style.rc["axes.facecolor"]) == "#000000"  # base sheet collapsed
-    assert style.rc["grid.color"] == "#333333"  # explicit rc wins over the sheet
-    assert style.settings["candle.up.color"] == "white"
+    styler = resolve_style("nightclouds")
+    assert mcolors.to_hex(styler.rcparams["axes.facecolor"]) == "#000000"  # base sheet collapsed
+    assert styler.rcparams["grid.color"] == "#333333"  # explicit rc wins over the sheet
+    assert styler.settings["candle.up.color"] == "white"
 
 
-def test_resolve_style_mapping():
-    style = resolve_style({
+def test_get_styler_mapping():
+    styler = get_styler({
         "stylesheet": "dark_background",
         "rc": {"grid.color": "red"},
         "settings": {"sma.color": "blue"},
     })
-    assert style.rc["grid.color"] == "red"
-    assert mcolors.to_hex(style.rc["text.color"]) == "#ffffff"
-    assert style.settings == {"sma.color": "blue"}
+    assert styler.rcparams["grid.color"] == "red"
+    assert mcolors.to_hex(styler.rcparams["text.color"]) == "#ffffff"
+    assert styler.settings == {"sma.color": "blue"}
 
 
 def test_style_blacklist_resolves():
@@ -49,20 +47,20 @@ def test_base_template_excludes_non_style_keys():
     assert "axes.grid" in template  # a real style key survives
 
 
-def test_resolve_style_aliases():
-    style = resolve_style({
+def test_get_styler_aliases():
+    styler = get_styler({
         "settings": {"overlay.color": ["red", "blue"]},
         "aliases": {"sma": "overlay"},
     })
-    assert style.aliases == {"sma": "overlay"}
-    assert get_styler(style).aliases == {"sma": "overlay"}  # carried into the styler
+    assert styler.aliases == {"sma": "overlay"}
+    assert get_styler(styler).aliases == {"sma": "overlay"}  # passthrough keeps them
 
 
 def test_styles_without_aliases_declare_none():
     # no library-wide default map — aliases ship with the style that wants them
     assert resolve_style("nightclouds").aliases == {}
     assert resolve_style("dark_background").aliases == {}  # a plain mpl sheet
-    assert resolve_style({"rc": {"grid.color": "red"}}).aliases == {}
+    assert get_styler({"rc": {"grid.color": "red"}}).aliases == {}
 
 
 def test_cascade_shares_one_overlay_cycle():
@@ -76,29 +74,6 @@ def test_cascade_shares_one_overlay_cycle():
         assert drawn == [mcolors.to_hex(c) for c in palette[:3]]  # one cursor, in order
     finally:
         plt.close("all")
-
-
-def test_resolve_style_passthrough():
-    style = Style(rc={"grid.color": "red"})
-    assert resolve_style(style) is style
-
-
-def test_style_validates_rc():
-    # matplotlib's per-key validators are the schema — errors at definition
-    with pytest.raises(ValueError):
-        Style(rc={"grid.color": "no-such-color"})
-    with pytest.raises(KeyError):
-        Style(rc={"no.such.key": 1})
-
-
-def test_unknown_style_name():
-    with pytest.raises(ValueError, match="Unknown style"):
-        resolve_style("no-such-style")
-
-
-def test_unknown_spec_keys():
-    with pytest.raises(ValueError, match="Unknown style keys"):
-        resolve_style({"colors": {}})
 
 
 def test_get_styler_resolves_specs():
@@ -123,9 +98,8 @@ def test_canvas_style_by_name():
 
 def test_standard_sheet_as_style():
     # matplotlib sheet names are accepted as whole looks — no mplchart opinions
-    style = resolve_style("ggplot")
-    assert style.name == "ggplot"
-    assert style.rc["axes.grid"] is True  # ggplot's own grid, full alpha
+    styler = resolve_style("ggplot")
+    assert styler.rcparams["axes.grid"] is True  # ggplot's own grid, full alpha
 
     from mplchart.canvas import Canvas
 
@@ -148,28 +122,63 @@ def test_styles_are_ambient_isolated():
         plt.close(canvas.figure)
 
 
-def test_external_morethemes_provider():
-    pytest.importorskip("morethemes")
+def test_provider_packages_have_zero_blast_radius():
+    # mplfinance/morethemes are imported only inside their loader functions —
+    # with both blocked, the whole package imports and charts render; only
+    # the loader calls may raise. A new top-level provider import fails here.
+    import subprocess
+    import sys
 
-    style = resolve_style("economist")
-    assert style.name == "economist"
-    assert style.rc["axes.facecolor"] == "#e8f4f4"  # the theme's rc, complete look
+    script = """
+import sys
 
-    with pytest.raises(ValueError, match="Unknown style"):
-        resolve_style("no-such-theme")
+class Block:
+    BLOCKED = {"morethemes", "mplfinance"}
+    def find_module(self, name, path=None):
+        if name.split(".")[0] in self.BLOCKED:
+            return self
+    def load_module(self, name):
+        raise ImportError(f"blocked: {name}")
+
+sys.meta_path.insert(0, Block())
+
+import matplotlib
+matplotlib.use("Agg")
+
+import mplchart.styles.mplfinance
+import mplchart.styles.morethemes
+from mplchart.chart import Chart
+from mplchart.primitives import Candlesticks
+from mplchart.samples import sample_prices
+from mplchart.styles import get_styler, resolve_style
+
+resolve_style("cascade")
+get_styler(None)
+Chart(sample_prices().tail(30), figsize=(3, 2)).plot([Candlesticks()])
+
+for load, name in [
+    (mplchart.styles.mplfinance.load_mpf_style, "yahoo"),
+    (mplchart.styles.morethemes.load_mt_theme, "economist"),
+    (get_styler, "mpf:yahoo"),
+    (get_styler, "mt:economist"),
+]:
+    try:
+        load(name)
+    except ImportError:
+        pass
+    else:
+        raise AssertionError(f"{load.__name__}({name!r}) did not raise with provider blocked")
+"""
+    subprocess.run([sys.executable, "-c", script], check=True)
 
 
 def test_style_namespaces_are_disjoint():
-    # the style name chain (lib → mpl sheets → providers) shares one flat
-    # namespace — this tripwire turns silent shadowing into a loud failure
-    # the moment any registry grows an overlapping name
+    # the style name chain (lib → mpl sheets) shares one flat namespace —
+    # this tripwire turns silent shadowing into a loud failure the moment
+    # either registry grows an overlapping name (external providers resolve
+    # via explicit loaders, outside this namespace)
     import matplotlib.style
 
     lib = set(available_styles())
     sheets = set(matplotlib.style.library) | {"default"}
     assert not lib & sheets, f"lib styles shadow matplotlib sheets: {lib & sheets}"
-
-    morethemes = pytest.importorskip("morethemes")
-    themes = set(morethemes.ALL_THEMES)
-    assert not themes & lib, f"provider themes shadowed by lib styles: {themes & lib}"
-    assert not themes & sheets, f"provider themes shadowed by mpl sheets: {themes & sheets}"

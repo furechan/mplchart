@@ -11,7 +11,7 @@ better suited for LLM consumption.
 - [mplchart.primitives](https://raw.githubusercontent.com/furechan/mplchart/main/docs/reference/primitives.md): mplchart drawing primitives
 - [mplchart.indicators](https://raw.githubusercontent.com/furechan/mplchart/main/docs/reference/indicators.md): Technical analysis indicators — pandas pipeline only
 - [mplchart.expressions](https://raw.githubusercontent.com/furechan/mplchart/main/docs/reference/expressions.md): Polars expression factories
-- [mplchart.styles](https://raw.githubusercontent.com/furechan/mplchart/main/docs/reference/styles.md): Chart styling — static `Style` spec + runtime `Styler`
+- [mplchart.styles](https://raw.githubusercontent.com/furechan/mplchart/main/docs/reference/styles.md): Chart styling — the runtime `Styler` and its spec forms
 - [index](https://raw.githubusercontent.com/furechan/mplchart/main/docs/reference/index.md): Reference overview and conventions
 
 ## Guides
