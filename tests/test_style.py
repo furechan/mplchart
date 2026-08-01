@@ -133,12 +133,12 @@ def test_provider_packages_have_zero_blast_radius():
 import sys
 
 class Block:
+    # modern finder API — the legacy find_module hook stopped being called
+    # in Python 3.12, which silently disabled the block
     BLOCKED = {"morethemes", "mplfinance"}
-    def find_module(self, name, path=None):
+    def find_spec(self, name, path=None, target=None):
         if name.split(".")[0] in self.BLOCKED:
-            return self
-    def load_module(self, name):
-        raise ImportError(f"blocked: {name}")
+            raise ImportError(f"blocked: {name}")
 
 sys.meta_path.insert(0, Block())
 
