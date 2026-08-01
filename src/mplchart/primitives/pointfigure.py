@@ -170,8 +170,8 @@ class PointFigure(Primitive):
         close = col_to_numpy(prices, "close")
 
         resolve = chart.canvas.resolve_color
-        colorup = resolve("pnf.up", ax, override=self.colorup, fallback="green")
-        colordn = resolve("pnf.down", ax, override=self.colordn, fallback="red")
+        colorup = resolve("pnf.up", ax=ax, override=self.colorup, fallback="green")
+        colordn = resolve("pnf.down", ax=ax, override=self.colordn, fallback="red")
 
         box = self.box_size
         if box is None:  # infer from the grid: smallest gap between levels

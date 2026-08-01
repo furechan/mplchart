@@ -1,7 +1,20 @@
 """Mplchart color utils"""
 
+import colorsys
+
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+
+
+def scale_lightness(color, amount):
+    """Scale a color's HLS lightness by ``amount`` (clamped to [0, 1]), as hex.
+
+    ``amount < 1`` darkens, ``> 1`` lightens — the same adjustment as
+    mplfinance's ``_adjust_color_brightness``.
+    """
+    hue, lightness, saturation = colorsys.rgb_to_hls(*mcolors.to_rgb(color))
+    rgb = colorsys.hls_to_rgb(hue, max(0.0, min(1.0, lightness * amount)), saturation)
+    return mcolors.to_hex(rgb)
 
 
 def normalize_color(color):

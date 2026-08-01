@@ -1,8 +1,8 @@
 """mplfinance style interop — convert an mpf style into a ``Styler``.
 
 ``load_mpf_style`` takes a named mplfinance style (``"yahoo"``,
-``"binance"``, ...) or a ``make_mpf_style`` dict and returns the matching
-``Styler``, usable anywhere a style spec is accepted::
+``"binance"``, ...) and returns the matching ``Styler``, usable anywhere
+a style spec is accepted::
 
     from mplchart.styles.mplfinance import load_mpf_style
 
@@ -15,10 +15,9 @@ The rc half mirrors mplfinance's own ``_apply_mpfstyle`` semantics
 (``base_mpl_style`` as the stylesheet, then ``rc``, then the face/grid
 keys), except scoped and totalized like every mplchart style instead of
 mutating global rcParams. ``marketcolors`` map onto the corresponding
-settings keys, and ``mavcolors`` becomes a shared ``overlay.color`` cycle
-via aliases, the same model as the shipped ``cascade`` style.
-
-Not mapped: ``y_on_right`` — axis placement is chart layout, not a look.
+settings keys, ``mavcolors`` becomes a shared ``overlay.color`` cycle
+via aliases (the same model as the shipped ``cascade`` style), and
+``y_on_right`` maps to the ``yaxis.right`` setting.
 
 Requires `mplfinance <https://pypi.org/project/mplfinance/>`_, an optional
 dependency of this module only, imported on call.
@@ -64,12 +63,11 @@ def _updown(entry):
     return up, down
 
 
-def load_mpf_style(spec):
-    """Convert an mplfinance style into a ``Styler``.
+def load_mpf_style(name):
+    """Convert a named mplfinance style into a ``Styler``.
 
     Args:
-        spec: an mplfinance style name (``mpf.available_styles()``) or a
-            style dict as built by ``mpf.make_mpf_style``.
+        name: an mplfinance style name (``mpf.available_styles()``).
 
     Returns:
         The matching ``Styler`` — pass it to ``Chart(style=...)`` or layer
@@ -77,15 +75,11 @@ def load_mpf_style(spec):
     """
     import mplfinance as mpf
 
-    if isinstance(spec, str):
-        if spec not in mpf.available_styles():
-            available = ", ".join(mpf.available_styles())
-            raise ValueError(f"Unknown mplfinance style {spec!r} — available: {available}")
-        style = mpf.make_mpf_style(base_mpf_style=spec)
-    elif isinstance(spec, Mapping):
-        style = dict(spec)
-    else:
-        raise ValueError(f"Invalid mplfinance style {spec!r}")
+    if name not in mpf.available_styles():
+        available = ", ".join(mpf.available_styles())
+        raise ValueError(f"Unknown mplfinance style {name!r} — available: {available}")
+
+    style = mpf.make_mpf_style(base_mpf_style=name)
 
     sheet = style.get("base_mpl_style")
     if sheet == "seaborn-darkgrid" and "seaborn-v0_8-darkgrid" in mpl.style.library:
@@ -128,6 +122,9 @@ def load_mpf_style(spec):
     marketcolors = style.get("marketcolors") or {}
     settings = {}
 
+    if style.get("y_on_right") is not None:
+        settings["yaxis.right"] = style["y_on_right"]
+
     pairs = {
         "candle": marketcolors.get("candle"),
         "edge": marketcolors.get("edge"),
@@ -140,14 +137,21 @@ def load_mpf_style(spec):
         if pair:
             settings[f"{prefix}.up.color"], settings[f"{prefix}.down.color"] = pair
 
-    # volume outlines are opt-in in mplchart — map vcedge only when it
-    # differs from the faces, where same-color outlines would be invisible
+    # volume outlines: mpf never draws same-color edges — when vcedge equals
+    # the faces it substitutes the faces darkened to 90% lightness
+    # (its _adjust_color_brightness), which is volume.edge.lightness in
+    # mplchart terms; a differing vcedge maps as declared colors
     vcedge = _updown(marketcolors.get("vcedge"))
-    if vcedge and vcedge != _updown(marketcolors.get("volume")):
-        settings["volume.edge.up.color"], settings["volume.edge.down.color"] = vcedge
+    if vcedge:
+        if vcedge == _updown(marketcolors.get("volume")):
+            settings["volume.edge.lightness"] = 0.90
+        else:
+            settings["volume.edge.up.color"], settings["volume.edge.down.color"] = vcedge
 
     alpha = marketcolors.get("alpha")
     if alpha is not None and alpha != 1:
+        # candle only — mpf applies marketcolors alpha to candle collections
+        # (and hollow/renko variants) but never to ohlc bars
         settings["candle.alpha"] = alpha
     if marketcolors.get("volume_alpha") is not None:
         settings["volume.alpha"] = marketcolors["volume_alpha"]

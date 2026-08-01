@@ -97,8 +97,9 @@ None — plot the chart prices.
 from the indicator, else the class name.
 - **width** (float): Width of each candlestick body as a fraction of bar
 spacing. Defaults to 0.8.
-- **alpha** (float): Opacity of the candlesticks, between 0.0
-and 1.0. Defaults to the `candle.alpha` setting, else 1.0.
+- **alpha** (float): Opacity of the candle body fills, between
+0.0 and 1.0 — edges and wicks stay opaque, the mplfinance
+rendering. Defaults to the `candle.alpha` setting, else 1.0.
 - **color** (str): Single color for the mono hollow scheme.
 Mutually exclusive with `colorup`/`colordn`.
 - **colorup** (str): Color for up-bars (bicolor scheme).

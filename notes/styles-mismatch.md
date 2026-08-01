@@ -26,11 +26,11 @@ mplfinance encodes chart colors in a nested `marketcolors` dict; mplchart encode
 | `marketcolors.ohlc.up` / `.down` | `settings["ohlc.up.color"]` / `["ohlc.down.color"]` |
 | `marketcolors.volume.up` / `.down` | `settings["volume.up.color"]` / `["volume.down.color"]` |
 | `marketcolors.vcdopcod` | `settings["volume.use_prev_close"]` (3 styles: `charles`, `ibd`, `yahoo`) |
-| `marketcolors.vcedge` | `settings["volume.edge.up.color"]` / `["volume.edge.down.color"]` (only `tradingview` sets it apart from the volume colors) |
+| `marketcolors.vcedge` | `settings["volume.edge.up.color"]` / `["volume.edge.down.color"]`. Only `tradingview` sets it apart from the volume faces; for the same-as-faces case (the other 15) mpf does NOT draw same-color edges — its plotting substitutes the faces darkened to 90% HLS lightness (`_adjust_color_brightness`, found 2026-08-01 in `plotting.py`; the spec-level "edges match exactly" verification below missed this runtime substitution). The converter carries the intent as `settings["volume.edge.lightness"] = 0.90` — a Volume setting acting as a final transform on the effective edge colors (edges default to the faces first), implemented via `colors.scale_lightness`, which matches mpf's darkening math exactly |
 | `marketcolors.hollow` | `settings["candle.off.color"]` (1 style: `kenan`) |
-| `marketcolors.alpha` | `settings["candle.alpha"]` and `settings["ohlc.alpha"]` |
+| `marketcolors.alpha` | `settings["candle.alpha"]` only — source-verified 2026-08-01: mpf applies it in the candlestick/hollow/renko collection constructors but never in `_construct_ohlc_collections`, so ohlc bars stay opaque (an earlier revision wrongly listed `ohlc.alpha` too) |
 | `marketcolors.volume_alpha` | `settings["volume.alpha"]` (1 style: `tradingview`) |
-| `y_on_right` | `rc["ytick.labelright"]` + `labelleft` / `right` / `left` — used by 11 of 16 styles; verified to render correctly |
+| `y_on_right` | `settings["yaxis.right"]` (mapped 2026-08-01, once the `yaxis_right=` chart option landed; the earlier experiment mapped it as the four `ytick.labelright`/`labelleft`/`right`/`left` rc keys) — 11 of 16 styles put labels on the right |
 | `style_name`, `base_mpf_style` | — (metadata, no equivalent needed) |
 
 ## The mismatch
@@ -69,9 +69,7 @@ Volume outlines cannot use `"none"` as a per-bar array entry: matplotlib parses 
 
 ## Status
 
-No converter shipped — the validation harness lived in a scratchpad and was not kept. Its full mapping is the "Direct mappings" table above, so it can be rebuilt from this note in minutes; the pieces that took experimenting to find (the `seaborn-*` alias, the `"none"` edge trap, the exact role names) are recorded in Gotcha.
-
-Options if it ever matters: port selected mpf palettes into `styles/lib/` as shipped styles, or expose a `from_mplfinance` utility so users bring their own. Neither is scheduled — and note the converter is only worth shipping if users actually have custom mpf styles to bring; the 16 built-ins would be better ported once as native palettes than converted at runtime.
+**Converter shipped** (0.0.48): `styles/mplfinance.py` `load_mpf_style(name)` — name-only, str → Styler (the `make_mpf_style`-dict path existed briefly and was removed 2026-08-01) — with the `"mpf:"` style prefix as the string form (`Chart(style="mpf:yahoo")`, dispatched via the `mplchart.styles` entry-point group). It follows the mappings above in full — the last two special cases fell on 2026-08-01: `y_on_right` (initially excluded as chart layout) maps to `settings["yaxis.right"]` since the `yaxis_right=` chart option (param → `yaxis.right` setting → left) landed, and `vcedge` (initially skipped when equal to the volume faces as "invisible") always maps since the same-as-faces case was found to darken in mpf's rendering — see the table row. Renderer parity followed the same day: mpf bakes `marketcolors.alpha` into the candle *face* RGBA only (edges/wicks opaque — the implicit-rim twin of the vcedge darkening); mplchart's candlestick renderer originally applied alpha collection-wide and was changed to face-only to match. Volume alpha stays whole-artist on both sides (`ax.bar(..., alpha=)`). `mavcolors` take the key-alias route (shared `overlay.color` cycle), not the prop-cycle substitution. `marketcolors.alpha` maps to `candle.alpha` only (see the table row — the briefly-considered `ohlc.alpha` wire was a parity error, reverted same day).
 
 Note for issue #19 (platform themes): converting mpf styles does **not** deliver ThinkOrSwim/Bloomberg/IBKR looks — those do not exist in mplfinance either (see `notes/themes-review.md`). Platform palettes have to be sampled from real screenshots.
 

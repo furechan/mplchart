@@ -1,14 +1,19 @@
 # Change Log
 
 ## 0.0.48
+- Candlestick `alpha`/`candle.alpha` now applies to the body fills only — edges and wicks stay opaque, matching mplfinance's rendering
+- New `yaxis_right=` option on `Chart`/`Canvas` — pane y-axis labels on the right or left (`False`); `None` default consults the `yaxis.right` style setting, else matplotlib's left convention; shipped styles declare `yaxis.right: True` so the default look keeps right; twin overlays take the opposite side
+- Provider style prefixes resolve via the `mplchart.styles` entry-point group (declared in pyproject.toml) — installed packages can register their own prefixes
 - Removed the `homepage` project URL — explicit labels only (documentation, repository, changelog)
-- New `mplchart.styles.mplfinance` module — `load_mpf_style` converts an mplfinance style (name or `make_mpf_style` dict) into a `Styler`: `base_mpl_style`/rc/face/grid keys to rc, `marketcolors` to settings, `mavcolors` to a shared `overlay.color` cycle; requires mplfinance
-- New `mplchart.styles.morethemes` module — `load_mt_theme` converts a morethemes theme into a `Styler`; requires morethemes
+- New `mplchart.styles.mplfinance` module — `load_mpf_style` converts a named mplfinance style into a `Styler`: `base_mpl_style`/rc/face/grid keys to rc, `marketcolors` to settings, `mavcolors` to a shared `overlay.color` cycle, `y_on_right` to `yaxis.right`; same-as-face `vcedge` maps to `volume.edge.lightness: 0.9` matching mpf's rendering; requires mplfinance
+- New `volume.edge.lightness` setting — final transform scaling the volume outline lightness (edge colors defaulting to the faces first); setting it alone opts the outlines in
+- New `colors.scale_lightness` helper — scale a color's HLS lightness, returned as hex
+- New `mplchart.styles.morethemes` module — `load_mt_style` converts a morethemes theme into a `Styler`; requires morethemes
 - Removed bare-name morethemes resolution in `Chart(style=...)` (shipped 0.0.47) — external providers convert via the explicit loader modules
 - API docs generator renders docstring admonition sections (previously emitted an object repr)
 - Provider style prefixes: `style="mpf:yahoo"` / `style="mt:economist"` dispatch to the loader modules
 - New `styles/stylesheet.py` submodule — `base_template` and `load_stylesheet` (the matplotlib layer)
-- New `styles/registry.py` submodule — `ENTRY_POINTS` and `available_styles` (the name registries)
+- New `styles/registry.py` submodule — `style_handler` and `available_styles` (the name registries)
 - Removed the `Style` spec class and the `styles/style.py` module — `Styler` is the single style object: `Styler.from_spec` builds from a spec mapping, `resolve_style` resolves a name (shipped style, matplotlib sheet, or provider-prefixed) into a `Styler`, and `get_styler` dispatches any spec form and layers overrides
 
 ## 0.0.47

@@ -24,6 +24,10 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
+[project.entry-points."mplchart.styles"]
+mpf = "mplchart.styles.mplfinance:load_mpf_style"
+mt = "mplchart.styles.morethemes:load_mt_style"
+
 [project.optional-dependencies]
 pandas = ["pandas"]
 polars = ["polars"]

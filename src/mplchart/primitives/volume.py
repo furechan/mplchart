@@ -8,6 +8,10 @@ Style settings consumed by this primitive:
     volume.edge.down.color   outline; one side set makes the other follow
                              its face color (set both alike for a neutral
                              outline)
+    volume.edge.lightness  rim knob — final transform scaling the outline
+                             lightness (edge colors defaulting to the
+                             faces first); < 1 darkens, > 1 lightens, and
+                             setting it alone opts the outlines in
     volume.ma.color        SMA overlay line (default: ~gray)
     volume.alpha           opacity, bars and ma line (default: 0.5)
     volume.use_prev_close  interbar-coloring flag (default: False)
@@ -18,6 +22,7 @@ independent per-element params, not an atomic scheme.
 
 import numpy as np
 
+from ..colors import scale_lightness
 from ..model.primitive import Primitive
 from ..utils import col_to_numpy, plot_vbars
 
@@ -99,18 +104,18 @@ class Volume(Primitive):
         xv = col_to_numpy(prices, "xloc")
 
         width = self.width
-        alpha = chart.canvas.get_setting("volume", "alpha", ax, override=self.alpha, fallback=0.5)
+        alpha = chart.canvas.get_setting("volume", "alpha", ax=ax, override=self.alpha, fallback=0.5)
 
         # per-element chain: kwarg → setting → snapped default (independent
         # params, not an atomic scheme — same policy as OHLC)
         resolve = chart.canvas.resolve_color
-        colorup = resolve("volume.up", ax, override=self.colorup, fallback="~green")
-        colordn = resolve("volume.down", ax, override=self.colordn, fallback="~red")
+        colorup = resolve("volume.up", ax=ax, override=self.colorup, fallback="~green")
+        colordn = resolve("volume.down", ax=ax, override=self.colordn, fallback="~red")
 
         # direction: intrabar (close vs open, matching the candlesticks) by
         # default, or interbar with use_prev_close — first bar compares to itself
         use_prev_close = chart.canvas.get_setting(
-            "volume", "use_prev_close", ax, override=self.use_prev_close, fallback=False
+            "volume", "use_prev_close", ax=ax, override=self.use_prev_close, fallback=False
         )
         if use_prev_close:
             prev = np.concatenate((close[:1], close[:-1]))
@@ -123,8 +128,17 @@ class Volume(Primitive):
         # outlines are opt-in as a pair: unset with neither side gives
         # unoutlined bars (the default look); with one side set the other
         # follows its face, as candle edges follow their faces
-        edgeup = resolve("volume.edge.up", ax, override=self.edgeup)
-        edgedn = resolve("volume.edge.down", ax, override=self.edgedn)
+        edgeup = resolve("volume.edge.up", ax=ax, override=self.edgeup)
+        edgedn = resolve("volume.edge.down", ax=ax, override=self.edgedn)
+
+        # lightness is a final transform on the effective edge colors —
+        # wherever they came from, explicit or face-defaulted — and setting
+        # it alone opts the outlines in (the mpf implicit-rim model)
+        lightness = chart.canvas.get_setting("volume.edge", "lightness", ax=ax)
+        if lightness is not None:
+            edgeup = scale_lightness(edgeup or colorup, lightness)
+            edgedn = scale_lightness(edgedn or colordn, lightness)
+
         edgecolor = (
             np.where(up, edgeup or colorup, edgedn or colordn)
             if edgeup or edgedn
@@ -140,7 +154,7 @@ class Volume(Primitive):
                    edgecolor=edgecolor)
 
         if self.sma:
-            colorma = resolve("volume.ma", ax, override=self.colorma, fallback="~gray")
+            colorma = resolve("volume.ma", ax=ax, override=self.colorma, fallback="~gray")
             n = self.sma
             valid = np.convolve(volume, np.ones(n) / n, mode="valid")
             average = np.concatenate([np.full(n - 1, np.nan), valid])

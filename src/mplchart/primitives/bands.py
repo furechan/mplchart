@@ -64,7 +64,7 @@ class Bands(BindingPrimitive):
 
         label = self.label if self.label is not None else get_label(self.indicator)
         label = label if self.legend else None
-        color = chart.canvas.resolve_color("bands", ax, override=self.color, fallback="line")
+        color = chart.canvas.resolve_color("bands", ax=ax, override=self.color, fallback="line")
 
         if self.middle in columns:
             xv, mv = chart.view.series_xy(data[self.middle])

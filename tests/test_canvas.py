@@ -98,6 +98,53 @@ def test_get_axes_invalid_target(canvas):
         canvas.get_axes("bogus")
 
 
+def test_yaxis_default_right(canvas):
+    # the default "mplchart" style declares yaxis.right True — the finance convention
+    assert canvas.yaxis_right is True
+    pane = canvas.get_axes()
+    assert pane.yaxis.get_ticks_position() == "right"
+
+
+def test_yaxis_sheet_style_left():
+    # a style with no yaxis.right opinion keeps matplotlib's left convention
+    from mplchart.styles import Styler
+
+    canvas = Canvas(figsize=(2, 2), style=Styler(stylesheet="classic"))
+    assert canvas.yaxis_right is False
+    assert canvas.get_axes().yaxis.get_ticks_position() == "left"
+    plt.close(canvas.figure)
+
+
+def test_yaxis_right_setting():
+    from mplchart.styles import get_styler
+
+    style = get_styler("mplchart", overrides={"yaxis.right": False})
+    canvas = Canvas(figsize=(2, 2), style=style)
+    assert canvas.yaxis_right is False
+    assert canvas.get_axes().yaxis.get_ticks_position() == "left"
+    plt.close(canvas.figure)
+
+    # the explicit param beats the setting
+    canvas = Canvas(figsize=(2, 2), style=style, yaxis_right=True)
+    assert canvas.yaxis_right is True
+    plt.close(canvas.figure)
+
+
+def test_yaxis_left():
+    canvas = Canvas(figsize=(2, 2), yaxis_right=False)
+    pane = canvas.get_axes()
+    assert pane.yaxis.get_ticks_position() == "left"
+    pane.plot([1.0, 2.0])
+    twin = canvas.get_axes("twinx")  # twin overlay takes the opposite side
+    assert twin.yaxis.get_ticks_position() == "right"
+    plt.close(canvas.figure)
+
+
+def test_yaxis_invalid():
+    with pytest.raises(ValueError, match="Invalid yaxis_right"):
+        Canvas(yaxis_right="left")
+
+
 def test_resolve_color_scheme_lookup():
     from matplotlib.colors import to_hex
 
@@ -117,9 +164,9 @@ def test_resolve_color_list_cycling():
 
     canvas = Canvas(style=Styler(settings={"sma.color": ["red", "blue"]}))
     ax = canvas.get_axes()
-    assert canvas.resolve_color("sma", ax) == to_hex("red")
-    assert canvas.resolve_color("sma", ax) == to_hex("blue")
-    assert canvas.resolve_color("sma", ax) == to_hex("red")  # wraps around
+    assert canvas.resolve_color("sma", ax=ax) == to_hex("red")
+    assert canvas.resolve_color("sma", ax=ax) == to_hex("blue")
+    assert canvas.resolve_color("sma", ax=ax) == to_hex("red")  # wraps around
     plt.close(canvas.figure)
 
 

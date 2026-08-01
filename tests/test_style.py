@@ -70,7 +70,7 @@ def test_cascade_shares_one_overlay_cycle():
 
     ax = plt.figure().add_subplot()
     try:
-        drawn = [styler.resolve_color(name, ax) for name in ("SMA(20)", "EMA(50)", "sma-200")]
+        drawn = [styler.resolve_color(name, ax=ax) for name in ("SMA(20)", "EMA(50)", "sma-200")]
         assert drawn == [mcolors.to_hex(c) for c in palette[:3]]  # one cursor, in order
     finally:
         plt.close("all")
@@ -158,7 +158,7 @@ Chart(sample_prices().tail(30), figsize=(3, 2)).plot([Candlesticks()])
 
 for load, name in [
     (mplchart.styles.mplfinance.load_mpf_style, "yahoo"),
-    (mplchart.styles.morethemes.load_mt_theme, "economist"),
+    (mplchart.styles.morethemes.load_mt_style, "economist"),
     (get_styler, "mpf:yahoo"),
     (get_styler, "mt:economist"),
 ]:

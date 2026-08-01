@@ -54,18 +54,18 @@ def test_instance_labels_share_prefix_cycle():
     # list cycles key on the resolved key — SMA(20)/SMA(50) share one cursor
     styler = Styler(settings={"sma.color": ["red", "blue"]})
     ax = StubAxes()
-    assert styler.resolve_color("SMA(20)", ax) == hexc("red")
-    assert styler.resolve_color("SMA(50)", ax) == hexc("blue")
-    assert styler.resolve_color("sma-10", ax) == hexc("red")  # wraps, same cursor
+    assert styler.resolve_color("SMA(20)", ax=ax) == hexc("red")
+    assert styler.resolve_color("SMA(50)", ax=ax) == hexc("blue")
+    assert styler.resolve_color("sma-10", ax=ax) == hexc("red")  # wraps, same cursor
 
 
 def test_list_cycling_per_axes():
     styler = Styler(settings={"sma.color": ["red", "blue"]})
     ax1, ax2 = StubAxes(), StubAxes()
-    assert styler.resolve_color("sma", ax1) == hexc("red")
-    assert styler.resolve_color("sma", ax1) == hexc("blue")
-    assert styler.resolve_color("sma", ax2) == hexc("red")  # independent cycle per pane
-    assert styler.resolve_color("sma", ax1) == hexc("red")  # wraps around
+    assert styler.resolve_color("sma", ax=ax1) == hexc("red")
+    assert styler.resolve_color("sma", ax=ax1) == hexc("blue")
+    assert styler.resolve_color("sma", ax=ax2) == hexc("red")  # independent cycle per pane
+    assert styler.resolve_color("sma", ax=ax1) == hexc("red")  # wraps around
 
 
 def test_list_cycling_without_axes_raises():
@@ -77,13 +77,13 @@ def test_list_cycling_without_axes_raises():
 
 def test_empty_list_defers_to_fallback():
     styler = Styler(settings={"sma.color": []})
-    assert styler.resolve_color("sma", StubAxes(), fallback="green") == hexc("green")
+    assert styler.resolve_color("sma", ax=StubAxes(), fallback="green") == hexc("green")
 
 
 def test_cycles_die_with_axes():
     styler = Styler(settings={"sma.color": ["red", "blue"]})
     ax = StubAxes()
-    styler.resolve_color("sma", ax)
+    styler.resolve_color("sma", ax=ax)
     assert len(styler.counters) == 1
     del ax
     assert len(styler.counters) == 0  # weakly-keyed: pane gone, counter gone
@@ -96,10 +96,10 @@ def test_aliases_share_one_cycle():
         aliases={"sma": "overlay", "ema": "overlay"},
     )
     ax = StubAxes()
-    assert styler.resolve_color("SMA(20)", ax) == hexc("red")
-    assert styler.resolve_color("EMA(50)", ax) == hexc("blue")  # same cursor, not its own
-    assert styler.resolve_color("sma-200", ax) == hexc("green")
-    assert styler.resolve_color("EMA(10)", ax) == hexc("red")  # wraps
+    assert styler.resolve_color("SMA(20)", ax=ax) == hexc("red")
+    assert styler.resolve_color("EMA(50)", ax=ax) == hexc("blue")  # same cursor, not its own
+    assert styler.resolve_color("sma-200", ax=ax) == hexc("green")
+    assert styler.resolve_color("EMA(10)", ax=ax) == hexc("red")  # wraps
 
 
 def test_alias_is_a_rename_not_a_fallback():
@@ -121,8 +121,8 @@ def test_aliases_apply_to_every_facet():
     )
     ax = StubAxes()
     assert styler.get_setting("SMA(20)", "alpha", fallback=1.0) == 0.5
-    assert styler.get_setting("SMA(20)", "width", ax) == 1  # cycling is not color-only
-    assert styler.get_setting("EMA(50)", "width", ax) == 2
+    assert styler.get_setting("SMA(20)", "width", ax=ax) == 1  # cycling is not color-only
+    assert styler.get_setting("EMA(50)", "width", ax=ax) == 2
 
 
 def test_facets_cycle_independently():
@@ -133,17 +133,17 @@ def test_facets_cycle_independently():
         aliases={"sma": "overlay", "ema": "overlay"},
     )
     ax = StubAxes()
-    assert styler.resolve_color("SMA(20)", ax) == hexc("red")
-    assert styler.get_setting("SMA(20)", "width", ax) == 1
-    assert styler.resolve_color("EMA(50)", ax) == hexc("blue")
-    assert styler.get_setting("EMA(50)", "width", ax) == 2
+    assert styler.resolve_color("SMA(20)", ax=ax) == hexc("red")
+    assert styler.get_setting("SMA(20)", "width", ax=ax) == 1
+    assert styler.resolve_color("EMA(50)", ax=ax) == hexc("blue")
+    assert styler.get_setting("EMA(50)", "width", ax=ax) == 2
 
 
 def test_override_and_fallback_are_never_cycled():
     styler = Styler(settings={"sma.color": ["red", "blue"]}, aliases={"ema": "overlay"})
     ax = StubAxes()
-    assert styler.get_setting("sma", "width", ax, override=[1, 2]) == [1, 2]
-    assert styler.get_setting("ema", "width", ax, fallback=[3, 4]) == [3, 4]
+    assert styler.get_setting("sma", "width", ax=ax, override=[1, 2]) == [1, 2]
+    assert styler.get_setting("ema", "width", ax=ax, fallback=[3, 4]) == [3, 4]
 
 
 def test_aliases_carry_through_replace():
@@ -153,7 +153,7 @@ def test_aliases_carry_through_replace():
     )
     derived = styler.replace(overrides={"candle.alpha": 0.9})
     assert derived.aliases == {"sma": "overlay"}
-    assert derived.resolve_color("SMA(20)", StubAxes()) == hexc("red")  # fresh cursor
+    assert derived.resolve_color("SMA(20)", ax=StubAxes()) == hexc("red")  # fresh cursor
 
 
 def test_non_string_colors_normalize():
@@ -178,12 +178,12 @@ def test_line_fill_sentinels():
     styler = Styler()
     fig, ax = plt.subplots()
     try:
-        first = styler.resolve_color("close", ax, fallback="line")
+        first = styler.resolve_color("close", ax=ax, fallback="line")
         assert first == hexc(plt.rcParams["text.color"])  # first trace uses text.color
         ax.plot([0, 1], label="close")
-        second = styler.resolve_color("sma", ax, fallback="line")
+        second = styler.resolve_color("sma", ax=ax, fallback="line")
         assert second != first  # cycled color once labeled artists exist
-        fill = styler.resolve_color("volume", ax, fallback="fill")
+        fill = styler.resolve_color("volume", ax=ax, fallback="fill")
         assert fill
     finally:
         plt.close(fig)
@@ -200,7 +200,8 @@ def test_context_scoped_rc():
 def test_get_styler_none():
     styler = get_styler(overrides={"candle.alpha": 0.9})
     assert isinstance(styler, Styler)
-    assert styler.settings == {"candle.alpha": 0.9}  # canonical keys, no munging
+    # canonical keys, no munging — overrides layer over the default style's settings
+    assert styler.settings == {"yaxis.right": True, "candle.alpha": 0.9}
 
 
 def test_get_styler_passthrough():

@@ -9,7 +9,7 @@ Style settings consumed by this primitive (see notes/candlestick-styles.md):
     wicks.up.color       wick colors (default: follow the edges); set both
     wicks.down.color       to one color for neutral wicks (yahoo-style)
     candle.off.color       hollow-body fill (default: axes.facecolor)
-    candle.alpha           opacity (default: 1.0)
+    candle.alpha           body-fill opacity — edges/wicks stay opaque (default: 1.0)
     candle.hollow          hollow-mode flag (default: resolved faces equal)
     candle.use_prev_close  interbar-coloring flag (default: False)
 
@@ -21,6 +21,7 @@ import warnings
 
 import numpy as np
 
+import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 
 from matplotlib.collections import LineCollection, PolyCollection
@@ -64,8 +65,9 @@ class Candlesticks(BindingPrimitive):
             from the indicator, else the class name.
         width (float): Width of each candlestick body as a fraction of bar
             spacing. Defaults to 0.8.
-        alpha (float, optional): Opacity of the candlesticks, between 0.0
-            and 1.0. Defaults to the ``candle.alpha`` setting, else 1.0.
+        alpha (float, optional): Opacity of the candle body fills, between
+            0.0 and 1.0 — edges and wicks stay opaque, the mplfinance
+            rendering. Defaults to the ``candle.alpha`` setting, else 1.0.
         color (str, optional): Single color for the mono hollow scheme.
             Mutually exclusive with ``colorup``/``colordn``.
         colorup (str, optional): Color for up-bars (bicolor scheme).
@@ -172,8 +174,8 @@ class Candlesticks(BindingPrimitive):
 
         get_setting = chart.canvas.get_setting
 
-        alpha = get_setting("candle", "alpha", ax, override=self.alpha, fallback=1.0)
-        use_prev_close = get_setting("candle", "use_prev_close", ax, override=self.use_prev_close, fallback=False)
+        alpha = get_setting("candle", "alpha", ax=ax, override=self.alpha, fallback=1.0)
+        use_prev_close = get_setting("candle", "use_prev_close", ax=ax, override=self.use_prev_close, fallback=False)
 
         resolve = chart.canvas.resolve_color
         textcolor = plt.rcParams["text.color"]
@@ -197,21 +199,21 @@ class Candlesticks(BindingPrimitive):
 
         # single flow, one resolve per renderer slot; overrides are the
         # sanitized side colors, fallbacks chain faces → edges → wicks
-        faceup = resolve("candle.up", ax, override=colorup, fallback=textcolor)
-        facedn = resolve("candle.down", ax, override=colordn, fallback=textcolor)
-        edgeup = resolve("edge.up", ax, override=colorup, fallback=faceup)
-        edgedn = resolve("edge.down", ax, override=colordn, fallback=facedn)
-        wickup = resolve("wicks.up", ax, override=colorup, fallback=edgeup)
-        wickdn = resolve("wicks.down", ax, override=colordn, fallback=edgedn)
+        faceup = resolve("candle.up", ax=ax, override=colorup, fallback=textcolor)
+        facedn = resolve("candle.down", ax=ax, override=colordn, fallback=textcolor)
+        edgeup = resolve("edge.up", ax=ax, override=colorup, fallback=faceup)
+        edgedn = resolve("edge.down", ax=ax, override=colordn, fallback=facedn)
+        wickup = resolve("wicks.up", ax=ax, override=colorup, fallback=edgeup)
+        wickdn = resolve("wicks.down", ax=ax, override=colordn, fallback=edgedn)
 
         # mode chain: kwarg → candle.hollow setting → resolved-face default
-        hollow = get_setting("candle", "hollow", ax, override=self.hollow)
+        hollow = get_setting("candle", "hollow", ax=ax, override=self.hollow)
         if hollow is None:
             hollow = faceup == facedn
 
         if hollow:
             # kwarg schemes (colorup set) pin the hollow fill to the background
-            faceoff = resolve("candle.off", ax, override=facecolor if colorup else None, fallback=facecolor)
+            faceoff = resolve("candle.off", ax=ax, override=facecolor if colorup else None, fallback=facecolor)
         else:
             faceoff = None
 
@@ -270,6 +272,13 @@ def plot_cspoly(
     if faceoff is not None:
         facecolor = np.where(body_up, faceoff, facecolor)
 
+    # alpha applies to the body fills only — edges and wicks stay opaque,
+    # the mplfinance rendering (its candle constructor bakes alpha into the
+    # face RGBA and leaves edge/wick colors untouched)
+    facecolor = mcolors.to_rgba_array(facecolor)
+    if alpha is not None:
+        facecolor[:, 3] = alpha
+
     linewidths = (0.7,)
 
     # wicks: two segments per bar (top → high, bottom → low), drawn beneath the bodies
@@ -283,7 +292,6 @@ def plot_cspoly(
         segments,  # ty: ignore[invalid-argument-type]  # pyright: ignore[reportArgumentType]  # stubs say Sequence[ArrayLike]; 3-D ndarray is supported
         colors=np.repeat(wickcolor, 2),
         linewidths=linewidths,
-        alpha=alpha,
     )
 
     # bodies: (n, 4, 2) rectangle vertex array — hits PolyCollection's set_verts fast path
@@ -294,7 +302,6 @@ def plot_cspoly(
 
     poly = PolyCollection(
         verts,  # ty: ignore[invalid-argument-type]  # pyright: ignore[reportArgumentType]  # stubs say Sequence[ArrayLike]; 3-D ndarray is supported
-        alpha=alpha,
         facecolors=facecolor,
         edgecolors=edgecolor,
         linewidths=linewidths,

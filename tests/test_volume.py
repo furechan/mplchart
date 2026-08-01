@@ -151,3 +151,26 @@ def test_edge_one_side_only():
     fig, poly = plot_volume(colorup="green", colordn="red", edgeup="navy")
     assert rgb(poly.get_edgecolor()) == [rgba("navy")[:3], rgba("red")[:3]]
     plt.close(fig)
+
+
+def test_edge_lightness_opts_in():
+    # lightness alone opts the outlines in: edges default to the faces,
+    # then the transform scales their lightness (the mpf implicit rim)
+    from mplchart.colors import scale_lightness
+
+    scheme = {"volume.edge.lightness": 0.9}
+    fig, poly = plot_volume(settings=scheme, colorup="#4dc790", colordn="#fd6b6c")
+    expected = [rgba(scale_lightness(c, 0.9))[:3] for c in ("#4dc790", "#fd6b6c")]
+    assert rgb(poly.get_edgecolor()) == expected
+    plt.close(fig)
+
+
+def test_edge_lightness_transforms_explicit_colors():
+    # lightness is a final transform — it adjusts an explicit edge color too
+    from mplchart.colors import scale_lightness
+
+    scheme = {"volume.edge.lightness": 1.2}
+    fig, poly = plot_volume(settings=scheme, colorup="green", colordn="red", edgeup="navy")
+    expected = [rgba(scale_lightness("navy", 1.2))[:3], rgba(scale_lightness("red", 1.2))[:3]]
+    assert rgb(poly.get_edgecolor()) == expected
+    plt.close(fig)

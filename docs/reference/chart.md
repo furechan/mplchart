@@ -21,6 +21,7 @@ Chart(
     normalize=False,
     raw_dates=False,
     style=None,
+    yaxis_right=None,
     color_scheme=(),
 )
 ```
@@ -59,6 +60,12 @@ matplotlib stylesheet name, a spec mapping
 (`stylesheet`/`rc`/`settings`/`aliases`), or a prebuilt
 `Styler`. Defaults to the `"mplchart"` style.
 Styles are total — ambient rcParams never affect the chart.
+- **yaxis_right** (bool): Whether the pane y-axis labels render
+on the right. Defaults to `None`, which consults the
+`yaxis.right` style setting, else `False` — the shipped
+styles declare `yaxis.right: True` (the finance convention),
+while styles without an opinion (e.g. a plain matplotlib
+stylesheet) keep matplotlib's left convention.
 - **color_scheme**: Deprecated and ignored — use `style=` with settings
 (e.g. `Styler(settings={"sma.color": "red"})`).
 

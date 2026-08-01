@@ -7,6 +7,7 @@ STYLE = {
         "grid.alpha": 1.0,
     },
     "settings": {
+        "yaxis.right": True,
         "candle.up.color": "white",
         "candle.down.color": "#4a90d9",
         "ohlc.up.color": "white",

@@ -36,7 +36,7 @@ import matplotlib.style
 
 from ..colors import closest_color, normalize_color
 from ..utils import extract_prefix
-from .registry import ENTRY_POINTS, available_styles
+from .registry import available_styles, style_handler
 from .stylesheet import base_template, load_stylesheet
 
 
@@ -96,13 +96,7 @@ def resolve_style(name):
     """
     prefix, sep, name = name.rpartition(":")
     if sep:
-        if prefix not in ENTRY_POINTS:
-            known = ", ".join(sorted(ENTRY_POINTS))
-            raise ValueError(f"Unknown style prefix {prefix!r} — known prefixes: {known}")
-        module_name, loader_name = ENTRY_POINTS[prefix]
-        module = import_module(f".{module_name}", __package__)
-        loader = getattr(module, loader_name)
-
+        loader = style_handler(prefix)
         return loader(name)  # loaders build the Styler
 
     if name in available_styles():
@@ -259,7 +253,7 @@ class Styler:
 
         return values[index % len(values)]
 
-    def get_setting(self, name, facet, ax=None, *, override=None, fallback=None, extract=True):
+    def get_setting(self, name, facet, *, ax=None, override=None, fallback=None, extract=True):
         """Lookup a setting by name and facet: override → setting → fallback.
 
         ``override`` (an explicit user value, e.g. a primitive kwarg) wins
@@ -291,11 +285,11 @@ class Styler:
 
         return fallback if value is None else value
 
-    def resolve_color(self, name, ax=None, *, override=None, fallback=None, extract=True):
+    def resolve_color(self, name, *, ax=None, override=None, fallback=None, extract=True):
         """Resolve the color for a name: setting lookup, then color pipeline.
 
         The lookup — chain, aliasing and cycling — is ``get_setting(name,
-        "color", ax)``; the name is a lookup key, never a color candidate.
+        "color", ax=ax)``; the name is a lookup key, never a color candidate.
         What is left here is color *interpretation* of the winner: ``"~"``
         snaps to the closest prop-cycle color, ``"line"``/``"fill"`` take
         the next color from the axes prop cycle (``None`` without axes).
@@ -304,7 +298,7 @@ class Styler:
         styler: scalar-safe for ``np.where``, validated by ``to_rgba``.
         """
         color = self.get_setting(
-            name, "color", ax, override=override, fallback=fallback, extract=extract
+            name, "color", ax=ax, override=override, fallback=fallback, extract=extract
         )
 
         if isinstance(color, str):

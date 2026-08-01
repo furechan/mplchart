@@ -24,18 +24,48 @@ def test_yahoo_mapping():
     assert styler.settings["candle.down.color"] == "#fe3032"
     assert styler.settings["wicks.up.color"] == "#606060"
     assert styler.settings["volume.use_prev_close"] is True  # vcdopcod
+    assert styler.settings["yaxis.right"] is True  # y_on_right
     assert styler.settings["candle.alpha"] == 0.9
+    assert "ohlc.alpha" not in styler.settings  # mpf never applies alpha to ohlc bars
     assert styler.rcparams["axes.facecolor"] == "#fafafa"
     assert styler.rcparams["grid.color"] == "#d0d0d0"
     assert styler.rcparams["axes.grid"] is True
-    # vcedge equals the volume faces — invisible outlines stay unmapped
+
+
+def test_same_color_vcedge_darkens():
+    # mpf never draws same-color volume edges — it substitutes the faces
+    # darkened to 90% lightness; the converter carries that intent as the
+    # volume.edge.lightness setting rather than precomputed colors
+    import matplotlib.colors as mc
+    from mplfinance._helpers import _adjust_color_brightness
+
+    from mplchart.colors import scale_lightness
+
+    styler = load_mpf_style("yahoo")  # vcedge equals the volume faces
+    assert styler.settings["volume.edge.lightness"] == 0.90
     assert "volume.edge.up.color" not in styler.settings
+
+    # the primitive's transform matches mpf's darkening math exactly
+    for face in ("#4dc790", "#fd6b6c"):
+        assert scale_lightness(face, 0.90) == mc.to_hex(_adjust_color_brightness(face, 0.90))
 
 
 def test_tradingview_volume_edges():
     styler = load_mpf_style("tradingview")
     assert styler.settings["volume.edge.up.color"] == "white"  # vcedge differs
     assert styler.settings["volume.alpha"] == 0.65  # volume_alpha
+
+
+def test_y_on_right_mapping():
+    # nightclouds is one of the 5 mpf styles that keep labels on the left
+    assert load_mpf_style("nightclouds").settings["yaxis.right"] is False
+
+    from mplchart.canvas import Canvas
+
+    canvas = Canvas(figsize=(2, 2), style=load_mpf_style("nightclouds"))
+    assert canvas.yaxis_right is False
+    assert canvas.get_axes().yaxis.get_ticks_position() == "left"
+    plt.close(canvas.figure)
 
 
 def test_nightclouds_mavcolors_cycle():
@@ -46,7 +76,7 @@ def test_nightclouds_mavcolors_cycle():
 
     ax = plt.figure().add_subplot()
     try:
-        drawn = [styler.resolve_color(name, ax) for name in ("SMA(20)", "EMA(50)")]
+        drawn = [styler.resolve_color(name, ax=ax) for name in ("SMA(20)", "EMA(50)")]
         assert drawn == [mcolors.to_hex(c) for c in styler.settings["overlay.color"][:2]]
     finally:
         plt.close("all")
@@ -58,18 +88,9 @@ def test_styles_without_mavcolors_declare_no_aliases():
     assert "overlay.color" not in styler.settings
 
 
-def test_make_mpf_style_dict():
-    custom = mpf.make_mpf_style(base_mpf_style="charles", mavcolors=["red", "blue"])
-    styler = load_mpf_style(custom)
-    assert styler.settings["overlay.color"] == ["red", "blue"]
-    assert styler.settings["candle.up.color"] == custom["marketcolors"]["candle"]["up"]
-
-
 def test_unknown_style_name():
     with pytest.raises(ValueError, match="Unknown mplfinance style"):
         load_mpf_style("no-such-style")
-    with pytest.raises(ValueError, match="Invalid mplfinance style"):
-        load_mpf_style(42)
 
 
 def test_mpf_prefix_dispatch():

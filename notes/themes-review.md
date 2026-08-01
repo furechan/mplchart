@@ -4,7 +4,7 @@ Survey of the style/theme landscape available to mplchart charts, July 2026. Ver
 
 ## What resolves as a `style=` value
 
-`Chart(style=...)` normalizes through `get_styler` in this order: mplchart shipped styles (`styles/lib/<name>.py`, which shadow), then matplotlib stylesheet names. External packages convert via explicit loaders (July 2026): `styles.morethemes.load_mt_theme` and `styles.mplfinance.load_mpf_style`, with the `"mt:"` / `"mpf:"` style prefixes as the string form (`style="mpf:yahoo"`) — the flat-namespace morethemes hook was removed when mplfinance interop showed provider names collide (`nightclouds`, `classic`, `default`).
+`Chart(style=...)` normalizes through `get_styler` in this order: mplchart shipped styles (`styles/lib/<name>.py`, which shadow), then matplotlib stylesheet names. External packages convert via explicit loaders (July 2026): `styles.morethemes.load_mt_style` and `styles.mplfinance.load_mpf_style`, with the `"mt:"` / `"mpf:"` style prefixes as the string form (`style="mpf:yahoo"`) — the flat-namespace morethemes hook was removed when mplfinance interop showed provider names collide (`nightclouds`, `classic`, `default`).
 
 Only mplchart's own styles carry chart-specific settings (`candle.*`, grid opinions). Matplotlib sheets and morethemes set rcParams only — they are the complete look, with no mplchart opinions layered on.
 

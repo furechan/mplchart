@@ -56,6 +56,12 @@ class Chart:
             (``stylesheet``/``rc``/``settings``/``aliases``), or a prebuilt
             ``Styler``. Defaults to the ``"mplchart"`` style.
             Styles are total — ambient rcParams never affect the chart.
+        yaxis_right (bool, optional): Whether the pane y-axis labels render
+            on the right. Defaults to ``None``, which consults the
+            ``yaxis.right`` style setting, else ``False`` — the shipped
+            styles declare ``yaxis.right: True`` (the finance convention),
+            while styles without an opinion (e.g. a plain matplotlib
+            stylesheet) keep matplotlib's left convention.
         color_scheme: Deprecated and ignored — use ``style=`` with settings
             (e.g. ``Styler(settings={"sma.color": "red"})``).
 
@@ -81,6 +87,7 @@ class Chart:
         normalize=False,
         raw_dates=False,
         style=None,
+        yaxis_right=None,
         color_scheme=(),
     ):
         if color_scheme:
@@ -96,7 +103,7 @@ class Chart:
         self.max_bars = max_bars
         self.raw_dates = raw_dates
 
-        self.canvas = Canvas(figsize=figsize, figure=figure, title=title, style=style)
+        self.canvas = Canvas(figsize=figsize, figure=figure, title=title, style=style, yaxis_right=yaxis_right)
 
         if prices is None:
             raise ValueError("Prices data must be provided at initialization!")

@@ -22,6 +22,7 @@ STYLE = {
         "tema": "overlay",
     },
     "settings": {
+        "yaxis.right": True,
         "candle.up.color": "#2e7d32",
         "candle.down.color": "#c62828",
         "ohlc.up.color": "#2e7d32",

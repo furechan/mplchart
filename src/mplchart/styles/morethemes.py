@@ -1,12 +1,12 @@
 """morethemes interop — convert a morethemes theme into a ``Styler``.
 
-``load_mt_theme`` takes a named morethemes theme (``"economist"``,
+``load_mt_style`` takes a named morethemes theme (``"economist"``,
 ``"wsj"``, ...) and returns the matching ``Styler``, usable anywhere a
 style spec is accepted::
 
-    from mplchart.styles.morethemes import load_mt_theme
+    from mplchart.styles.morethemes import load_mt_style
 
-    chart = Chart(style=load_mt_theme("economist"))
+    chart = Chart(style=load_mt_style("economist"))
 
 The ``"mt:"`` style prefix is the string form of the same conversion:
 ``Chart(style="mt:economist")`` dispatches here via ``resolve_style``.
@@ -24,7 +24,7 @@ import matplotlib as mpl
 from .styler import Styler
 
 
-def load_mt_theme(name):
+def load_mt_style(name):
     """Convert a morethemes theme into a ``Styler``.
 
     Args:

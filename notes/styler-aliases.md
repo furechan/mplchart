@@ -6,7 +6,7 @@ Status: **implemented** (2026-07-27), as designed below except where marked. Com
 
 This reinstates the "category mapping" that the 2026-07-23 doctrine in [styler-settings.md](styler-settings.md) rejected. That rejection was correctly reasoned on what was known then; the grounds for revisiting are recorded there and summarised below (the prop cycle cannot carry two palettes, and the identity-keyed reserve mechanism is not serializable).
 
-Name note: "key alias" — not "style alias", which would read as an alias for a *style name* (morethemes names already resolve as styles). What gets renamed is the settings lookup key.
+Name note: "key alias" — not "style alias", which would read as an alias for a *style name* (style names have their own namespace: shipped styles, matplotlib sheets, and `mpf:`/`mt:` provider-prefixed names). What gets renamed is the settings lookup key.
 
 ## The problem
 

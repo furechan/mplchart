@@ -40,6 +40,13 @@ class Canvas:
             (``stylesheet``/``rc``/``settings``/``aliases``), or a prebuilt
             ``Styler``. Defaults to the ``"mplchart"`` style.
             Styles are total — ambient rcParams never affect the chart.
+        yaxis_right (bool, optional): Whether the pane y-axis labels render
+            on the right. Defaults to ``None``, which consults the
+            ``yaxis.right`` style setting, else ``False`` — the shipped
+            styles declare ``yaxis.right: True`` (the finance convention),
+            while styles without an opinion (e.g. a plain matplotlib
+            stylesheet) keep matplotlib's left convention. Twin overlays
+            (e.g. Volume on the main pane) take the opposite side.
 
     Creating a Canvas eagerly creates (or adopts) the figure, sets the tight
     layout engine (required by the pane geometry), and installs the styled
@@ -48,8 +55,15 @@ class Canvas:
 
     DEFAULT_FIGSIZE = (12, 9)
 
-    def __init__(self, figsize=None, *, figure=None, title=None, style=None):
+    def __init__(self, figsize=None, *, figure=None, title=None, style=None, yaxis_right=None):
+        if yaxis_right not in (None, True, False):
+            raise ValueError(f"Invalid yaxis_right {yaxis_right!r} — expected a bool")
+
         self.styler = get_styler(style)
+
+        if yaxis_right is None:
+            yaxis_right = self.styler.get_setting("yaxis", "right", fallback=False)
+        self.yaxis_right = yaxis_right
 
         with self.styler.context():
             if figure is not None:
@@ -121,15 +135,17 @@ class Canvas:
         ax.yaxis.grid(False)
         ax.tick_params(left=False, labelleft=False)
 
-    @classmethod
-    def config_pane_axes(cls, ax):
-        """Style a data pane: transparent patch, y-grid, right yticks, no x-ticks."""
+    def config_pane_axes(self, ax):
+        """Style a data pane: transparent patch, y-grid, side yticks, no x-ticks."""
         ax.set_xmargin(0.0)
         ax.set_axisbelow(True)
         ax.patch.set_visible(False)  # see through to root axes drawings
         ax.xaxis.grid(False)
-        ax.yaxis.grid(cls.grid_enabled("y"))
-        ax.yaxis.tick_right()
+        ax.yaxis.grid(self.grid_enabled("y"))
+        if self.yaxis_right:
+            ax.yaxis.tick_right()
+        else:
+            ax.yaxis.tick_left()
         ax.tick_params(
             axis="x", which="both", bottom=False, top=False, labelbottom=False
         )
@@ -216,7 +232,10 @@ class Canvas:
         current = axes[-1]
         if not current.has_data():
             return current
-        return make_twinx(current)
+        twin = make_twinx(current)  # twin yticks default left, opposite the right panes
+        if not self.yaxis_right:
+            twin.yaxis.tick_right()  # keep the twin on the opposite side
+        return twin
 
     def new_axes(self, position: PanePosition = "below", *, height_ratio: float | None = None):
         """Create a new pane — the only pane creator.
@@ -285,10 +304,10 @@ class Canvas:
 
     # --- colors ---
 
-    def get_setting(self, name, facet, ax=None, *, override=None, fallback=None, extract=True):
+    def get_setting(self, name, facet, *, ax=None, override=None, fallback=None, extract=True):
         """Lookup a style setting through the styler — see ``Styler.get_setting``."""
-        return self.styler.get_setting(name, facet, ax, override=override, fallback=fallback, extract=extract)
+        return self.styler.get_setting(name, facet, ax=ax, override=override, fallback=fallback, extract=extract)
 
-    def resolve_color(self, name, ax=None, *, override=None, fallback=None, extract=True):
+    def resolve_color(self, name, *, ax=None, override=None, fallback=None, extract=True):
         """Resolve a color through the styler — see ``Styler.resolve_color``."""
-        return self.styler.resolve_color(name, ax, override=override, fallback=fallback, extract=extract)
+        return self.styler.resolve_color(name, ax=ax, override=override, fallback=fallback, extract=extract)

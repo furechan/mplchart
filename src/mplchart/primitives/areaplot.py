@@ -58,7 +58,7 @@ class AreaPlot(BindingPrimitive):
         series = result
 
         label = self.label if self.label is not None else get_label(self.indicator)
-        color = chart.canvas.resolve_color(label, ax, override=self.color, fallback="fill")
+        color = chart.canvas.resolve_color(label, ax=ax, override=self.color, fallback="fill")
         label = label if self.legend else None
 
         kwargs = dict(

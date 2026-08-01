@@ -173,16 +173,19 @@ def test_settings_hollow_color():
 
 
 def test_settings_candle_alpha():
-    # candle.alpha is a non-color facet — canonical dotted key
+    # candle.alpha is a non-color facet — canonical dotted key. Alpha is
+    # baked into the body-fill colors only; edges and wicks stay opaque
+    # (the mplfinance rendering)
     style = Styler(settings={"candle.alpha": 0.25})
     fig, wicks, poly = plot_candles(style=style)
-    assert poly.get_alpha() == 0.25
-    assert wicks.get_alpha() == 0.25
+    assert all(c[3] == 0.25 for c in poly.get_facecolor())
+    assert all(c[3] == 1.0 for c in poly.get_edgecolor())
+    assert all(c[3] == 1.0 for c in wicks.get_color())
     plt.close(fig)
 
     # explicit kwarg wins over the setting
     fig, wicks, poly = plot_candles(style=style, alpha=0.75)
-    assert poly.get_alpha() == 0.75
+    assert all(c[3] == 0.75 for c in poly.get_facecolor())
     plt.close(fig)
 
 
