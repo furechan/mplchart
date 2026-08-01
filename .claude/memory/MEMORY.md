@@ -31,3 +31,4 @@
 - [Smoke-test wheel before publishing](feedback-publish-smoke-test.md) — isolated env with latest deps; dev venv masked the mpl 3.11 breakage in 0.0.41
 - [PyPI URL labels: explicit only](feedback-pypi-url-labels.md) — documentation/repository/changelog, no ambiguous homepage link
 - [Material MkDocs 2.0 banner is expected noise](project-material-mkdocs2-banner.md) — red stderr banner on every build; not an error, ignore it; opt-out env var NO_MKDOCS_2_WARNING if ever needed
+- [Python version skew: venv 3.11 vs CI 3.12/3.13](project-python-version-skew.md) — version-sensitive code passes locally, fails only on CI; test import-machinery changes on 3.13 via `uv run --python 3.13 --no-project`
