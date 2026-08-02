@@ -88,7 +88,7 @@ class Candlesticks(BindingPrimitive):
             with an explicit ``color=`` raises at plot time.
         use_bars (bool): Deprecated and ignored — the legacy bar renderer was
             removed (sample code preserved in
-            ``playground/candlesticks-as-bars.ipynb``).
+            ``playground/prototypes/candlesticks-as-bars.ipynb``).
     """
 
     def __init__(

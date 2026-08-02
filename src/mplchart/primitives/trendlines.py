@@ -1,7 +1,7 @@
 """TrendLines primitive — walkback trend-line detection.
 
 EXPERIMENTAL: this primitive and its engine are under active development
-in ``playground/trend-lines-proto.ipynb`` and are likely to change.
+in ``playground/prototypes/trend-lines-proto.ipynb`` and are likely to change.
 Keep this module in sync with the notebook's engine and primitive cells.
 
 The engine walks the bars backward from the most recent swing,
@@ -231,7 +231,7 @@ class TrendLines(Primitive):
     """Walkback trendlines: a support and a resistance ladder per chart.
 
     EXPERIMENTAL: heuristics, parameters, and output are likely to
-    change; developed in ``playground/trend-lines-proto.ipynb``.
+    change; developed in ``playground/prototypes/trend-lines-proto.ipynb``.
 
     Thin drawing wrapper over ``trend_lines`` — run that function on raw
     high/low arrays for debugging. Draws the ladder: the winning leg and

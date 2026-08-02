@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.49
+- Reorganized `playground/` into subfolders (`styles/`, `integrations/`, `matplotlib/`, `prototypes/`, `apps/`) with a README index; removed outdated notebooks (`rebase-series`, `mplchart-tests`, `date-labels`, `matplotlib-backend`); renamed `line-extents.ipynb` → `matplotlib/matplotlib-autoscale.ipynb`
+
 ## 0.0.48
 - Candlestick `alpha`/`candle.alpha` now applies to the body fills only — edges and wicks stay opaque, matching mplfinance's rendering
 - New `yaxis_right=` option on `Chart`/`Canvas` — pane y-axis labels on the right or left (`False`); `None` default consults the `yaxis.right` style setting, else matplotlib's left convention; shipped styles declare `yaxis.right: True` so the default look keeps right; twin overlays take the opposite side

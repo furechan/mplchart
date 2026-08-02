@@ -120,7 +120,7 @@ else `False`. Meaningless for a mono palette — `True`
 with an explicit `color=` raises at plot time.
 - **use_bars** (bool): Deprecated and ignored — the legacy bar renderer was
 removed (sample code preserved in
-`playground/candlesticks-as-bars.ipynb`).
+`playground/prototypes/candlesticks-as-bars.ipynb`).
 
 ### HeikinAshi
 
@@ -608,7 +608,7 @@ TrendLines(
 Walkback trendlines: a support and a resistance ladder per chart.
 
 EXPERIMENTAL: heuristics, parameters, and output are likely to
-change; developed in `playground/trend-lines-proto.ipynb`.
+change; developed in `playground/prototypes/trend-lines-proto.ipynb`.
 
 Thin drawing wrapper over `trend_lines` — run that function on raw
 high/low arrays for debugging. Draws the ladder: the winning leg and

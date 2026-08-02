@@ -75,7 +75,7 @@ Naming: the hollow-fill key is `candle.off.color` (settled 2026-07-23, reversing
 
 ## Emulation check (2026-07-23)
 
-`playground/candlesticks-styles.ipynb` translates all 16 shipped mplfinance styles (`marketcolors` → settings via a prototype of the compat stretch goal; rc half via scoped `mpl.rc_context`, the manual stand-in for the pending rc wiring) — every candle look reproduces with the current settings surface, nothing missing. Caveat for the translator: styledata often spells inherit as concrete colors instead of `"i"`, so the wick check needs canonical color comparison (`normalize_color`) against the edges before declaring a key needed.
+`playground/styles/candlesticks-styles.ipynb` translates all 16 shipped mplfinance styles (`marketcolors` → settings via a prototype of the compat stretch goal; rc half via scoped `mpl.rc_context`, the manual stand-in for the pending rc wiring) — every candle look reproduces with the current settings surface, nothing missing. Caveat for the translator: styledata often spells inherit as concrete colors instead of `"i"`, so the wick check needs canonical color comparison (`normalize_color`) against the edges before declaring a key needed.
 
 ## Criteria — the 2×2 model
 
