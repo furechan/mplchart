@@ -281,4 +281,5 @@ Optional extras:
 - [morethemes](https://github.com/y-sunflower/morethemes) - More themes for matplotlib
 - [pandas](https://github.com/pandas-dev/pandas) - Flexible and powerful data analysis / manipulation library for Python
 - [polars](https://github.com/pola-rs/polars) - Fast DataFrame library for Python
+- [ta-lib](https://github.com/TA-Lib/ta-lib-python) - Python wrapper for TA-Lib
 - [yfinance](https://github.com/ranaroussi/yfinance) - Download market data from Yahoo! Finance's API
