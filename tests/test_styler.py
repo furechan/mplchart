@@ -201,7 +201,11 @@ def test_get_styler_none():
     styler = get_styler(overrides={"candle.alpha": 0.9})
     assert isinstance(styler, Styler)
     # canonical keys, no munging — overrides layer over the default style's settings
-    assert styler.settings == {"yaxis.right": True, "candle.alpha": 0.9}
+    assert styler.settings == {
+        "yaxis.right": True,
+        "volume.edge.lightness": 0.9,
+        "candle.alpha": 0.9,
+    }
 
 
 def test_get_styler_passthrough():

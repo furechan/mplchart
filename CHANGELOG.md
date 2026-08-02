@@ -1,6 +1,7 @@
 # Change Log
 
 ## 0.0.49
+- The default `mplchart` style now sets `volume.edge.lightness: 0.9` — subtle same-hue rims separate adjacent volume bars, matching mplfinance's default edge rendering
 - Reorganized `playground/` into subfolders (`styles/`, `integrations/`, `matplotlib/`, `prototypes/`, `apps/`) with a README index; removed outdated notebooks (`rebase-series`, `mplchart-tests`, `date-labels`, `matplotlib-backend`); renamed `line-extents.ipynb` → `matplotlib/matplotlib-autoscale.ipynb`
 
 ## 0.0.48
