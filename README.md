@@ -277,7 +277,6 @@ Optional extras:
 
 ## Related projects
 - [mplfinance](https://pypi.org/project/mplfinance/) - Matplotlib utilities for the visualization, and visual analysis, of financial data
-- [cufflinks](https://github.com/santosjorge/cufflinks) - Productivity Tools for Plotly + Pandas
 - [matplotlib](https://github.com/matplotlib/matplotlib) - Matplotlib: plotting with Python
 - [morethemes](https://github.com/y-sunflower/morethemes) - More themes for matplotlib
 - [pandas](https://github.com/pandas-dev/pandas) - Flexible and powerful data analysis / manipulation library for Python
