@@ -77,9 +77,6 @@ markers = [
 [tool.uv]
 default-groups = ["dev", "docs"]
 
-[tool.ty.src]
-exclude = ["playground"]
-
 [tool.ruff]
 cache-dir = "/dev/null"
 

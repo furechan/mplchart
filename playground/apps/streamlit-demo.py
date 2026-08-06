@@ -1,6 +1,6 @@
 """ mplchart with streamlit demo """
 
-import streamlit as st # pyright: ignore[reportMissingImports]
+import streamlit as st # type: ignore # streamlit may not be installed in the current environment, but it is required for this script to run
 import yfinance as yf
 
 from mplchart.chart import Chart

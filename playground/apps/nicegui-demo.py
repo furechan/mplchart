@@ -1,6 +1,6 @@
 """ sample script to display a chart with nicegui """
 
-from nicegui import ui # pyright: ignore[reportMissingImports]
+from nicegui import ui # type: ignore # ui may not be installed in the current environment, but it is required for this script to run
 
 import yfinance as yf
 
