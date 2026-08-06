@@ -2,15 +2,15 @@
 # https://tox.wiki/en/latest/config.html
 #
 # Usage:
-#   tox            # everyday set: tests + pandas + polars + ruff
+#   tox            # everyday set: tests + pandas + polars + ruff + ty
 #   tox -m full    # full pre-publish matrix (Python 3.10-3.14)
 #   tox list       # list environments
 
 work_dir = ".venv/tox"
-env_list = ["tests", "pandas", "polars", "ruff"]
+env_list = ["tests", "pandas", "polars", "ruff", "ty"]
 
 [labels]
-full = ["tests", "3.10", "3.11", "3.12", "3.13", "3.14", "pandas", "polars", "ruff"]
+full = ["tests", "3.10", "3.11", "3.12", "3.13", "3.14", "pandas", "polars", "ruff", "ty"]
 
 [env_run_base]
 deps = ["pytest"]
@@ -26,6 +26,13 @@ deps = ["ruff"]
 commands = [["python", "-m", "ruff", "check"]]
 set_env = { RUFF_CACHE_DIR = ".venv/ruff_cache" }
 skip_install = true
+
+# type check — locked resolution (uv.lock) so results match `uv run ty check`;
+# dev+docs groups make every checked import resolve (notebooks, scripts)
+[env.ty]
+runner = "uv-venv-lock-runner"
+dependency_groups = ["dev", "docs"]
+commands = [["python", "-m", "ty", "check"]]
 
 # pandas-only install — polars tests skip via importorskip
 [env.pandas]
