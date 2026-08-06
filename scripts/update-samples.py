@@ -2,7 +2,6 @@
 
 from pathlib import Path
 from functools import lru_cache
-from typing import cast
 
 import pandas as pd
 import yfinance as yf
@@ -59,7 +58,7 @@ def get_prices(symbol: str, *, freq: str = "daily") -> pd.DataFrame:
     prices.index.name = EXPECTED_INDEX[freq]
 
     if freq == "daily":
-        prices.index = cast(pd.DatetimeIndex, prices.index).tz_localize(None)
+        prices = prices.tz_localize(None)
 
     return prices
 
