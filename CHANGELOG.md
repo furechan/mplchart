@@ -1,6 +1,7 @@
 # Change Log
 
 ## 0.0.49
+- Removed the `mplchart.pandas` module (`merge_prices`, deprecated in 0.0.46, and `rebase_series`) — the multiple-tickers article shows the merge inline in pandas and polars
 - The default `mplchart` style now sets `volume.edge.lightness: 0.9` — subtle same-hue rims separate adjacent volume bars, matching mplfinance's default edge rendering
 - Reorganized `playground/` into subfolders (`styles/`, `integrations/`, `matplotlib/`, `prototypes/`, `apps/`) with a README index; removed outdated notebooks (`rebase-series`, `mplchart-tests`, `date-labels`, `matplotlib-backend`); renamed `line-extents.ipynb` → `matplotlib/matplotlib-autoscale.ipynb`
 

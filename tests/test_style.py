@@ -130,6 +130,7 @@ def test_provider_packages_have_zero_blast_radius():
     import sys
 
     script = """
+import importlib.util
 import sys
 
 class Block:
@@ -154,7 +155,11 @@ from mplchart.styles import get_styler, resolve_style
 
 resolve_style("cascade")
 get_styler(None)
-Chart(sample_prices().tail(30), figsize=(3, 2)).plot([Candlesticks()])
+
+# pandas-only and polars-only installs both run this test — use whichever is there
+backend = "pandas" if importlib.util.find_spec("pandas") else "polars"
+prices = sample_prices(max_bars=30, backend=backend)
+Chart(prices, figsize=(3, 2)).plot([Candlesticks()])
 
 for load, name in [
     (mplchart.styles.mplfinance.load_mpf_style, "yahoo"),

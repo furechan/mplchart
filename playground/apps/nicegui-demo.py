@@ -1,6 +1,6 @@
 """ sample script to display a chart with nicegui """
 
-from nicegui import ui
+from nicegui import ui # pyright: ignore[reportMissingImports]
 
 import yfinance as yf
 

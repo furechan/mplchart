@@ -15,7 +15,7 @@ Current notebooks (6):
 - `chart-export.ipynb` — export to SVG / PNG / JPG via `chart.render()` (renamed from chart-render 2026-07-27; page framed around exporting, display config deliberately excluded)
 - `talib-functions.ipynb` — ta-lib `Function` integration
 
-Moved out 2026-07-27: `multiple-tickers.ipynb` → `docs/articles/` — mostly a pandas/polars merge recipe, not an mplchart tutorial (join + rebase shown inline in both backends; `merge_prices` deprecated 2026-07-26 and its warning points to this notebook — data prep belongs in user code, don't reintroduce a merge util).
+Moved out 2026-07-27: `multiple-tickers.ipynb` → `docs/articles/` — mostly a pandas/polars merge recipe, not an mplchart tutorial (join + rebase shown inline in both backends; the whole `mplchart.pandas` module — `merge_prices`, `rebase_series` — was removed in 0.0.49 on 2026-08-06 after deprecation in 0.0.46 — data prep belongs in user code, don't reintroduce a merge util).
 
 There is deliberately no `examples/README.md` (removed 2026-07-26 — it duplicated the notebook listing below the fold on GitHub and was an unlinked orphan on the site; the mkdocs sidebar nav *is* the examples index — do not recreate it). The main README's `## Examples` section links to the docs-site Tutorials (absolute URL). The docs site renders these notebooks via the `docs/examples` symlink; nav in `mkdocs.yml`. Site/docs conventions live in `notes/mkdocs-setup.md`.
 

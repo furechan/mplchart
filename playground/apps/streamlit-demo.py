@@ -1,6 +1,6 @@
 """ mplchart with streamlit demo """
 
-import streamlit as st
+import streamlit as st # pyright: ignore[reportMissingImports]
 import yfinance as yf
 
 from mplchart.chart import Chart
