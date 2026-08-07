@@ -65,7 +65,7 @@ def test_dunder_all():
     """__all__ must list exactly the uppercase indicator names"""
     import mplchart.indicators as module
 
-    assert module.__all__ == [k for k in dir(module) if k.isupper()]
+    assert sorted(module.__all__) == [k for k in dir(module) if k.isupper()]
 
 
 def test_stoch_params():
