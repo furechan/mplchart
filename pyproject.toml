@@ -74,8 +74,5 @@ markers = [
 [tool.uv]
 default-groups = ["dev", "docs"]
 
-[tool.ruff]
-cache-dir = "/dev/null"
-
 [tool.ruff.lint.per-file-ignores]
 "*.ipynb" = ["F401", "F811"]
