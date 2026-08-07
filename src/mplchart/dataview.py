@@ -299,10 +299,6 @@ class PolarsDataView(DataView):
                 return series.struct.unnest()
             return series
 
-        if isinstance(item, tuple) and item and all(is_polars_expr(e) for e in item):
-            series = [self.prices.select(e).to_series() for e in item]
-            return pl.DataFrame({s.name: s for s in series})
-
         if is_series_data(item):
             # polars data carries no index — positional, full-length only
             if len(item) != len(self.dates):
@@ -317,7 +313,7 @@ class PolarsDataView(DataView):
 
         raise TypeError(
             f"PolarsDataView cannot evaluate {type(item).__name__!r}: "
-            f"expected a column name, polars Expr, tuple of Expr, callable "
+            f"expected a column name, polars Expr, callable "
             f"indicator, or series data."
         )
 

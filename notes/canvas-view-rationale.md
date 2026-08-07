@@ -56,7 +56,7 @@ The mapper (`DateMapper` / `PandasDateMapper` / `PolarsDateMapper`) renamed — 
 `apply_indicator`'s dispatch moves into the View, split along the subclass axis — dispatch by subclass replaces dispatch by inspection:
 
 - Each subclass implements `eval` in full — column string, callable, and its native expression types; no shared template (pandas deals with pandas, polars with polars).
-- **`PolarsDataView`**: `pl.Expr` → `select` (struct → unnested frame), tuple of Expr → frame. Needs only polars itself — `expressions/` *creates* Exprs; the View merely evaluates them.
+- **`PolarsDataView`**: `pl.Expr` → `select` (struct → unnested frame). Needs only polars itself — `expressions/` *creates* Exprs; the View merely evaluates them.
 - **`PandasDataView`**: pandas Expression via the duck-typed `_eval_expression` hook (detected via `type(item).__dict__`) — no import of the expression module.
 
 The backend branch doesn't move — it disappears. A polars Expr reaching a `PandasDataView` is not a checked branch but a type the receiving view doesn't recognize. No opt-in module leaks into the core: evaluation is item-shape duck-typing plus native frame ops.

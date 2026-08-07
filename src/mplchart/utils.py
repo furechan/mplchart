@@ -28,23 +28,14 @@ def is_polars_expr(item) -> bool:
     return type(item).__module__ == "polars.expr.expr"
 
 
-def is_polars_expr_like(item) -> bool:
-    """True if item is a polars Expr or a tuple of polars Expr."""
-    if is_polars_expr(item):
-        return True
-    if isinstance(item, tuple) and item and all(is_polars_expr(e) for e in item):
-        return True
-    return False
-
-
 def is_pandas_expr(item) -> bool:
     """check if item is a pandas Expression"""
     return type(item).__module__ == "pandas.api.typing"
 
 
 def is_indicator_like(item) -> bool:
-    """True if item is any acceptable indicator form: column name, polars expr, tuple-of-Expr, pandas expr, or callable."""
-    return isinstance(item, str) or is_polars_expr_like(item) or is_pandas_expr(item) or callable(item)
+    """True if item is any acceptable indicator form: column name, polars expr, pandas expr, or callable."""
+    return isinstance(item, str) or is_polars_expr(item) or is_pandas_expr(item) or callable(item)
 
 
 def is_series_data(item) -> bool:
@@ -70,9 +61,6 @@ def apply_indicator(prices, indicator):
     - Polars Expr: evaluates against ``prices`` and returns a Series. If the
       Series is Struct-typed (e.g. ``pl.struct(MACD())``), it is unnested
       into a multi-column DataFrame.
-    - Tuple of ``pl.Expr``: evaluates each and returns a DataFrame. Accepted
-      for interop with libraries that emit tuple-of-Expr (e.g. mintalib);
-      mplchart's own multi-output expressions return a struct Expr instead.
     - Pandas Expression: evaluates via ``_eval_expression`` and returns a Series.
     - Callable: returns ``indicator(prices)``.
     """
@@ -91,11 +79,6 @@ def apply_indicator(prices, indicator):
             return series.struct.unnest()
         return series
 
-    if isinstance(indicator, tuple) and indicator and all(is_polars_expr(e) for e in indicator):
-        import polars as pl
-        series = [prices.select(e).to_series() for e in indicator]
-        return pl.DataFrame({s.name: s for s in series})
-
     if is_pandas_expr(indicator):
         return indicator._eval_expression(prices)
 
@@ -104,7 +87,7 @@ def apply_indicator(prices, indicator):
 
     raise TypeError(
         f"Cannot apply {type(indicator).__name__!r} to prices: "
-        f"expected a column name, polars Expr, tuple of Expr, pandas Expression, or callable indicator."
+        f"expected a column name, polars Expr, pandas Expression, or callable indicator."
     )
 
 

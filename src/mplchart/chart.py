@@ -233,7 +233,7 @@ class Chart:
             indicator.apply_to_chart(self)
             return
 
-        # Anything else (polars Expr, pandas Expression, tuple-of-Expr,
+        # Anything else (polars Expr, pandas Expression,
         # callable, or already-computed series data) is wrapped in the default
         # AutoPlot primitive and dispatched through its apply_to_chart — the
         # single auto-plot code path.
