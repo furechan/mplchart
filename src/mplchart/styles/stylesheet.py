@@ -7,7 +7,7 @@ aliases — lives at this layer.
 """
 
 import matplotlib as mpl
-import matplotlib.style
+import matplotlib.style as mstyle
 
 # the keys matplotlib refuses to let a style set — private since 3.11, where the
 # ``style.core`` module became a deprecated shim due for removal in 3.13.
@@ -52,6 +52,6 @@ def load_stylesheet(spec):
     if spec == "default":
         # matplotlib special-cases this name in style.use the same way
         return base_template()
-    if isinstance(spec, str) and spec in mpl.style.library:
-        return dict(mpl.style.library[spec])
+    if isinstance(spec, str) and spec in mstyle.library:
+        return dict(mstyle.library[spec])
     return dict(mpl.rc_params_from_file(spec, use_default_template=False))

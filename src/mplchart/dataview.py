@@ -45,7 +45,7 @@ class DataView(ABC):
     dates: Any  # contract attribute — see class docstring
 
     @abstractmethod
-    def slice(self, data, *, xcol=None):
+    def slice(self, data, *, xcol=None) -> Any:
         """Slice prices-aligned data to the visible window.
 
         Positional contract (both backends): data must be full-length in
@@ -57,7 +57,7 @@ class DataView(ABC):
         ...
 
     @abstractmethod
-    def series_xy(self, *series):
+    def series_xy(self, *series) -> tuple[np.ndarray, ...]:
         """Return (x, *windowed_series) numpy arrays.
 
         Positional contract: each series must be full-length in prices row
@@ -66,12 +66,12 @@ class DataView(ABC):
         ...
 
     @abstractmethod
-    def map_date(self, date):
+    def map_date(self, date) -> np.datetime64 | int:
         """Map a single date to its x-coordinate."""
         ...
 
     @abstractmethod
-    def eval(self, item):
+    def eval(self, item) -> Any:
         """Evaluate an indicator or expression — or adopt already-computed data.
 
         Returns a full-length native result — no windowing. Each backend

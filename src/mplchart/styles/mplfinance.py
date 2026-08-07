@@ -26,7 +26,7 @@ dependency of this module only, imported on call.
 from collections.abc import Mapping
 
 import matplotlib as mpl
-import matplotlib.style
+import matplotlib.style as mstyle
 
 from .styler import Styler
 
@@ -82,7 +82,7 @@ def load_mpf_style(name):
     style = mpf.make_mpf_style(base_mpf_style=name)
 
     sheet = style.get("base_mpl_style")
-    if sheet == "seaborn-darkgrid" and "seaborn-v0_8-darkgrid" in mpl.style.library:
+    if sheet == "seaborn-darkgrid" and "seaborn-v0_8-darkgrid" in mstyle.library:
         # mplfinance's own shim for the sheet matplotlib renamed
         sheet = "seaborn-v0_8-darkgrid"
 

@@ -1,6 +1,8 @@
 # Change Log
 
 ## 0.0.49
+- Added `pyright` to the dev dependencies (`uv run pyright`)
+- Annotated the `DataView` abstract method return types; `matplotlib.style` is now imported as `mstyle` (matching the `mticker`/`mcolors`/`mdates` convention)
 - Added a `ty` type-check environment to tox (default set and full matrix) — locked resolution via `uv.lock`, matching `uv run ty check`
 - Removed the `mplchart.pandas` module (`merge_prices`, deprecated in 0.0.46, and `rebase_series`) — the multiple-tickers article shows the merge inline in pandas and polars
 - The default `mplchart` style now sets `volume.edge.lightness: 0.9` — subtle same-hue rims separate adjacent volume bars, matching mplfinance's default edge rendering

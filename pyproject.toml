@@ -57,6 +57,7 @@ dev = [
     "mplfinance>=0.12.10b0",
     "morethemes>=0.7.0",
     "griffe>=2.1.0",
+    "pyright>=1.1.411",
 ]
 docs = [
     "mkdocs-jupyter>=0.26.3",

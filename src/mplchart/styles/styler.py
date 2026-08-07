@@ -32,7 +32,7 @@ from weakref import WeakKeyDictionary
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import matplotlib.style
+import matplotlib.style as mstyle
 
 from ..colors import closest_color, normalize_color
 from ..utils import extract_prefix
@@ -103,7 +103,7 @@ def resolve_style(name):
         module = import_module(f".lib.{name}", __package__)
         return Styler.from_spec(module.STYLE)
 
-    if name == "default" or name in mpl.style.library:
+    if name == "default" or name in mstyle.library:
         # a standard matplotlib stylesheet as the whole look —
         # no mplchart opinions ride along (grid keys per the sheet)
         return Styler(stylesheet=name)
