@@ -1,6 +1,7 @@
 # Change Log
 
 ## 0.0.49
+- Dev dependencies cleanup — removed `jinja2`, `nbmask`, `pdoc`, `numba`; aligned the `nbcheck` pin (`>=0.0.5`); removed the legacy `[tool.pydev]` section
 - Removed tuple-of-Expr indicator support (`view.eval`, deprecated `apply_indicator`, `is_polars_expr_like` helper) — multi-output expressions return struct Exprs
 - `__all__` in `mplchart.indicators` is now an explicit literal list, with a test guarding against drift
 - Added `pyright` to the dev dependencies (`uv run pyright`)

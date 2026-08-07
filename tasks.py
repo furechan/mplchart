@@ -5,7 +5,7 @@ import json
 import subprocess
 
 from pathlib import Path
-from invoke import task
+from invoke.tasks import task
 
 PACKAGE = "mplchart"
 ROOT = Path(__file__).parent

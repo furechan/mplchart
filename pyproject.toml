@@ -42,17 +42,13 @@ dev = [
     "pytest",
     "nbmake",
     "ipykernel",
-    "jinja2",
     "ipywidgets",
     "ruff",
-    "nbmask",
     "invoke",
-    "pdoc",
-    "numba",
     "twine",
     "ta-lib>=0.6.7",
     "mintalib",
-    "nbcheck>=0.0.4",
+    "nbcheck>=0.0.5",
     "ty>=0.0.26",
     "mplfinance>=0.12.10b0",
     "morethemes>=0.7.0",
@@ -82,8 +78,4 @@ default-groups = ["dev", "docs"]
 cache-dir = "/dev/null"
 
 [tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401"]
 "*.ipynb" = ["F401", "F811"]
-
-[tool.pydev]
-allow-publish = true
