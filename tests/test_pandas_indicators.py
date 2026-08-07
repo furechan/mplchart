@@ -61,6 +61,13 @@ def test_indicators(indicator, freq, max_bars=250):
     plt.close()
 
 
+def test_dunder_all():
+    """__all__ must list exactly the uppercase indicator names"""
+    import mplchart.indicators as module
+
+    assert module.__all__ == [k for k in dir(module) if k.isupper()]
+
+
 def test_stoch_params():
     """STOCH must honor fastn/slown (regression: they were silently ignored)"""
     prices = sample_prices()

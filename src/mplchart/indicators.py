@@ -593,4 +593,36 @@ class WCLPRICE(Indicator):
         return library.calc_wclprice(prices)
 
 
-__all__ = [k for k in dir() if k.isupper()]
+__all__ = [
+    "ADX",
+    "ATR",
+    "AVGPRICE",
+    "BBANDS",
+    "BBP",
+    "BBW",
+    "BOP",
+    "CMF",
+    "DEMA",
+    "DMI",
+    "DONCHIAN",
+    "EMA",
+    "HMA",
+    "KELTNER",
+    "MACD",
+    "MACDV",
+    "MEDPRICE",
+    "MFI",
+    "MOM",
+    "NATR",
+    "PPO",
+    "RMA",
+    "ROC",
+    "RSI",
+    "SMA",
+    "STOCH",
+    "TEMA",
+    "TRANGE",
+    "TYPPRICE",
+    "WCLPRICE",
+    "WMA",
+]

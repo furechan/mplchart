@@ -115,6 +115,7 @@ def date_labels(dates):
     
     formats = ("%Y", "%b-%d", "%H:%M", "%S")
 
+    label = "*"
     labels = []
     pdate = dates[0] - (dates[1] - dates[0])
 

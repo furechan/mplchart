@@ -5,6 +5,6 @@
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
 
-    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.typeCheckingMode": "standard",
     "python.analysis.diagnosticMode": "openFilesOnly"
 }

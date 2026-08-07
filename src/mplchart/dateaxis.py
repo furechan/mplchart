@@ -84,8 +84,8 @@ class DTArrayFormatter(mticker.Formatter):
         """date label"""
         size = len(self.dtarray)
         idx = np.floor(value).astype(int).clip(0, size - 1)
-        date = self.dtarray[idx]
-        return date.astype('O').strftime(self.fmt)
+        date = self.dtarray[idx].item()
+        return date.strftime(self.fmt)
 
     def format_ticks(self, values):
         """date labels"""
