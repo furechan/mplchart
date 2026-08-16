@@ -6,5 +6,12 @@
     "python.testing.pytestEnabled": true,
 
     "python.analysis.typeCheckingMode": "standard",
-    "python.analysis.diagnosticMode": "openFilesOnly"
+    "python.analysis.diagnosticMode": "openFilesOnly",
+
+    // Allows the $schema reference in context7.json to resolve. context7.com is not
+    // in VS Code's default json.schemaDownload.trustedDomains list, so without this
+    // the editor declines to fetch it and flags the domain as untrusted.
+    "json.schemaDownload.trustedDomains": {
+        "https://context7.com/": true
+    }
 }
