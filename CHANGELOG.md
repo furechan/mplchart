@@ -1,6 +1,7 @@
 # Change Log
 
 ## 0.0.49
+- Added `context7.json` — scopes the Context7 doc index to `README.md`, `docs/` and `examples/`, with usage rules for coding agents
 - Fixed a stale `Style` reference in `docs/reference/index.md` — `mplchart.styles` exports `Styler`
 - Added PyPI classifiers for discoverability — `Intended Audience :: Financial and Insurance Industry`, `Topic :: Office/Business :: Financial :: Investment`, `Topic :: Scientific/Engineering :: Visualization`
 - Dev dependencies cleanup — removed `jinja2`, `nbmask`, `pdoc`, `numba`; aligned the `nbcheck` pin (`>=0.0.5`); removed the legacy `[tool.pydev]` section

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "mplchart",
+  "description": "Classic technical analysis stock charts in Python, built on matplotlib, for pandas and polars DataFrames",
+  "branch": "main",
+  "excludeFolders": [
+    "notes",
+    "playground",
+    "scripts",
+    "src",
+    "tests",
+    "docs/assets",
+    "docs/overrides"
+  ],
+  "excludeFiles": [
+    "BACKLOG.md",
+    "CHANGELOG.md",
+    "CLAUDE.md",
+    "LICENSE.txt",
+    "mkdocs.yml",
+    "tasks.py",
+    "tox.toml",
+    "uv.lock"
+  ],
+  "rules": [
+    "prices is a pandas or polars DataFrame with lower case columns open, high, low, close, volume. Use Chart(normalize=True) to normalize other column layouts.",
+    "mplchart.indicators is the pandas pipeline; mplchart.expressions is the polars counterpart. Pick the one matching the DataFrame type, do not mix them in one chart.",
+    "Indicators and expressions use upper case names: SMA, EMA, RSI, MACD, ROC.",
+    "An indicator is either auto-plotted by passing it to Chart.plot, or bound to a renderer primitive: LinePlot(SMA(50)). The equivalent operator form is SMA(50) @ LinePlot().",
+    "Indicators chain with the | operator: EMA(20) | ROC(1).",
+    "Pane('above') and Pane('below') create a new pane; primitives listed after a Pane draw into it. Panes are sticky, there is no explicit pane cursor.",
+    "Style a chart with the style= option on Chart: a builtin style name, a matplotlib stylesheet name, or a style dict. Styles are total, ambient matplotlib rcParams never leak into a chart.",
+    "Install with pip install mplchart. The [pandas], [polars] and [all] extras only pull in the DataFrame library alongside it.",
+    "The interface is experimental and still changing. Prefer the API shown in these docs over any older mplchart usage."
+  ]
+}
