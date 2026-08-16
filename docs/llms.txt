@@ -7,13 +7,13 @@ better suited for LLM consumption.
 
 ## API reference
 
-- [mplchart.chart](https://raw.githubusercontent.com/furechan/mplchart/main/docs/reference/chart.md): charting main module
-- [mplchart.primitives](https://raw.githubusercontent.com/furechan/mplchart/main/docs/reference/primitives.md): mplchart drawing primitives
-- [mplchart.indicators](https://raw.githubusercontent.com/furechan/mplchart/main/docs/reference/indicators.md): Technical analysis indicators — pandas pipeline only
-- [mplchart.expressions](https://raw.githubusercontent.com/furechan/mplchart/main/docs/reference/expressions.md): Polars expression factories
-- [mplchart.styles](https://raw.githubusercontent.com/furechan/mplchart/main/docs/reference/styles.md): Chart styling — the runtime `Styler` and its spec forms
-- [index](https://raw.githubusercontent.com/furechan/mplchart/main/docs/reference/index.md): Reference overview and conventions
+- [mplchart.chart](https://furechan.github.io/mplchart/reference/chart.md): charting main module
+- [mplchart.primitives](https://furechan.github.io/mplchart/reference/primitives.md): mplchart drawing primitives
+- [mplchart.indicators](https://furechan.github.io/mplchart/reference/indicators.md): Technical analysis indicators — pandas pipeline only
+- [mplchart.expressions](https://furechan.github.io/mplchart/reference/expressions.md): Polars expression factories
+- [mplchart.styles](https://furechan.github.io/mplchart/reference/styles.md): Chart styling — the runtime `Styler` and its spec forms
+- [index](https://furechan.github.io/mplchart/reference/index.md): Reference overview and conventions
 
 ## Guides
 
-- [backends](https://raw.githubusercontent.com/furechan/mplchart/main/docs/backends.md): pandas and polars data pipelines
+- [backends](https://furechan.github.io/mplchart/backends.md): pandas and polars data pipelines
