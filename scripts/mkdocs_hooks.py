@@ -1,9 +1,10 @@
 """mkdocs hooks — publish the markdown sources alongside the rendered HTML.
 
-llms.txt points at the markdown rather than the HTML, and agents that expand an
-llms.txt commonly fetch same-origin links only, so the markdown has to be served
-from the site itself. With use_directory_urls a page renders to <stem>/index.html,
-which leaves <stem>.md free for the source next to it.
+The docs are navigable as markdown on their own: index.md links the reference
+pages, which link each other, and agents that follow those links stay on one
+origin. That only works if the sources are served next to the HTML — with
+use_directory_urls a page renders to <stem>/index.html, which leaves <stem>.md
+free for the source beside it, the URL the .md convention already predicts.
 """
 
 import shutil

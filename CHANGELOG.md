@@ -1,7 +1,9 @@
 # Change Log
 
 ## 0.0.49
-- `docs/llms.txt` now links same-origin markdown — a post-build hook (`scripts/mkdocs_hooks.py`) publishes every documentation `.md` alongside its rendered HTML, replacing the GitHub-raw URLs
+- The docs site now publishes every page's markdown source alongside its rendered HTML (post-build hook, `scripts/mkdocs_hooks.py`) — `use_directory_urls` renders a page to `<stem>/index.html`, leaving `<stem>.md` free beside it
+- `docs/index.md` gained a Reference section linking the API pages, and "Where to go next" now links the tutorials instead of pointing at the HTML sidebar — the docs are navigable as markdown, not just as a rendered site
+- Removed `docs/llms.txt` and its generator code — an index restating `index.md` and the nav; nothing auto-fetches a project-level llms.txt (tools fetch the origin root), so discovery lives in `furechan.github.io/llms.txt` instead
 - Removed the site verification files — `docs/BingSiteAuth.xml` and the google verification step in `pages.yml`; `furechan.github.io` is verified once at the origin
 - Added `context7.json` — scopes the Context7 doc index to `README.md`, `docs/` and `examples/`, with usage rules for coding agents
 - Fixed a stale `Style` reference in `docs/reference/index.md` — `mplchart.styles` exports `Styler`
