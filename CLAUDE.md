@@ -13,7 +13,7 @@ See [notes/architecture.md](notes/architecture.md).
 ## Docs and notes
 
 - `notes/` — internal design and engineering notes (architecture, proposals, roadmaps). Not user-facing. Put new design notes here.
-- `docs/` — source of the published MkDocs documentation site (Material theme + mkdocs-jupyter, config in `mkdocs.yml`). `docs/examples` is a symlink to `examples/`; notebooks render from committed outputs (`execute: false`). Preview with `uv run mkdocs serve`, build with `uv run mkdocs build`. A post-build hook (`scripts/mkdocs_hooks.py`) also publishes every documentation `.md` alongside its rendered HTML, so the docs stay navigable as markdown (`index.md` links the reference pages, which link each other).
+- `docs/` — source of the published MkDocs documentation site (Material theme + mkdocs-jupyter, config in `mkdocs.yml`). `docs/examples` is a symlink to `examples/`; notebooks render from committed outputs (`execute: false`). Preview with `uv run mkdocs serve`, build with `uv run mkdocs build`. The site is the HTML view for humans and search engines; agents are pointed at this repo instead, where the docs are already markdown and notebooks.
 - `docs/reference/*.md` — **generated** API reference; regenerate with `inv apidocs` after docstring changes, never hand-edit (exception: `reference/index.md` is hand-written). The pages are the fastest way to look up the public API. Design record: `notes/api-reference-roadmap.md`.
 
 ## Setup

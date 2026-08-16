@@ -7,9 +7,6 @@ repo_name: furechan/mplchart
 exclude_docs: |
   overrides/
 
-hooks:
-  - scripts/mkdocs_hooks.py
-
 theme:
   name: material
   custom_dir: docs/overrides
