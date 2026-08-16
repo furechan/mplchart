@@ -3,24 +3,13 @@
   "projectTitle": "mplchart",
   "description": "Classic technical analysis stock charts in Python, built on matplotlib, for pandas and polars DataFrames",
   "branch": "main",
+  "folders": [
+    "docs",
+    "examples"
+  ],
   "excludeFolders": [
-    "notes",
-    "playground",
-    "scripts",
-    "src",
-    "tests",
     "docs/assets",
     "docs/overrides"
-  ],
-  "excludeFiles": [
-    "BACKLOG.md",
-    "CHANGELOG.md",
-    "CLAUDE.md",
-    "LICENSE.txt",
-    "mkdocs.yml",
-    "tasks.py",
-    "tox.toml",
-    "uv.lock"
   ],
   "rules": [
     "prices is a pandas or polars DataFrame with lower case columns open, high, low, close, volume. Use Chart(normalize=True) to normalize other column layouts.",
