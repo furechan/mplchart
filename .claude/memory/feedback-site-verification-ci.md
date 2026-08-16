@@ -1,22 +1,16 @@
 ---
 name: feedback-site-verification-ci
-description: google site verification files are injected at CI time in the pages workflow, never committed to docs sources
+description: search-engine verification lives once at the furechan.github.io origin; project repos carry no verification files at all
 metadata:
   type: feedback
 ---
 
-Google Search Console verification files (`google<hex>.html`) are written into the built site by a `run` step in the pages workflow — not committed under `docs/`.
+Project repos carry **no** search-engine verification files — not committed under `docs/`, not injected by the pages workflow. Verification is done once at the origin, in the `furechan/furechan.github.io` user-site repo, which serves `google3e5afa36401ddb09.html` and `BingSiteAuth.xml` at the site root.
 
-**Why:** the user set this convention in mintalib (2026-07-25) and mplchart follows it: the token is noise in the docs sources, and the file only needs to exist in the deployed site. The token is *account*-scoped, not site-scoped, so the same file (`google3e5afa36401ddb09.html`) verifies every site the account claims.
+**Why:** on 2026-08-16 the user added `furechan.github.io` as a single property in both Google Search Console and Bing Webmaster Tools, and deleted the per-project `mintalib` and `mplchart` properties. Both engines treat an owner of a parent URL-prefix property as an owner of every path under that origin, so `https://furechan.github.io/mplchart/` inherits ownership and a project-local token verifies nothing. The tokens are account-scoped, so the origin copies are the same files the projects used to serve.
 
-**How to apply:** after the site build step, before the pages artifact upload:
+This replaces the earlier CI-injection convention (2026-07-25 to 2026-08-16), where a `run` step in `pages.yml` wrote the google file into the build output. That step and `docs/BingSiteAuth.xml` were removed from mplchart on 2026-08-16.
 
-```yaml
-- name: Add google site verification
-  run: |
-    echo "google-site-verification: google3e5afa36401ddb09.html" > site/google3e5afa36401ddb09.html
-```
-
-(build output dir varies per project: `site` in mplchart, `_site` in mintalib). Keep the step forever — Google rechecks the file periodically and un-verifies if it disappears.
+**How to apply:** do not add verification files or CI injection steps to project repos, and remove them if found. The one thing that must not disappear is the pair of files at the origin root — both engines recheck periodically and un-verify the whole origin if they 404. Sitemaps are separate from verification: a project sitemap (`https://furechan.github.io/<project>/sitemap.xml`) is submitted under the origin property.
 
 Related convention: the workflow is named `pages.yml` in both projects — it publishes the project *website* (docs + articles, eventually blog-like content), so it's named for the site, not "docs".

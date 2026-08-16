@@ -1,6 +1,7 @@
 # Change Log
 
 ## 0.0.49
+- Removed the site verification files — `docs/BingSiteAuth.xml` and the google verification step in `pages.yml`; `furechan.github.io` is verified once at the origin
 - Added `context7.json` — scopes the Context7 doc index to `README.md`, `docs/` and `examples/`, with usage rules for coding agents
 - Fixed a stale `Style` reference in `docs/reference/index.md` — `mplchart.styles` exports `Styler`
 - Added PyPI classifiers for discoverability — `Intended Audience :: Financial and Insurance Industry`, `Topic :: Office/Business :: Financial :: Investment`, `Topic :: Scientific/Engineering :: Visualization`

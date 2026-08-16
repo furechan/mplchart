@@ -14,7 +14,7 @@
 - [Indicator/expression operator API](project-operator-api.md) — constructor form primary, `@` operator alternative; `|` chains indicators
 - [Backend architecture (pandas/polars split)](project-backend-architecture.md) — core is backend-agnostic; indicators/library/pandas are pandas-only opt-in; expressions is polars-only opt-in
 - [wrap_result origin (mintalib)](project-wrap-result-origin.md) — numpy→backend-frame wrapper ported from mintalib model/function.py; the original dual-backend indicator design
-- [Site verification via CI injection](feedback-site-verification-ci.md) — google verification files are written by a pages.yml run step, never committed to docs; token is account-scoped, same file for all sites
+- [Site verification lives at the origin](feedback-site-verification-ci.md) — verified once at furechan.github.io (user-site repo); project repos carry no verification files or CI injection steps
 - [Commit .envrc files](feedback-envrc.md) — `.envrc` is project metadata, not secrets; commit it. Secrets live in separate gitignored files it sources.
 - [.envrc uses sops_import deliberately](feedback-envrc-sops-import.md) — intentional per-project opt-in to the sops store; don't revert to load_env or flag as doctrine violation
 - [VS Code interpreter path warning](feedback-vscode-interpreter-path.md) — if `.venv` exists but VS Code warns on `.venv/bin/python`, set `python.defaultInterpreterPath` to `${workspaceFolder}/.venv/bin/python` in workspace settings.
