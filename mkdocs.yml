@@ -1,6 +1,7 @@
 site_name: mplchart
 site_description: Classic technical analysis stock charts in Python, built on matplotlib
 site_url: https://furechan.github.io/mplchart/
+site_dir: build/site
 repo_url: https://github.com/furechan/mplchart
 repo_name: furechan/mplchart
 
@@ -32,6 +33,7 @@ theme:
 plugins:
   - search
   - mkdocs-jupyter:
+      cache_dir: build/cache/mkdocs-jupyter
       execute: false
       include_source: true
 

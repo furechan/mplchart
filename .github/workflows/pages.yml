@@ -28,7 +28,7 @@ jobs:
         run: uv run --no-sync mkdocs build --strict
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: site
+          path: build/site
 
   deploy:
     needs: build

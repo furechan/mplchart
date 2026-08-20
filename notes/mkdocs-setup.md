@@ -13,13 +13,13 @@ Documentation/tutorial site for discoverability — tutorials, articles, and a b
 - `docs/` — site source (MkDocs default `docs_dir`). Landing page `index.md` adapted from README.
 - `docs/examples` → symlink to `examples/` — notebooks stay single-source, no copies to drift. All 8 example notebooks are wired into the nav as tutorials.
 - `notes/` — internal design/engineering notes (formerly `docs/`), not published.
-- `site/` and `.cache/` (mkdocs-jupyter conversion cache) are gitignored; built HTML is never committed.
+- Build output lives under the gitignored `build/`: `site_dir: build/site` and the mkdocs-jupyter conversion cache at `build/cache/mkdocs-jupyter`; built HTML is never committed.
 
 ## Build model
 
 - **Notebooks render from committed outputs** (`execute: false`) — no execution, no network, no yfinance flakiness at build time; builds take seconds. Executing and saving outputs is a local authoring step (`nbcheck` habit covers freshness).
 - Notebook markdown cells are indexed by the built-in site search; cell tags (`hide_input`, `remove_cell`) can shape the published look later.
-- Local preview: `uv run mkdocs serve` at localhost:8000, live-reloads on save; VS Code auto-forwards the port over SSH (Simple Browser works too). `uv run mkdocs build` writes `site/`.
+- Local preview: `uv run mkdocs serve` at localhost:8000, live-reloads on save; VS Code auto-forwards the port over SSH (Simple Browser works too). `uv run mkdocs build` writes `build/site`.
 - Publishing (TODO): GitHub Actions workflow on push to main — `uv sync --group docs` + `mkdocs build`, deployed via the Pages "GitHub Actions" source (no gh-pages branch). Nothing is published manually.
 
 ## Search/SEO notes

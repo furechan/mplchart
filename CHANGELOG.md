@@ -1,6 +1,7 @@
 # Change Log
 
 ## 0.0.49
+- mkdocs output moved under `build/` — `site_dir: build/site` and mkdocs-jupyter `cache_dir: build/cache/mkdocs-jupyter`; the Pages workflow uploads `build/site`, and `site/`/`.cache/` are gone from `.gitignore`
 - `docs/index.md` gained a Reference section linking the API pages, and "Where to go next" now links the tutorials instead of pointing at the HTML sidebar — the page reads correctly as markdown in the repo, not only as a rendered page with a nav
 - Removed `docs/llms.txt` and its generator code — an index restating `index.md` and the nav; nothing auto-fetches a project-level llms.txt (tools fetch the origin root), so discovery lives in `furechan.github.io/llms.txt`, which points at the repos
 - Removed the site verification files — `docs/BingSiteAuth.xml` and the google verification step in `pages.yml`; `furechan.github.io` is verified once at the origin
