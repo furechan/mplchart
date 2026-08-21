@@ -1448,13 +1448,13 @@ wheels = [
 
 [[package]]
 name = "mintalib"
-version = "0.1.1"
+version = "0.1.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/55/34/09b3327cfe405308c9156d482b6202657cd77fa874a57f91ab29c2fd61dc/mintalib-0.1.1.tar.gz", hash = "sha256:da8af4109b64925cf2fee14a9a5fde26d2d696473efb233fba3d26aefdb61bd9", size = 849118, upload-time = "2026-07-12T16:07:45.358Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/fe/37/fda96c75132f54999224ceaa06b3be2af883887fba082b6adfebd80534fd/mintalib-0.1.4.tar.gz", hash = "sha256:a379735ec79c94773b041795dfcc91a2cdb11f8644b9efc24cf5cce9cd2a869a", size = 850475, upload-time = "2026-08-04T22:06:45.955Z" }
 
 [[package]]
 name = "mistune"
