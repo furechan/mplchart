@@ -20,3 +20,7 @@ Items decided or considered but not scheduled. Add new items at the end.
 - ~~Remove `mplchart.pandas.merge_prices` (deprecated in 0.0.46) and decide `rebase_series`'s fate — after a release or two of grace~~ — done 2026-08-06: the whole `mplchart.pandas` module removed in 0.0.49 (`rebase_series` included; the multiple-tickers article covers the recipe)
 - Drop `pdoc` from the dev dependencies — unused since the API reference moved to griffe (`scripts/make-api-docs.py`)
 - Fold `model/` into its consumers: `model/primitive.py` → `primitives/base.py`, `Indicator`/`IndicatorChain` → `indicators.py` (or sibling module) — each model module has exactly one consumer (core duck-types), the central package blurs the pandas/backend-agnostic split, and expressions already keep their machinery local (`prelude.py`); internal-only paths, no API break; update `notes/architecture.md`
+
+## Documentation
+
+- Expand the generated API reference marker emitted by `scripts/make-api-docs.py` to include the regeneration command (`uv run inv apidocs`), matching mintalib's source-only notice; mplchart already marks every generated page as generated and warns against direct edits, so this is a discoverability improvement rather than missing protection.
