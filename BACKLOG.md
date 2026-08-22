@@ -23,4 +23,4 @@ Items decided or considered but not scheduled. Add new items at the end.
 
 ## Documentation
 
-- Expand the generated API reference marker emitted by `scripts/make-api-docs.py` to include the regeneration command (`uv run inv apidocs`), matching mintalib's source-only notice; mplchart already marks every generated page as generated and warns against direct edits, so this is a discoverability improvement rather than missing protection.
+- ~~Expand the generated API reference marker emitted by `scripts/make-api-docs.py` to include the regeneration command (`uv run inv apidocs`), matching mintalib's source-only notice; mplchart already marks every generated page as generated and warns against direct edits, so this is a discoverability improvement rather than missing protection.~~ — done 2026-08-22
