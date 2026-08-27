@@ -1,6 +1,8 @@
 # Change Log
 
 ## 0.0.49
+- Polars expression aliases now default to the lowercase function name; use `.alias(...)` when parameterized names are needed
+- `ROC` now returns the price-change ratio scaled to 100, matching percentage-based indicators such as `NATR`
 - mkdocs output moved under `build/` — `site_dir: build/site` and mkdocs-jupyter `cache_dir: build/cache/mkdocs-jupyter`; the Pages workflow uploads `build/site`, and `site/`/`.cache/` are gone from `.gitignore`
 - `docs/index.md` gained a Reference section linking the API pages, and "Where to go next" now links the tutorials instead of pointing at the HTML sidebar — the page reads correctly as markdown in the repo, not only as a rendered page with a nav
 - Removed `docs/llms.txt` and its generator code — an index restating `index.md` and the nav; nothing auto-fetches a project-level llms.txt (tools fetch the origin root), so discovery lives in `furechan.github.io/llms.txt`, which points at the repos

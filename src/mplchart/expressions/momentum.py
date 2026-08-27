@@ -9,8 +9,8 @@ from .volatility import ATR
 
 @wrap_expression
 def ROC(period: int = 1, *, src: pl.Expr = CLOSE) -> pl.Expr:
-    """Rate of Change"""
-    return src.pct_change(period)
+    """Rate of Change (percent)"""
+    return src.pct_change(period) * 100
 
 
 @wrap_expression

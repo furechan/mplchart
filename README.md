@@ -197,7 +197,8 @@ from mplchart.primitives import Candlesticks, Volume, Pane, LinePlot
 from mplchart.expressions import SMA, EMA, RSI, MACD
 
 Chart(prices, title=ticker, max_bars=250).plot(
-    Candlesticks(), Volume(), SMA(50), SMA(200),
+    Candlesticks(), Volume(),
+    SMA(50).alias("sma50"), SMA(200).alias("sma200"),
     Pane("above", yticks=(30, 50, 70)),
     LinePlot(RSI(), overbought=70, oversold=30),
     Pane("below"),

@@ -109,10 +109,10 @@ class RMA(Indicator):
 
 
 class ROC(Indicator):
-    """Rate of Change.
+    """Rate of Change (percent).
 
-    Measures the fractional change in price over a given number of bars
-    (e.g. 0.05 for a 5% move). Positive values indicate upward momentum;
+    Measures the change in price over a given number of bars as a ratio scaled
+    to 100 (e.g. 5.0 for a 5% move). Positive values indicate upward momentum;
     negative values indicate downward momentum.
 
     Args:

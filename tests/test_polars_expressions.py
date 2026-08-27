@@ -87,7 +87,7 @@ def test_eval_struct_expr():
 
 def test_struct_expr_alias_as_label():
     expr = MACD(12, 26, 9)
-    assert get_label(expr) == "macd-12-26-9"
+    assert get_label(expr) == "macd"
 
     # custom alias overrides the default
     custom = expr.alias("my-macd")
@@ -96,3 +96,9 @@ def test_struct_expr_alias_as_label():
     prices = sample_prices(backend="polars")
     result = get_view(prices).eval(custom)
     assert list(result.columns) == ["macd", "macdsignal", "macdhist"]
+
+
+def test_expression_alias_does_not_encode_parameters():
+    assert get_label(SMA(20)) == "sma"
+    assert get_label(SMA(50)) == "sma"
+    assert get_label(SMA(50).alias("sma50")) == "sma50"

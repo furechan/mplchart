@@ -31,10 +31,11 @@ passed as the `src` keyword argument. This enables both calling styles:
     SMA(20)                    # defaults to CLOSE
     SMA(20, src=pl.col("open"))
 
-Builds a slug label (e.g. "sma-20", "macd-12-26-9") from the call args
-and aliases the resulting `pl.Expr` with it. Multi-output factories
-return a single `pl.struct(...)` Expr; the view's `eval` unnests
-it into a DataFrame at evaluation time.
+Aliases the resulting `pl.Expr` with the lowercase function name (e.g.
+`"sma"` or `"macd"`). Call `.alias(...)` on the returned expression
+when multiple instances need distinct names. Multi-output factories return
+a single `pl.struct(...)` Expr; the view's `eval` unnests it into a
+DataFrame at evaluation time.
 
 ### OPEN
 
@@ -118,7 +119,7 @@ Triple Exponential Moving Average
 ROC(period: int = 1, *, src: pl.Expr = CLOSE)
 ```
 
-Rate of Change
+Rate of Change (percent)
 
 ### MOM
 

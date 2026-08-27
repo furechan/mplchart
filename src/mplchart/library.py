@@ -33,7 +33,7 @@ def calc_mom(series, period: int = 1):
 
 def calc_roc(series, period: int = 1):
     """Rate of Change"""
-    return series.pct_change(period)
+    return series.pct_change(period) * 100
 
 
 def calc_sma(series, period: int = 20):
@@ -320,4 +320,3 @@ def calc_tema(series, period: int = 20):
     ema2 = calc_ema(ema1, period)
     ema3 = calc_ema(ema2, period)
     return 3 * (ema1 - ema2) + ema3
-
