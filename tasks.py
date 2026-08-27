@@ -1,10 +1,14 @@
 # noinspection PyUnresolvedReferences
 
 import os
+import re
 import json
 import subprocess
+import urllib.error
+import urllib.request
 
 from pathlib import Path
+from invoke.exceptions import Exit
 from invoke.tasks import task
 
 PACKAGE = "mplchart"
@@ -30,10 +34,35 @@ def load_direnv(path: str | Path = ROOT):
 load_direnv()
 
 
+def get_version() -> str | None:
+    """Get version from pyproject."""
+    data = ROOT.joinpath("pyproject.toml").read_text()
+    pattern = r'^version \s* = \s* "(.+)" \s*'
+    match = re.search(pattern, data, flags=re.VERBOSE | re.MULTILINE)
+    return match.group(1) if match else None
+
+
+def latest_pypi_version() -> str:
+    """Get the latest published version from PyPI."""
+    url = f"https://pypi.org/pypi/{PACKAGE}/json"
+    try:
+        with urllib.request.urlopen(url, timeout=10) as response:
+            return json.load(response)["info"]["version"]
+    except urllib.error.HTTPError as error:
+        raise Exit(f"could not get the latest PyPI version: HTTP {error.code}") from error
+    except urllib.error.URLError as error:
+        raise Exit(f"could not get the latest PyPI version: {error.reason}") from error
+    except (KeyError, TypeError, ValueError) as error:
+        raise Exit("could not read the latest version from PyPI's response") from error
+
+
 @task
 def info(ctx):
-    """Show installed package version"""
-    ctx.run(f"uv pip show {PACKAGE}")
+    """Show the current project version and the latest version on PyPI."""
+    version = get_version()
+    pypi_version = latest_pypi_version()
+    print(f"Current version: {version}")
+    print(f"Latest on PyPI: {pypi_version}")
 
 
 @task
