@@ -1450,11 +1450,30 @@ wheels = [
 name = "mintalib"
 version = "0.1.4"
 source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version < '3.11'",
+]
 dependencies = [
-    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" } },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/fe/37/fda96c75132f54999224ceaa06b3be2af883887fba082b6adfebd80534fd/mintalib-0.1.4.tar.gz", hash = "sha256:a379735ec79c94773b041795dfcc91a2cdb11f8644b9efc24cf5cce9cd2a869a", size = 850475, upload-time = "2026-08-04T22:06:45.955Z" }
+
+[[package]]
+name = "mintalib"
+version = "0.1.5"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.14' and sys_platform == 'win32'",
+    "python_full_version >= '3.14' and sys_platform == 'emscripten'",
+    "python_full_version >= '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'",
+    "python_full_version >= '3.11' and python_full_version < '3.14' and sys_platform == 'win32'",
+    "python_full_version >= '3.11' and python_full_version < '3.14' and sys_platform == 'emscripten'",
+    "python_full_version >= '3.11' and python_full_version < '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'",
+]
+dependencies = [
+    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" } },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f2/7a/999410a82fbe79a1fcc2a4df5df63a8f3266ecaf7a1126012c442e2380e8/mintalib-0.1.5.tar.gz", hash = "sha256:24b7b5cf2b5a5ed00da825fb17e1e18252f154e57d4f227b08f26267bd310ac9", size = 850637, upload-time = "2026-08-27T19:59:18.153Z" }
 
 [[package]]
 name = "mistune"
@@ -1607,7 +1626,8 @@ dev = [
     { name = "invoke" },
     { name = "ipykernel" },
     { name = "ipywidgets" },
-    { name = "mintalib" },
+    { name = "mintalib", version = "0.1.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "mintalib", version = "0.1.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "morethemes" },
     { name = "mplfinance" },
     { name = "nbcheck" },

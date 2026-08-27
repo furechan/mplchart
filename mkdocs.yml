@@ -5,12 +5,8 @@ site_dir: build/site
 repo_url: https://github.com/furechan/mplchart
 repo_name: furechan/mplchart
 
-exclude_docs: |
-  overrides/
-
 theme:
   name: material
-  custom_dir: docs/overrides
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
