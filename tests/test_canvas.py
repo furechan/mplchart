@@ -36,6 +36,11 @@ def test_canvas_render(canvas):
     assert b"<svg" in result
 
 
+def test_canvas_render_metadata(canvas):
+    result = canvas.render(format="svg", metadata={"Title": "AAPL chart"})
+    assert b"<dc:title>AAPL chart</dc:title>" in result
+
+
 def test_canvas_adopts_existing_figure():
     figure = plt.figure()
     figure.add_subplot()  # content to be cleared

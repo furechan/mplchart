@@ -2,6 +2,8 @@
 
 import warnings
 
+from typing import Any
+
 from .canvas import Canvas, PanePosition
 from .dataview import get_view
 from .dateaxis import config_date_axis
@@ -323,7 +325,13 @@ class Chart:
         """
         self.canvas.show()
 
-    def render(self, format="svg", *, dpi="figure"):
+    def render(
+        self,
+        format="svg",
+        *,
+        dpi="figure",
+        metadata: dict[str, Any] | None = None,
+    ):
         """Render the chart to bytes in the specified image format.
 
         Args:
@@ -331,8 +339,11 @@ class Chart:
                 Defaults to ``"svg"``.
             dpi (float or str): Resolution in dots per inch. Pass ``"figure"``
                 to use the figure's own DPI setting. Defaults to ``"figure"``.
+            metadata (dict, optional): Metadata passed unchanged to
+                Matplotlib's ``Figure.savefig``. Supported keys and value
+                types depend on the output format.
 
         Returns:
             bytes: The rendered image as a byte string.
         """
-        return self.canvas.render(format=format, dpi=dpi)
+        return self.canvas.render(format=format, dpi=dpi, metadata=metadata)

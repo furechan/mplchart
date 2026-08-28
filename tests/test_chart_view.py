@@ -65,6 +65,13 @@ def test_plot_over_transformed_view(prices):
     plt.close(chart.figure)
 
 
+def test_render_forwards_metadata(prices):
+    chart = Chart(prices, figsize=(4, 3))
+    result = chart.render(metadata={"Title": "AAPL chart"})
+    assert b"<dc:title>AAPL chart</dc:title>" in result
+    plt.close(chart.figure)
+
+
 def test_init_prices_again_warns(prices):
     chart = Chart(prices, figsize=(4, 3))
     with pytest.warns(UserWarning, match="already called"):

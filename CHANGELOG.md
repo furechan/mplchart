@@ -1,6 +1,7 @@
 # Change Log
 
 ## 0.0.49
+- `Chart.render` and `Canvas.render` accept `metadata=` and pass it unchanged to Matplotlib's `Figure.savefig`
 - Polars expression aliases now default to the lowercase function name; use `.alias(...)` when parameterized names are needed
 - `ROC` now returns the price-change ratio scaled to 100, matching percentage-based indicators such as `NATR`
 - mkdocs output moved under `build/` — `site_dir: build/site` and mkdocs-jupyter `cache_dir: build/cache/mkdocs-jupyter`; the Pages workflow uploads `build/site`, and `site/`/`.cache/` are gone from `.gitignore`

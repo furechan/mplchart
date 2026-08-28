@@ -175,7 +175,7 @@ the end of the cell, so calling `show()` is usually not needed.
 #### Chart.render
 
 ```python
-render(format='svg', *, dpi='figure')
+render(format='svg', *, dpi='figure', metadata: dict[str, Any] | None = None)
 ```
 
 Render the chart to bytes in the specified image format.
@@ -186,6 +186,9 @@ Render the chart to bytes in the specified image format.
 Defaults to `"svg"`.
 - **dpi** (float or str): Resolution in dots per inch. Pass `"figure"`
 to use the figure's own DPI setting. Defaults to `"figure"`.
+- **metadata** (dict): Metadata passed unchanged to
+Matplotlib's `Figure.savefig`. Supported keys and value
+types depend on the output format.
 
 **Returns:**
 

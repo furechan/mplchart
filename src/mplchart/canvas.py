@@ -9,7 +9,7 @@ numpy arrays and axes cross the boundary, frames don't.
 
 import io
 
-from typing import Literal
+from typing import Any, Literal
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -92,7 +92,13 @@ class Canvas:
         with self.styler.context():
             plt.show()
 
-    def render(self, format="svg", *, dpi="figure"):
+    def render(
+        self,
+        format="svg",
+        *,
+        dpi="figure",
+        metadata: dict[str, Any] | None = None,
+    ):
         """Render the figure to bytes in the specified image format.
 
         Args:
@@ -100,13 +106,16 @@ class Canvas:
                 Defaults to ``"svg"``.
             dpi (float or str): Resolution in dots per inch. Pass ``"figure"``
                 to use the figure's own DPI setting. Defaults to ``"figure"``.
+            metadata (dict, optional): Metadata passed unchanged to
+                Matplotlib's ``Figure.savefig``. Supported keys and value
+                types depend on the output format.
 
         Returns:
             bytes: The rendered image as a byte string.
         """
         file = io.BytesIO()
         with self.styler.context():
-            self.figure.savefig(file, format=format, dpi=dpi)
+            self.figure.savefig(file, format=format, dpi=dpi, metadata=metadata)
         return file.getvalue()
 
     # --- pane styling ---
