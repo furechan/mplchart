@@ -11,9 +11,6 @@ requires-python = ">=3.10"
 readme = "README.md"
 description = "Classic Stock Charts in Python"
 license-files = ["LICENSE.txt"]
-urls.documentation = "https://furechan.github.io/mplchart/"
-urls.repository = "https://github.com/furechan/mplchart"
-urls.changelog = "https://github.com/furechan/mplchart/blob/main/CHANGELOG.md"
 authors = [{ name = "Furechan", email = "furechan@xsmail.com" }]
 keywords = ["finance", "charting", "matplotlib", "candlesticks"]
 dependencies = ["matplotlib", "numpy", "pyarrow"]
@@ -26,6 +23,12 @@ classifiers = [
     "Topic :: Office/Business :: Financial :: Investment",
     "Topic :: Scientific/Engineering :: Visualization",
 ]
+
+[project.urls]
+Documentation = "https://furechan.github.io/mplchart/"
+Source = "https://github.com/furechan/mplchart"
+Issues = "https://github.com/furechan/mplchart/issues"
+Changelog = "https://github.com/furechan/mplchart/blob/main/CHANGELOG.md"
 
 [project.entry-points."mplchart.styles"]
 mpf = "mplchart.styles.mplfinance:load_mpf_style"
