@@ -37,13 +37,12 @@ Includes `ty` for type checking and `ruff` for linting.
 
 ## Publishing workflow
 
-Only wheels are built and published — no sdist.
+Releases are built, tested, and published to PyPI by the manually dispatched `.github/workflows/release.yml` workflow. It builds only a wheel (no sdist), tests the installed wheel on every supported Python version, and publishes through PyPI trusted publishing.
 
 ```bash
 inv check        # lint (ruff) + nbcheck examples
-inv build        # clean → uv build --wheel
-inv publish      # twine upload dist/*.whl to PyPI
+inv build        # local test build only; not for publishing
 inv bump         # bump patch version in pyproject.toml + uv sync
 ```
 
-**Important:** `bump` runs *after* publishing, not before. The correct order is: `check` → `build` → `publish` → `bump`.
+**Important:** `bump` runs *after* publishing, not before. The correct order is: `check` → run the `release` workflow → `bump`.

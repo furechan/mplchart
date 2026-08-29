@@ -92,7 +92,8 @@ def gallery(ctx):
 
 @task(clean)
 def build(ctx):
-    """Build project wheel (runs clean first)"""
+    """Build a local project wheel (runs clean first)"""
+    print("Warning: local builds are not for publishing; use the release workflow.")
     ctx.run("uv build --wheel")
 
 
@@ -101,19 +102,6 @@ def dump(ctx):
     """List contents of the built wheel"""
     for file in ROOT.glob("dist/*.whl"):
         ctx.run(f"unzip -l {file}")
-
-
-@task
-def publish(ctx, testpypi=False):
-    """Upload dist/*.whl to PyPI via twine (use --testpypi for TestPyPI)
-
-    Publishing order: check → build → publish → bump
-    Note: bump runs *after* publishing, not before.
-    """
-    flags = "--skip-existing"
-    if testpypi:
-        flags += " --repository testpypi"
-    ctx.run(f"twine upload {flags} dist/*.whl")
 
 
 @task
