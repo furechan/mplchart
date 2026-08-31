@@ -1,6 +1,8 @@
-name: pages
+name: Build and Deploy Documentation
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
