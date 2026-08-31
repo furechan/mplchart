@@ -1,4 +1,4 @@
-name: Test Supported Python Versions
+name: CI
 
 on:
   push:
