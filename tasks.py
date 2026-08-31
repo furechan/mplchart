@@ -78,6 +78,12 @@ def check(ctx):
     ctx.run("ruff check")
 
 
+@task(check)
+def docs(ctx):
+    """Check the project and build the documentation."""
+    ctx.run("mkdocs build --strict")
+
+
 @task
 def apidocs(ctx):
     """Regenerate the API reference pages in docs/reference from docstrings"""

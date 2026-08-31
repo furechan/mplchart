@@ -41,6 +41,7 @@ Releases are built, tested, and published to PyPI by the manually dispatched `.g
 
 ```bash
 inv check        # lint (ruff) + nbcheck examples
+inv docs         # check + strict documentation build
 inv build        # local test build only; not for publishing
 inv bump         # bump patch version in pyproject.toml + uv sync
 ```
