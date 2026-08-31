@@ -72,19 +72,6 @@ def clean(ctx):
 
 
 @task
-def check(ctx):
-    """Lint with ruff and check notebooks with nbcheck (validity + executed outputs)"""
-    ctx.run("nbcheck -x examples docs docs/articles")
-    ctx.run("ruff check")
-
-
-@task(check)
-def docs(ctx):
-    """Check the project and build the documentation."""
-    ctx.run("mkdocs build --strict")
-
-
-@task
 def apidocs(ctx):
     """Regenerate the API reference pages in docs/reference from docstrings"""
     ctx.run("uv run python scripts/make-api-docs.py")
@@ -94,6 +81,20 @@ def apidocs(ctx):
 def gallery(ctx):
     """Re-execute the docs gallery notebook in place"""
     ctx.run("jupyter nbconvert --to notebook --execute --inplace docs/gallery.ipynb")
+
+
+@task
+def check(ctx):
+    """Lint with ruff and check notebooks with nbcheck (validity + executed outputs)"""
+    ctx.run("nbcheck -x examples docs docs/articles")
+    ctx.run("ruff check")
+
+
+@task(check, apidocs, gallery)
+def docs(ctx):
+    """Check the project and build the documentation."""
+    ctx.run("mkdocs build --strict")
+
 
 
 @task(clean)
