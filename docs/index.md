@@ -1,4 +1,4 @@
-# mplchart
+# Home
 
 Create classic technical analysis stock charts in Python with minimal code. The library is built around [matplotlib](https://matplotlib.org/) and supports both [pandas](https://pandas.pydata.org/) and [polars](https://pola.rs/) DataFrames. Charts are defined with a declarative interface, based on a set of drawing primitives like `Candlesticks`, `Volume` and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc.
 
