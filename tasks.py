@@ -15,24 +15,6 @@ PACKAGE = "mplchart"
 ROOT = Path(__file__).parent
 
 
-def load_direnv(path: str | Path = ROOT):
-    """Load direnv environment for `path` in os.environ. Requires direnv installed."""
-    output = subprocess.check_output(
-        ["direnv", "export", "json"],
-        cwd=path,
-        text=True
-        )
-    if output:
-        data = json.loads(output)
-        for k, v in data.items():
-            if v is None:
-                os.environ.pop(k, None)
-            else:
-                os.environ[k] = v
-
-
-load_direnv()
-
 
 def get_version() -> str | None:
     """Get version from pyproject."""
