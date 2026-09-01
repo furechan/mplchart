@@ -28,6 +28,7 @@ theme:
 
 plugins:
   - search
+  - awesome-nav
   - mkdocs-jupyter:
       cache_dir: build/cache/mkdocs-jupyter
       execute: false

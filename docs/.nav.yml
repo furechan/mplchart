@@ -1,0 +1,8 @@
+append_unmatched: true
+
+nav:
+  - index.md
+  - gallery.ipynb
+  - reference
+  - examples
+  - articles

@@ -1,0 +1,9 @@
+append_unmatched: true
+
+nav:
+  - index.md
+  - chart.md
+  - primitives.md
+  - indicators.md
+  - expressions.md
+  - styles.md
