@@ -37,13 +37,14 @@ Includes `ty` for type checking and `ruff` for linting.
 
 ## Publishing workflow
 
-Releases are built, tested, and published to PyPI by the manually dispatched `.github/workflows/release.yml` workflow. It builds only a wheel (no sdist), tests the installed wheel on every supported Python version, and publishes through PyPI trusted publishing.
+Releases are built, tested, and published to PyPI when a `vX.Y.Z` tag is pushed. `.github/workflows/build.yml` is reusable and manually dispatchable; it builds only a wheel (no sdist) and tests the installed wheel on every supported Python version. `.github/workflows/release.yml` validates the tag and PyPI state, calls the build workflow, then publishes through PyPI Trusted Publishing.
 
 ```bash
 inv check        # lint (ruff) + nbcheck examples
 inv docs         # check + strict documentation build
 inv build        # local test build only; not for publishing
-inv bump         # bump patch version in pyproject.toml + uv sync
+inv bump         # move a plain release to the next patch .dev0 version
+inv release      # test, release/tag/push, then advance to the next .dev0
 ```
 
-**Important:** `bump` runs *after* publishing, not before. The correct order is: `check` → run the `release` workflow → `bump`.
+The repository normally carries the next patch development version (`X.Y.Z.dev0`). Run `uv run inv release` from `main`: it tests, removes `.dev0`, commits and pushes the release with its tag, then commits and pushes the next patch `.dev0`. A failed release push stops before the development bump. Publish only through the tag-triggered release workflow.

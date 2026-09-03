@@ -1,9 +1,7 @@
 # noinspection PyUnresolvedReferences
 
-import os
 import re
 import json
-import subprocess
 import urllib.error
 import urllib.request
 
@@ -13,6 +11,7 @@ from invoke.tasks import task
 
 PACKAGE = "mplchart"
 ROOT = Path(__file__).parent
+VERSION_PATTERN = re.compile(r"^(\d+)\.(\d+)\.(\d+)(?:\.dev0)?$")
 
 
 
@@ -95,5 +94,44 @@ def dump(ctx):
 
 @task
 def bump(ctx):
-    """Bump patch version in pyproject.toml (re-locks and syncs)"""
-    ctx.run("uv version --bump patch")
+    """Move a released patch version to the next patch development version."""
+    version = get_version()
+    match = VERSION_PATTERN.fullmatch(version or "")
+    if version is None or match is None or version.endswith(".dev0"):
+        raise Exit(f"expected a plain three-part release version, found {version!r}")
+    major, minor, patch = map(int, match.groups())
+    next_version = f"{major}.{minor}.{patch + 1}.dev0"
+    ctx.run(f"uv version --no-sync {next_version}")
+    print(f"Started development of {next_version}")
+
+
+@task
+def release(ctx):
+    """Test, commit, tag, and push the current development release."""
+    branch = ctx.run("git branch --show-current", hide=True).stdout.strip()
+    if branch != "main":
+        print(f"Nothing to release from {branch!r}; switch to main first")
+        return
+
+    dev_version = get_version()
+    match = VERSION_PATTERN.fullmatch(dev_version or "")
+    if dev_version is None or match is None or not dev_version.endswith(".dev0"):
+        raise Exit(f"expected a three-part .dev0 version, found {dev_version!r}")
+    major, minor, patch = map(int, match.groups())
+    release_version = f"{major}.{minor}.{patch}"
+    next_version = f"{major}.{minor}.{patch + 1}.dev0"
+    tag = f"v{release_version}"
+
+    ctx.run("pytest")
+
+    ctx.run(f"uv version --no-sync {release_version}")
+    ctx.run("git add pyproject.toml uv.lock")
+    ctx.run(f'git commit -m "Release version {release_version}"')
+    ctx.run(f'git tag -a {tag} -m "Release {release_version}"')
+    ctx.run(f"git push origin main {tag}")
+
+    ctx.run(f"uv version --no-sync {next_version}")
+    ctx.run("git add pyproject.toml uv.lock")
+    ctx.run(f'git commit -m "Start development of {next_version}"')
+    ctx.run("git push origin main")
+    print(f"Pushed {tag} for release and advanced main to {next_version}")

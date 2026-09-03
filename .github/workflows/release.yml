@@ -1,61 +1,67 @@
+# Validate a version tag, build its wheel, approve, and publish to PyPI.
 name: Release
 
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  validate:
+    name: Validate release version
     permissions:
       contents: read
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-      - uses: astral-sh/setup-uv@v10.0.1
-        with:
-          enable-cache: false
-      - name: Build wheel
-        run: uv build --wheel --no-sources
-      - uses: actions/upload-artifact@v7
-        with:
-          name: wheel
-          path: dist/*.whl
-          if-no-files-found: error
 
-  test:
-    needs: build
-    name: Test wheel on Python ${{ matrix.python-version }}
-    runs-on: ubuntu-latest
+      - name: Match tag, package version, and PyPI
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          python - <<'PY'
+          import os
+          import re
+          import tomllib
+          import urllib.error
+          import urllib.request
+          from pathlib import Path
+
+          version = tomllib.loads(Path("pyproject.toml").read_text())["project"]["version"]
+          tag = os.environ["RELEASE_TAG"]
+          if tag != f"v{version}":
+              raise SystemExit(f"tag {tag!r} does not match project version {version!r}")
+          if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+              raise SystemExit(f"release version must be a plain three-part version: {version!r}")
+
+          url = f"https://pypi.org/pypi/mplchart/{version}/json"
+          try:
+              urllib.request.urlopen(url, timeout=10)
+          except urllib.error.HTTPError as error:
+              if error.code == 404:
+                  print(f"Validated unpublished release {version}")
+              else:
+                  raise
+          else:
+              raise SystemExit(f"mplchart {version} already exists on PyPI")
+          PY
+
+  build:
+    name: Build and test
+    needs: validate
     permissions:
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-      - uses: actions/download-artifact@v8
-        with:
-          name: wheel
-          path: dist
-      - uses: astral-sh/setup-uv@v10.0.1
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install wheel and test dependencies
-        run: |
-          uv export --only-group dev --no-emit-project --no-hashes --frozen \
-            --output-file release-requirements.txt
-          uv venv --python ${{ matrix.python-version }} .release-venv
-          uv pip install --python .release-venv/bin/python \
-            --requirements release-requirements.txt dist/*.whl
-      - name: Run tests against wheel
-        run: .release-venv/bin/python -m pytest
+    uses: ./.github/workflows/build.yml
 
   publish:
-    needs: test
+    name: Confirm and publish to PyPI
+    needs: build
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -67,5 +73,7 @@ jobs:
         with:
           name: wheel
           path: dist
+      - uses: astral-sh/setup-uv@v10.0.1
+
       - name: Publish wheel to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        run: uv publish --trusted-publishing always dist/*
