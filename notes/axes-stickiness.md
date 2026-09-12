@@ -32,7 +32,7 @@ Rule of thumb: **`Pane` opens panes for what follows; `pane=` borrows an existin
 
 ## Canvas layer
 
-- **`get_axes(target=None)`** — selective, pure, never moves anything. `"same"` (default) → last-created pane; `"main"` → first pane; `"twinx"` → twin overlay of the current pane. Raises on `"above"`/`"below"` (pointing at `Pane`). One documented exception: resolving with no pane yet bootstraps the first pane (initialization, not movement — and for `"twinx"` the bootstrap returns the *plain pane*, see Volume below).
+- **`get_axes(target=None)`** — selective, pure, never moves anything. `"same"` (default) → last-created pane; `"main"` → first pane; `"twinx"` → twin overlay of the current pane. Raises on `"above"`/`"below"` (pointing at `Pane`). The root and main axes exist from Canvas initialization; selection never needs to bootstrap a pane.
 - **`new_axes(position="below", *, height_ratio=None)`** — the creative half, surfacing `layout.add_vplot` (which existed all along; `get_axes` used to reach down to it). Creates the pane; by list order it is immediately current. Name avoids matplotlib's `Figure.add_axes` (different meaning).
 
 ## The Volume special case (by design)
@@ -40,7 +40,7 @@ Rule of thumb: **`Pane` opens panes for what follows; `pane=` borrows an existin
 `Volume` always asks `get_axes("twinx")` and inspects the result's `_label`. The ownership rule lives in `get_axes` itself (moved there 2026-07-26): **an empty current pane resolves as its own overlay** — nothing to be scale-independent from — while a pane with content (`has_data()`) yields a fresh twin stamped `_label="twinx"`:
 
 - current pane has content → twin → overlay etiquette: bars squashed into the bottom quarter (`set_ylim(0, 4*vmax)`), y-axis hidden.
-- current pane empty (volume-only chart `chart.plot(Volume(sma=50))`, or right after `Pane("below")`) → the pane itself → Volume owns it: full height, visible scale. The second case is the classic dedicated volume sub-pane, which the old bootstrap-based detection could never produce (a pane *existed*, so it twinned the empty pane — also, `plot()` pre-bootstraps a pane for root-drawing primitives, so "no pane exists" was unobservable inside `plot()` anyway).
+- current pane empty (volume-only chart `chart.plot(Volume(sma=50))`, or right after `Pane("below")`) → the pane itself → Volume owns it: full height, visible scale. The second case is the classic dedicated volume sub-pane.
 
 Known wrinkle (accepted, no action — decided 2026-07-26): when the pane has content, `get_axes("twinx")` creates a *new* twin every call (no reuse). No practical use case puts two twinx overlays on one pane (one `Volume()` per pane is the pattern), and reuse would raise a real semantic question (shared vs independent overlay scales) not worth deciding speculatively.
 

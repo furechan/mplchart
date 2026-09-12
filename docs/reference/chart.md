@@ -26,6 +26,7 @@ Chart(
     raw_dates=False,
     style=None,
     yaxis_right=None,
+    yaxis_log=False,
     color_scheme=(),
 )
 ```
@@ -70,6 +71,10 @@ on the right. Defaults to `None`, which consults the
 styles declare `yaxis.right: True` (the finance convention),
 while styles without an opinion (e.g. a plain matplotlib
 stylesheet) keep matplotlib's left convention.
+- **yaxis_log** (bool): Use a logarithmic y-axis on the main
+pane. Defaults to False. Additional panes and twin overlays
+retain their own linear scales. Logarithmic axes require
+positive values.
 - **color_scheme**: Deprecated and ignored — use `style=` with settings
 (e.g. `Styler(settings={"sma.color": "red"})`).
 

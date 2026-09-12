@@ -47,23 +47,33 @@ class Canvas:
             while styles without an opinion (e.g. a plain matplotlib
             stylesheet) keep matplotlib's left convention. Twin overlays
             (e.g. Volume on the main pane) take the opposite side.
+        yaxis_log (bool, optional): Use a logarithmic y-axis on the main
+            pane. Defaults to False. Additional panes and twin overlays
+            retain their own linear scales. Logarithmic axes require
+            positive values.
 
     Creating a Canvas eagerly creates (or adopts) the figure, sets the tight
     layout engine (required by the pane geometry), and installs the styled
-    root axes.
+    root and main axes.
     """
 
     DEFAULT_FIGSIZE = (12, 9)
 
-    def __init__(self, figsize=None, *, figure=None, title=None, style=None, yaxis_right=None):
+    def __init__(
+        self, figsize=None, *, figure=None, title=None, style=None,
+        yaxis_right=None, yaxis_log=False,
+    ):
         if yaxis_right not in (None, True, False):
             raise ValueError(f"Invalid yaxis_right {yaxis_right!r} — expected a bool")
+        if yaxis_log not in (True, False):
+            raise ValueError(f"Invalid yaxis_log {yaxis_log!r} — expected a bool")
 
         self.styler = get_styler(style)
 
         if yaxis_right is None:
             yaxis_right = self.styler.get_setting("yaxis", "right", fallback=False)
         self.yaxis_right = yaxis_right
+        self.yaxis_log = yaxis_log
 
         with self.styler.context():
             if figure is not None:
@@ -76,6 +86,9 @@ class Canvas:
 
             ax = init_vplot(self.figure)
             self.config_root_axes(ax)
+            self.config_pane_axes(add_vplot(figure=self.figure))
+            if self.yaxis_log:
+                self.main_axes().set_yscale("log")
 
             if title:
                 self.set_title(title)
@@ -168,18 +181,11 @@ class Canvas:
 
     def root_axes(self):
         """Root (background) axes — always present."""
-        if not self.figure.axes:
-            with self.styler.context():
-                ax = init_vplot(self.figure)
-                self.config_root_axes(ax)
         return self.figure.axes[0]
 
     def main_axes(self):
-        """Main price axes (first data pane), created if needed."""
-        self.root_axes()
-        if len(self.figure.axes) > 1:
-            return self.figure.axes[1]
-        return self.get_axes()
+        """Main price axes (first data pane), created at initialization."""
+        return self.figure.axes[1]
 
     def panes(self):
         """The pane axes in creation order — root and twinx overlays excluded."""
@@ -195,9 +201,6 @@ class Canvas:
         last created; "main" is the first pane; "twinx" is a twin overlay of
         the current pane. Pane creation goes through ``new_axes`` (the
         ``Pane`` primitive / ``chart.pane()``).
-
-        One exception: resolving with no pane yet bootstraps the first pane
-        (initialization, not movement).
 
         "twinx" resolves to an overlay of the current pane: the pane itself
         when it is empty (nothing to be scale-independent from), else a
@@ -222,14 +225,7 @@ class Canvas:
 
     def _get_axes(self, target):
         """``get_axes`` body — runs inside the styler's rc context."""
-        self.root_axes()
         axes = self.panes()
-
-        if not axes:
-            # bootstrap: first pane (a plain pane even for "twinx")
-            ax = add_vplot(figure=self.figure)
-            self.config_pane_axes(ax)
-            return ax
 
         if target == "main":
             return axes[0]
@@ -247,7 +243,7 @@ class Canvas:
         return twin
 
     def new_axes(self, position: PanePosition = "below", *, height_ratio: float | None = None):
-        """Create a new pane — the only pane creator.
+        """Create a new pane in addition to the main pane.
 
         The new pane is the last created, hence current: subsequent draws
         land on it ("creation is sticky by construction").
@@ -261,17 +257,11 @@ class Canvas:
             raise ValueError("Invalid position %r" % position)
 
         with self.styler.context():
-            self.root_axes()
-
-            if not self.panes():
-                # first pane is the main pane, full height
-                ax = add_vplot(figure=self.figure)
-            else:
-                ax = add_vplot(
-                    figure=self.figure,
-                    height_ratio=height_ratio or 0.2,
-                    append=position == "below",
-                )
+            ax = add_vplot(
+                figure=self.figure,
+                height_ratio=height_ratio or 0.2,
+                append=position == "below",
+            )
 
             self.config_pane_axes(ax)
 

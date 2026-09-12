@@ -308,6 +308,11 @@ def plot_cspoly(
         label=label,
     )
 
-    ax.add_collection(wicks)
-    ax.add_collection(poly)
+    # Collection autoscaling can return log-transformed bounds on log axes.
+    # Supply the original data coordinates, including all positive values
+    # so Matplotlib can determine the smallest positive limit correctly.
+    ax.add_collection(wicks, autolim=False)
+    ax.add_collection(poly, autolim=False)
+    ax.update_datalim(segments.reshape(-1, 2))
+    ax.update_datalim(verts.reshape(-1, 2))
     ax.autoscale_view()

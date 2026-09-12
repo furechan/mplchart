@@ -64,6 +64,10 @@ class Chart:
             styles declare ``yaxis.right: True`` (the finance convention),
             while styles without an opinion (e.g. a plain matplotlib
             stylesheet) keep matplotlib's left convention.
+        yaxis_log (bool, optional): Use a logarithmic y-axis on the main
+            pane. Defaults to False. Additional panes and twin overlays
+            retain their own linear scales. Logarithmic axes require
+            positive values.
         color_scheme: Deprecated and ignored — use ``style=`` with settings
             (e.g. ``Styler(settings={"sma.color": "red"})``).
 
@@ -90,6 +94,7 @@ class Chart:
         raw_dates=False,
         style=None,
         yaxis_right=None,
+        yaxis_log=False,
         color_scheme=(),
     ):
         if color_scheme:
@@ -105,7 +110,10 @@ class Chart:
         self.max_bars = max_bars
         self.raw_dates = raw_dates
 
-        self.canvas = Canvas(figsize=figsize, figure=figure, title=title, style=style, yaxis_right=yaxis_right)
+        self.canvas = Canvas(
+            figsize=figsize, figure=figure, title=title, style=style,
+            yaxis_right=yaxis_right, yaxis_log=yaxis_log,
+        )
 
         if prices is None:
             raise ValueError("Prices data must be provided at initialization!")
@@ -269,10 +277,6 @@ class Chart:
 
         if not indicators:
             raise ValueError("No indicators provided!")
-
-        # ensure a main pane exists — root-drawing primitives (e.g. Stripes)
-        # never create one themselves
-        self.canvas.get_axes()
 
         for indicator in indicators:
             self.plot_indicator(indicator)

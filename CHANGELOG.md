@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.0.52
+- Fixed candlestick autoscaling on logarithmic axes
+- Added `yaxis_log=True` on `Chart` and `Canvas` for a logarithmic main pane
+- Canvas creates root and main axes eagerly; `new_axes()` and `Chart.pane()` always add a secondary pane
+
 ## 0.0.49
 - Removed `inv publish`; releases are published through the GitHub Actions release workflow, and `inv build` now warns that local wheels are not for publishing
 - `Chart.render` and `Canvas.render` accept `metadata=` and pass it unchanged to Matplotlib's `Figure.savefig`

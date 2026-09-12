@@ -13,12 +13,15 @@ def canvas():
     plt.close(canvas.figure)
 
 
-def test_canvas_creates_styled_root(canvas):
-    assert len(canvas.figure.axes) == 1
+def test_canvas_creates_styled_root_and_main(canvas):
+    assert len(canvas.figure.axes) == 2
     root = canvas.root_axes()
     assert root._label == "root"
     assert root.get_xmargin() == 0.0
-    assert canvas.count_axes() == 0
+    assert canvas.count_axes() == 1
+    main = canvas.figure.axes[1]
+    assert main.get_xmargin() == 0.0
+    assert not main.patch.get_visible()
 
 
 def test_canvas_title():
@@ -46,12 +49,13 @@ def test_canvas_adopts_existing_figure():
     figure.add_subplot()  # content to be cleared
     canvas = Canvas(figure=figure)
     assert canvas.figure is figure
-    assert len(figure.axes) == 1  # cleared, root only
+    assert len(figure.axes) == 2  # cleared, root and main
     plt.close(figure)
 
 
-def test_get_axes_creates_main_pane(canvas):
-    ax = canvas.get_axes()
+def test_get_axes_selects_existing_main_pane(canvas):
+    ax = canvas.figure.axes[1]
+    assert canvas.get_axes() is ax
     assert canvas.count_axes() == 1
     assert canvas.main_axes() is ax
     assert canvas.get_axes("same") is ax
@@ -150,6 +154,34 @@ def test_yaxis_invalid():
         Canvas(yaxis_right="left")
 
 
+def test_yaxis_default_linear(canvas):
+    assert canvas.yaxis_log is False
+    assert canvas.main_axes().get_yscale() == "linear"
+
+
+@pytest.mark.parametrize("yaxis_log", [False, True])
+def test_yaxis_log_main_only(yaxis_log):
+    canvas = Canvas(yaxis_log=yaxis_log)
+    try:
+        main = canvas.main_axes()
+        main.plot([1.0, 10.0, 100.0])
+        twin = canvas.get_axes("twinx")
+        below = canvas.new_axes("below")
+        above = canvas.new_axes("above")
+        assert main.get_yscale() == ("log" if yaxis_log else "linear")
+        for ax in (canvas.root_axes(), twin, below, above):
+            assert ax.get_yscale() == "linear"
+        assert b"<svg" in canvas.render()
+    finally:
+        plt.close(canvas.figure)
+
+
+@pytest.mark.parametrize("value", [None, "log", 2])
+def test_yaxis_log_invalid(value):
+    with pytest.raises(ValueError, match="Invalid yaxis_log"):
+        Canvas(yaxis_log=value)
+
+
 def test_resolve_color_scheme_lookup():
     from matplotlib.colors import to_hex
 
@@ -244,3 +276,17 @@ def test_root_patch_renders_facecolor():
     assert root.patch.get_visible()
     assert not pane.patch.get_visible()
     plt.close(canvas.figure)
+
+
+@pytest.mark.parametrize("position", ["above", "below"])
+def test_new_axes_on_fresh_canvas_adds_secondary_pane(canvas, position):
+    main = canvas.figure.axes[1]
+    added = canvas.new_axes(position)
+    assert canvas.panes() == [main, added]
+    assert canvas.main_axes() is main
+    assert canvas.get_axes() is added
+    spec = added.get_subplotspec()
+    assert spec.rowspan.start == (0 if position == "above" else 1)
+    assert spec.get_gridspec().get_height_ratios() == (
+        [0.2, 1.0] if position == "above" else [1.0, 0.2]
+    )

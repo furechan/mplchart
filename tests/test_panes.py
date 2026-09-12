@@ -95,8 +95,32 @@ def test_renderers_accept_pane(prices, renderer):
     plt.close(chart.figure)
 
 
+@pytest.mark.parametrize("yaxis_log", [False, True])
+def test_chart_yaxis_log(prices, yaxis_log):
+    chart = Chart(prices, figsize=(6, 4), yaxis_log=yaxis_log)
+    try:
+        chart.plot(Candlesticks())
+        main = chart.canvas.main_axes()
+        _, lows = chart.view.series_xy(chart.view.eval("low"))
+        _, highs = chart.view.series_xy(chart.view.eval("high"))
+        low, high = min(lows), max(highs)
+        assert main.dataLim.ymin == pytest.approx(low)
+        assert main.dataLim.ymax == pytest.approx(high)
+        lower, upper = main.get_ylim()
+        assert 0 < lower < low < high < upper
+        chart.plot(LinePlot("close"), Volume(), Pane("below"), LinePlot("close"))
+        assert main.get_ylim() == pytest.approx((lower, upper))
+        assert main.get_yscale() == ("log" if yaxis_log else "linear")
+        for ax in chart.figure.axes:
+            if ax is not main:
+                assert ax.get_yscale() == "linear"
+        assert b"<svg" in chart.render()
+    finally:
+        plt.close(chart.figure)
+
+
 def test_volume_standalone(prices):
-    # volume-only chart: the twinx request bootstraps a plain pane and
+    # volume-only chart: the twinx request selects the empty main pane and
     # Volume owns it — full height, visible scale
     chart = Chart(prices, figsize=(6, 4))
     chart.plot(Volume(sma=50))
@@ -130,4 +154,16 @@ def test_volume_overlay(prices):
     assert chart.canvas.count_axes(include_twins=True) == 2
     twin = next(ax for ax in chart.figure.axes if getattr(ax, "_label", None) == "twinx")
     assert not twin.yaxis.get_visible()
+    plt.close(chart.figure)
+
+
+@pytest.mark.parametrize("position", ["above", "below"])
+def test_pane_before_plot_preserves_empty_main(prices, position):
+    chart = Chart(prices, figsize=(6, 4))
+    main = chart.canvas.main_axes()
+    chart.pane(position).plot(LinePlot("close"))
+    assert len(chart.canvas.panes()) == 2
+    assert not main.has_data()
+    assert len(chart.canvas.get_axes().lines) == 1
+    assert chart.canvas.main_axes() is main
     plt.close(chart.figure)
