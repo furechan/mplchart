@@ -1,7 +1,7 @@
 # Change Log
 
 ## 0.0.52
-- Fixed candlestick autoscaling on logarithmic axes
+- Fixed candlestick, OHLC, bar, and Point & Figure autoscaling on logarithmic axes
 - Added `yaxis_log=True` on `Chart` and `Canvas` for a logarithmic main pane
 - Canvas creates root and main axes eagerly; `new_axes()` and `Chart.pane()` always add a secondary pane
 

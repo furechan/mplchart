@@ -201,7 +201,7 @@ class PointFigure(Primitive):
                 colors=colorup, linewidths=1.2,
                 alpha=self.alpha, label=self.label,
             )
-            ax.add_collection(xs)
+            ax.add_collection(xs, autolim=False)
         if centers:
             os_ = EllipseCollection(
                 widths=w * 0.8, heights=box * 0.8, angles=0, units="xy",
@@ -209,7 +209,7 @@ class PointFigure(Primitive):
                 facecolors="none", edgecolors=colordn,
                 linewidths=1.2, alpha=self.alpha,
             )
-            ax.add_collection(os_)
+            ax.add_collection(os_, autolim=False)
 
         pts = np.column_stack([np.concatenate([xv, xv]), np.concatenate([low, high])])
         ax.update_datalim(pts)

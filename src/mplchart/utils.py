@@ -262,7 +262,9 @@ def plot_vbars(ax, xvalues, heights, *, width=0.8, color=None, edgecolor=None,
         facecolors=color, edgecolors="none" if edgecolor is None else edgecolor,
         alpha=alpha, label=label,
     )
-    ax.add_collection(poly)
+    # Keep limits in data coordinates on non-linear axes.
+    ax.add_collection(poly, autolim=False)
+    ax.update_datalim(verts.reshape(-1, 2))
     ax.autoscale_view()
     return poly
 

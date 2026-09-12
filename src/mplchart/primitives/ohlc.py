@@ -118,5 +118,7 @@ def plot_ohlc(xvalues, open_, high, low, close, ax=None, width=0.8, alpha=1.0, c
         edgecolors=edgecolors, linewidths=(1.0,), alpha=alpha, label=label
     )
 
-    ax.add_collection(poly)
+    # Keep limits in data coordinates on non-linear axes.
+    ax.add_collection(poly, autolim=False)
+    ax.update_datalim(verts.reshape(-1, 2))
     ax.autoscale_view()
