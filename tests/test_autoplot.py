@@ -9,7 +9,7 @@ pytestmark = pytest.mark.pandas
 
 from mplchart.chart import Chart  # noqa: E402
 from mplchart.indicators import BBANDS, MACD, SMA  # noqa: E402
-from mplchart.primitives import Bands, LinePlot  # noqa: E402
+from mplchart.primitives import Bands, Line  # noqa: E402
 from mplchart.samples import sample_prices  # noqa: E402
 from mplchart.styles import Styler  # noqa: E402
 
@@ -79,7 +79,7 @@ def test_lineplot_honors_settings(prices):
     # renderers resolve colors by name — the old AutoPlot-only asymmetry is gone
     style = Styler(settings={"sma.color": "crimson"})
     chart = Chart(prices, figsize=(4, 3), style=style)
-    chart.plot(LinePlot(SMA(20)))
+    chart.plot(Line(SMA(20)))
     (line,) = chart.canvas.main_axes().lines
     assert mcolors.to_rgba(line.get_color())[:3] == rgb("crimson")
     plt.close(chart.figure)

@@ -4,8 +4,8 @@ from ..model.primitive import BindingPrimitive
 from ..utils import get_label
 
 from .bands import Bands
-from .barplot import BarPlot
-from .lineplot import LinePlot
+from .barplot import Bars
+from .lineplot import Line
 
 
 class AutoPlot(BindingPrimitive):
@@ -13,8 +13,8 @@ class AutoPlot(BindingPrimitive):
 
     Auto-plots an expression or indicator by dispatching each output to a
     renderer primitive: band results (``upperband``/``lowerband``) go to
-    ``Bands`` wholesale; otherwise ``*hist`` columns go to ``BarPlot`` and
-    everything else to ``LinePlot``, column by column. Styling lives in the
+    ``Bands`` wholesale; otherwise ``*hist`` columns go to ``Bars`` and
+    everything else to ``Line``, column by column. Styling lives in the
     renderers (keyed by series name). Used implicitly when plotting anything
     that is not already a ``Primitive``; can also be applied explicitly to
     override the legend label.
@@ -41,7 +41,7 @@ class AutoPlot(BindingPrimitive):
         columns = list(data.columns) if hasattr(data, "columns") else []
 
         if not columns:
-            LinePlot(data, label=label).apply_to_chart(chart)
+            Line(data, label=label).apply_to_chart(chart)
             return
 
         if "upperband" in columns and "lowerband" in columns:
@@ -54,9 +54,9 @@ class AutoPlot(BindingPrimitive):
             first = counter == 0
 
             if item.endswith("hist"):
-                BarPlot(data[item], label=label if first else None, legend=first,
+                Bars(data[item], label=label if first else None, legend=first,
                         alpha=0.5, width=0.8).apply_to_chart(chart)
                 continue
 
-            LinePlot(data[item], label=label if first else None, legend=first).apply_to_chart(chart)
+            Line(data[item], label=label if first else None, legend=first).apply_to_chart(chart)
             counter += 1

@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 from mplchart.chart import Chart
 from mplchart.samples import sample_prices
-from mplchart.primitives import Candlesticks, Pane, LinePlot, AreaPlot, BarPlot, Volume
+from mplchart.primitives import Candlesticks, Pane, Line, Area, Bars, Volume
 
 
 @pytest.fixture(params=["pandas", "polars"])
@@ -22,7 +22,7 @@ def prices(backend):
 def test_pane_is_sticky(prices):
     # creation moves the current pane: followers land on the new pane
     chart = Chart(prices, figsize=(6, 4))
-    chart.plot([Candlesticks(), Pane("below"), LinePlot("close"), LinePlot("open")])
+    chart.plot([Candlesticks(), Pane("below"), Line("close"), Line("open")])
 
     panes = chart.canvas.panes()
     assert len(panes) == 2
@@ -33,7 +33,7 @@ def test_pane_is_sticky(prices):
 
 def test_pane_above(prices):
     chart = Chart(prices, figsize=(6, 4))
-    chart.plot([Candlesticks(), Pane("above"), LinePlot("close")])
+    chart.plot([Candlesticks(), Pane("above"), Line("close")])
 
     panes = chart.canvas.panes()
     assert len(panes) == 2
@@ -62,9 +62,9 @@ def test_renderer_pane_is_ephemeral(prices):
     chart.plot([
         Candlesticks(),
         Pane("below"),
-        LinePlot("close"),
-        LinePlot("open", pane="main"),  # one-off overlay on main
-        LinePlot("high"),               # still lands in the lower pane
+        Line("close"),
+        Line("open", pane="main"),  # one-off overlay on main
+        Line("high"),               # still lands in the lower pane
     ])
 
     panes = chart.canvas.panes()
@@ -77,11 +77,11 @@ def test_renderer_pane_is_ephemeral(prices):
 def test_renderer_pane_creating_rejected(prices):
     chart = Chart(prices, figsize=(6, 4))
     with pytest.raises(ValueError, match="Invalid target"):
-        chart.plot(LinePlot("close", pane="above"))  # ty: ignore[invalid-argument-type]  # pyright: ignore[reportArgumentType]
+        chart.plot(Line("close", pane="above"))  # ty: ignore[invalid-argument-type]  # pyright: ignore[reportArgumentType]
     plt.close(chart.figure)
 
 
-@pytest.mark.parametrize("renderer", [LinePlot, AreaPlot, BarPlot], ids=lambda r: r.__name__)
+@pytest.mark.parametrize("renderer", [Line, Area, Bars], ids=lambda r: r.__name__)
 def test_renderers_accept_pane(prices, renderer):
     chart = Chart(prices, figsize=(6, 4))
     chart.plot([Candlesticks(), Pane("below"), renderer("close", pane="main")])
@@ -108,7 +108,7 @@ def test_chart_yaxis_log(prices, yaxis_log):
         assert main.dataLim.ymax == pytest.approx(high)
         lower, upper = main.get_ylim()
         assert 0 < lower < low < high < upper
-        chart.plot(LinePlot("close"), Volume(), Pane("below"), LinePlot("close"))
+        chart.plot(Line("close"), Volume(), Pane("below"), Line("close"))
         assert main.get_ylim() == pytest.approx((lower, upper))
         assert main.get_yscale() == ("log" if yaxis_log else "linear")
         for ax in chart.figure.axes:
@@ -161,7 +161,7 @@ def test_volume_overlay(prices):
 def test_pane_before_plot_preserves_empty_main(prices, position):
     chart = Chart(prices, figsize=(6, 4))
     main = chart.canvas.main_axes()
-    chart.pane(position).plot(LinePlot("close"))
+    chart.pane(position).plot(Line("close"))
     assert len(chart.canvas.panes()) == 2
     assert not main.has_data()
     assert len(chart.canvas.get_axes().lines) == 1

@@ -1,11 +1,12 @@
-"""BarPlot primitive"""
+"""Bars primitive"""
 
+import warnings
 from ..canvas import PaneTarget
 from ..model.primitive import BindingPrimitive
 from ..utils import get_label, plot_vbars
 
 
-class BarPlot(BindingPrimitive):
+class Bars(BindingPrimitive):
     """
     Bar Plot Primitive
 
@@ -24,8 +25,8 @@ class BarPlot(BindingPrimitive):
         label (str): plot label
 
     Examples:
-        BarPlot(SMA(50), color="red", alpha=0.5)
-        SMA(50) @ BarPlot(color="red", alpha=0.5)
+        Bars(SMA(50), color="red", alpha=0.5)
+        SMA(50) @ Bars(color="red", alpha=0.5)
     """
 
     def __init__(
@@ -58,7 +59,7 @@ class BarPlot(BindingPrimitive):
 
         if hasattr(result, "columns"):
             raise ValueError(
-                "BarPlot expects a single series; compose a single-output "
+                "Bars expects a single series; compose a single-output "
                 "expression to select one column of a multi-output result."
             )
         series = result
@@ -72,3 +73,15 @@ class BarPlot(BindingPrimitive):
             ax, xv, yv,
             width=self.width, color=color, alpha=self.alpha, label=label,
         )
+
+
+class BarPlot(Bars):
+    """Deprecated: use :class:`Bars` instead."""
+
+    def __new__(cls, *args, **kwargs):
+        warnings.warn(
+            "BarPlot is deprecated; use Bars instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return super().__new__(cls)

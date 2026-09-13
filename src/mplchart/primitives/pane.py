@@ -14,7 +14,7 @@ class Pane(Primitive):
     Creation is sticky: the new pane becomes current and the primitives
     that follow land on it. Pane is the only pane creator — to draw a
     single primitive on an existing pane use the renderers' ``pane=``
-    parameter instead (e.g. ``LinePlot(x, pane="main")``).
+    parameter instead (e.g. ``Line(x, pane="main")``).
 
     Args:
         position (str): "below" (default) or "above" — where the new pane
@@ -23,7 +23,7 @@ class Pane(Primitive):
         yticks (tuple): y-axis tick values (also draws heavy grid lines)
 
     Examples:
-        chart.plot(Pane("below", yticks=(30, 50, 70)), LinePlot(RSI(14)))
+        chart.plot(Pane("below", yticks=(30, 50, 70)), Line(RSI(14)))
     """
 
     def __init__(self, position: PanePosition = "below", *, height_ratio: float | None = None, yticks: tuple | None = None):

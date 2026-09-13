@@ -1,6 +1,7 @@
 # Change Log
 
 ## 0.0.53
+- Renamed `LinePlot`, `AreaPlot`, and `BarPlot` to `Line`, `Area`, and `Bars`; old names remain as subclasses emitting `DeprecationWarning`
 - Removed deprecated `Chart.mapper`, `Chart.plot_vline()`, `Chart(color_scheme=...)`, `Candlesticks(use_bars=...)`, `utils.apply_indicator()`, and indicator-to-primitive `|` binding; use `chart.view`, `chart.vline()`, `style=`, `Candlesticks()`, `view.eval()`, and constructor or `@` binding
 - Removed the `samex` pane target alias; use `same`
 

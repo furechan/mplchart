@@ -42,7 +42,7 @@ With the gallery in place, the per-item parade notebooks (indicators-pandas, pri
 - **Done**: `examples/indicators.ipynb` — indicator mechanics (callables, panes, binding constructor-first with `@` alternative, `|` chaining, `as_expr` boolean composition, custom via bare function or `Indicator` subclass).
 - **Done**: `examples/expressions.ipynb` — expression mechanics (factories return aliased native `pl.Expr`, struct multi-output, `src` composition instead of `|`, native boolean conditions, custom via `.alias()` or `wrap_expression`). Mirrors the indicators page section-for-section.
 - **Done**: removed `indicators-pandas.ipynb` and `expressions-polars.ipynb` after harvesting their unique charts into the gallery (DONCHIAN, DMI, MACDV, BBP/BBW — gallery now 12 charts).
-- **Done**: `examples/primitives.ipynb` — primitive mechanics organized by role (price/volume renderers with color options, indicator renderers `LinePlot`/`AreaPlot`/`BarPlot`, condition primitives `Stripes`/`Markers`, `Pane`/`HLine`/`VLine`, pattern primitives `Swings`/`ZigZag`/`TrendLines`), with backend-parity note. Replaces both primitives parades (removed).
+- **Done**: `examples/primitives.ipynb` — primitive mechanics organized by role (price/volume renderers with color options, indicator renderers `Line`/`Area`/`Bars`, condition primitives `Stripes`/`Markers`, `Pane`/`HLine`/`VLine`, pattern primitives `Swings`/`ZigZag`/`TrendLines`), with backend-parity note. Replaces both primitives parades (removed).
 - **TODO**: backend-architecture article (plain md): what's shared, pandas-only (indicators), polars-only (expressions).
 
 ## Publishing

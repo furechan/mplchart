@@ -1,11 +1,12 @@
-"""AreaPlot primitive"""
+"""Area primitive"""
 
+import warnings
 from ..canvas import PaneTarget
 from ..model.primitive import BindingPrimitive
 from ..utils import get_label
 
 
-class AreaPlot(BindingPrimitive):
+class Area(BindingPrimitive):
     """
     Area Plot Primitive
 
@@ -23,8 +24,8 @@ class AreaPlot(BindingPrimitive):
         label (str): plot label
 
     Examples:
-        AreaPlot(SMA(50), color="red", alpha=0.5)
-        SMA(50) @ AreaPlot(color="red", alpha=0.5)
+        Area(SMA(50), color="red", alpha=0.5)
+        SMA(50) @ Area(color="red", alpha=0.5)
     """
 
     def __init__(
@@ -52,7 +53,7 @@ class AreaPlot(BindingPrimitive):
 
         if hasattr(result, "columns"):
             raise ValueError(
-                "AreaPlot expects a single series; compose a single-output "
+                "Area expects a single series; compose a single-output "
                 "expression to select one column of a multi-output result."
             )
         series = result
@@ -75,3 +76,15 @@ class AreaPlot(BindingPrimitive):
             interpolate=True,
             **kwargs,
         )
+
+
+class AreaPlot(Area):
+    """Deprecated: use :class:`Area` instead."""
+
+    def __new__(cls, *args, **kwargs):
+        warnings.warn(
+            "AreaPlot is deprecated; use Area instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return super().__new__(cls)

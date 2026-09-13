@@ -191,14 +191,14 @@ def test_chart_raw_dates_pandas():
     pytest.importorskip("pandas")
     from mplchart.chart import Chart
     from mplchart.samples import sample_prices
-    from mplchart.primitives import Candlesticks, LinePlot
+    from mplchart.primitives import Candlesticks, Line
     from mplchart.indicators import SMA
 
     prices = sample_prices(freq="daily", backend="pandas")
     chart = Chart(prices, max_bars=100, raw_dates=True)
     assert chart.view is not None
     assert chart.view.raw_dates is True
-    chart.plot(Candlesticks(), SMA(20) @ LinePlot())
+    chart.plot(Candlesticks(), SMA(20) @ Line())
     assert chart.canvas.count_axes() > 0
     plt.close()
 

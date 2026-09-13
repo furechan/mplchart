@@ -29,7 +29,7 @@ and technical indicators like `SMA`, `EMA`, `RSI`, `ROC`, `MACD`, etc ...
 import yfinance as yf
 
 from mplchart.chart import Chart
-from mplchart.primitives import Candlesticks, Volume, Pane, LinePlot
+from mplchart.primitives import Candlesticks, Volume, Pane, Line
 from mplchart.indicators import SMA, RSI, MACD
 
 ticker = 'AAPL'
@@ -38,7 +38,7 @@ prices = yf.Ticker(ticker).history('5y')
 Chart(prices, title=ticker, max_bars=250, normalize=True).plot(
     Candlesticks(), Volume(), SMA(50), SMA(200),
     Pane("above", yticks=(30, 50, 70)),
-    LinePlot(RSI(14), overbought=70, oversold=30),
+    Line(RSI(14), overbought=70, oversold=30),
     Pane("below"),
     MACD(),
 ).show()
@@ -112,9 +112,9 @@ The main drawing primitives are :
 - `OHLC` for open, high, low, close bar plots
 - `Volume` for volume bar plots
 - `Pane` to open a new pane (above or below) for the primitives that follow
-- `LinePlot` draw an indicator as line plot
-- `AreaPlot` draw an indicator as area plot
-- `BarPlot` draw an indicator as bar plot
+- `Line` draw an indicator as line plot
+- `Area` draw an indicator as area plot
+- `Bars` draw an indicator as bar plot
 - `Bands` draw upper/lower(/middle) bands with a translucent fill
 - `Stripes` to shade background areas where a condition is active
 - `Markers` to mark signal crossings with symbols
@@ -169,14 +169,14 @@ Pass an indicator to a rendering primitive to customize display — the `@` bind
 
 
 ```python
-# Customizing indicator style with LinePlot
+# Customizing indicator style with Line
 
 from mplchart.indicators import SMA, EMA, ROC
-from mplchart.primitives import Candlesticks, LinePlot
+from mplchart.primitives import Candlesticks, Line
 
 indicators = [
     Candlesticks(),
-    LinePlot(SMA(20), style="dashed", color="red", alpha=0.5, width=3)
+    Line(SMA(20), style="dashed", color="red", alpha=0.5, width=3)
 ]
 
 Chart(prices).plot(indicators)
@@ -193,14 +193,14 @@ These can be used directly with `chart.plot()`.
 # Candlesticks chart with polars expressions
 
 from mplchart.chart import Chart
-from mplchart.primitives import Candlesticks, Volume, Pane, LinePlot
+from mplchart.primitives import Candlesticks, Volume, Pane, Line
 from mplchart.expressions import SMA, EMA, RSI, MACD
 
 Chart(prices, title=ticker, max_bars=250).plot(
     Candlesticks(), Volume(),
     SMA(50).alias("sma50"), SMA(200).alias("sma200"),
     Pane("above", yticks=(30, 50, 70)),
-    LinePlot(RSI(), overbought=70, oversold=30),
+    Line(RSI(), overbought=70, oversold=30),
     Pane("below"),
     MACD(),
 ).show()
@@ -212,12 +212,12 @@ passed to `df.select()`, or used anywhere polars expressions are accepted.
 Pass an expression to a rendering primitive to customize display — the `@` binding operator is an equivalent alternative:
 
 ```python
-from mplchart.primitives import LinePlot, AreaPlot
+from mplchart.primitives import Line, Area
 from mplchart.expressions import SMA, RSI
 
-LinePlot(SMA(50), color="red")     # expression → primitive
-AreaPlot(RSI(14), color="blue")    # expression → primitive
-SMA(50) @ LinePlot(color="red")    # operator form
+Line(SMA(50), color="red")     # expression → primitive
+Area(RSI(14), color="blue")    # expression → primitive
+SMA(50) @ Line(color="red")    # operator form
 ```
 
 

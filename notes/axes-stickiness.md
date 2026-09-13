@@ -12,7 +12,7 @@ Design note, July 2026. Records the analysis and decisions behind the pane/axes 
 
 There was no explicit "current pane" state. The `"same"` target resolved to `axes[-1]` — the most recently **created** pane. Selection did not reorder that list; creation appended. So stickiness was an accident of creation:
 
-- `LinePlot(target="below")` **leaked** — it created a pane and dragged every following indicator into it (unintended stickiness). Fixed 2026-07 by removing `target=` from the renderers and `plot()`.
+- `Line(target="below")` **leaked** — it created a pane and dragged every following indicator into it (unintended stickiness). Fixed 2026-07 by removing `target=` from the renderers and `plot()`.
 - `Pane("main")` was a **silent no-op** — selection could not stick because only creation moved `axes[-1]`.
 
 Both misbehaviors had one root cause: creation was sticky, selection could not be, and nothing in the API distinguished the two.
@@ -22,13 +22,13 @@ Both misbehaviors had one root cause: creation was sticky, selection could not b
 Stickiness is a property of the *type*, not of the argument:
 
 - **`Pane(position="above"|"below")` / `chart.pane(position)` — creative and sticky, the only pane creator.** Every call creates a new pane; the new pane becomes current. Selecting values are rejected — `Pane("main")` is a loud `ValueError`, not a fixed behavior.
-- **Renderer `pane="main"|"twinx"` (`LinePlot`, `AreaPlot`, `BarPlot`, `Bands`) — selective and ephemeral.** Places that one primitive; never moves the cursor. Creating values are rejected — a new pane is chart structure and structure is declared by `Pane`.
+- **Renderer `pane="main"|"twinx"` (`Line`, `Area`, `Bars`, `Bands`) — selective and ephemeral.** Places that one primitive; never moves the cursor. Creating values are rejected — a new pane is chart structure and structure is declared by `Pane`.
 
 The vocabularies are **disjoint** — creation uses prepositions (`"above"`, `"below"`), selection uses locations (`"main"`, `"twinx"`; future `"top"`, `"bottom"`). The sticky/ephemeral question cannot be asked of the wrong object, and the parameter names (`position` vs `pane`) don't overlap either.
 
 **No cursor state.** With selection stripped of stickiness, "current = last created" is *correct by construction* — `axes[-1]` is the current pane because nothing but creation can compete. The earlier design's underlying assumption is vindicated rather than replaced; `_current_axes`/`set_axes` (a previous iteration of this note) are unnecessary.
 
-Rule of thumb: **`Pane` opens panes for what follows; `pane=` borrows an existing pane for one primitive.** A shared side pane is always spelled `Pane("above"), RSI(), ADX()`; a one-off overlay is `LinePlot(x, pane="main")`.
+Rule of thumb: **`Pane` opens panes for what follows; `pane=` borrows an existing pane for one primitive.** A shared side pane is always spelled `Pane("above"), RSI(), ADX()`; a one-off overlay is `Line(x, pane="main")`.
 
 ## Canvas layer
 
@@ -46,7 +46,7 @@ Known wrinkle (accepted, no action — decided 2026-07-26): when the pane has co
 
 ## Scope of `pane=`
 
-Only the four indicator renderers: `LinePlot`, `AreaPlot`, `BarPlot`, `Bands`. Everything else keeps its hardwired discipline: price/chart-type renderers draw on the current pane (and Renko/PointFigure must be first anyway); `AutoPlot` is a dispatcher, not user-facing — no `pane=` at this stage; `Volume` has the twinx discipline; `Stripes`/`VLine` are root-layer; `Markers` pins to main (draws at close); `HLine` stays simple on the current pane. Primitives advance on demand, never as a sweep (the styling maturity-model doctrine applies).
+Only the four indicator renderers: `Line`, `Area`, `Bars`, `Bands`. Everything else keeps its hardwired discipline: price/chart-type renderers draw on the current pane (and Renko/PointFigure must be first anyway); `AutoPlot` is a dispatcher, not user-facing — no `pane=` at this stage; `Volume` has the twinx discipline; `Stripes`/`VLine` are root-layer; `Markers` pins to main (draws at close); `HLine` stays simple on the current pane. Primitives advance on demand, never as a sweep (the styling maturity-model doctrine applies).
 
 ## Future extensions (designed-for, not implemented)
 
@@ -55,7 +55,7 @@ Only the four indicator renderers: `LinePlot`, `AreaPlot`, `BarPlot`, `Bands`. E
 
 ## Consequences (mostly landed 2026-07)
 
-- `target=` removed from `plot()`/`LinePlot`/`AreaPlot`/`BarPlot` (done); reinstated as `pane=` with sound (ephemeral) semantics — not a flip-flop: the removal was of the broken accidental stickiness.
+- `target=` removed from `plot()`/`Line`/`Area`/`Bars` (done); reinstated as `pane=` with sound (ephemeral) semantics — not a flip-flop: the removal was of the broken accidental stickiness.
 - `pane()` / `Pane` are trivial sugar over `new_axes` (+ yticks); the duplicated bodies go away.
 - Grouping is explicit: `[Pane("below"), ROC(1), ROC(1) | EMA(20)]`. Adjacency-based coupling breaks on reorder and is invisible — exactly what was removed.
 

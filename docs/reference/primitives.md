@@ -11,7 +11,7 @@ mplchart drawing primitives.
 Primitives are the drawing building blocks passed to `chart.plot(...)`:
 price renderers (`Candlesticks`, `OHLC`, `Renko`, ...), generic
 renderers that bind an indicator or expression via `@` or a positional
-argument (`LinePlot`, `AreaPlot`, `BarPlot`, `Bands`), overlays
+argument (`Line`, `Area`, `Bars`, `Bands`), overlays
 (`Markers`, `Stripes`, `VLine`, `HLine`), and layout controls
 (`Pane`). Plot order matters: primitives land on the current pane, and
 `Pane` creates a new one for the primitives that follow.
@@ -28,8 +28,8 @@ Default plotter primitive.
 
 Auto-plots an expression or indicator by dispatching each output to a
 renderer primitive: band results (`upperband`/`lowerband`) go to
-`Bands` wholesale; otherwise `*hist` columns go to `BarPlot` and
-everything else to `LinePlot`, column by column. Styling lives in the
+`Bands` wholesale; otherwise `*hist` columns go to `Bars` and
+everything else to `Line`, column by column. Styling lives in the
 renderers (keyed by series name). Used implicitly when plotting anything
 that is not already a `Primitive`; can also be applied explicitly to
 override the legend label.
@@ -306,10 +306,10 @@ close (interbar) instead of close vs open (intrabar). Default
 else `False`. Mirrors the flag of the same name on
 `Candlesticks`.
 
-### LinePlot
+### Line
 
 ```python
-LinePlot(
+Line(
     indicator=None,
     *,
     label: str | None = None,
@@ -353,15 +353,15 @@ through the `Pane` primitive.
 **Examples:**
 
 ```python
-LinePlot(SMA(50), style="dashdot", color="red")
-LinePlot(RSI(14), overbought=70, oversold=30)
-SMA(50) @ LinePlot(style="dashdot", color="red")
+Line(SMA(50), style="dashdot", color="red")
+Line(RSI(14), overbought=70, oversold=30)
+SMA(50) @ Line(style="dashdot", color="red")
 ```
 
-### AreaPlot
+### Area
 
 ```python
-AreaPlot(
+Area(
     indicator=None,
     *,
     color: str | None = None,
@@ -391,14 +391,14 @@ still names the plot for styling either way.
 **Examples:**
 
 ```python
-AreaPlot(SMA(50), color="red", alpha=0.5)
-SMA(50) @ AreaPlot(color="red", alpha=0.5)
+Area(SMA(50), color="red", alpha=0.5)
+SMA(50) @ Area(color="red", alpha=0.5)
 ```
 
-### BarPlot
+### Bars
 
 ```python
-BarPlot(
+Bars(
     indicator=None,
     *,
     color: str | None = None,
@@ -430,8 +430,8 @@ still names the plot for styling either way.
 **Examples:**
 
 ```python
-BarPlot(SMA(50), color="red", alpha=0.5)
-SMA(50) @ BarPlot(color="red", alpha=0.5)
+Bars(SMA(50), color="red", alpha=0.5)
+SMA(50) @ Bars(color="red", alpha=0.5)
 ```
 
 ### Bands
@@ -649,7 +649,7 @@ Create a new pane inline within a plot() call. Mirrors the
 Creation is sticky: the new pane becomes current and the primitives
 that follow land on it. Pane is the only pane creator — to draw a
 single primitive on an existing pane use the renderers' `pane=`
-parameter instead (e.g. `LinePlot(x, pane="main")`).
+parameter instead (e.g. `Line(x, pane="main")`).
 
 **Arguments:**
 
@@ -661,7 +661,7 @@ is inserted in the vertical stack
 **Examples:**
 
 ```python
-chart.plot(Pane("below", yticks=(30, 50, 70)), LinePlot(RSI(14)))
+chart.plot(Pane("below", yticks=(30, 50, 70)), Line(RSI(14)))
 ```
 
 ### VLine
@@ -721,8 +721,8 @@ before any indicator calculation takes place.
 Binding primitives take an indicator or expression as first argument;
 the `@` operator is an equivalent alternative:
 
-    LinePlot(SMA(50), style="dashed", color="blue")    # constructor form
-    SMA(50) @ LinePlot(style="dashed", color="blue")   # operator form
+    Line(SMA(50), style="dashed", color="blue")    # constructor form
+    SMA(50) @ Line(style="dashed", color="blue")   # operator form
 
 ### BindingPrimitive
 
@@ -734,3 +734,57 @@ Base class for primitives that bind to an indicator or expression via `@`.
 
 Provides the `indicator` attribute, a positional `indicator` argument,
 and the `@` binding operator.
+
+### LinePlot
+
+```python
+LinePlot(
+    indicator=None,
+    *,
+    label: str | None = None,
+    legend: bool = True,
+    pane: PaneTarget | None = None,
+    style: str | None = None,
+    marker: str | None = None,
+    width: float | None = None,
+    color: str | None = None,
+    alpha: float | None = None,
+    overbought: float | None = None,
+    oversold: float | None = None,
+)
+```
+
+Deprecated: use `Line` instead.
+
+### AreaPlot
+
+```python
+AreaPlot(
+    indicator=None,
+    *,
+    color: str | None = None,
+    alpha: float | None = None,
+    label: str | None = None,
+    legend: bool = True,
+    pane: PaneTarget | None = None,
+)
+```
+
+Deprecated: use `Area` instead.
+
+### BarPlot
+
+```python
+BarPlot(
+    indicator=None,
+    *,
+    color: str | None = None,
+    alpha: float | None = None,
+    width: float | None = None,
+    label: str | None = None,
+    legend: bool = True,
+    pane: PaneTarget | None = None,
+)
+```
+
+Deprecated: use `Bars` instead.

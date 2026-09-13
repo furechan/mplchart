@@ -19,8 +19,8 @@ class Primitive(ABC):
     Binding primitives take an indicator or expression as first argument;
     the ``@`` operator is an equivalent alternative::
 
-        LinePlot(SMA(50), style="dashed", color="blue")    # constructor form
-        SMA(50) @ LinePlot(style="dashed", color="blue")   # operator form
+        Line(SMA(50), style="dashed", color="blue")    # constructor form
+        SMA(50) @ Line(style="dashed", color="blue")   # operator form
     """
 
     __repr__ = short_repr

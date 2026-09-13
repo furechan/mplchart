@@ -46,10 +46,10 @@ For each item passed to `chart.plot()`:
 
 | Operator | Meaning |
 |---|---|
-| `SMA(50) @ LinePlot(...)` | bind indicator or expression to a primitive |
+| `SMA(50) @ Line(...)` | bind indicator or expression to a primitive |
 | `SMA(50) \| EMA(10)` | chain indicators left-to-right |
 | `prices.pipe(SMA(50))` | apply indicator to data directly (use pandas `.pipe` or call the indicator) |
 
 ## Primitives
 
-Regular primitives (`LinePlot`, `AreaPlot`, `BarPlot`, `AutoPlot`) use `chart.view.series_xy(data)` for x/y extraction. Irregular primitives (`ZigZag`, `Swings`, `Stripes`, `Markers`) compute their own sparse row indices and map them through `chart.view.slice(..., xcol=...)` or `chart.view.series_xy`. The data plane is the view and the figure plane is the canvas: primitives call `chart.view.*` (`eval`, `series_xy`, `slice`, `map_date`, `prices`) and `chart.canvas.*` (`get_axes`, `resolve_color`, `root_axes`, `main_axes`) directly — Chart wraps neither. Chart keeps only the fluent surface (`plot`, `pane`, `hline`, `vline`, `show`, `render`, `figure`, `title=`).
+Regular primitives (`Line`, `Area`, `Bars`, `AutoPlot`) use `chart.view.series_xy(data)` for x/y extraction. Irregular primitives (`ZigZag`, `Swings`, `Stripes`, `Markers`) compute their own sparse row indices and map them through `chart.view.slice(..., xcol=...)` or `chart.view.series_xy`. The data plane is the view and the figure plane is the canvas: primitives call `chart.view.*` (`eval`, `series_xy`, `slice`, `map_date`, `prices`) and `chart.canvas.*` (`get_axes`, `resolve_color`, `root_axes`, `main_axes`) directly — Chart wraps neither. Chart keeps only the fluent surface (`plot`, `pane`, `hline`, `vline`, `show`, `render`, `figure`, `title=`).

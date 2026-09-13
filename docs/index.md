@@ -19,7 +19,7 @@ pip install mplchart
 import yfinance as yf
 
 from mplchart.chart import Chart
-from mplchart.primitives import Candlesticks, Volume, Pane, LinePlot
+from mplchart.primitives import Candlesticks, Volume, Pane, Line
 from mplchart.indicators import SMA, RSI, MACD
 
 ticker = 'AAPL'
@@ -28,7 +28,7 @@ prices = yf.Ticker(ticker).history('5y')
 Chart(prices, title=ticker, max_bars=250, normalize=True).plot(
     Candlesticks(), Volume(), SMA(50), SMA(200),
     Pane("above", yticks=(30, 50, 70)),
-    LinePlot(RSI(14), overbought=70, oversold=30),
+    Line(RSI(14), overbought=70, oversold=30),
     Pane("below"),
     MACD(),
 ).show()

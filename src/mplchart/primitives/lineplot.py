@@ -1,5 +1,6 @@
-"""LinePlot primitive"""
+"""Line primitive"""
 
+import warnings
 import numpy as np
 
 from ..canvas import PaneTarget
@@ -7,7 +8,7 @@ from ..model.primitive import BindingPrimitive
 from ..utils import get_label
 
 
-class LinePlot(BindingPrimitive):
+class Line(BindingPrimitive):
     """
     Line Plot Primitive
 
@@ -34,9 +35,9 @@ class LinePlot(BindingPrimitive):
         oversold (float): level below which to shade a fill-between band
 
     Examples:
-        LinePlot(SMA(50), style="dashdot", color="red")
-        LinePlot(RSI(14), overbought=70, oversold=30)
-        SMA(50) @ LinePlot(style="dashdot", color="red")
+        Line(SMA(50), style="dashdot", color="red")
+        Line(RSI(14), overbought=70, oversold=30)
+        SMA(50) @ Line(style="dashdot", color="red")
     """
 
     def __init__(
@@ -78,7 +79,7 @@ class LinePlot(BindingPrimitive):
 
         if hasattr(result, "columns"):
             raise ValueError(
-                "LinePlot expects a single series; compose a single-output "
+                "Line expects a single series; compose a single-output "
                 "expression to select one column of a multi-output result."
             )
         series = result
@@ -111,3 +112,15 @@ class LinePlot(BindingPrimitive):
                     where=(yv >= self.overbought),
                     interpolate=True, alpha=0.5,
                 )
+
+
+class LinePlot(Line):
+    """Deprecated: use :class:`Line` instead."""
+
+    def __new__(cls, *args, **kwargs):
+        warnings.warn(
+            "LinePlot is deprecated; use Line instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return super().__new__(cls)

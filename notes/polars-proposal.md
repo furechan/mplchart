@@ -20,7 +20,7 @@ Since expression factories match the indicator classes in name and signature, `m
 
 ### 2. Primitives take expressions (the IntoExpr contract)
 
-Every data parameter of a primitive accepts `str | pl.Expr`, normalized via `pl.col()` — polars' own `IntoExpr` pattern. `LinePlot("close")`, `LinePlot(SMA(20))`, and `LinePlot(CLOSE.rolling_mean(20))` are the same call. `Candlesticks(open=..., high=..., low=..., close=...)` parameterized by expressions makes Heikin-Ashi, smoothed candles, or spread charts a *usage* rather than a feature.
+Every data parameter of a primitive accepts `str | pl.Expr`, normalized via `pl.col()` — polars' own `IntoExpr` pattern. `Line("close")`, `Line(SMA(20))`, and `Line(CLOSE.rolling_mean(20))` are the same call. `Candlesticks(open=..., high=..., low=..., close=...)` parameterized by expressions makes Heikin-Ashi, smoothed candles, or spread charts a *usage* rather than a feature.
 
 The user-facing distinction between expression and primitive dissolves; internally the boundary stays crisp: expressions compute columns, primitives own axes and artists.
 
@@ -45,7 +45,7 @@ Cautions: numba is the heaviest dependency in the stack (LLVM, import time, JIT 
 
 ### 5. Explicit styling over smart defaults
 
-No per-indicator plotting registry or metadata magic. Users who care about overbought levels care about *which* levels, so explicit `LinePlot(RSI(14), overbought=70, oversold=30)` and `pane(yticks=...)` win over pre-filled defaults. The one convention layer kept is AutoPlot's output contract: struct field names (`*hist` → bars, `upperband`/`lowerband`/`middleband` → band fill) drive render style — the expression declares its shape, the plotter renders the shape.
+No per-indicator plotting registry or metadata magic. Users who care about overbought levels care about *which* levels, so explicit `Line(RSI(14), overbought=70, oversold=30)` and `pane(yticks=...)` win over pre-filled defaults. The one convention layer kept is AutoPlot's output contract: struct field names (`*hist` → bars, `upperband`/`lowerband`/`middleband` → band fill) drive render style — the expression declares its shape, the plotter renders the shape.
 
 ## What mplchart is
 

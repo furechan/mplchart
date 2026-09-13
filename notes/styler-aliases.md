@@ -22,7 +22,7 @@ Five terms, no synonyms, each tied to a concrete step. **"Role" is retired here*
 
 | term | example | what it is |
 |---|---|---|
-| `name` | `"SMA(20)"`, `"sma-20"`, `"candle.up"` | what the caller passes: an indicator label or an already-canonical prefix. Not `label` — that word means legend text (`LinePlot(label=...)`, `get_label`). |
+| `name` | `"SMA(20)"`, `"sma-20"`, `"candle.up"` | what the caller passes: an indicator label or an already-canonical prefix. Not `label` — that word means legend text (`Line(label=...)`, `get_label`). |
 | `prefix` | `"sma"`, `"candle.up"` | `extract_prefix(name)` — everything before the facet. Dots do not split, so a prefix may carry a variant (`candle.up`). |
 | alias | `"sma"` → `"overlay"` | the style-owned rename applied to the prefix. A mapping, not a thing. |
 | `facet` | `"color"`, `"alpha"` | the trailing segment, never sanitized. |

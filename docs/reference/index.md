@@ -16,5 +16,5 @@ The pages in this section are generated from the source docstrings by `scripts/m
 
 - `prices` is a pandas or polars DataFrame with columns `open`, `high`, `low`, `close`, `volume` (lower case; use `Chart(normalize=True)` to normalize other layouts)
 - Indicators and expressions use upper case names: `SMA`, `EMA`, `MACD`
-- An indicator or expression is plotted directly (auto-plotted) or bound to a renderer primitive: `LinePlot(SMA(50))` or the equivalent operator form `SMA(50) @ LinePlot()`
+- An indicator or expression is plotted directly (auto-plotted) or bound to a renderer primitive: `Line(SMA(50))` or the equivalent operator form `SMA(50) @ Line()`
 - Indicators chain with the `|` operator: `EMA(20) | ROC(1)`

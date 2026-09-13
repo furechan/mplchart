@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import pytest
 
 from mplchart.chart import Chart
-from mplchart.primitives import BarPlot, Candlesticks, OHLC, PointFigure
+from mplchart.primitives import Bars, Candlesticks, OHLC, PointFigure
 from mplchart.samples import sample_prices
 
 
@@ -17,7 +17,7 @@ def test_collection_log_limits(backend, raw_dates, renderer):
         pytest.skip("PointFigure transforms require row-number dates")
     primitive = {
         "candles": Candlesticks(), "ohlc": OHLC(),
-        "bars": BarPlot("close"), "pnf": PointFigure(box_size=5),
+        "bars": Bars("close"), "pnf": PointFigure(box_size=5),
     }[renderer]
     prices = sample_prices(backend=backend).tail(500)
     chart = Chart(prices, max_bars=40, raw_dates=raw_dates, yaxis_log=True)

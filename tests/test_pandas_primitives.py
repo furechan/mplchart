@@ -16,7 +16,7 @@ from mplchart.chart import Chart  # noqa: E402
 from mplchart.samples import sample_prices  # noqa: E402
 from mplchart.primitives import (  # noqa: E402
     Candlesticks, HeikinAshi, OHLC, Volume,
-    LinePlot, AreaPlot, BarPlot,
+    Line, Area, Bars,
     Swings, ZigZag, Stripes, Markers,
     HLine, VLine, TrendLines,
 )
@@ -29,11 +29,11 @@ PRIMITIVES = [
     Candlesticks(),
     HeikinAshi(),
     OHLC(),
-    LinePlot("close"),
+    Line("close"),
     Volume(),
-    SMA(20) @ LinePlot(),
-    SMA(20) @ AreaPlot(),
-    SMA(20) @ BarPlot(),
+    SMA(20) @ Line(),
+    SMA(20) @ Area(),
+    SMA(20) @ Bars(),
     Swings(),
     ZigZag(),
     ZigZag(color="purple"),

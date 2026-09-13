@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 from mplchart.chart import Chart
 from mplchart.samples import sample_prices
-from mplchart.primitives import LinePlot, BarPlot, AreaPlot
+from mplchart.primitives import Line, Bars, Area
 
 BACKENDS = ["pandas", "polars"]
 
@@ -15,13 +15,13 @@ def test_string_indicator_plots_price_column(backend):
     pytest.importorskip(backend)
     prices = sample_prices(freq="daily", backend=backend)
     chart = Chart(prices, max_bars=100)
-    chart.plot(LinePlot("close"), BarPlot("volume"), AreaPlot("open"))
+    chart.plot(Line("close"), Bars("volume"), Area("open"))
     assert chart.canvas.count_axes() > 0
     plt.close()
 
 
 def test_string_indicator_stays_a_string():
-    lp = LinePlot("close")
+    lp = Line("close")
     assert lp.indicator == "close"
 
 
@@ -41,7 +41,7 @@ def test_unknown_column_raises():
     prices = sample_prices(freq="daily", backend="polars")
     chart = Chart(prices, max_bars=100)
     with pytest.raises(Exception, match="nope"):
-        chart.plot(LinePlot("nope"))
+        chart.plot(Line("nope"))
     plt.close()
 
 
@@ -50,7 +50,7 @@ def test_bare_series_primitive_requires_indicator():
     prices = sample_prices(freq="daily", backend="polars")
     chart = Chart(prices, max_bars=100)
     with pytest.raises(ValueError, match="requires an indicator"):
-        chart.plot(LinePlot())
+        chart.plot(Line())
     plt.close()
 
 
@@ -61,7 +61,7 @@ def test_multi_output_requires_composition():
     prices = sample_prices(freq="daily", backend="polars")
     chart = Chart(prices, max_bars=100)
     with pytest.raises(ValueError, match="single-output expression"):
-        chart.plot(LinePlot(MACD()))
+        chart.plot(Line(MACD()))
     plt.close()
 
 
@@ -71,6 +71,6 @@ def test_struct_field_selects_one_output():
 
     prices = sample_prices(freq="daily", backend="polars")
     chart = Chart(prices, max_bars=100)
-    chart.plot(LinePlot(MACD().struct.field("macdhist")))
+    chart.plot(Line(MACD().struct.field("macdhist")))
     assert chart.canvas.count_axes() > 0
     plt.close()

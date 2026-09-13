@@ -174,7 +174,7 @@ class Chart:
         Creation is sticky: the new pane becomes current and subsequent
         plots land on it. To draw a single primitive on an existing pane
         use the renderers' ``pane=`` parameter instead (e.g.
-        ``LinePlot(x, pane="main")``).
+        ``Line(x, pane="main")``).
 
         Args:
             position: "below" (default) or "above" — where the new pane is

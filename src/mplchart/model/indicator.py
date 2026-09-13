@@ -20,7 +20,7 @@ class Indicator(ABC):
     chain indicators. Apply an indicator to data with ``indicator(prices)``
     or ``prices.pipe(indicator)``::
 
-        LinePlot(RSI(14), overbought=70)   # bind to a primitive
+        Line(RSI(14), overbought=70)   # bind to a primitive
         SMA(50) | EMA(20)                  # chain: apply SMA then EMA
         prices.pipe(SMA(50))               # apply indicator to data
     """
