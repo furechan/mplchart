@@ -368,14 +368,3 @@ def test_indicator_requires_ohlc():
     with pytest.raises(ValueError, match="OHLC columns"):
         chart.plot(Candlesticks(lambda prices: prices["close"]))
     plt.close("all")
-
-
-def test_color_scheme_deprecated():
-    # color_scheme is deprecated and ignored — warn at Chart, default look renders
-    with pytest.warns(DeprecationWarning, match="color_scheme is deprecated"):
-        chart = Chart(make_prices(), figsize=(4, 3), color_scheme={"candle.up": "green"})
-    chart.plot(Candlesticks())
-    wicks, poly = chart.canvas.main_axes().collections
-    textcolor = rgba(plt.rcParams["text.color"])
-    assert tuple(poly.get_facecolor()[1]) == textcolor  # scheme ignored
-    plt.close(chart.figure)

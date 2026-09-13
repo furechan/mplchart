@@ -177,7 +177,7 @@ class Canvas:
     @staticmethod
     def valid_target(target):
         """whether the target name is a valid selective target"""
-        return target in ("main", "same", "samex", "twinx")
+        return target in ("main", "same", "twinx")
 
     def root_axes(self):
         """Root (background) axes — always present."""
@@ -208,7 +208,7 @@ class Canvas:
         the two apart (see Volume).
 
         Args:
-            target: one of "main", "same" ("samex" is an alias), "twinx".
+            target: one of "main", "same", "twinx".
                 Defaults to "same" (the current pane).
         """
         if target is None:
@@ -230,7 +230,7 @@ class Canvas:
         if target == "main":
             return axes[0]
 
-        if target in ("same", "samex"):
+        if target == "same":
             return axes[-1]
 
         # twinx: an empty current pane is its own overlay

@@ -1,7 +1,6 @@
 """mplchart utils"""
 
 import sys
-import warnings
 
 import numpy as np
 
@@ -47,49 +46,6 @@ def is_series_data(item) -> bool:
     view's job — see ``view.eval``.
     """
     return not callable(item) and hasattr(item, "__array__")
-
-
-def apply_indicator(prices, indicator):
-    """Apply an indicator or expression to prices.
-
-    Deprecated: evaluation lives on the data view — use ``view.eval(item)``
-    (see ``mplchart.dataview``). Kept self-contained for compatibility since
-    it accepts any frame, not just chartable prices.
-
-    - str: column name — plain native column access (``prices[name]``);
-      derived prices are indicators (e.g. ``TYPPRICE()``), not string aliases.
-    - Polars Expr: evaluates against ``prices`` and returns a Series. If the
-      Series is Struct-typed (e.g. ``pl.struct(MACD())``), it is unnested
-      into a multi-column DataFrame.
-    - Pandas Expression: evaluates via ``_eval_expression`` and returns a Series.
-    - Callable: returns ``indicator(prices)``.
-    """
-    warnings.warn(
-        "apply_indicator() is deprecated, use view.eval() instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    if isinstance(indicator, str):
-        return prices[indicator]
-
-    if is_polars_expr(indicator):
-        import polars as pl
-        series = prices.select(indicator).to_series()
-        if isinstance(series.dtype, pl.Struct):
-            return series.struct.unnest()
-        return series
-
-    if is_pandas_expr(indicator):
-        return indicator._eval_expression(prices)
-
-    if callable(indicator):
-        return indicator(prices)
-
-    raise TypeError(
-        f"Cannot apply {type(indicator).__name__!r} to prices: "
-        f"expected a column name, polars Expr, pandas Expression, or callable indicator."
-    )
-
 
 
 def normalize_prices(prices):

@@ -1,7 +1,6 @@
 """Primitive base classes — backend-agnostic."""
 
 import copy
-import warnings
 
 from abc import ABC, abstractmethod
 
@@ -68,13 +67,3 @@ class BindingPrimitive(Primitive):
         if not is_indicator_like(other):
             return NotImplemented
         return self.clone(indicator=other)
-
-    def __ror__(self, indicator):
-        if not callable(indicator):
-            return NotImplemented
-        warnings.warn(
-            "Pass the indicator to the primitive constructor (or bind with @).",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.clone(indicator=indicator)

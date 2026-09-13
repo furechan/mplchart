@@ -17,8 +17,6 @@ Color kwargs bypass the color settings entirely (atomic schemes); explicit
 ``alpha=``/``hollow=``/``use_prev_close=`` kwargs win over their settings.
 """
 
-import warnings
-
 import numpy as np
 
 import matplotlib.colors as mcolors
@@ -86,9 +84,6 @@ class Candlesticks(BindingPrimitive):
             (``None``) defers to the ``candle.use_prev_close`` setting,
             else ``False``. Meaningless for a mono palette — ``True``
             with an explicit ``color=`` raises at plot time.
-        use_bars (bool): Deprecated and ignored — the legacy bar renderer was
-            removed (sample code preserved in
-            ``playground/prototypes/candlesticks-as-bars.ipynb``).
     """
 
     def __init__(
@@ -103,16 +98,7 @@ class Candlesticks(BindingPrimitive):
         colordn: str | None = None,
         hollow: bool | None = None,
         use_prev_close: bool | None = None,
-        use_bars: bool = False,
     ):
-        if use_bars:
-            warnings.warn(
-                "use_bars is deprecated and ignored — the legacy bar renderer "
-                "was removed",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-
         if color and (colorup or colordn):
             raise ValueError("Cannot pass color together with colorup/colordn!")
 

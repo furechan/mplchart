@@ -43,17 +43,6 @@ def test_get_view_rejects_unsupported():
         get_view({"close": [1, 2, 3]})
 
 
-def test_chart_mapper_deprecated_alias():
-    pytest.importorskip("pandas")
-    from mplchart.chart import Chart
-    from mplchart.samples import sample_prices
-
-    chart = Chart(sample_prices(freq="daily", backend="pandas"), max_bars=50)
-    with pytest.warns(DeprecationWarning, match="chart.view"):
-        assert chart.mapper is chart.view
-    plt.close()
-
-
 @pytest.mark.parametrize("backend", BACKENDS)
 def test_view_public_interface(backend):
     view = make_view(backend, max_bars=20)
@@ -176,15 +165,6 @@ def test_eval_backend_mismatch_raises():
     view = make_view("pandas")
     with pytest.raises(TypeError, match="cannot evaluate"):
         view.eval(pl.col("close") * 2)
-
-
-def test_apply_indicator_deprecated_alias():
-    from mplchart.utils import apply_indicator
-
-    prices = make_prices("pandas")
-    with pytest.warns(DeprecationWarning, match="view.eval"):
-        result = apply_indicator(prices, "close")
-    assert len(result) == len(prices)
 
 
 # --- slice ---

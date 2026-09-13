@@ -62,7 +62,6 @@ Candlesticks(
     colordn: str | None = None,
     hollow: bool | None = None,
     use_prev_close: bool | None = None,
-    use_bars: bool = False,
 )
 ```
 
@@ -122,9 +121,6 @@ close (interbar) instead of close vs open (intrabar). Default
 (`None`) defers to the `candle.use_prev_close` setting,
 else `False`. Meaningless for a mono palette — `True`
 with an explicit `color=` raises at plot time.
-- **use_bars** (bool): Deprecated and ignored — the legacy bar renderer was
-removed (sample code preserved in
-`playground/prototypes/candlesticks-as-bars.ipynb`).
 
 ### HeikinAshi
 

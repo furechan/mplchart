@@ -28,9 +28,7 @@ OUTPUT_DIR = Path(__file__).parent.parent / "docs" / "reference"
 # public members to leave out of the reference (qualified within their page)
 EXCLUDE = {
     "Chart.plot_indicator",
-    "Chart.plot_vline",
     "Chart.view",
-    "Chart.mapper",
     "Chart.init_prices",
     "Chart.get_view",
 }

@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.0.53
+- Removed deprecated `Chart.mapper`, `Chart.plot_vline()`, `Chart(color_scheme=...)`, `Candlesticks(use_bars=...)`, `utils.apply_indicator()`, and indicator-to-primitive `|` binding; use `chart.view`, `chart.vline()`, `style=`, `Candlesticks()`, `view.eval()`, and constructor or `@` binding
+- Removed the `samex` pane target alias; use `same`
+
 ## 0.0.52
 - Fixed candlestick, OHLC, bar, and Point & Figure autoscaling on logarithmic axes
 - Added `yaxis_log=True` on `Chart` and `Canvas` for a logarithmic main pane

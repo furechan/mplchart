@@ -27,7 +27,6 @@ Chart(
     style=None,
     yaxis_right=None,
     yaxis_log=False,
-    color_scheme=(),
 )
 ```
 
@@ -75,8 +74,6 @@ stylesheet) keep matplotlib's left convention.
 pane. Defaults to False. Additional panes and twin overlays
 retain their own linear scales. Logarithmic axes require
 positive values.
-- **color_scheme**: Deprecated and ignored — use `style=` with settings
-(e.g. `Styler(settings={"sma.color": "red"})`).
 
 **Examples:**
 

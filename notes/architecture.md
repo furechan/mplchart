@@ -16,7 +16,7 @@ Discussion (not decided): [polars-proposal.md](polars-proposal.md) — exploring
 | `indicators.py` | Pandas-only indicator classes (subclass `Indicator`) |
 | `library.py` | Pandas-only calc functions called by indicators |
 | `expressions/` | Polars-only expression factories returning `pl.Expr` (multi-output expressions return a `pl.struct(...)` Expr) |
-| `utils.py` | Backend detection, `is_indicator_like`, `col_to_numpy`, `normalize_prices`, etc. (`apply_indicator` deprecated — use `view.eval`) |
+| `utils.py` | Backend detection, `is_indicator_like`, `col_to_numpy`, `normalize_prices`, etc. |
 | `layout.py` | Matplotlib figure/axes layout helpers |
 | `canvas.py` | `Canvas` — presentation plane: figure, title, styled panes, pane state, show/render; owns the `Styler` and delegates color resolution to it |
 | `styles/` | Style machinery — runtime `Styler` (color-scheme lookup, per-pane color cycles, prop-cycle sentinels, scoped rc context); target design in [styler-sketch.md](styler-sketch.md) |

@@ -12,18 +12,6 @@ from .utils import normalize_prices, check_prices
 from .primitives.autoplot import AutoPlot
 
 
-"""
-How primitives/indicators are plotted
-1) try apply_to_chart. No processing or no reindexing yet
-2) call indicator / process data
-3) call slice / map index and slice data to charting view
-3) replace indicator with wrapper if applicable
-4) select/create axes
-5) try indicator plot_result if applicable
-6) otherwise plot series as lines
-"""
-
-
 class Chart:
     """Main charting class for creating financial charts with technical indicators.
 
@@ -68,8 +56,6 @@ class Chart:
             pane. Defaults to False. Additional panes and twin overlays
             retain their own linear scales. Logarithmic axes require
             positive values.
-        color_scheme: Deprecated and ignored — use ``style=`` with settings
-            (e.g. ``Styler(settings={"sma.color": "red"})``).
 
     Examples:
         chart = Chart(prices, title="AAPL", max_bars=252)
@@ -95,16 +81,7 @@ class Chart:
         style=None,
         yaxis_right=None,
         yaxis_log=False,
-        color_scheme=(),
     ):
-        if color_scheme:
-            warnings.warn(
-                "color_scheme is deprecated and ignored — use style= with "
-                "settings (e.g. Styler(settings={'sma.color': 'red'}))",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-
         self.start = start
         self.end = end
         self.max_bars = max_bars
@@ -129,16 +106,6 @@ class Chart:
     def view(self):
         """The chart data view — created lazily on first access (see ``get_view``)."""
         return self.get_view()
-
-    @property
-    def mapper(self):
-        """Deprecated alias for the data view, kept for compatibility."""
-        warnings.warn(
-            "chart.mapper is deprecated, use chart.view instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.view
 
     def init_prices(self, prices, normalize: bool = False):
         """Prepare and store the chart price data.
@@ -297,15 +264,6 @@ class Chart:
 
         self.plot_indicator(VLine(date, color=color, linestyle=linestyle))
         return self
-
-    def plot_vline(self, date):
-        """Legacy alias for vline(), kept for compatibility. Use vline() instead."""
-        warnings.warn(
-            "plot_vline() is a legacy alias, use vline() instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.vline(date)
 
     def hline(self, value, *, color=None, linestyle=None):
         """Draw a horizontal line on the current pane at the given value.

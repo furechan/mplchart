@@ -86,13 +86,3 @@ def test_hline_method(freq):
     chart.plot(Candlesticks()).hline(25, color="red")
     assert chart.canvas.count_axes() > 0
     plt.close()
-
-
-def test_plot_vline_deprecated():
-    prices = sample_prices(backend="pandas")
-    date = prices.index[len(prices) // 2]
-    chart = Chart(prices, max_bars=100)
-    chart.plot(Candlesticks())
-    with pytest.warns(DeprecationWarning, match="plot_vline"):
-        chart.plot_vline(date)
-    plt.close()
