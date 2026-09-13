@@ -82,4 +82,7 @@ markers = [
 default-groups = ["dev", "docs"]
 
 [tool.ruff.lint.per-file-ignores]
-"*.ipynb" = ["F401", "F811"]
+"*.ipynb" = [
+    "F401", # Allow unused imports in notebook setup cells.
+    "F811", # Allow redefinitions across notebook cells.
+]
