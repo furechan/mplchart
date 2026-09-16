@@ -38,11 +38,13 @@ prices = yf.Ticker(ticker).history('5y')
 Chart(prices, title=ticker, max_bars=250, normalize=True).plot(
     Candlesticks(), Volume(), SMA(50), SMA(200),
     Pane("above", yticks=(30, 50, 70)),
-    Line(RSI(14), overbought=70, oversold=30),
+    RSI(14) @ Line(overbought=70, oversold=30),
     Pane("below"),
     MACD(),
 ).show()
 ```
+
+`SMA` and `MACD` use default rendering. The `@` operator binds `RSI(14)` to a `Line` renderer to customize its display; `Line(RSI(14), ...)` is the equivalent constructor form.
 
 
 ## Plotting indicators
