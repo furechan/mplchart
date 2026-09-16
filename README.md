@@ -263,6 +263,37 @@ indicators = [
 Chart(prices).plot(indicators).show()
 ```
 
+## Third-party indicators
+
+[mintalib](https://github.com/furechan/mintalib) provides additional technical analysis indicators. Pass them directly to `plot()` for default rendering. Its imports follow the same backend convention as mplchart: `indicators` for pandas and `expressions` for polars. Install mintalib separately, then choose the import matching your prices DataFrame.
+
+For pandas data:
+
+```python
+from mintalib.indicators import CCI
+```
+
+For polars data:
+
+```python
+from mintalib.expressions import CCI
+```
+
+With `prices` in the corresponding backend, the chart code is the same. Draw CCI in its own pane below the price chart:
+
+```python
+from mplchart.chart import Chart
+from mplchart.primitives import Candlesticks
+
+Chart(prices, max_bars=250).plot(
+    Candlesticks(),
+).pane("below").plot(
+    CCI(20),
+).show()
+```
+
+Calculations are deferred until plotting and use default rendering. Optional renderer binding works too: `Line(CCI(20), color="red")` or `CCI(20) @ Line(color="red")`.
+
 ## Examples
 
 Example notebooks live in the `examples` folder and render as tutorials on the documentation site at [furechan.github.io/mplchart](https://furechan.github.io/mplchart/).
@@ -300,10 +331,12 @@ Optional extras:
 
 
 ## Related projects
+
 - [mplfinance](https://pypi.org/project/mplfinance/) - Matplotlib utilities for the visualization, and visual analysis, of financial data
 - [matplotlib](https://github.com/matplotlib/matplotlib) - Matplotlib: plotting with Python
 - [morethemes](https://github.com/y-sunflower/morethemes) - More themes for matplotlib
 - [pandas](https://github.com/pandas-dev/pandas) - Flexible and powerful data analysis / manipulation library for Python
 - [polars](https://github.com/pola-rs/polars) - Fast DataFrame library for Python
 - [ta-lib](https://github.com/TA-Lib/ta-lib-python) - Python wrapper for TA-Lib
+- [mintalib](https://github.com/furechan/mintalib) - Technical analysis indicators for Python
 - [yfinance](https://github.com/ranaroussi/yfinance) - Download market data from Yahoo! Finance's API
