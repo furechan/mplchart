@@ -12,15 +12,15 @@ class Line(BindingPrimitive):
     """
     Line Plot Primitive
 
-    Plot any indicator or expression as a line plot. Use ``@`` to bind.
+    Plot a column from prices, an indicator, or an expression as a line plot.
+    Pass the source to the constructor, or bind with ``@``.
 
     Args:
-        indicator: indicator, expression, or already-computed series data
-            (full-length prices-aligned; pandas date-indexed data aligns by
-            date). ``@`` binds indicators/expressions only — pass data via
-            the constructor.
-        label (str): legend label override. When None, derived from the indicator
-            (the series name for data) — also the styling key for color settings.
+        indicator: column name in prices, or an indicator/expression evaluated
+            from prices during plotting. Pandas expressions require the
+            constructor form; indicators and polars expressions also support ``@``.
+        label (str): legend label override. When None, derived from the column,
+            indicator, or expression — also the styling key for color settings.
         style (str): line style like 'solid', 'dashed', 'dotted', 'dashdot', 'marker'
         marker (str): marker character like '.' or 'o'
         width (float): line width override
@@ -35,6 +35,7 @@ class Line(BindingPrimitive):
         oversold (float): level below which to shade a fill-between band
 
     Examples:
+        Line("sma-20", color="red")  # column already in prices
         Line(SMA(50), style="dashdot", color="red")
         Line(RSI(14), overbought=70, oversold=30)
         SMA(50) @ Line(style="dashdot", color="red")

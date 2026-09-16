@@ -16,9 +16,12 @@ class Primitive(ABC):
     calculation pipeline. They implement ``apply_to_chart`` which is invoked
     before any indicator calculation takes place.
 
-    Binding primitives take an indicator or expression as first argument;
-    the ``@`` operator is an equivalent alternative::
+    Binding primitives take a column name in prices, an indicator, or an
+    expression as first argument. Indicators and expressions are evaluated
+    from prices during plotting. The ``@`` operator is an alternative binding
+    syntax (except for pandas expressions, which require the constructor)::
 
+        Line("sma-50", color="blue")                  # existing column
         Line(SMA(50), style="dashed", color="blue")    # constructor form
         SMA(50) @ Line(style="dashed", color="blue")   # operator form
     """

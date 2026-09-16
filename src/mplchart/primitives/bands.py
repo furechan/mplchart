@@ -13,8 +13,8 @@ class Bands(BindingPrimitive):
     auto-plotted BBANDS/KELTNER/DONCHIAN.
 
     Args:
-        indicator: indicator, expression, or already-computed frame with the
-            band columns.
+        indicator: indicator or expression evaluated from prices to produce
+            the band columns.
         upper (str): name of the upper-band column. Defaults to "upperband".
         middle (str): name of the middle-band column, drawn when present.
             Defaults to "middleband".

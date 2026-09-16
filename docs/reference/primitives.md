@@ -327,16 +327,16 @@ Line(
 
 Line Plot Primitive
 
-Plot any indicator or expression as a line plot. Use `@` to bind.
+Plot a column from prices, an indicator, or an expression as a line plot.
+Pass the source to the constructor, or bind with `@`.
 
 **Arguments:**
 
-- **indicator**: indicator, expression, or already-computed series data
-(full-length prices-aligned; pandas date-indexed data aligns by
-date). `@` binds indicators/expressions only — pass data via
-the constructor.
-- **label** (str): legend label override. When None, derived from the indicator
-(the series name for data) — also the styling key for color settings.
+- **indicator**: column name in prices, or an indicator/expression evaluated
+from prices during plotting. Pandas expressions require the
+constructor form; indicators and polars expressions also support `@`.
+- **label** (str): legend label override. When None, derived from the column,
+indicator, or expression — also the styling key for color settings.
 - **style** (str): line style like 'solid', 'dashed', 'dotted', 'dashdot', 'marker'
 - **marker** (str): marker character like '.' or 'o'
 - **width** (float): line width override
@@ -353,6 +353,7 @@ through the `Pane` primitive.
 **Examples:**
 
 ```python
+Line("sma-20", color="red")  # column already in prices
 Line(SMA(50), style="dashdot", color="red")
 Line(RSI(14), overbought=70, oversold=30)
 SMA(50) @ Line(style="dashdot", color="red")
@@ -374,14 +375,14 @@ Area(
 
 Area Plot Primitive
 
-Plot any indicator or expression as an area plot. Use `@` to bind.
+Plot a column from prices, an indicator, or an expression as an area plot.
+Pass the source to the constructor, or bind with `@`.
 
 **Arguments:**
 
-- **indicator**: indicator, expression, or already-computed series data
-(full-length prices-aligned; pandas date-indexed data aligns by
-date). `@` binds indicators/expressions only — pass data via
-the constructor.
+- **indicator**: column name in prices, or an indicator/expression evaluated
+from prices during plotting. Pandas expressions require the
+constructor form; indicators and polars expressions also support `@`.
 - **color** (str): color name or value
 - **alpha** (float): opacity value between 0.0 and 1.0
 - **legend** (bool): include in the legend. Defaults to True — the label
@@ -391,6 +392,7 @@ still names the plot for styling either way.
 **Examples:**
 
 ```python
+Area("sma-20", color="red")  # column already in prices
 Area(SMA(50), color="red", alpha=0.5)
 SMA(50) @ Area(color="red", alpha=0.5)
 ```
@@ -412,14 +414,14 @@ Bars(
 
 Bar Plot Primitive
 
-Plot any indicator or expression as a bar plot. Use `@` to bind.
+Plot a column from prices, an indicator, or an expression as a bar plot.
+Pass the source to the constructor, or bind with `@`.
 
 **Arguments:**
 
-- **indicator**: indicator, expression, or already-computed series data
-(full-length prices-aligned; pandas date-indexed data aligns by
-date). `@` binds indicators/expressions only — pass data via
-the constructor.
+- **indicator**: column name in prices, or an indicator/expression evaluated
+from prices during plotting. Pandas expressions require the
+constructor form; indicators and polars expressions also support `@`.
 - **color** (str): color name or value
 - **alpha** (float): opacity value between 0.0 and 1.0
 - **legend** (bool): include in the legend. Defaults to True — the label
@@ -430,6 +432,7 @@ still names the plot for styling either way.
 **Examples:**
 
 ```python
+Bars("sma-20", color="red")  # column already in prices
 Bars(SMA(50), color="red", alpha=0.5)
 SMA(50) @ Bars(color="red", alpha=0.5)
 ```
@@ -458,8 +461,8 @@ auto-plotted BBANDS/KELTNER/DONCHIAN.
 
 **Arguments:**
 
-- **indicator**: indicator, expression, or already-computed frame with the
-band columns.
+- **indicator**: indicator or expression evaluated from prices to produce
+the band columns.
 - **upper** (str): name of the upper-band column. Defaults to "upperband".
 - **middle** (str): name of the middle-band column, drawn when present.
 Defaults to "middleband".
@@ -718,9 +721,12 @@ Primitives act directly on the chart without going through the indicator
 calculation pipeline. They implement `apply_to_chart` which is invoked
 before any indicator calculation takes place.
 
-Binding primitives take an indicator or expression as first argument;
-the `@` operator is an equivalent alternative:
+Binding primitives take a column name in prices, an indicator, or an
+expression as first argument. Indicators and expressions are evaluated
+from prices during plotting. The `@` operator is an alternative binding
+syntax (except for pandas expressions, which require the constructor):
 
+    Line("sma-50", color="blue")                  # existing column
     Line(SMA(50), style="dashed", color="blue")    # constructor form
     SMA(50) @ Line(style="dashed", color="blue")   # operator form
 

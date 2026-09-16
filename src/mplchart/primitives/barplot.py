@@ -10,13 +10,13 @@ class Bars(BindingPrimitive):
     """
     Bar Plot Primitive
 
-    Plot any indicator or expression as a bar plot. Use ``@`` to bind.
+    Plot a column from prices, an indicator, or an expression as a bar plot.
+    Pass the source to the constructor, or bind with ``@``.
 
     Args:
-        indicator: indicator, expression, or already-computed series data
-            (full-length prices-aligned; pandas date-indexed data aligns by
-            date). ``@`` binds indicators/expressions only — pass data via
-            the constructor.
+        indicator: column name in prices, or an indicator/expression evaluated
+            from prices during plotting. Pandas expressions require the
+            constructor form; indicators and polars expressions also support ``@``.
         color (str): color name or value
         alpha (float): opacity value between 0.0 and 1.0
         legend (bool): include in the legend. Defaults to True — the label
@@ -25,6 +25,7 @@ class Bars(BindingPrimitive):
         label (str): plot label
 
     Examples:
+        Bars("sma-20", color="red")  # column already in prices
         Bars(SMA(50), color="red", alpha=0.5)
         SMA(50) @ Bars(color="red", alpha=0.5)
     """

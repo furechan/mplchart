@@ -10,9 +10,9 @@ Technical analysis indicators — pandas pipeline only.
 
 An indicator instance is a callable applied to a prices DataFrame:
 `SMA(50)(prices)`. In charts, indicators are passed to `chart.plot(...)`
-directly (auto-plotted) or bound to a renderer primitive via `@`, as in
-`SMA(50) @ Line()`. For the polars pipeline, use the equivalent
-factories in `mplchart.expressions`.
+directly (auto-plotted) or bound with `Line(SMA(50))` or
+`SMA(50) @ Line()`. Both binding forms defer calculation until plotting.
+For the polars pipeline, use the equivalent factories in `mplchart.expressions`.
 
 ---
 

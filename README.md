@@ -45,6 +45,36 @@ Chart(prices, title=ticker, max_bars=250, normalize=True).plot(
 ```
 
 
+## Columns and deferred calculations
+
+Keep chart data in `prices`. Pass column names, indicators, or expressions directly to `plot()` for default rendering; renderer primitives are optional. There are two ways to supply values:
+
+- **Existing columns:** `chart.plot("sma-20")` reads a column already in `prices`. Compute it beforehand with your own code or any indicator library.
+- **Deferred calculations:** `chart.plot(SMA(20))` computes the indicator from `prices` during plotting. With polars data, use the factories in `mplchart.expressions` instead of `mplchart.indicators`.
+
+For example, with pandas data:
+
+```python
+from mplchart.chart import Chart
+from mplchart.samples import sample_prices
+from mplchart.primitives import Candlesticks
+
+prices = sample_prices(backend="pandas")
+prices["sma-20"] = prices["close"].rolling(20).mean()
+
+Chart(prices, max_bars=250).plot(
+    Candlesticks(),
+    "sma-20",
+).show()
+```
+
+For deferred calculation, replace `"sma-20"` with `SMA(20)`, importing `SMA` from `mplchart.indicators`. Both use default rendering: a line for a single column or moving average.
+
+To customize the display, optionally use a renderer such as `Line`, `Area`, or `Bars`: `Line("sma-20", color="red")` styles an existing column, while `Line(SMA(20), color="red")` styles a deferred calculation.
+
+`SMA(20) @ Line(color="red")` is an alternative to `Line(SMA(20), color="red")`; both defer calculation until plotting. Parenthesize composed expressions before binding, for example `(EMA(20) - EMA(50)) @ Area()` with polars expressions. Pandas expressions (`pd.col(...)` or `.as_expr()`) require constructor binding because pandas handles `@` itself.
+
+
 ## Styles
 
 Charts are styled via the `style=` option — a builtin style, any matplotlib stylesheet name, or a custom style dict. Styles are total: ambient matplotlib settings never affect a chart.
@@ -112,9 +142,9 @@ The main drawing primitives are :
 - `OHLC` for open, high, low, close bar plots
 - `Volume` for volume bar plots
 - `Pane` to open a new pane (above or below) for the primitives that follow
-- `Line` draw an indicator as line plot
-- `Area` draw an indicator as area plot
-- `Bars` draw an indicator as bar plot
+- `Line` draw a column, indicator, or expression as a line plot
+- `Area` draw a column, indicator, or expression as a area plot
+- `Bars` draw a column, indicator, or expression as a bar plot
 - `Bands` draw upper/lower(/middle) bands with a translucent fill
 - `Stripes` to shade background areas where a condition is active
 - `Markers` to mark signal crossings with symbols

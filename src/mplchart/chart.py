@@ -221,18 +221,25 @@ class Chart:
         raise ValueError(f"Indicator {indicator!r} not callable")
 
     def plot(self, *args):
-        """Plot one or more indicators onto the chart.
+        """Plot columns, indicators, expressions, or primitives onto the chart.
+
+        Column names select data from prices; indicators and expressions are
+        evaluated from prices during plotting. These inputs use default rendering
+        (a line for a single series). Renderer primitives are optional: use
+        ``Line``, ``Area``, or ``Bars`` to customize the display.
 
         Args:
-            *args: Any number of indicators or lists of indicators. Indicators may be
-                ``Indicator`` instances, ``Primitive`` instances, or any callable
-                that accepts a prices DataFrame. Use ``pane()`` or the ``Pane``
+            *args: Column names, indicators, expressions, primitives, or callables
+                that accept a prices DataFrame; lists of these are also accepted. Use ``pane()`` or the ``Pane``
                 primitive to select or create the target pane.
 
         Returns:
             Chart: ``self``, for method chaining.
 
         Examples:
+            chart.plot("sma-50")  # existing column, default rendering
+            chart.plot(SMA(50))  # deferred calculation, default rendering
+            chart.plot(Line("sma-50", color="red"))  # optional customization
             chart.plot(Candlesticks(), Volume())
             chart.pane("above").plot(RSI(14))
             chart.plot(Pane("below"), MACD())

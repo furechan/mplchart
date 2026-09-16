@@ -12,6 +12,31 @@ pip install mplchart[pandas]     # or mplchart[polars], or mplchart[all]
 
 Data conventions are also shared: columns `open`, `high`, `low`, `close`, `volume` in lower case, and a datetime column named `date` or `datetime` (or a datetime index for pandas). Use `Chart(..., normalize=True)` for data with different capitalization, like yfinance output.
 
+## Existing columns or deferred calculations
+
+On either backend, `chart.plot("sma-20")` reads the `sma-20` column from `prices`. Your data pipeline can compute that column before creating the chart:
+
+With pandas:
+
+```python
+prices["sma-20"] = prices["close"].rolling(20).mean()
+
+```
+
+With polars:
+
+```python
+import polars as pl
+
+prices = prices.with_columns(pl.col("close").rolling_mean(20).alias("sma-20"))
+```
+
+In either case, plot with `Chart(prices).plot(Candlesticks(), "sma-20")`, importing the chart and primitives as usual.
+
+Alternatively, `chart.plot(SMA(20))` defers calculation from `prices` until plotting. Both column names and calculations use default rendering, with a line for a single column or moving average. Renderer primitives are optional: use `Line("sma-20", color="red")` or `Line(SMA(20), color="red")` to customize the display. `SMA(20) @ Line()` is equivalent to `Line(SMA(20))`; the binding syntax does not determine when calculation happens. Both paths use the same renderers. The backend-specific indicator and expression systems below are conveniences for deferred calculations.
+
+Pandas expressions (`pd.col(...)` or `.as_expr()`) must use constructor binding, such as `Stripes(RSI(14).as_expr() < 30)`: pandas captures `@` itself. Polars expressions support both binding forms, including composed expressions such as `(EMA(20) - EMA(50)) @ Area()`.
+
 ## What differs: computing values
 
 The one real difference between the backends is how *computed series* — moving averages, oscillators, custom formulas — are expressed:
