@@ -45,34 +45,27 @@ Chart(prices, title=ticker, max_bars=250, normalize=True).plot(
 ```
 
 
-## Columns and deferred calculations
+## Plotting indicators
 
-Keep chart data in `prices`. Pass column names, indicators, or expressions directly to `plot()` for default rendering; renderer primitives are optional. There are two ways to supply values:
-
-- **Existing columns:** `chart.plot("sma-20")` reads a column already in `prices`. Compute it beforehand with your own code or any indicator library.
-- **Deferred calculations:** `chart.plot(SMA(20))` computes the indicator from `prices` during plotting. With polars data, use the factories in `mplchart.expressions` instead of `mplchart.indicators`.
-
-For example, with pandas data:
+Pass indicators directly to `plot()` to calculate values from `prices` during plotting and use default rendering. For example, `SMA(20)` computes a moving average and draws it as a line; no renderer primitive is required. With polars data, import the factories from `mplchart.expressions` instead of `mplchart.indicators`.
 
 ```python
 from mplchart.chart import Chart
 from mplchart.samples import sample_prices
 from mplchart.primitives import Candlesticks
+from mplchart.indicators import SMA
 
 prices = sample_prices(backend="pandas")
-prices["sma-20"] = prices["close"].rolling(20).mean()
 
 Chart(prices, max_bars=250).plot(
     Candlesticks(),
-    "sma-20",
+    SMA(20),
 ).show()
 ```
 
-For deferred calculation, replace `"sma-20"` with `SMA(20)`, importing `SMA` from `mplchart.indicators`. Both use default rendering: a line for a single column or moving average.
+To customize the display, optionally use a renderer such as `Line`, `Area`, or `Bars`: `Line(SMA(20), color="red")` draws the moving average in red. `SMA(20) @ Line(color="red")` is an equivalent binding form; both defer calculation until plotting. Parenthesize composed expressions before binding, for example `(EMA(20) - EMA(50)) @ Area()` with polars expressions. Pandas expressions (`pd.col(...)` or `.as_expr()`) require constructor binding because pandas handles `@` itself.
 
-To customize the display, optionally use a renderer such as `Line`, `Area`, or `Bars`: `Line("sma-20", color="red")` styles an existing column, while `Line(SMA(20), color="red")` styles a deferred calculation.
-
-`SMA(20) @ Line(color="red")` is an alternative to `Line(SMA(20), color="red")`; both defer calculation until plotting. Parenthesize composed expressions before binding, for example `(EMA(20) - EMA(50)) @ Area()` with polars expressions. Pandas expressions (`pd.col(...)` or `.as_expr()`) require constructor binding because pandas handles `@` itself.
+If your data pipeline already adds custom columns to `prices`, you can also plot those by name alongside the price data: `Chart(prices).plot(Candlesticks(), "sma-20")` reads the existing `sma-20` column and uses default line rendering. Use `Line("sma-20", color="red")` to customize its appearance.
 
 
 ## Styles
