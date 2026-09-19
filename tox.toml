@@ -27,7 +27,7 @@ commands = [["python", "-m", "ruff", "check"]]
 set_env = { RUFF_CACHE_DIR = ".venv/ruff_cache" }
 skip_install = true
 
-# type check — locked resolution (uv.lock) so results match `uv run ty check`;
+# type check all Python files and notebooks — locked resolution (uv.lock) so results match `uv run ty check`;
 # dev+docs groups make every checked import resolve (notebooks, scripts)
 [env.ty]
 runner = "uv-venv-lock-runner"
