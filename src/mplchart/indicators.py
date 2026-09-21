@@ -145,6 +145,23 @@ class MOM(Indicator):
         return library.calc_mom(series, self.period)
 
 
+class DPO(Indicator):
+    """Detrended Price Oscillator.
+
+    Computes ``(close.shift(displacement) - SMA(period)).shift(-displacement)``, where ``displacement = period // 2 + 1``. This centers the oscillator on the displaced price bar to isolate price cycles. Values use later bars relative to their plotted date; the final ``displacement`` bars are missing because their moving-average windows are not yet available.
+
+    Args:
+        period (int): Moving-average window in bars. Must be positive. Defaults to 20.
+    """
+
+    def __init__(self, period: int = 20):
+        self.period = period
+
+    def __call__(self, prices):
+        series = self.get_series(prices)
+        return library.calc_dpo(series, self.period)
+
+
 class ATR(Indicator):
     """Average True Range.
 
@@ -602,6 +619,7 @@ __all__ = [
     "RMA",
     "ROC",
     "MOM",
+    "DPO",
     "ATR",
     "NATR",
     "RSI",

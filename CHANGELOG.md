@@ -1,6 +1,7 @@
 # Change Log
 
 ## 0.0.54
+- Added DPO (Detrended Price Oscillator) for pandas and Polars, shifted back by `period // 2 + 1` bars
 - Let active Pages deployments finish before starting the next run
 
 ## 0.0.53

@@ -12,7 +12,7 @@ from .prelude import wrap_expression, OPEN, HIGH, LOW, CLOSE, VOLUME
 
 from .trend import SMA, EMA, RMA, WMA, HMA, DEMA, TEMA
 
-from .momentum import ROC, MOM, RSI, PPO, MACD, MACDV, BOP, CMF, MFI, STOCH
+from .momentum import ROC, MOM, DPO, RSI, PPO, MACD, MACDV, BOP, CMF, MFI, STOCH
 
 from .volatility import TRANGE, ATR, BBP, BBW, NATR, BBANDS, DONCHIAN, KELTNER, DMI, ADX
 
@@ -22,7 +22,7 @@ __all__ = [
     "wrap_expression",
     "OPEN", "HIGH", "LOW", "CLOSE", "VOLUME",
     "SMA", "EMA", "RMA", "WMA", "HMA", "DEMA", "TEMA",
-    "ROC", "MOM", "RSI", "PPO", "MACD", "MACDV", "BOP", "CMF", "MFI", "STOCH",
+    "ROC", "MOM", "DPO", "RSI", "PPO", "MACD", "MACDV", "BOP", "CMF", "MFI", "STOCH",
     "TRANGE", "ATR", "BBP", "BBW", "NATR", "BBANDS", "DONCHIAN", "KELTNER", "DMI", "ADX",
     "AVGPRICE", "MEDPRICE", "TYPPRICE", "WCLPRICE",
 ]

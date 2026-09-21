@@ -31,6 +31,14 @@ def calc_mom(series, period: int = 1):
     return series - series.shift(period)
 
 
+def calc_dpo(series, period: int = 20):
+    """Detrended Price Oscillator, shifted back to the displaced price bar."""
+    if period <= 0:
+        raise ValueError("period must be greater than zero")
+    displacement = period // 2 + 1
+    return (series.shift(displacement) - calc_sma(series, period)).shift(-displacement)
+
+
 def calc_roc(series, period: int = 1):
     """Rate of Change"""
     return series.pct_change(period) * 100

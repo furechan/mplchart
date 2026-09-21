@@ -15,7 +15,7 @@ from mplchart.utils import get_label  # noqa: E402
 from mplchart.dataview import get_view  # noqa: E402
 from mplchart.expressions import (  # noqa: E402
     SMA, EMA, RMA, WMA, HMA, DEMA, TEMA,
-    RSI, MACD, STOCH, ROC, MOM,
+    DPO, RSI, MACD, STOCH, ROC, MOM,
     TRANGE, ATR, BBANDS, DONCHIAN, KELTNER,
     AVGPRICE, MEDPRICE, TYPPRICE, WCLPRICE,
 )
@@ -24,6 +24,7 @@ from mplchart.expressions import (  # noqa: E402
 FREQS = ["daily", "hourly", "minute"]
 
 EXPRESSIONS = [
+    DPO(),
     SMA(20),
     EMA(20),
     RMA(14),

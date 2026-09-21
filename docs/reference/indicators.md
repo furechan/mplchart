@@ -123,6 +123,20 @@ Positive values indicate upward momentum; negative values indicate downward mome
 
 - **period** (int): Lookback period in bars. Defaults to 1.
 
+### DPO
+
+```python
+DPO(period: int = 20)
+```
+
+Detrended Price Oscillator.
+
+Computes `(close.shift(displacement) - SMA(period)).shift(-displacement)`, where `displacement = period // 2 + 1`. This centers the oscillator on the displaced price bar to isolate price cycles. Values use later bars relative to their plotted date; the final `displacement` bars are missing because their moving-average windows are not yet available.
+
+**Arguments:**
+
+- **period** (int): Moving-average window in bars. Must be positive. Defaults to 20.
+
 ### ATR
 
 ```python

@@ -26,6 +26,8 @@ PAIRS = [
     ("TEMA(20)", ind.TEMA(20), xp.TEMA(20)),
     ("ROC()", ind.ROC(), xp.ROC()),
     ("MOM(10)", ind.MOM(10), xp.MOM(10)),
+    ("DPO(20)", ind.DPO(20), xp.DPO(20)),
+    ("DPO(15)", ind.DPO(15), xp.DPO(15)),
     ("RSI(14)", ind.RSI(14), xp.RSI(14)),
     ("ATR(14)", ind.ATR(14), xp.ATR(14)),
     ("NATR(14)", ind.NATR(14), xp.NATR(14)),

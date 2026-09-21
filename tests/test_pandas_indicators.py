@@ -11,7 +11,7 @@ from mplchart.samples import sample_prices  # noqa: E402
 from mplchart.primitives import Candlesticks, Volume  # noqa: E402
 from mplchart.indicators import (  # noqa: E402
     SMA, EMA, WMA, HMA,
-    RSI, ATR, NATR, ADX,
+    DPO, RSI, ATR, NATR, ADX,
     MACD, PPO,
     BBANDS, STOCH, CMF, BOP, MFI,
 )
@@ -21,6 +21,7 @@ FREQS = ["daily", "hourly", "minute"]
 
 INDICATORS = [
     Volume(),
+    DPO(),
     SMA(20),
     EMA(20),
     WMA(20),

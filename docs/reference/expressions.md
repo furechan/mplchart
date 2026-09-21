@@ -130,6 +130,21 @@ MOM(period: int = 1, *, src: pl.Expr = CLOSE)
 
 Momentum
 
+### DPO
+
+```python
+DPO(period: int = 20, *, src: pl.Expr = CLOSE)
+```
+
+Detrended Price Oscillator.
+
+Computes `(src.shift(displacement) - SMA(period, src=src)).shift(-displacement)`, where `displacement = period // 2 + 1`. This centers the oscillator on the displaced price bar to isolate price cycles. Values use later bars relative to their plotted date; the final `displacement` bars are missing because their moving-average windows are not yet available.
+
+**Arguments:**
+
+- **period** (int): Moving-average window in bars. Must be positive. Defaults to 20.
+- **src** (Expr): Source expression. Defaults to the close price.
+
 ### RSI
 
 ```python
