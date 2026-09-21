@@ -12,6 +12,8 @@ The pages in this section are generated from the source docstrings by `scripts/m
 - [mplchart.expressions](expressions.md) — polars expression factories, the polars-pipeline counterparts of the indicators
 - [mplchart.styles](styles.md) — chart styling: the runtime `Styler` and its spec forms
 
+- [mplchart.notebook](notebook.md) — optional notebook chart widget with ticker and visible-bar controls
+
 ## Conventions
 
 - `prices` is a pandas or polars DataFrame with columns `open`, `high`, `low`, `close`, `volume` (lower case; use `Chart(normalize=True)` to normalize other layouts)

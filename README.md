@@ -318,6 +318,28 @@ pip install mplchart[polars]
 pip install mplchart[all]
 ```
 
+## Notebook chart widget
+
+Install the notebook extra alongside your chosen data backend:
+
+```console
+pip install 'mplchart[notebook,pandas]'
+```
+
+Pass a callable that accepts a ticker and returns a prices DataFrame. The widget displays centered Ticker and Max bars inputs above the chart:
+
+```python
+from mplchart.notebook import chart_widget
+
+chart_widget(get_prices, ticker="AAPL", max_bars=250)
+```
+
+The default chart shows candlesticks and volume. Pass `indicators=[Candlesticks(), SMA(50), Volume()]` to supply the complete plot sequence, or chart options such as `style="nightclouds"`, `figsize=(12, 8)`, and `normalize=True`. Match pandas indicators or Polars expressions to your loader's backend.
+
+A bardata feed works directly as `chart_widget(feed.get, ticker="AAPL")`. Use `functools.partial(feed.get, freq="weekly")` to bind loader options. mplchart does not require bardata or any other data provider.
+
+Max bars changes only the visible window and reuses the current ticker's loaded history, preserving indicator warm-up. Switching tickers calls the loader again; data caching belongs to the loader. The returned widget displays as the last expression in a notebook cell, or via `display(widget)`, and requires a live kernel with widget support.
+
 ## Dependencies
 
 Required:
@@ -330,6 +352,7 @@ Optional extras:
 - `[pandas]` — pandas
 - `[polars]` — polars
 - `[all]` — pandas and polars
+- `[notebook]` — ipywidgets and IPython for `mplchart.notebook.chart_widget`
 
 
 ## Related projects

@@ -1657,6 +1657,11 @@ all = [
     { name = "pandas", version = "3.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "polars" },
 ]
+notebook = [
+    { name = "ipython", version = "8.39.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "ipython", version = "9.10.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "ipywidgets" },
+]
 pandas = [
     { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "pandas", version = "3.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
@@ -1699,6 +1704,8 @@ docs = [
 
 [package.metadata]
 requires-dist = [
+    { name = "ipython", marker = "extra == 'notebook'" },
+    { name = "ipywidgets", marker = "extra == 'notebook'", specifier = ">=8" },
     { name = "matplotlib" },
     { name = "numpy" },
     { name = "pandas", marker = "extra == 'all'" },
@@ -1707,7 +1714,7 @@ requires-dist = [
     { name = "polars", marker = "extra == 'polars'" },
     { name = "pyarrow" },
 ]
-provides-extras = ["pandas", "polars", "all"]
+provides-extras = ["pandas", "polars", "all", "notebook"]
 
 [package.metadata.requires-dev]
 dev = [

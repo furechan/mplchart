@@ -69,3 +69,17 @@ To customize the display, optionally use a renderer such as `Line`, `Area`, or `
 
 `SMA(20) @ Line(color="red")` is an alternative to `Line(SMA(20), color="red")`; both defer calculation until plotting. Parenthesize composed expressions before binding, for example `(EMA(20) - EMA(50)) @ Area()` with polars expressions. Pandas expressions (`pd.col(...)` or `.as_expr()`) require constructor binding because pandas handles `@` itself.
 
+
+## Interactive notebooks
+
+Install `mplchart[notebook,pandas]` or `mplchart[notebook,polars]` to use centered ticker and visible-bar controls:
+
+```python
+from mplchart.notebook import chart_widget
+
+chart_widget(get_prices, ticker="AAPL", max_bars=250)
+```
+
+Supply a callable that takes a ticker and returns prices, such as a bardata feed's `feed.get`. The widget defaults to candlesticks and volume; pass `indicators` for a custom plot sequence and additional chart options as keywords. Changing Max bars reuses the current ticker's full history. See the [notebook API reference](reference/notebook.md) for details.
+
+Try the [Yahoo chart widget example](examples/chart-widget.ipynb) for a complete notebook with a cached price loader and custom indicators.
