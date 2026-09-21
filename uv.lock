@@ -1642,7 +1642,7 @@ wheels = [
 
 [[package]]
 name = "mplchart"
-version = "0.0.55.dev0"
+version = "0.0.55"
 source = { editable = "." }
 dependencies = [
     { name = "matplotlib" },
