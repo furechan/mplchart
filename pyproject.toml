@@ -37,7 +37,7 @@ mt = "mplchart.styles.morethemes:load_mt_style"
 [project.optional-dependencies]
 pandas = ["pandas"]
 polars = ["polars"]
-all = ["pandas", "polars"]
+all = ["pandas", "polars", "ipywidgets>=8", "ipython"]
 notebook = ["ipywidgets>=8", "ipython"]
 
 [dependency-groups]

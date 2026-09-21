@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.55
+- Include notebook widget dependencies in the `[all]` extra
+
 ## 0.0.54
 - Added `mplchart.notebook.chart_widget` and the optional `[notebook]` extra
 - Added DPO (Detrended Price Oscillator) for pandas and Polars, shifted back by `period // 2 + 1` bars
