@@ -12,7 +12,7 @@ Current notebooks (6):
 - `indicators.ipynb` — indicator mechanics (callables, panes, binding, `|` chaining, `as_expr`, custom indicators; pandas)
 - `expressions.ipynb` — expression mechanics (factories, `src` composition, boolean conditions, `wrap_expression`; polars); mirrors the indicators page section-for-section
 - `primitives.ipynb` — primitive mechanics by role (price/volume renderers, chart types — HeikinAshi/Renko/PointFigure incl. the transform-first contract, indicator renderers, condition primitives, panes/reference lines, pattern primitives); backend-agnostic
-- `chart-export.ipynb` — export to SVG / PNG / JPG via `chart.render()` (renamed from chart-render 2026-07-27; page framed around exporting, display config deliberately excluded)
+- `export-chart.ipynb` — export to SVG / PNG / JPG via `chart.render()` (page framed around exporting, display config deliberately excluded)
 - `talib-functions.ipynb` — ta-lib `Function` integration
 
 Moved out 2026-07-27: `multiple-tickers.ipynb` → `docs/articles/` — mostly a pandas/polars merge recipe, not an mplchart tutorial (join + rebase shown inline in both backends; the whole `mplchart.pandas` module — `merge_prices`, `rebase_series` — was removed in 0.0.49 on 2026-08-06 after deprecation in 0.0.46 — data prep belongs in user code, don't reintroduce a merge util).
