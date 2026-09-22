@@ -81,5 +81,3 @@ chart_widget(get_prices, ticker="AAPL", max_bars=250)
 ```
 
 Supply a callable that takes a ticker and returns prices, such as a bardata feed's `feed.get`. The widget defaults to candlesticks and volume; pass `indicators` for a custom plot sequence and additional chart options as keywords. Changing Max bars reuses the current ticker's full history. See the [notebook API reference](reference/notebook.md) for details.
-
-Try the [Yahoo chart widget example](examples/chart-widget.ipynb) for a complete notebook with a cached price loader and custom indicators.
