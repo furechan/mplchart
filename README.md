@@ -318,24 +318,6 @@ pip install mplchart[polars]
 pip install mplchart[all]
 ```
 
-## Notebook chart controls
-
-Install the notebook extra alongside your chosen data backend:
-
-```console
-pip install 'mplchart[notebook,pandas]'
-```
-
-Browse stocks without editing notebook code: `chart_widget` adds Ticker and Max bars inputs that redraw the chart. Pass a callable that accepts a ticker and returns a prices DataFrame:
-
-```python
-from mplchart.notebook import chart_widget
-
-chart_widget(get_prices, ticker="AAPL", max_bars=250)
-```
-
-The default chart shows candlesticks and volume. Changing Max bars reuses the loaded history, preserving indicator warm-up; switching tickers calls the loader again. Requires a live notebook kernel with widget support. See the [notebook API reference](https://furechan.github.io/mplchart/reference/notebook/) for custom plots and chart options.
-
 ## Dependencies
 
 Required:
