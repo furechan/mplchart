@@ -4,7 +4,9 @@ Python project managed with [uv](https://docs.astral.sh/uv/).
 
 ## Local Memory
 
-Use local memory @.claude/memory/MEMORY.md instead of global memory.
+Read `.agents/memory/MEMORY.md` as the memory index before project work, and read linked memory files when relevant to the task. Write all project memory files to `.agents/memory/` instead of a global memory directory.
+
+Use dashes (not underscores) in memory file names (e.g. `project-my-topic.md`).
 
 ## Architecture
 
