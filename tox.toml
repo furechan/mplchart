@@ -6,6 +6,7 @@
 #   tox -m full    # full pre-publish matrix (Python 3.10-3.14)
 #   tox list       # list environments
 
+requires = ["tox>=4.52.1", "tox-uv>=1.36.0"]
 work_dir = ".venv/tox"
 env_list = ["tests", "pandas", "polars", "ruff", "ty"]
 
