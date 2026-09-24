@@ -5,4 +5,5 @@
     
     "python.analysis.typeCheckingMode": "standard",
     "python.analysis.diagnosticMode": "openFilesOnly",
+
 }
