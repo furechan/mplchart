@@ -11,7 +11,6 @@ Scratch and exploration notebooks — not user-facing documentation. For curated
 - [heikin-ashi.ipynb](heikin-ashi.ipynb) — the `HeikinAshi` primitive and its `calc_heikin_ashi` indicator
 - [swings-primitive.ipynb](swings-primitive.ipynb) — the `Swings` primitive: peaks and valleys on a bound indicator
 - [mplchart-interact.ipynb](mplchart-interact.ipynb) — interactive charting with ipywidgets
-- [chart-widget.ipynb](chart-widget.ipynb) — Yahoo Finance charts with Ticker and Max bars notebook controls
 
 ## [styles/](styles/)
 

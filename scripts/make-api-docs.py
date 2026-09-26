@@ -20,7 +20,6 @@ MODULES = {
     "indicators": ("indicators", False),
     "expressions": ("expressions", False),
     "styles": ("styles", False),
-    "notebook": ("notebook", False),
 }
 
 PACKAGE = "mplchart"

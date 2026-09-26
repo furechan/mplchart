@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.56
+- Removed `mplchart.notebook.chart_widget` and the `[notebook]` extra; `[all]` now installs only pandas and polars
+
 ## 0.0.55
 - Include notebook widget dependencies in the `[all]` extra
 

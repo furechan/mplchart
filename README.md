@@ -310,7 +310,7 @@ pip install mplchart
 The indicators module requires pandas; the expressions module requires polars.
 If either is already in your environment, mplchart will use it automatically.
 The `[pandas]` and `[polars]` extras install the corresponding data backend.
-The `[all]` extra installs both backends and the notebook widget dependencies:
+The `[all]` extra installs both backends:
 
 ```console
 pip install mplchart[pandas]
@@ -329,8 +329,7 @@ Required:
 Optional extras:
 - `[pandas]` — pandas
 - `[polars]` — polars
-- `[all]` — pandas, polars, ipywidgets, and IPython
-- `[notebook]` — ipywidgets and IPython for `mplchart.notebook.chart_widget`
+- `[all]` — pandas and polars
 
 
 ## Related projects
