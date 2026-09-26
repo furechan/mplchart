@@ -7,7 +7,7 @@
 #   tox list       # list environments
 
 work_dir = ".venv/tox"
-requires = ["tox>=4.52.1", "tox-uv>=1.36.0"]
+requires = ["tox>=4.52.1", "tox-uv-bare>=1.36.0"]
 env_list = ["tests", "pandas", "polars", "ruff", "ty"]
 
 [labels]
@@ -22,8 +22,10 @@ set_env = { PYTHONDONTWRITEBYTECODE = "1" }
 # test suite on the default interpreter with both backends
 [env.tests]
 
+# Use locked dependencies so lint results match `uv run ruff check`.
 [env.ruff]
-deps = ["ruff"]
+runner = "uv-venv-lock-runner"
+dependency_groups = ["dev"]
 commands = [["python", "-m", "ruff", "check"]]
 set_env = { RUFF_CACHE_DIR = ".venv/ruff_cache" }
 skip_install = true

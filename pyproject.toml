@@ -60,6 +60,8 @@ dev = [
     "morethemes>=0.7.0",
     "griffe>=2.1.0",
     "pyright>=1.1.411",
+    "tox>=4.52.1",
+    "tox-uv-bare>=1.36.0",
 ]
 docs = [
     "mkdocs-awesome-nav>=3.3.0",
