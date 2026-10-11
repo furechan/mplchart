@@ -1,6 +1,6 @@
 ---
 name: feedback-site-verification-ci
-description: search-engine verification lives once at the furechan.github.io origin; project repos carry no verification files at all
+description: search-engine verification lives once at the furechan.github.io origin; project repos carry no verification files at all; sitemaps submitted as a single origin index
 metadata:
   type: feedback
 ---
@@ -11,6 +11,8 @@ Project repos carry **no** search-engine verification files — not committed un
 
 This replaces the earlier CI-injection convention (2026-07-25 to 2026-08-16), where a `run` step in `pages.yml` wrote the google file into the build output. That step and `docs/BingSiteAuth.xml` were removed from mplchart on 2026-08-16.
 
-**How to apply:** do not add verification files or CI injection steps to project repos, and remove them if found. The one thing that must not disappear is the pair of files at the origin root — both engines recheck periodically and un-verify the whole origin if they 404. Sitemaps are separate from verification: a project sitemap (`https://furechan.github.io/<project>/sitemap.xml`) is submitted under the origin property.
+**How to apply:** do not add verification files or CI injection steps to project repos, and remove them if found. The one thing that must not disappear is the pair of files at the origin root — both engines recheck periodically and un-verify the whole origin if they 404. Sitemaps are separate from verification: submit only the origin sitemap index (`https://furechan.github.io/sitemap.xml`), a `<sitemapindex>` living in the user-site repo that lists each project sitemap (`/<project>/sitemap.xml`). Do not submit the project sitemaps individually — the index fans out to them. Changed 2026-10-05, replacing three separate per-sitemap submissions.
+
+**Gotcha:** a sitemap submitted before the origin was serving content stays `Couldn't fetch` indefinitely — Search Console never retries a failed sitemap, and its status string also lags behind a successful read. Judge by the `Last read` and `Discovered pages` columns, not the status text, and clear a stuck row by deleting and resubmitting it.
 
 Related convention: the workflow is named `pages.yml` in both projects — it publishes the project *website* (docs + articles, eventually blog-like content), so it's named for the site, not "docs".
